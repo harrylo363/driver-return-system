@@ -56,36 +56,14 @@
         .conditional-required.required-now {
             color: #dc3545;
         }
-        .tabs {
-            display: flex;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #e1e5e9;
+        .panel-navigation {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 2px solid #e1e5e9;
+            text-align: center;
         }
-        .tab-btn {
-            padding: 12px 24px;
-            border: none;
-            background: transparent;
-            color: #666;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-            transition: all 0.3s;
-        }
-        .tab-btn.active {
-            color: #667eea;
-            border-bottom-color: #667eea;
-        }
-        .tab-btn:hover {
-            color: #667eea;
-        }
-        .tab-content {
-            margin-bottom: 30px;
-        }
-        .tab-content h3 {
-            margin-bottom: 20px;
-            color: #333;
-            font-size: 20px;
+        .panel-navigation .btn {
+            margin: 0 10px;
         }
         .import-section {
             background: #f8f9fa;
@@ -360,92 +338,84 @@
 
         <!-- Admin Panel (Hidden until login) -->
         <div class="card" id="adminPanel" style="display: none;">
-            <h2>User Management</h2>
+            <h2>Create New User</h2>
             
-            <!-- Tabs for different sections -->
-            <div class="tabs">
-                <button class="tab-btn active" onclick="showTab('create-user')">Create User</button>
-                <button class="tab-btn" onclick="showTab('bulk-import')">Bulk Import</button>
-            </div>
-
-            <!-- Create Single User Section -->
-            <div class="tab-content" id="create-user">
-                <h3>Create New User</h3>
-                <div class="grid">
-                    <div>
-                        <div class="form-group">
-                            <label for="newUsername">Username</label>
-                            <input type="text" id="newUsername" placeholder="Enter username">
-                        </div>
-                        <div class="form-group">
-                            <label for="newEmail">Email <span style="color: #666; font-size: 12px;">(optional for drivers)</span></label>
-                            <input type="text" id="newEmail" placeholder="Enter email address (optional for drivers)">
-                        </div>
-                    </div>
-                    <div>
-                        <div class="form-group">
-                            <label for="newPassword">Password <span style="color: #666; font-size: 12px;">(optional for drivers)</span></label>
-                            <input type="text" id="newPassword" placeholder="Enter password (optional for drivers)">
-                        </div>
-                        <div class="form-group">
-                            <label for="newRole">Role</label>
-                            <select id="newRole">
-                                <option value="driver">Driver</option>
-                                <option value="dispatcher">Dispatcher</option>
-                                <option value="admin">Admin</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <button class="btn btn-success" onclick="createUser()">Create User</button>
-                <button class="btn btn-info" onclick="loadUsers()">Refresh User List</button>
-                <button class="btn btn-primary" onclick="createDefaultUsers()">Create Default Users</button>
-            </div>
-
-            <!-- Bulk Import Section -->
-            <div class="tab-content hidden" id="bulk-import">
-                <h3>Bulk Import Drivers</h3>
-                
-                <div class="import-section">
+            <div class="grid">
+                <div>
                     <div class="form-group">
-                        <label for="fileInput">Select CSV or Excel File</label>
-                        <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" onchange="handleFileSelect(event)">
-                        <small class="field-help">Supported formats: CSV, Excel (.xlsx, .xls)</small>
+                        <label for="newUsername">Username</label>
+                        <input type="text" id="newUsername" placeholder="Enter username">
                     </div>
-
-                    <div class="template-section">
-                        <h4>File Format Requirements:</h4>
-                        <p>Your file should have these columns (in any order):</p>
-                        <ul class="format-list">
-                            <li><strong>username</strong> - Required for all users</li>
-                            <li><strong>email</strong> - Optional for drivers (will auto-generate if empty)</li>
-                            <li><strong>password</strong> - Optional for drivers (will auto-generate if empty)</li>
-                            <li><strong>role</strong> - Optional (defaults to "driver")</li>
-                        </ul>
-                        
-                        <button class="btn btn-secondary" onclick="downloadTemplate()">📥 Download CSV Template</button>
+                    <div class="form-group">
+                        <label for="newEmail">Email <span style="color: #666; font-size: 12px;">(optional for drivers)</span></label>
+                        <input type="text" id="newEmail" placeholder="Enter email address (optional for drivers)">
                     </div>
-
-                    <div class="preview-section" id="previewSection" style="display: none;">
-                        <h4>File Preview:</h4>
-                        <div class="file-info" id="fileInfo"></div>
-                        <div class="preview-table" id="previewTable"></div>
-                        <div class="import-actions">
-                            <button class="btn btn-success" onclick="importUsers()">🚀 Import Users</button>
-                            <button class="btn btn-secondary" onclick="clearPreview()">❌ Clear</button>
-                        </div>
+                </div>
+                <div>
+                    <div class="form-group">
+                        <label for="newPassword">Password <span style="color: #666; font-size: 12px;">(optional for drivers)</span></label>
+                        <input type="text" id="newPassword" placeholder="Enter password (optional for drivers)">
+                    </div>
+                    <div class="form-group">
+                        <label for="newRole">Role</label>
+                        <select id="newRole">
+                            <option value="driver">Driver</option>
+                            <option value="dispatcher">Dispatcher</option>
+                            <option value="admin">Admin</option>
+                        </select>
                     </div>
                 </div>
             </div>
+
+            <button class="btn btn-success" onclick="createUser()">Create User</button>
+            <button class="btn btn-info" onclick="loadUsers()">Refresh User List</button>
+            <button class="btn btn-primary" onclick="createDefaultUsers()">Create Default Users</button>
 
             <div id="adminMessage"></div>
+        </div>
 
-            <div class="users-list">
-                <h3>Existing Users</h3>
-                <div id="usersList">
-                    <div class="info message">Click "Refresh User List" to load users</div>
+        <!-- Bulk Import Panel (Separate Card) -->
+        <div class="card" id="bulkImportPanel" style="display: none;">
+            <h2>📁 Bulk Import Drivers</h2>
+            <p style="color: #666; margin-bottom: 25px;">Import multiple drivers at once using CSV or Excel files</p>
+            
+            <div class="import-section">
+                <div class="form-group">
+                    <label for="fileInput">Select CSV or Excel File</label>
+                    <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" onchange="handleFileSelect(event)">
+                    <small class="field-help">Supported formats: CSV, Excel (.xlsx, .xls)</small>
                 </div>
+
+                <div class="template-section">
+                    <h4>File Format Requirements:</h4>
+                    <p>Your file should have these columns (in any order):</p>
+                    <ul class="format-list">
+                        <li><strong>username</strong> - Required for all users</li>
+                        <li><strong>email</strong> - Optional for drivers (will auto-generate if empty)</li>
+                        <li><strong>password</strong> - Optional for drivers (will auto-generate if empty)</li>
+                        <li><strong>role</strong> - Optional (defaults to "driver")</li>
+                    </ul>
+                    
+                    <button class="btn btn-secondary" onclick="downloadTemplate()">📥 Download CSV Template</button>
+                </div>
+
+                <div class="preview-section" id="previewSection" style="display: none;">
+                    <h4>File Preview:</h4>
+                    <div class="file-info" id="fileInfo"></div>
+                    <div class="preview-table" id="previewTable"></div>
+                    <div class="import-actions">
+                        <button class="btn btn-success" onclick="importUsers()">🚀 Import Users</button>
+                        <button class="btn btn-secondary" onclick="clearPreview()">❌ Clear</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="bulkImportMessage"></div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <button class="btn btn-primary" onclick="showCreateUserPanel()">👤 Back to Create User</button>
+                <button class="btn btn-info" onclick="loadUsers()">🔄 Refresh User List</button>
             </div>
         </div>
     </div>
@@ -476,7 +446,7 @@
                 if (response.ok && data.user.role === 'admin') {
                     authToken = data.token;
                     document.getElementById('loginCard').style.display = 'none';
-                    document.getElementById('adminPanel').style.display = 'block';
+                    showCreateUserPanel(); // Show the create user panel by default
                     showMessage('adminMessage', `Welcome, ${data.user.username}!`, 'success');
                     loadUsers();
                 } else {
@@ -489,22 +459,27 @@
 
         let parsedData = null;
 
-        function showTab(tabName) {
-            // Hide all tab contents
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.add('hidden');
-            });
-            
-            // Remove active class from all tabs
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // Show selected tab content
-            document.getElementById(tabName).classList.remove('hidden');
-            
-            // Add active class to clicked tab
-            event.target.classList.add('active');
+        function showCreateUserPanel() {
+            document.getElementById('adminPanel').style.display = 'block';
+            document.getElementById('bulkImportPanel').style.display = 'none';
+            document.getElementById('userListPanel').style.display = 'block';
+            clearMessages();
+        }
+
+        function showBulkImportPanel() {
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('bulkImportPanel').style.display = 'block';
+            document.getElementById('userListPanel').style.display = 'block';
+            clearMessages();
+            clearPreview();
+        }
+
+        function clearMessages() {
+            document.getElementById('adminMessage').innerHTML = '';
+            const bulkMessage = document.getElementById('bulkImportMessage');
+            if (bulkMessage) {
+                bulkMessage.innerHTML = '';
+            }
         }
 
         function downloadTemplate() {
@@ -525,7 +500,7 @@ Lisa Wilson,lisa@company.com,dispatch123,dispatcher`;
             window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
             
-            showMessage('adminMessage', '📥 Template downloaded! Fill it out and import.', 'success');
+            showMessage('bulkImportMessage', '📥 Template downloaded! Fill it out and import.', 'success');
         }
 
         async function handleFileSelect(event) {
@@ -533,7 +508,7 @@ Lisa Wilson,lisa@company.com,dispatch123,dispatcher`;
             if (!file) return;
 
             try {
-                showMessage('adminMessage', 'Processing file...', 'info');
+            showMessage('bulkImportMessage', 'Processing file...', 'info');
                 
                 let data;
                 if (file.name.endsWith('.csv')) {
@@ -546,11 +521,11 @@ Lisa Wilson,lisa@company.com,dispatch123,dispatcher`;
 
                 parsedData = data;
                 showPreview(data, file);
-                showMessage('adminMessage', `✅ File parsed successfully! Found ${data.length} rows.`, 'success');
+                showMessage('bulkImportMessage', `✅ File parsed successfully! Found ${data.length} rows.`, 'success');
                 
             } catch (error) {
                 console.error('File parsing error:', error);
-                showMessage('adminMessage', `❌ Error: ${error.message}`, 'error');
+                showMessage('bulkImportMessage', `❌ Error: ${error.message}`, 'error');
                 clearPreview();
             }
         }
@@ -664,11 +639,11 @@ Lisa Wilson,lisa@company.com,dispatch123,dispatcher`;
 
         async function importUsers() {
             if (!parsedData || parsedData.length === 0) {
-                showMessage('adminMessage', 'No data to import', 'error');
+                showMessage('bulkImportMessage', 'No data to import', 'error');
                 return;
             }
 
-            showMessage('adminMessage', 'Importing users...', 'info');
+            showMessage('bulkImportMessage', 'Importing users...', 'info');
             
             let created = 0;
             let errors = [];
@@ -723,7 +698,7 @@ Lisa Wilson,lisa@company.com,dispatch123,dispatcher`;
                 console.log('Import errors:', errors);
             }
 
-            showMessage('adminMessage', message, created > 0 ? 'success' : 'error');
+            showMessage('bulkImportMessage', message, created > 0 ? 'success' : 'error');
             
             // Clear preview and refresh user list
             clearPreview();
