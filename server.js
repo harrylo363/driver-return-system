@@ -70,7 +70,7 @@ const authenticateToken = (req, res, next) => {
     });
 };
 
-// Admin middleware - ADD THIS
+// Admin middleware
 const checkAdmin = async (req, res, next) => {
     try {
         const authHeader = req.headers['authorization'];
@@ -103,6 +103,7 @@ io.on('connection', (socket) => {
         const { role } = data;
         if (role === 'dispatcher' || role === 'admin') {
             socket.join('dispatchers');
+            console.log(`${role} joined dispatchers room`);
         }
     });
 
@@ -146,6 +147,8 @@ app.post('/api/auth/register', async (req, res) => {
             { expiresIn: '24h' }
         );
 
+        console.log(`✅ User created: ${username} (${role})`);
+
         res.status(201).json({
             message: 'User created successfully',
             token,
@@ -176,6 +179,8 @@ app.post('/api/auth/login', async (req, res) => {
             { expiresIn: '24h' }
         );
 
+        console.log(`🔑 User logged in: ${user.username} (${user.role})`);
+
         res.json({
             message: 'Login successful',
             token,
@@ -187,13 +192,36 @@ app.post('/api/auth/login', async (req, res) => {
     }
 });
 
-// ADMIN PANEL API ROUTES - ADD THESE
+// Verify token endpoint
+app.get('/api/auth/verify', authenticateToken, (req, res) => {
+    res.json({ 
+        valid: true, 
+        user: { 
+            id: req.user.userId, 
+            username: req.user.username, 
+            role: req.user.role 
+        } 
+    });
+});
+
+// Get drivers list for dropdown (no authentication required)
+app.get('/api/auth/drivers', async (req, res) => {
+    try {
+        const drivers = await User.find({ role: 'driver' }, 'username').sort({ username: 1 });
+        console.log(`📋 Drivers list requested: ${drivers.length} drivers found`);
+        res.json(drivers);
+    } catch (error) {
+        console.error('Error fetching drivers:', error);
+        res.status(500).json({ error: 'Failed to fetch drivers' });
+    }
+});
+
+// ADMIN PANEL API ROUTES
 // Get all users (admin only)
 app.get('/api/users', checkAdmin, async (req, res) => {
     try {
-        console.log('Admin fetching all users...');
         const users = await User.find({}, '-password').sort({ createdAt: -1 });
-        console.log(`Found ${users.length} users`);
+        console.log(`👥 Admin fetched ${users.length} users`);
         res.json(users);
     } catch (error) {
         console.error('Error fetching users:', error);
@@ -215,7 +243,7 @@ app.delete('/api/users/:id', checkAdmin, async (req, res) => {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        console.log(`User ${deletedUser.username} deleted by admin`);
+        console.log(`🗑️ Admin deleted user: ${deletedUser.username}`);
         res.json({ 
             message: 'User deleted successfully',
             user: { id: deletedUser._id, username: deletedUser.username }
@@ -226,12 +254,49 @@ app.delete('/api/users/:id', checkAdmin, async (req, res) => {
     }
 });
 
-// Serve admin panel
-app.get('/admin', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+// Simple notification endpoint (no auth required for driver app)
+app.post('/api/notifications/simple', async (req, res) => {
+    try {
+        const { driver, status, location, estimatedArrival, warehouse, company } = req.body;
+
+        const notification = new Notification({
+            driver,
+            status,
+            location: location || 'Location unavailable',
+            estimatedArrival: estimatedArrival || 'Unknown',
+            warehouse: warehouse || 'Main Warehouse',
+            company: company || 'Your Company Inc.'
+        });
+
+        await notification.save();
+
+        // Send real-time update to dispatchers
+        io.to('dispatchers').emit('driver-notification', {
+            driver: notification.driver,
+            status: notification.status,
+            location: notification.location,
+            timestamp: notification.timestamp,
+            estimatedArrival: notification.estimatedArrival
+        });
+
+        console.log(`📱 Notification from ${driver}: ${status}`);
+
+        res.status(201).json({
+            message: 'Notification sent successfully',
+            notification: {
+                id: notification._id,
+                driver: notification.driver,
+                status: notification.status,
+                timestamp: notification.timestamp
+            }
+        });
+    } catch (error) {
+        console.error('Notification error:', error);
+        res.status(500).json({ error: 'Failed to send notification' });
+    }
 });
 
-// Send notification
+// Send notification (authenticated version)
 app.post('/api/notifications', authenticateToken, async (req, res) => {
     try {
         const { status, location, estimatedArrival, warehouse, company } = req.body;
@@ -255,6 +320,8 @@ app.post('/api/notifications', authenticateToken, async (req, res) => {
             timestamp: notification.timestamp,
             estimatedArrival: notification.estimatedArrival
         });
+
+        console.log(`📱 Authenticated notification from ${req.user.username}: ${status}`);
 
         res.status(201).json({
             message: 'Notification sent successfully',
@@ -281,6 +348,7 @@ app.get('/api/notifications', authenticateToken, (req, res) => {
         .sort({ timestamp: -1 })
         .limit(50)
         .then(notifications => {
+            console.log(`📋 ${req.user.role} fetched ${notifications.length} notifications`);
             res.json({ notifications });
         })
         .catch(error => {
@@ -289,35 +357,40 @@ app.get('/api/notifications', authenticateToken, (req, res) => {
         });
 });
 
-// Initialize database with default users
+// Serve admin panel
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+// Clean database function (removes all users)
+async function cleanDatabase() {
+    try {
+        const deletedUsers = await User.deleteMany({});
+        const deletedNotifications = await Notification.deleteMany({});
+        console.log(`🧹 Database cleaned: ${deletedUsers.deletedCount} users, ${deletedNotifications.deletedCount} notifications deleted`);
+    } catch (error) {
+        console.error('Database clean error:', error);
+    }
+}
+
+// Initialize database with fresh admin user only
 async function initializeDatabase() {
     try {
-        const adminExists = await User.findOne({ role: 'admin' });
-        if (!adminExists) {
-            const defaultUsers = [
-                {
-                    username: 'admin',
-                    email: 'admin@company.com',
-                    password: await bcrypt.hash('admin123!@#', 12),
-                    role: 'admin'
-                },
-                {
-                    username: 'dispatcher1',
-                    email: 'dispatcher@company.com',
-                    password: await bcrypt.hash('dispatch123!@#', 12),
-                    role: 'dispatcher'
-                },
-                {
-                    username: 'driver1',
-                    email: 'driver@company.com',
-                    password: await bcrypt.hash('driver123!@#', 12),
-                    role: 'driver'
-                }
-            ];
+        // Clean all existing data
+        await cleanDatabase();
+        
+        // Create only admin user
+        const adminUser = {
+            username: 'admin',
+            email: 'admin@company.com',
+            password: await bcrypt.hash('admin123!@#', 12),
+            role: 'admin'
+        };
 
-            await User.insertMany(defaultUsers);
-            console.log('✅ Default users created');
-        }
+        await User.create(adminUser);
+        console.log('✅ Fresh admin user created');
+        console.log('📧 Admin login: admin@company.com / admin123!@#');
+        
     } catch (error) {
         console.error('Database initialization error:', error);
     }
@@ -332,6 +405,7 @@ mongoose.connection.once('open', () => {
     server.listen(PORT, () => {
         console.log(`🚀 Server running on port ${PORT}`);
         console.log(`🛠️ Admin panel: http://localhost:${PORT}/admin`);
+        console.log(`🚚 Driver app: http://localhost:${PORT}`);
     });
 });
 
