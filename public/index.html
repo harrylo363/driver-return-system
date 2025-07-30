@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Return System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .container {
+            background: white;
+            color: #333;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            margin: 10px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+        .status {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚚 Driver Return System</h1>
+        <p>Welcome to the Driver Return Notification System</p>
+        
+        <div>
+            <a href="/driver-app.html" class="btn">📱 Driver App</a>
+            <a href="/dashboard.html" class="btn">📊 Dispatcher Dashboard</a>
+        </div>
+        
+        <div class="status">
+            <h3>System Status</h3>
+            <p>API Health: <a href="/api/health" target="_blank">Check Status</a></p>
+            
+            <div style="margin-top: 20px;">
+                <h4>Default Login Credentials:</h4>
+                <p><strong>Driver:</strong> driver@company.com / driver123!@#</p>
+                <p><strong>Dispatcher:</strong> dispatcher@company.com / dispatch123!@#</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
