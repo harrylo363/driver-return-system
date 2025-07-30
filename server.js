@@ -371,6 +371,43 @@ app.post('/api/notifications', authenticateToken, async (req, res) => {
     }
 });
 
+// Get notifications for dispatcher dashboard (simple version)
+app.get('/api/notifications/simple-list', async (req, res) => {
+    try {
+        const notifications = await Notification.find({})
+            .sort({ timestamp: -1 })
+            .limit(50);
+        
+        console.log(`📋 Dispatcher dashboard: ${notifications.length} notifications fetched`);
+        res.json({ notifications });
+    } catch (error) {
+        console.error('Error fetching notifications for dashboard:', error);
+        res.status(500).json({ error: 'Failed to fetch notifications' });
+    }
+});
+
+// Handle check-in status updates
+app.post('/api/notifications/checkin', async (req, res) => {
+    try {
+        const { notificationId, driverName, isCheckedIn, timestamp } = req.body;
+        
+        // You can store check-in status in database if needed
+        // For now, just log it
+        console.log(`✅ Check-in update: ${driverName} - ${isCheckedIn ? 'CHECKED IN' : 'UNCHECKED'}`);
+        
+        res.json({ 
+            message: 'Check-in status updated',
+            notificationId,
+            driverName,
+            isCheckedIn,
+            timestamp
+        });
+    } catch (error) {
+        console.error('Error updating check-in status:', error);
+        res.status(500).json({ error: 'Failed to update check-in status' });
+    }
+});
+
 // Get notifications
 app.get('/api/notifications', authenticateToken, (req, res) => {
     if (req.user.role !== 'dispatcher' && req.user.role !== 'admin') {
