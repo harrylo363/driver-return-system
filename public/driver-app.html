@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            flex: 1;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 16px;
+            background: #f8f9fa;
+        }
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+        }
+        .btn {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+        .btn-status {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            padding: 25px;
+            font-size: 20px;
+            min-height: 80px;
+        }
+        .btn-arrived {
+            background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+        }
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .hidden {
+            display: none;
+        }
+        .driver-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+        .logout-btn {
+            background: transparent;
+            color: #666;
+            border: 1px solid #ddd;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚚 Driver App</h1>
+            <p>Quick warehouse return notification</p>
+        </div>
+
+        <!-- Login Screen -->
+        <div class="card" id="loginScreen">
+            <h2 style="text-align: center; margin-bottom: 30px;">Driver Login</h2>
+            
+            <div class="form-group">
+                <label for="username">Username or Email</label>
+                <input type="text" id="username" placeholder="Enter your username or email">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Enter your password">
+            </div>
+
+            <button class="btn btn-primary" onclick="login()">Log In</button>
+
+            <div id="loginMessage"></div>
+
+            <div style="margin-top: 20px; font-size: 12px; color: #666; text-align: center;">
+                <strong>Default Login:</strong><br>
+                Email: driver@company.com<br>
+                Password: driver123!@#
+            </div>
+        </div>
+
+        <!-- Main Screen -->
+        <div class="card hidden" id="mainScreen">
+            <div class="driver-info">
+                <div style="font-size: 18px; font-weight: bold; margin-bottom: 5px;" id="driverName">Driver Name</div>
+                <div style="color: #666; font-size: 14px;" id="currentTime"></div>
+            </div>
+
+            <button class="btn btn-status" onclick="sendNotification('30 minutes away')">
+                🕐 30 MINUTES AWAY
+            </button>
+            
+            <button class="btn btn-status btn-arrived" onclick="sendNotification('arrived')">
+                ✅ ARRIVED AT WAREHOUSE
+            </button>
+
+            <div id="statusMessage"></div>
+
+            <button class="btn logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <script>
+        let currentUser = null;
+        let authToken = null;
+        let socket = null;
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            updateTime();
+            setInterval(updateTime, 1000);
+            
+            // Check if user is already logged in
+            const savedToken = localStorage.getItem('authToken');
+            if (savedToken) {
+                authToken = savedToken;
+                showMainScreen();
+            }
+        });
+
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleString();
+            const timeElement = document.getElementById('currentTime');
+            if (timeElement) {
+                timeElement.textContent = timeString;
+            }
+        }
+
+        async function login() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+
+            if (!username || !password) {
+                showMessage('loginMessage', 'Please enter username and password', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    authToken = data.token;
+                    currentUser = data.user;
+                    localStorage.setItem('authToken', authToken);
+                    
+                    showMainScreen();
+                    initializeSocket();
+                    showMessage('statusMessage', 'Login successful!', 'success');
+                } else {
+                    showMessage('loginMessage', data.error || 'Login failed', 'error');
+                }
+            } catch (error) {
+                showMessage('loginMessage', 'Connection error. Please try again.', 'error');
+            }
+        }
+
+        function showMainScreen() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainScreen').classList.remove('hidden');
+            
+            if (currentUser) {
+                document.getElementById('driverName').textContent = currentUser.username;
+            }
+        }
+
+        function showLoginScreen() {
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('mainScreen').classList.add('hidden');
+        }
+
+        function initializeSocket() {
+            socket = io();
+            
+            socket.on('connect', () => {
+                console.log('Connected to server');
+                socket.emit('join-room', { role: 'driver', userId: currentUser.id });
+            });
+
+            socket.on('status-update', (data) => {
+                showMessage('statusMessage', '✅ Status confirmed by dispatch', 'success');
+            });
+        }
+
+        async function sendNotification(status) {
+            if (!authToken) {
+                showMessage('statusMessage', 'Please log in first', 'error');
+                return;
+            }
+
+            try {
+                const location = await getCurrentLocation();
+                
+                const response = await fetch('/api/notifications', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        status: status,
+                        location: location,
+                        estimatedArrival: status === 'arrived' ? 'At warehouse' : calculateETA(status),
+                        warehouse: 'Main Warehouse',
+                        company: 'Your Company Inc.'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage('statusMessage', `✅ Status "${status}" sent successfully!`, 'success');
+                } else {
+                    showMessage('statusMessage', data.error || 'Failed to send notification', 'error');
+                }
+            } catch (error) {
+                showMessage('statusMessage', 'Failed to send notification', 'error');
+            }
+        }
+
+        function getCurrentLocation() {
+            return new Promise((resolve) => {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            const lat = position.coords.latitude.toFixed(6);
+                            const lng = position.coords.longitude.toFixed(6);
+                            resolve(`${lat}, ${lng}`);
+                        },
+                        () => resolve('Location unavailable')
+                    );
+                } else {
+                    resolve('Location unavailable');
+                }
+            });
+        }
+
+        function calculateETA(status) {
+            if (status === 'arrived') {
+                return 'At warehouse';
+            } else if (status === '30 minutes away') {
+                const eta = new Date(Date.now() + 30 * 60000);
+                return eta.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            }
+            return 'Unknown';
+        }
+
+        function logout() {
+            localStorage.removeItem('authToken');
+            authToken = null;
+            currentUser = null;
+            if (socket) socket.disconnect();
+            showLoginScreen();
+            clearMessages();
+        }
+
+        function showMessage(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.innerHTML = `<div class="message ${type}">${message}</div>`;
+                
+                if (type === 'success') {
+                    setTimeout(() => {
+                        element.innerHTML = '';
+                    }, 5000);
+                }
+            }
+        }
+
+        function clearMessages() {
+            document.getElementById('loginMessage').innerHTML = '';
+            document.getElementById('statusMessage').innerHTML = '';
+        }
+    </script>
+</body>
+</html>
