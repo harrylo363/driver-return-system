@@ -128,17 +128,50 @@ app.post('/api/auth/register', async (req, res) => {
     try {
         const { username, email, password, role = 'driver' } = req.body;
 
-        if (!username || !email || !password) {
-            return res.status(400).json({ error: 'Username, email, and password are required' });
+        // Username is always required
+        if (!username) {
+            return res.status(400).json({ error: 'Username is required' });
         }
 
-        const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+        // For non-drivers, email and password are required
+        if (role !== 'driver' && (!email || !password)) {
+            return res.status(400).json({ error: 'Email and password are required for dispatchers and admins' });
+        }
+
+        // For drivers, generate defaults if not provided
+        let finalEmail = email;
+        let finalPassword = password;
+
+        if (role === 'driver') {
+            if (!email) {
+                finalEmail = `${username.toLowerCase().replace(/\s+/g, '')}@driver.local`;
+            }
+            if (!password) {
+                finalPassword = 'driver123';
+            }
+        }
+
+        // Check if username already exists
+        const existingUser = await User.findOne({ username });
         if (existingUser) {
-            return res.status(400).json({ error: 'User already exists' });
+            return res.status(400).json({ error: 'Username already exists' });
         }
 
-        const hashedPassword = await bcrypt.hash(password, 12);
-        const user = new User({ username, email, password: hashedPassword, role });
+        // Check if email already exists (only if email is provided)
+        if (finalEmail) {
+            const existingEmail = await User.findOne({ email: finalEmail });
+            if (existingEmail) {
+                return res.status(400).json({ error: 'Email already exists' });
+            }
+        }
+
+        const hashedPassword = await bcrypt.hash(finalPassword, 12);
+        const user = new User({ 
+            username, 
+            email: finalEmail, 
+            password: hashedPassword, 
+            role 
+        });
         await user.save();
 
         const token = jwt.sign(
