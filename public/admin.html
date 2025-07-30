@@ -46,6 +46,23 @@
             font-weight: bold;
             color: #555;
         }
+        .required {
+            color: #dc3545;
+        }
+        .conditional-required {
+            color: #ffc107;
+            transition: color 0.3s;
+        }
+        .conditional-required.required-now {
+            color: #dc3545;
+        }
+        .field-help {
+            display: block;
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+            font-style: italic;
+        }
         .form-group input, .form-group select {
             width: 100%;
             padding: 12px;
@@ -213,22 +230,24 @@
             <div class="grid">
                 <div>
                     <div class="form-group">
-                        <label for="newUsername">Username</label>
+                        <label for="newUsername">Username <span class="required">*</span></label>
                         <input type="text" id="newUsername" placeholder="Enter username">
                     </div>
                     <div class="form-group">
-                        <label for="newEmail">Email</label>
+                        <label for="newEmail">Email <span class="conditional-required" id="emailRequired">*</span></label>
                         <input type="text" id="newEmail" placeholder="Enter email address">
+                        <small class="field-help" id="emailHelp">Required for dispatchers and admins, optional for drivers</small>
                     </div>
                 </div>
                 <div>
                     <div class="form-group">
-                        <label for="newPassword">Password</label>
+                        <label for="newPassword">Password <span class="conditional-required" id="passwordRequired">*</span></label>
                         <input type="text" id="newPassword" placeholder="Enter password" value="password123!@#">
+                        <small class="field-help" id="passwordHelp">Required for dispatchers and admins, optional for drivers</small>
                     </div>
                     <div class="form-group">
-                        <label for="newRole">Role</label>
-                        <select id="newRole">
+                        <label for="newRole">Role <span class="required">*</span></label>
+                        <select id="newRole" onchange="updateFieldRequirements()">
                             <option value="driver">Driver</option>
                             <option value="dispatcher">Dispatcher</option>
                             <option value="admin">Admin</option>
@@ -295,22 +314,52 @@
             const password = document.getElementById('newPassword').value.trim();
             const role = document.getElementById('newRole').value;
 
-            if (!username || !email || !password) {
-                showMessage('adminMessage', 'All fields are required', 'error');
+            if (!username) {
+                showMessage('adminMessage', 'Username is required', 'error');
                 return;
             }
 
+            // Check requirements based on role
+            if (role === 'driver') {
+                // For drivers, only username is required
+                if (!username) {
+                    showMessage('adminMessage', 'Username is required for drivers', 'error');
+                    return;
+                }
+            } else {
+                // For dispatchers and admins, all fields are required
+                if (!username || !email || !password) {
+                    showMessage('adminMessage', 'Username, email, and password are required for dispatchers and admins', 'error');
+                    return;
+                }
+            }
+
             try {
+                // Prepare user data
+                const userData = { username, role };
+                
+                // Add email and password only if provided or if not a driver
+                if (email || role !== 'driver') {
+                    userData.email = email || `${username}@temp.com`;
+                }
+                if (password || role !== 'driver') {
+                    userData.password = password || 'temp123!@#';
+                }
+
                 const response = await fetch('/api/auth/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, email, password, role })
+                    body: JSON.stringify(userData)
                 });
 
                 const data = await response.json();
 
                 if (response.ok) {
-                    showMessage('adminMessage', `✅ User "${username}" created successfully!`, 'success');
+                    let successMessage = `✅ ${role} "${username}" created successfully!`;
+                    if (role === 'driver' && !email && !password) {
+                        successMessage += ` (Email and password auto-generated)`;
+                    }
+                    showMessage('adminMessage', successMessage, 'success');
                     
                     // Clear form
                     document.getElementById('newUsername').value = '';
@@ -522,6 +571,34 @@
             }
         }
 
+        function updateFieldRequirements() {
+            const role = document.getElementById('newRole').value;
+            const emailRequired = document.getElementById('emailRequired');
+            const passwordRequired = document.getElementById('passwordRequired');
+            const emailHelp = document.getElementById('emailHelp');
+            const passwordHelp = document.getElementById('passwordHelp');
+            const emailInput = document.getElementById('newEmail');
+            const passwordInput = document.getElementById('newPassword');
+
+            if (role === 'driver') {
+                // For drivers, email and password are optional
+                emailRequired.classList.remove('required-now');
+                passwordRequired.classList.remove('required-now');
+                emailHelp.textContent = 'Optional for drivers (will auto-generate if empty)';
+                passwordHelp.textContent = 'Optional for drivers (will auto-generate if empty)';
+                emailInput.style.borderColor = '#e1e5e9';
+                passwordInput.style.borderColor = '#e1e5e9';
+            } else {
+                // For dispatchers and admins, email and password are required
+                emailRequired.classList.add('required-now');
+                passwordRequired.classList.add('required-now');
+                emailHelp.textContent = 'Required for dispatchers and admins';
+                passwordHelp.textContent = 'Required for dispatchers and admins';
+                emailInput.style.borderColor = '#dc3545';
+                passwordInput.style.borderColor = '#dc3545';
+            }
+        }
+
         function showMessage(elementId, message, type) {
             const element = document.getElementById(elementId);
             if (element) {
@@ -535,9 +612,10 @@
             }
         }
 
-        // Auto-focus first input
+        // Auto-focus first input and initialize field requirements
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('adminEmail').focus();
+            updateFieldRequirements(); // Initialize field requirements
         });
     </script>
 </body>
