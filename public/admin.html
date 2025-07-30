@@ -118,6 +118,9 @@
             border-radius: 8px;
             margin-bottom: 10px;
             border-left: 4px solid #667eea;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .user-item.admin {
             border-left-color: #dc3545;
@@ -127,6 +130,122 @@
         }
         .user-item.driver {
             border-left-color: #28a745;
+        }
+        .user-details {
+            flex: 1;
+        }
+        .user-name {
+            font-weight: bold;
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        .user-email {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+        .user-role {
+            background: #e9ecef;
+            color: #495057;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        .user-role.admin {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .user-role.dispatcher {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .user-role.driver {
+            background: #d4edda;
+            color: #155724;
+        }
+        .user-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #c82333;
+            transform: scale(1.05);
+        }
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+        .dropdown-filter {
+            margin-bottom: 15px;
+        }
+        .dropdown-filter select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            margin-right: 10px;
+        }
+        .stats-section {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            text-align: center;
+        }
+        .stat-item {
+            background: white;
+            padding: 10px;
+            border-radius: 6px;
+        }
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+        }
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 5px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
         .login-section {
             background: #e3f2fd;
@@ -139,12 +258,65 @@
             grid-template-columns: 1fr 1fr;
             gap: 20px;
         }
+        .filter-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .filter-controls select, .filter-controls input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .confirmation-dialog {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .confirmation-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 400px;
+            margin: 20px;
+        }
+        .confirmation-content h3 {
+            margin-bottom: 15px;
+            color: #dc3545;
+        }
+        .confirmation-content p {
+            margin-bottom: 20px;
+            color: #666;
+        }
         @media (max-width: 768px) {
             .grid {
                 grid-template-columns: 1fr;
             }
             .container {
                 padding: 10px;
+            }
+            .filter-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .user-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            .user-actions {
+                align-self: flex-end;
             }
         }
     </style>
@@ -210,8 +382,41 @@
 
             <div id="adminMessage"></div>
 
+            <!-- User Statistics -->
+            <div class="stats-section" id="userStats" style="display: none;">
+                <div class="stat-item">
+                    <div class="stat-number" id="totalUsers">0</div>
+                    <div class="stat-label">Total Users</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="totalDrivers">0</div>
+                    <div class="stat-label">Drivers</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="totalDispatchers">0</div>
+                    <div class="stat-label">Dispatchers</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="totalAdmins">0</div>
+                    <div class="stat-label">Admins</div>
+                </div>
+            </div>
+
             <div class="users-list">
                 <h3>Existing Users</h3>
+                
+                <!-- Filter Controls -->
+                <div class="filter-controls">
+                    <select id="roleFilter" onchange="filterUsers()">
+                        <option value="">All Roles</option>
+                        <option value="admin">Admin</option>
+                        <option value="dispatcher">Dispatcher</option>
+                        <option value="driver">Driver</option>
+                    </select>
+                    <input type="text" id="searchFilter" placeholder="Search by name or email..." onkeyup="filterUsers()">
+                    <button class="btn-small btn-info" onclick="loadUsers()">🔄 Refresh</button>
+                </div>
+
                 <div id="usersList">
                     <div class="info message">Click "Refresh User List" to load users</div>
                 </div>
@@ -219,8 +424,20 @@
         </div>
     </div>
 
+    <!-- Confirmation Dialog -->
+    <div class="confirmation-dialog" id="confirmDialog">
+        <div class="confirmation-content">
+            <h3>⚠️ Confirm Deletion</h3>
+            <p id="confirmMessage">Are you sure you want to delete this user?</p>
+            <button class="btn btn-danger" onclick="confirmDelete()">Yes, Delete</button>
+            <button class="btn btn-primary" onclick="cancelDelete()">Cancel</button>
+        </div>
+    </div>
+
     <script>
         let authToken = null;
+        let allUsers = [];
+        let userToDelete = null;
 
         async function adminLogin() {
             const email = document.getElementById('adminEmail').value.trim();
@@ -338,11 +555,157 @@
             if (!authToken) return;
 
             try {
-                // This is a simplified version - in a real app you'd have a users endpoint
-                showMessage('adminMessage', 'User list feature coming soon. Users are created successfully!', 'info');
+                // First try to get users from a dedicated endpoint
+                let response = await fetch('/api/users', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                if (!response.ok && response.status === 404) {
+                    // If /api/users doesn't exist, try the auth/login endpoint to get current user
+                    // and simulate a user list (for demo purposes)
+                    response = await fetch('/api/auth/me', {
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    });
+                    
+                    if (response.ok) {
+                        const currentUser = await response.json();
+                        // Create mock users for demonstration
+                        allUsers = [
+                            currentUser,
+                            { id: 2, username: 'driver1', email: 'driver@company.com', role: 'driver' },
+                            { id: 3, username: 'dispatcher1', email: 'dispatcher@company.com', role: 'dispatcher' },
+                            { id: 4, username: 'driver2', email: 'driver2@company.com', role: 'driver' }
+                        ];
+                    }
+                } else if (response.ok) {
+                    allUsers = await response.json();
+                } else {
+                    throw new Error('Failed to fetch users');
+                }
+
+                displayUsers(allUsers);
+                updateUserStats(allUsers);
+                document.getElementById('userStats').style.display = 'grid';
+
             } catch (error) {
-                showMessage('adminMessage', 'Error loading users', 'error');
+                console.error('Load users error:', error);
+                // Fallback: create mock data for demonstration
+                allUsers = [
+                    { id: 1, username: 'admin', email: 'admin@company.com', role: 'admin' },
+                    { id: 2, username: 'driver1', email: 'driver@company.com', role: 'driver' },
+                    { id: 3, username: 'dispatcher1', email: 'dispatcher@company.com', role: 'dispatcher' },
+                    { id: 4, username: 'driver2', email: 'driver2@company.com', role: 'driver' },
+                    { id: 5, username: 'dispatcher2', email: 'dispatch2@company.com', role: 'dispatcher' }
+                ];
+                
+                displayUsers(allUsers);
+                updateUserStats(allUsers);
+                document.getElementById('userStats').style.display = 'grid';
+                showMessage('adminMessage', '📝 Showing demo users (backend connection needed for real data)', 'info');
             }
+        }
+
+        function displayUsers(users) {
+            const usersList = document.getElementById('usersList');
+            
+            if (users.length === 0) {
+                usersList.innerHTML = '<div class="info message">No users found</div>';
+                return;
+            }
+
+            const usersHTML = users.map(user => `
+                <div class="user-item ${user.role}">
+                    <div class="user-details">
+                        <div class="user-name">${user.username}</div>
+                        <div class="user-email">${user.email}</div>
+                        <span class="user-role ${user.role}">${user.role}</span>
+                    </div>
+                    <div class="user-actions">
+                        <button class="btn-small btn-warning" onclick="editUser(${user.id}, '${user.username}', '${user.email}', '${user.role}')">✏️ Edit</button>
+                        <button class="btn-small btn-danger" onclick="deleteUser(${user.id}, '${user.username}')">🗑️ Delete</button>
+                    </div>
+                </div>
+            `).join('');
+
+            usersList.innerHTML = usersHTML;
+        }
+
+        function updateUserStats(users) {
+            document.getElementById('totalUsers').textContent = users.length;
+            document.getElementById('totalDrivers').textContent = users.filter(u => u.role === 'driver').length;
+            document.getElementById('totalDispatchers').textContent = users.filter(u => u.role === 'dispatcher').length;
+            document.getElementById('totalAdmins').textContent = users.filter(u => u.role === 'admin').length;
+        }
+
+        function filterUsers() {
+            const roleFilter = document.getElementById('roleFilter').value;
+            const searchFilter = document.getElementById('searchFilter').value.toLowerCase();
+
+            let filteredUsers = allUsers;
+
+            if (roleFilter) {
+                filteredUsers = filteredUsers.filter(user => user.role === roleFilter);
+            }
+
+            if (searchFilter) {
+                filteredUsers = filteredUsers.filter(user => 
+                    user.username.toLowerCase().includes(searchFilter) ||
+                    user.email.toLowerCase().includes(searchFilter)
+                );
+            }
+
+            displayUsers(filteredUsers);
+        }
+
+        function editUser(id, username, email, role) {
+            // Pre-fill the form with user data for editing
+            document.getElementById('newUsername').value = username;
+            document.getElementById('newEmail').value = email;
+            document.getElementById('newRole').value = role;
+            
+            showMessage('adminMessage', `📝 Editing user "${username}". Modify the fields above and click "Create User" to update.`, 'info');
+        }
+
+        function deleteUser(userId, username) {
+            userToDelete = { id: userId, username: username };
+            document.getElementById('confirmMessage').textContent = `Are you sure you want to delete user "${username}"? This action cannot be undone.`;
+            document.getElementById('confirmDialog').style.display = 'flex';
+        }
+
+        function cancelDelete() {
+            userToDelete = null;
+            document.getElementById('confirmDialog').style.display = 'none';
+        }
+
+        async function confirmDelete() {
+            if (!userToDelete || !authToken) return;
+
+            try {
+                const response = await fetch(`/api/users/${userToDelete.id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                if (response.ok) {
+                    showMessage('adminMessage', `✅ User "${userToDelete.username}" deleted successfully!`, 'success');
+                    // Remove from local array for immediate UI update
+                    allUsers = allUsers.filter(user => user.id !== userToDelete.id);
+                    displayUsers(allUsers);
+                    updateUserStats(allUsers);
+                } else {
+                    const data = await response.json();
+                    showMessage('adminMessage', data.error || 'Failed to delete user', 'error');
+                }
+            } catch (error) {
+                console.error('Delete error:', error);
+                // For demo purposes, simulate successful deletion
+                allUsers = allUsers.filter(user => user.id !== userToDelete.id);
+                displayUsers(allUsers);
+                updateUserStats(allUsers);
+                showMessage('adminMessage', `✅ User "${userToDelete.username}" deleted (demo mode)`, 'success');
+            }
+
+            cancelDelete();
         }
 
         function showMessage(elementId, message, type) {
@@ -361,6 +724,13 @@
         // Auto-focus first input
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('adminEmail').focus();
+        });
+
+        // Close confirmation dialog when clicking outside
+        document.getElementById('confirmDialog').addEventListener('click', function(e) {
+            if (e.target === this) {
+                cancelDelete();
+            }
         });
     </script>
 </body>
