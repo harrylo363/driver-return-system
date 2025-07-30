@@ -70,6 +70,31 @@ const authenticateToken = (req, res, next) => {
     });
 };
 
+// Admin middleware - ADD THIS
+const checkAdmin = async (req, res, next) => {
+    try {
+        const authHeader = req.headers['authorization'];
+        const token = authHeader && authHeader.split(' ')[1];
+        
+        if (!token) {
+            return res.status(401).json({ error: 'Access token required' });
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
+        const user = await User.findById(decoded.userId);
+        
+        if (!user || user.role !== 'admin') {
+            return res.status(403).json({ error: 'Admin access required' });
+        }
+
+        req.user = user;
+        next();
+    } catch (error) {
+        console.error('Admin auth error:', error);
+        res.status(401).json({ error: 'Invalid token' });
+    }
+};
+
 // Socket.IO connection handling
 io.on('connection', (socket) => {
     console.log('Client connected:', socket.id);
@@ -160,6 +185,50 @@ app.post('/api/auth/login', async (req, res) => {
         console.error('Login error:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
+});
+
+// ADMIN PANEL API ROUTES - ADD THESE
+// Get all users (admin only)
+app.get('/api/users', checkAdmin, async (req, res) => {
+    try {
+        console.log('Admin fetching all users...');
+        const users = await User.find({}, '-password').sort({ createdAt: -1 });
+        console.log(`Found ${users.length} users`);
+        res.json(users);
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        res.status(500).json({ error: 'Failed to get users' });
+    }
+});
+
+// Delete user (admin only)
+app.delete('/api/users/:id', checkAdmin, async (req, res) => {
+    try {
+        // Prevent admin from deleting themselves
+        if (req.params.id === req.user._id.toString()) {
+            return res.status(400).json({ error: 'Cannot delete your own account' });
+        }
+
+        const deletedUser = await User.findByIdAndDelete(req.params.id);
+        
+        if (!deletedUser) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        console.log(`User ${deletedUser.username} deleted by admin`);
+        res.json({ 
+            message: 'User deleted successfully',
+            user: { id: deletedUser._id, username: deletedUser.username }
+        });
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        res.status(500).json({ error: 'Failed to delete user' });
+    }
+});
+
+// Serve admin panel
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
 // Send notification
@@ -262,6 +331,7 @@ mongoose.connection.once('open', () => {
     
     server.listen(PORT, () => {
         console.log(`🚀 Server running on port ${PORT}`);
+        console.log(`🛠️ Admin panel: http://localhost:${PORT}/admin`);
     });
 });
 
