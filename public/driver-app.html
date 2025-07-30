@@ -48,18 +48,17 @@
             margin-bottom: 8px;
             font-weight: bold;
             color: #555;
-            font-size: 18px;
+            font-size: 16px;
         }
-        select {
+        input, select {
             width: 100%;
             padding: 15px;
             border: 2px solid #e1e5e9;
             border-radius: 12px;
-            font-size: 18px;
+            font-size: 16px;
             background: #f8f9fa;
-            cursor: pointer;
         }
-        select:focus {
+        input:focus, select:focus {
             outline: none;
             border-color: #667eea;
             background: white;
@@ -143,17 +142,17 @@
             font-size: 16px;
             margin-bottom: 10px;
         }
-        .change-driver-btn {
+        .logout-btn {
             background: transparent;
-            color: #667eea;
-            border: 1px solid #667eea;
+            color: #dc3545;
+            border: 1px solid #dc3545;
             padding: 8px 16px;
             font-size: 14px;
             border-radius: 6px;
             cursor: pointer;
         }
-        .change-driver-btn:hover {
-            background: #667eea;
+        .logout-btn:hover {
+            background: #dc3545;
             color: white;
         }
         .notification-history {
@@ -189,10 +188,10 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-        .driver-selection {
+        .login-form {
             text-align: center;
         }
-        .driver-selection h2 {
+        .login-form h2 {
             margin-bottom: 20px;
             color: #333;
         }
@@ -200,6 +199,21 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
+        }
+        .admin-link {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: #e3f2fd;
+            border-radius: 8px;
+        }
+        .admin-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .admin-link a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -211,40 +225,27 @@
         </div>
 
         <!-- Driver Selection Screen -->
-        <div class="card" id="driverSelection">
-            <div class="driver-selection">
+        <div class="card" id="loginScreen">
+            <div class="login-form">
                 <h2>Select Your Name</h2>
                 
                 <div class="form-group">
                     <label for="driverSelect">Choose your name from the list:</label>
                     <select id="driverSelect">
-                        <option value="">-- Select Driver --</option>
-                        <option value="John Smith">John Smith</option>
-                        <option value="Sarah Johnson">Sarah Johnson</option>
-                        <option value="Mike Davis">Mike Davis</option>
-                        <option value="Lisa Wilson">Lisa Wilson</option>
-                        <option value="David Brown">David Brown</option>
-                        <option value="Anna Martinez">Anna Martinez</option>
-                        <option value="James Miller">James Miller</option>
-                        <option value="Maria Garcia">Maria Garcia</option>
-                        <option value="Robert Taylor">Robert Taylor</option>
-                        <option value="Jennifer Anderson">Jennifer Anderson</option>
-                        <option value="Custom Name">📝 Enter Custom Name</option>
+                        <option value="">-- Loading drivers... --</option>
                     </select>
                 </div>
 
-                <!-- Custom Name Input (Hidden by default) -->
-                <div class="form-group hidden" id="customNameGroup">
-                    <label for="customDriverName">Enter Your Name:</label>
-                    <input type="text" id="customDriverName" placeholder="Type your name here" style="width: 100%; padding: 15px; border: 2px solid #e1e5e9; border-radius: 12px; font-size: 16px; background: #f8f9fa;">
-                </div>
-
-                <button class="btn btn-primary" onclick="selectDriver()" id="selectBtn" disabled>
+                <button class="btn btn-primary" onclick="selectDriver()" id="loginBtn" disabled>
                     Begin Check-Out
                 </button>
+
+                <div class="admin-link">
+                    <p>Don't see your name? <a href="/admin" target="_blank">Contact admin</a></p>
+                </div>
             </div>
 
-            <div id="selectionMessage"></div>
+            <div id="loginMessage"></div>
         </div>
 
         <!-- Main App Screen -->
@@ -252,7 +253,7 @@
             <div class="driver-info">
                 <div class="driver-name" id="selectedDriverName">Driver Name</div>
                 <div class="current-time" id="currentTime"></div>
-                <button class="change-driver-btn" onclick="changeDriver()">Change Driver</button>
+                <button class="logout-btn" onclick="logoutDriver()">🚪 Logout</button>
             </div>
 
             <div class="status-buttons">
@@ -279,6 +280,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
     <script>
         let currentDriver = null;
+        let authToken = null;
         let socket = null;
         let notificationHistory = [];
 
@@ -286,94 +288,126 @@
         document.addEventListener('DOMContentLoaded', function() {
             updateTime();
             setInterval(updateTime, 1000);
-            setupDriverSelection();
-            loadStoredHistory();
+            checkExistingLogin();
+            loadDriversList();
         });
 
-        function setupDriverSelection() {
-            const driverSelect = document.getElementById('driverSelect');
-            const customNameGroup = document.getElementById('customNameGroup');
-            const selectBtn = document.getElementById('selectBtn');
-
-            // Handle driver selection change
-            driverSelect.addEventListener('change', function() {
-                const selectedValue = this.value;
+        async function loadDriversList() {
+            try {
+                // Get all users from the database
+                const response = await fetch('/api/auth/drivers');
                 
-                if (selectedValue === 'Custom Name') {
-                    customNameGroup.classList.remove('hidden');
-                    selectBtn.disabled = true;
-                    document.getElementById('customDriverName').focus();
-                } else if (selectedValue === '') {
-                    customNameGroup.classList.add('hidden');
-                    selectBtn.disabled = true;
+                if (response.ok) {
+                    const drivers = await response.json();
+                    populateDriverDropdown(drivers);
                 } else {
-                    customNameGroup.classList.add('hidden');
-                    selectBtn.disabled = false;
+                    // Fallback to demo drivers if API not available
+                    const demoDrivers = [
+                        { id: 'demo1', username: 'John Smith' },
+                        { id: 'demo2', username: 'Sarah Johnson' },
+                        { id: 'demo3', username: 'Mike Davis' },
+                        { id: 'demo4', username: 'Lisa Wilson' }
+                    ];
+                    populateDriverDropdown(demoDrivers);
+                    showMessage('loginMessage', 'Using demo drivers. Add /api/auth/drivers endpoint for real drivers.', 'warning');
                 }
-            });
+            } catch (error) {
+                console.error('Error loading drivers:', error);
+                showMessage('loginMessage', 'Error loading drivers list', 'error');
+            }
+        }
 
-            // Handle custom name input
-            document.getElementById('customDriverName').addEventListener('input', function() {
-                const customName = this.value.trim();
-                selectBtn.disabled = customName.length === 0;
+        function populateDriverDropdown(drivers) {
+            const driverSelect = document.getElementById('driverSelect');
+            const loginBtn = document.getElementById('loginBtn');
+            
+            // Clear existing options
+            driverSelect.innerHTML = '<option value="">-- Select Your Name --</option>';
+            
+            // Add drivers to dropdown
+            drivers.forEach(driver => {
+                const option = document.createElement('option');
+                option.value = JSON.stringify({ id: driver.id || driver._id, username: driver.username });
+                option.textContent = driver.username;
+                driverSelect.appendChild(option);
             });
+            
+            // Enable selection
+            driverSelect.addEventListener('change', function() {
+                loginBtn.disabled = this.value === '';
+            });
+        }
 
+        function checkExistingLogin() {
             // Check if driver was previously selected
             const savedDriver = localStorage.getItem('selectedDriver');
             if (savedDriver) {
-                currentDriver = savedDriver;
+                currentDriver = JSON.parse(savedDriver);
                 showMainScreen();
+                initializeSocket();
+                loadStoredHistory();
+            } else {
+                showLoginScreen();
             }
         }
 
-        function selectDriver() {
+        async function selectDriver() {
             const driverSelect = document.getElementById('driverSelect');
-            const customNameInput = document.getElementById('customDriverName');
+            const loginBtn = document.getElementById('loginBtn');
             
-            let selectedDriver;
-            
-            if (driverSelect.value === 'Custom Name') {
-                selectedDriver = customNameInput.value.trim();
-            } else {
-                selectedDriver = driverSelect.value;
-            }
-
-            if (!selectedDriver) {
-                showMessage('selectionMessage', 'Please select or enter a driver name', 'error');
+            if (!driverSelect.value) {
+                showMessage('loginMessage', 'Please select your name', 'error');
                 return;
             }
 
-            currentDriver = selectedDriver;
-            localStorage.setItem('selectedDriver', currentDriver);
-            
-            showMainScreen();
-            initializeSocket();
-            showMessage('statusMessage', `Welcome, ${currentDriver}! Ready to send notifications.`, 'success');
+            try {
+                // Parse selected driver data
+                currentDriver = JSON.parse(driverSelect.value);
+                
+                // Store selection
+                localStorage.setItem('selectedDriver', JSON.stringify(currentDriver));
+                
+                // Show main screen
+                showMainScreen();
+                initializeSocket();
+                loadStoredHistory();
+                
+                showMessage('statusMessage', `Welcome, ${currentDriver.username}!`, 'success');
+                
+            } catch (error) {
+                console.error('Driver selection error:', error);
+                showMessage('loginMessage', 'Error selecting driver', 'error');
+            }
         }
 
-        function changeDriver() {
+        function logoutDriver() {
             localStorage.removeItem('selectedDriver');
-            currentDriver = null;
             if (socket) socket.disconnect();
             
-            // Reset forms
-            document.getElementById('driverSelect').value = '';
-            document.getElementById('customDriverName').value = '';
-            document.getElementById('customNameGroup').classList.add('hidden');
-            document.getElementById('selectBtn').disabled = true;
+            currentDriver = null;
+            notificationHistory = [];
             
-            showDriverSelection();
+            // Reset dropdown
+            document.getElementById('driverSelect').value = '';
+            document.getElementById('loginBtn').disabled = true;
+            
+            showLoginScreen();
+            showMessage('loginMessage', 'Logged out successfully', 'success');
+        }
+
+        function clearStoredAuth() {
+            localStorage.removeItem('selectedDriver');
         }
 
         function showMainScreen() {
-            document.getElementById('driverSelection').classList.add('hidden');
+            document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('mainScreen').classList.remove('hidden');
-            document.getElementById('selectedDriverName').textContent = currentDriver;
+            document.getElementById('selectedDriverName').textContent = currentDriver.username;
             displayNotificationHistory();
         }
 
-        function showDriverSelection() {
-            document.getElementById('driverSelection').classList.remove('hidden');
+        function showLoginScreen() {
+            document.getElementById('loginScreen').classList.remove('hidden');
             document.getElementById('mainScreen').classList.add('hidden');
             clearMessages();
         }
@@ -383,6 +417,8 @@
             
             socket.on('connect', () => {
                 console.log('Connected to server');
+                // Join driver room
+                socket.emit('join-room', { role: 'driver', driverId: currentDriver.id });
             });
 
             socket.on('status-update', (data) => {
@@ -428,16 +464,15 @@
                 
                 // Create notification data
                 const notificationData = {
-                    driver: currentDriver,
+                    driver: currentDriver.username,
                     status: status,
                     location: location,
-                    timestamp: new Date().toISOString(),
                     estimatedArrival: estimatedArrival,
                     warehouse: 'Main Warehouse',
                     company: 'Your Company Inc.'
                 };
 
-                // Try to send to server (if available)
+                // Try to send to server
                 try {
                     const response = await fetch('/api/notifications/simple', {
                         method: 'POST',
@@ -448,16 +483,19 @@
                     if (response.ok) {
                         showMessage('statusMessage', `✅ Status "${status}" sent successfully to dispatch!`, 'success');
                     } else {
-                        // If server endpoint doesn't exist, simulate success
+                        // Fallback to local mode
                         showMessage('statusMessage', `✅ Status "${status}" recorded! (Demo mode)`, 'success');
                     }
-                } catch (error) {
-                    // If no server connection, still allow local functionality
+                } catch (fetchError) {
+                    // If server not available, still allow local functionality
                     showMessage('statusMessage', `✅ Status "${status}" recorded! (Offline mode)`, 'warning');
                 }
 
                 // Add to local history
-                addToHistory(notificationData);
+                addToHistory({
+                    ...notificationData,
+                    timestamp: new Date().toISOString()
+                });
                 
                 // Send real-time update if socket is connected
                 if (socket && socket.connected) {
@@ -544,14 +582,15 @@
         }
 
         function saveHistory() {
-            const historyKey = `history_${currentDriver}`;
+            if (!currentDriver) return;
+            const historyKey = `history_${currentDriver.id || currentDriver.username}`;
             localStorage.setItem(historyKey, JSON.stringify(notificationHistory));
         }
 
         function loadStoredHistory() {
             if (!currentDriver) return;
             
-            const historyKey = `history_${currentDriver}`;
+            const historyKey = `history_${currentDriver.id || currentDriver.username}`;
             const stored = localStorage.getItem(historyKey);
             
             if (stored) {
@@ -574,14 +613,15 @@
         }
 
         function clearMessages() {
-            document.getElementById('selectionMessage').innerHTML = '';
-            document.getElementById('statusMessage').innerHTML = '';
+            document.getElementById('loginMessage').innerHTML = '';
+            const statusMsg = document.getElementById('statusMessage');
+            if (statusMsg) statusMsg.innerHTML = '';
         }
 
-        // Load history when driver is selected
-        document.addEventListener('DOMContentLoaded', function() {
-            if (currentDriver) {
-                loadStoredHistory();
+        // Handle Enter key and dropdown selection
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !document.getElementById('loginScreen').classList.contains('hidden')) {
+                selectDriver();
             }
         });
     </script>
