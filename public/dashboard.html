@@ -476,16 +476,6 @@
             <p>Driver Return Status Monitoring</p>
         </div>
 
-        <!-- Push Notifications Panel -->
-        <div class="card">
-            <h2>🔔 Push Notifications</h2>
-            <div id="notificationStatus">
-                <div class="message info">Checking notification support...</div>
-            </div>
-            <button class="refresh-btn" onclick="enableNotifications()">🔔 Enable Notifications</button>
-            <button class="refresh-btn" onclick="testNotification()" style="background: #28a745;">📱 Test Notification</button>
-        </div>
-
         <!-- Statistics Cards -->
         <div class="stats-grid">
             <div class="stat-card total-card">
@@ -742,28 +732,6 @@
                     document.title = originalTitle;
                 }, 5000);
             }
-
-            static getPermissionStatus() {
-                if (this.isIOS()) {
-                    return 'ios-fallback';
-                }
-                if (!('Notification' in window)) {
-                    return 'not-supported';
-                }
-                return Notification.permission;
-            }
-
-            static getBrowserInfo() {
-                if (this.isIOS()) {
-                    return 'iPhone/iPad Safari';
-                }
-                const userAgent = navigator.userAgent;
-                if (userAgent.includes('Safari')) return 'Safari Desktop';
-                if (userAgent.includes('Chrome')) return 'Chrome';
-                if (userAgent.includes('Firefox')) return 'Firefox';
-                if (userAgent.includes('Edge')) return 'Edge';
-                return 'Unknown';
-            }
         }
 
         // Initialize dashboard
@@ -772,7 +740,6 @@
             loadNotifications();
             loadCheckedInStatus();
             checkDateChange();
-            checkNotificationPermission();
             setInterval(updateTime, 1000);
             setInterval(checkDateChange, 60000);
         });
@@ -803,74 +770,6 @@
             socket.on('disconnect', () => {
                 console.log('Disconnected from server');
             });
-        }
-
-        function checkNotificationPermission() {
-            const status = NotificationManager.getPermissionStatus();
-            const browser = NotificationManager.getBrowserInfo();
-            const notificationStatus = document.getElementById('notificationStatus');
-            
-            if (status === 'ios-fallback') {
-                notificationStatus.innerHTML = `
-                    <div class="message success">
-                        📱 iPhone/iPad detected - Using optimized mobile alerts<br>
-                        <small>You'll get full-screen notifications, sounds, and visual alerts designed for iOS</small>
-                    </div>`;
-            } else if (status === 'not-supported') {
-                notificationStatus.innerHTML = `
-                    <div class="message info">
-                        📱 Using enhanced mobile notifications<br>
-                        <small>You'll get visual alerts, sounds, and banner notifications</small>
-                    </div>`;
-            } else if (status === 'granted') {
-                notificationStatus.innerHTML = `<div class="message success">✅ Push notifications enabled! (${browser})</div>`;
-            } else if (status === 'denied') {
-                notificationStatus.innerHTML = `
-                    <div class="message info">
-                        📱 Using mobile-optimized notifications<br>
-                        <small>You'll get full-screen alerts and audio notifications instead</small>
-                    </div>`;
-            } else {
-                notificationStatus.innerHTML = `<div class="message info">🔔 Enable push notifications for ${browser} or use mobile alerts</div>`;
-            }
-        }
-
-        async function enableNotifications() {
-            const isIOS = NotificationManager.isIOS();
-            
-            if (isIOS) {
-                showMessage('📱 iPhone/iPad detected! Mobile notifications are automatically enabled. Try the test button.', 'success');
-                checkNotificationPermission();
-                return;
-            }
-
-            const granted = await NotificationManager.requestPermission();
-            checkNotificationPermission();
-            
-            if (granted) {
-                showMessage('✅ Push notifications enabled! You will now receive alerts when drivers update their status.', 'success');
-            } else {
-                showMessage('📱 Using mobile-optimized notifications instead. Try the test button to see how they work.', 'info');
-            }
-        }
-
-        function testNotification() {
-            console.log('Test notification triggered');
-            
-            // Always trigger notification regardless of platform
-            NotificationManager.sendDriverNotification(
-                'Test Driver',
-                'arrived',
-                'Test Warehouse Location',
-                'At warehouse'
-            );
-            
-            const browser = NotificationManager.getBrowserInfo();
-            if (NotificationManager.isIOS()) {
-                showMessage('📱 iPhone notification sent! Look for the full-screen alert and listen for the sound.', 'success');
-            } else {
-                showMessage(`🔔 Test notification sent! (${browser})`, 'success');
-            }
         }
 
         function checkDateChange() {
