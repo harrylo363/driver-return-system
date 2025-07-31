@@ -312,6 +312,34 @@
             color: #666;
             text-transform: uppercase;
         }
+        .notification-section {
+            background: #e8f5e8;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #c3e6cb;
+        }
+        .notification-status {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border-left: 4px solid #28a745;
+        }
+        .notification-demo {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            border: 1px solid #ffeaa7;
+        }
+        .role-conditional {
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+        .role-conditional.active {
+            opacity: 1;
+        }
         @media (max-width: 768px) {
             .grid {
                 grid-template-columns: 1fr;
@@ -368,12 +396,39 @@
                     </div>
                     <div class="form-group">
                         <label for="newRole">Role</label>
-                        <select id="newRole">
+                        <select id="newRole" onchange="toggleNotificationSetup()">
                             <option value="driver">Driver</option>
                             <option value="dispatcher">Dispatcher</option>
                             <option value="admin">Admin</option>
                         </select>
                     </div>
+                </div>
+            </div>
+
+            <!-- Push Notification Setup (for dispatchers and admins) -->
+            <div class="notification-section role-conditional" id="notificationSetup">
+                <h3>🔔 Push Notification Setup</h3>
+                <p style="color: #666; margin-bottom: 15px;">Configure browser notifications for this dispatcher/admin user</p>
+                
+                <div id="notificationStatus" class="notification-status">
+                    <div class="message info">Checking notification support...</div>
+                </div>
+                
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn btn-info" onclick="checkNotificationPermission()">🔍 Check Browser Support</button>
+                    <button class="btn btn-success" onclick="enableNotifications()">🔔 Enable Notifications</button>
+                    <button class="btn btn-secondary" onclick="testNotification()">📱 Test Notification</button>
+                </div>
+                
+                <div class="notification-demo" id="notificationDemo">
+                    <h4>📋 Notification Instructions for User:</h4>
+                    <p style="margin-bottom: 10px;">When the new user logs into the dispatcher dashboard, they should:</p>
+                    <ol style="margin-left: 20px; color: #666;">
+                        <li>Look for the "🔔 Push Notifications" section</li>
+                        <li>Click "Enable Notifications" and allow browser permissions</li>
+                        <li>Test notifications to ensure they work properly</li>
+                        <li>On iPhone/iPad, they'll get enhanced mobile alerts automatically</li>
+                    </ol>
                 </div>
             </div>
 
@@ -449,6 +504,95 @@
         let allUsers = [];
         let parsedData = null;
 
+        // Notification Manager for Admin Panel
+        class NotificationManager {
+            static isIOS() {
+                return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            }
+
+            static async requestPermission() {
+                if (this.isIOS()) {
+                    return false; // Force fallback mode for iOS
+                }
+
+                if (!('Notification' in window)) {
+                    return false;
+                }
+
+                if (Notification.permission === 'granted') {
+                    return true;
+                }
+
+                if (Notification.permission !== 'denied') {
+                    try {
+                        const permission = await Notification.requestPermission();
+                        return permission === 'granted';
+                    } catch (error) {
+                        return false;
+                    }
+                }
+
+                return false;
+            }
+
+            static getPermissionStatus() {
+                if (this.isIOS()) {
+                    return 'ios-fallback';
+                }
+                if (!('Notification' in window)) {
+                    return 'not-supported';
+                }
+                return Notification.permission;
+            }
+
+            static getBrowserInfo() {
+                if (this.isIOS()) {
+                    return 'iPhone/iPad Safari';
+                }
+                const userAgent = navigator.userAgent;
+                if (userAgent.includes('Safari')) return 'Safari Desktop';
+                if (userAgent.includes('Chrome')) return 'Chrome';
+                if (userAgent.includes('Firefox')) return 'Firefox';
+                if (userAgent.includes('Edge')) return 'Edge';
+                return 'Unknown';
+            }
+
+            static sendTestNotification() {
+                if (this.isIOS()) {
+                    this.sendIOSAlert();
+                    return;
+                }
+
+                if (Notification.permission === 'granted') {
+                    try {
+                        const notification = new Notification('🚚 Admin Panel Test', {
+                            body: 'Push notifications are working correctly!\nThe dispatcher will receive alerts like this when drivers update their status.',
+                            tag: 'admin-test-notification',
+                            requireInteraction: true
+                        });
+
+                        notification.onclick = function() {
+                            window.focus();
+                            notification.close();
+                        };
+
+                        setTimeout(() => notification.close(), 8000);
+                        return;
+                    } catch (error) {
+                        console.log('Browser notification failed, using fallback');
+                    }
+                }
+
+                // Fallback alert
+                this.sendIOSAlert();
+            }
+
+            static sendIOSAlert() {
+                alert('🚚 Test Notification\n\nPush notifications are working!\n\nThe dispatcher will receive alerts like this when drivers update their status.');
+            }
+        }
+
         async function adminLogin() {
             const email = document.getElementById('adminEmail').value.trim();
             const password = document.getElementById('adminPassword').value.trim();
@@ -473,6 +617,7 @@
                     showCreateUserPanel();
                     showMessage('createUserMessage', `Welcome, ${data.user.username}!`, 'success');
                     loadUsers();
+                    checkNotificationPermission();
                 } else {
                     showMessage('loginMessage', 'Admin access required', 'error');
                 }
@@ -486,6 +631,7 @@
             document.getElementById('bulkImportPanel').classList.add('hidden');
             document.getElementById('userListPanel').classList.remove('hidden');
             clearMessages();
+            toggleNotificationSetup();
         }
 
         function showBulkImportPanel() {
@@ -494,6 +640,80 @@
             document.getElementById('userListPanel').classList.remove('hidden');
             clearMessages();
             clearPreview();
+        }
+
+        function toggleNotificationSetup() {
+            const role = document.getElementById('newRole').value;
+            const notificationSetup = document.getElementById('notificationSetup');
+            
+            if (role === 'dispatcher' || role === 'admin') {
+                notificationSetup.classList.add('active');
+                checkNotificationPermission();
+            } else {
+                notificationSetup.classList.remove('active');
+            }
+        }
+
+        function checkNotificationPermission() {
+            const status = NotificationManager.getPermissionStatus();
+            const browser = NotificationManager.getBrowserInfo();
+            const notificationStatus = document.getElementById('notificationStatus');
+            
+            if (status === 'ios-fallback') {
+                notificationStatus.innerHTML = `
+                    <div class="message success">
+                        📱 iPhone/iPad detected - Mobile alerts will be used<br>
+                        <small>Dispatchers will get full-screen notifications, sounds, and visual alerts optimized for iOS</small>
+                    </div>`;
+            } else if (status === 'not-supported') {
+                notificationStatus.innerHTML = `
+                    <div class="message info">
+                        📱 Browser notifications not supported - Using mobile alerts<br>
+                        <small>Dispatchers will get enhanced visual alerts and sounds</small>
+                    </div>`;
+            } else if (status === 'granted') {
+                notificationStatus.innerHTML = `<div class="message success">✅ Browser notifications enabled! (${browser})</div>`;
+            } else if (status === 'denied') {
+                notificationStatus.innerHTML = `
+                    <div class="message info">
+                        📱 Browser notifications blocked - Mobile alerts will be used instead<br>
+                        <small>Dispatchers will get full-screen alerts instead of browser notifications</small>
+                    </div>`;
+            } else {
+                notificationStatus.innerHTML = `<div class="message info">🔔 Browser notifications available for ${browser}</div>`;
+            }
+        }
+
+        async function enableNotifications() {
+            const isIOS = NotificationManager.isIOS();
+            
+            if (isIOS) {
+                showMessage('createUserMessage', '📱 iPhone/iPad detected! Mobile notifications are automatically optimized for iOS.', 'success');
+                checkNotificationPermission();
+                return;
+            }
+
+            const granted = await NotificationManager.requestPermission();
+            checkNotificationPermission();
+            
+            if (granted) {
+                showMessage('createUserMessage', '✅ Browser notifications enabled! Dispatchers using this browser will receive push notifications.', 'success');
+            } else {
+                showMessage('createUserMessage', '📱 Using mobile-optimized alerts instead. Dispatchers will still get notifications.', 'info');
+            }
+        }
+
+        function testNotification() {
+            console.log('Admin test notification triggered');
+            
+            NotificationManager.sendTestNotification();
+            
+            const browser = NotificationManager.getBrowserInfo();
+            if (NotificationManager.isIOS()) {
+                showMessage('createUserMessage', '📱 iPhone test notification sent! This is how dispatchers will be alerted.', 'success');
+            } else {
+                showMessage('createUserMessage', `🔔 Test notification sent! (${browser}) Dispatchers will receive similar alerts.`, 'success');
+            }
         }
 
         function clearMessages() {
@@ -533,7 +753,16 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    showMessage('createUserMessage', `✅ ${role} "${username}" created successfully!`, 'success');
+                    let message = `✅ ${role} "${username}" created successfully!`;
+                    
+                    if (role === 'dispatcher' || role === 'admin') {
+                        message += '\n\n📋 Next Steps:\n';
+                        message += '• Share login credentials with the new user\n';
+                        message += '• Instruct them to enable notifications in the dashboard\n';
+                        message += '• Have them test notifications to ensure they work';
+                    }
+                    
+                    showMessage('createUserMessage', message, 'success');
                     
                     document.getElementById('newUsername').value = '';
                     document.getElementById('newEmail').value = '';
@@ -770,19 +999,24 @@ Lisa Wilson,lisa@company.com,dispatch123,dispatcher`;
                 return;
             }
 
-            const usersHTML = users.map(user => `
-                <div class="user-item ${user.role}">
-                    <div style="flex: 1;">
-                        <div style="font-weight: bold; font-size: 16px; margin-bottom: 4px;">${user.username}</div>
-                        <div style="color: #666; font-size: 14px; margin-bottom: 4px;">${user.email}</div>
-                        <span style="background: ${getRoleColor(user.role)}; color: ${getRoleTextColor(user.role)}; padding: 2px 8px; border-radius: 12px; font-size: 12px; text-transform: uppercase; font-weight: bold;">${user.role}</span>
+            const usersHTML = users.map(user => {
+                const notificationIcon = (user.role === 'dispatcher' || user.role === 'admin') ? '🔔' : '';
+                
+                return `
+                    <div class="user-item ${user.role}">
+                        <div style="flex: 1;">
+                            <div style="font-weight: bold; font-size: 16px; margin-bottom: 4px;">${user.username} ${notificationIcon}</div>
+                            <div style="color: #666; font-size: 14px; margin-bottom: 4px;">${user.email}</div>
+                            <span style="background: ${getRoleColor(user.role)}; color: ${getRoleTextColor(user.role)}; padding: 2px 8px; border-radius: 12px; font-size: 12px; text-transform: uppercase; font-weight: bold;">${user.role}</span>
+                            ${(user.role === 'dispatcher' || user.role === 'admin') ? '<span style="margin-left: 8px; font-size: 11px; color: #666;">Push notifications enabled</span>' : ''}
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button onclick="editUser('${user._id}', '${user.username}', '${user.email}', '${user.role}')" style="padding: 6px 12px; font-size: 12px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; background: #ffc107; color: #212529;">✏️ Edit</button>
+                            <button onclick="deleteUser('${user._id}', '${user.username}')" style="padding: 6px 12px; font-size: 12px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; background: #dc3545; color: white;">🗑️ Delete</button>
+                        </div>
                     </div>
-                    <div style="display: flex; gap: 8px;">
-                        <button onclick="editUser('${user._id}', '${user.username}', '${user.email}', '${user.role}')" style="padding: 6px 12px; font-size: 12px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; background: #ffc107; color: #212529;">✏️ Edit</button>
-                        <button onclick="deleteUser('${user._id}', '${user.username}')" style="padding: 6px 12px; font-size: 12px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; background: #dc3545; color: white;">🗑️ Delete</button>
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
 
             usersList.innerHTML = usersHTML;
         }
@@ -851,6 +1085,7 @@ Lisa Wilson,lisa@company.com,dispatch123,dispatcher`;
             document.getElementById('newUsername').value = username;
             document.getElementById('newEmail').value = email;
             document.getElementById('newRole').value = role;
+            toggleNotificationSetup();
             showMessage('createUserMessage', `📝 Editing user "${username}". Modify the fields above and click "Create User" to update.`, 'info');
         }
 
@@ -898,7 +1133,7 @@ Lisa Wilson,lisa@company.com,dispatch123,dispatcher`;
             }
         }
 
-        // Auto-focus first input
+        // Auto-focus first input and initialize
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('adminEmail').focus();
         });
