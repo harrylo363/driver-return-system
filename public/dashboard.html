@@ -1,4 +1,162 @@
-<!DOCTYPE html>
+.checkin-btn:hover {
+            background: #138496;
+        }
+        
+        /* iOS-specific notification styles */
+        .ios-notification-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 20000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .ios-notification-overlay.show {
+            opacity: 1;
+        }
+        
+        .ios-notification-modal {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px;
+            max-width: 90%;
+            width: 400px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+        
+        .ios-notification-overlay.show .ios-notification-modal {
+            transform: scale(1);
+        }
+        
+        .ios-notification-header {
+            margin-bottom: 20px;
+        }
+        
+        .ios-notification-icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+        
+        .ios-notification-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .driver-name-large {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .status-large {
+            font-size: 20px;
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+        
+        .location-info,
+        .eta-info {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        
+        .notification-time {
+            font-size: 14px;
+            color: #999;
+            margin-bottom: 25px;
+        }
+        
+        .ios-notification-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .ios-btn {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        
+        .ios-btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .ios-btn-primary:hover {
+            background: #5a67d8;
+        }
+        
+        .ios-btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .ios-btn-success:hover {
+            background: #1e7e34;
+        }
+        
+        /* iOS Banner notification */
+        .ios-banner-notification {
+            position: fixed;
+            top: -100px;
+            left: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            z-index: 15000;
+            transition: top 0.3s ease;
+        }
+        
+        .ios-banner-notification.show {
+            top: 20px;
+        }
+        
+        .ios-banner-notification.hide {
+            top: -100px;
+        }
+        
+        .banner-content {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+        }
+        
+        .banner-icon {
+            font-size: 30px;
+            margin-right: 15px;
+        }
+        
+        .banner-text {
+            flex: 1;
+        }
+        
+        .banner-title {
+            font-weight: bold;
+            font-size: 16px;
+            color: #333;<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -314,8 +472,78 @@
             color: white;
         }
         
-        .checkin-btn:hover {
-            background: #138496;
+        .banner-title {
+            font-weight: bold;
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .banner-subtitle {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .banner-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #999;
+            cursor: pointer;
+            padding: 5px;
+            margin-left: 10px;
+        }
+        
+        .banner-close:hover {
+            color: #666;
+        }
+        
+        /* Screen flash effect */
+        .screen-flash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 25000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.1s ease;
+        }
+        
+        .screen-flash.flash {
+            opacity: 1;
+        }
+        
+        /* Mobile responsive adjustments */
+        @media (max-width: 768px) {
+            .ios-notification-modal {
+                margin: 10px;
+                padding: 25px;
+            }
+            
+            .driver-name-large {
+                font-size: 24px;
+            }
+            
+            .status-large {
+                font-size: 18px;
+            }
+            
+            .ios-btn {
+                padding: 12px 20px;
+                font-size: 16px;
+            }
+            
+            .ios-banner-notification {
+                left: 10px;
+                right: 10px;
+            }
+            
+            .ios-banner-notification.show {
+                top: 10px;
+            }
         }
         
         @keyframes spin {
@@ -422,17 +650,16 @@
         let currentFilter = 'all';
         let lastCheckInDate = null;
 
-        // Enhanced Notification Manager with Safari Support
+        // iPhone-Compatible Notification Manager
         class NotificationManager {
             static async requestPermission() {
                 if (!('Notification' in window)) {
-                    console.log('Browser does not support notifications');
                     return false;
                 }
 
-                // Safari specific handling
-                if (this.isSafari()) {
-                    console.log('Safari detected - using enhanced notification methods');
+                // For iPhone, we'll always use fallback method
+                if (this.isIOS()) {
+                    return false; // Force fallback mode
                 }
 
                 if (Notification.permission === 'granted') {
@@ -444,7 +671,6 @@
                         const permission = await Notification.requestPermission();
                         return permission === 'granted';
                     } catch (error) {
-                        console.log('Notification permission request failed:', error);
                         return false;
                     }
                 }
@@ -452,153 +678,197 @@
                 return false;
             }
 
+            static isIOS() {
+                return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            }
+
             static isSafari() {
                 return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
             }
 
-            static isIOS() {
-                return /iPad|iPhone|iPod/.test(navigator.userAgent);
-            }
-
             static sendDriverNotification(driverName, status, location, estimatedArrival) {
-                // Try browser notification first
-                if (this.sendBrowserNotification(driverName, status, location, estimatedArrival)) {
+                console.log('Sending notification:', { driverName, status, location, estimatedArrival });
+                
+                // For iPhone/iPad, always use our custom system
+                if (this.isIOS()) {
+                    this.sendIOSNotification(driverName, status, location, estimatedArrival);
                     return;
                 }
 
-                // Fallback to visual/audio notification
-                this.sendFallbackNotification(driverName, status, location, estimatedArrival);
+                // Try browser notification for other platforms
+                if (Notification.permission === 'granted') {
+                    try {
+                        this.sendBrowserNotification(driverName, status, location, estimatedArrival);
+                        return;
+                    } catch (error) {
+                        console.log('Browser notification failed, using fallback');
+                    }
+                }
+
+                // Fallback for all other cases
+                this.sendIOSNotification(driverName, status, location, estimatedArrival);
             }
 
             static sendBrowserNotification(driverName, status, location, estimatedArrival) {
-                if (Notification.permission !== 'granted') {
-                    return false;
+                const title = `🚚 Driver Update: ${status}`;
+                let body = `${driverName} - ${status}`;
+                if (location && location !== 'Location unavailable') {
+                    body += `\nLocation: ${location}`;
+                }
+                if (estimatedArrival) {
+                    body += `\nETA: ${estimatedArrival}`;
                 }
 
-                try {
-                    const title = `🚚 Driver Update: ${status}`;
-                    let body = `${driverName} - ${status}`;
-                    if (location && location !== 'Location unavailable') {
-                        body += `\nLocation: ${location}`;
-                    }
-                    if (estimatedArrival) {
-                        body += `\nETA: ${estimatedArrival}`;
-                    }
+                const notification = new Notification(title, {
+                    body: body,
+                    icon: this.createNotificationIcon(status),
+                    tag: `driver-${driverName}-${Date.now()}`,
+                    requireInteraction: status === 'arrived'
+                });
 
-                    const options = {
-                        body: body,
-                        icon: this.createNotificationIcon(status),
-                        tag: `driver-${driverName}-${Date.now()}`,
-                        requireInteraction: status === 'arrived'
-                    };
+                notification.onclick = function() {
+                    window.focus();
+                    notification.close();
+                };
 
-                    const notification = new Notification(title, options);
-
-                    notification.onclick = function() {
-                        window.focus();
-                        notification.close();
-                    };
-
-                    // Auto-close for non-arrival notifications
-                    if (status !== 'arrived') {
-                        setTimeout(() => {
-                            notification.close();
-                        }, 10000);
-                    }
-
-                    return true;
-                } catch (error) {
-                    console.log('Browser notification failed:', error);
-                    return false;
+                if (status !== 'arrived') {
+                    setTimeout(() => notification.close(), 10000);
                 }
             }
 
-            static sendFallbackNotification(driverName, status, location, estimatedArrival) {
-                console.log('Using fallback notification for Safari/iOS');
-                
-                // Visual notification in the page
-                this.showInPageNotification(driverName, status, location, estimatedArrival);
-                
-                // Audio alert
-                this.playNotificationSound();
-                
-                // Browser title flash
-                this.flashBrowserTitle(driverName, status);
-                
-                // Vibrate on mobile (if supported)
-                this.vibrate();
+            static sendIOSNotification(driverName, status, location, estimatedArrival) {
+                // Multiple alert methods for iPhone
+                this.showIOSAlert(driverName, status, location, estimatedArrival);
+                this.flashScreen();
+                this.playIOSSound();
+                this.updatePageTitle(driverName, status);
+                this.showBannerAlert(driverName, status, location, estimatedArrival);
             }
 
-            static showInPageNotification(driverName, status, location, estimatedArrival) {
-                // Create floating notification
-                const notification = document.createElement('div');
-                notification.className = 'floating-notification';
-                notification.innerHTML = `
-                    <div class="floating-notification-content">
-                        <div class="floating-notification-header">
-                            <strong>🚚 Driver Update: ${status}</strong>
-                            <button onclick="this.parentElement.parentElement.parentElement.remove()" class="close-btn">×</button>
+            static showIOSAlert(driverName, status, location, estimatedArrival) {
+                // Full-screen overlay alert for iPhone
+                const overlay = document.createElement('div');
+                overlay.className = 'ios-notification-overlay';
+                overlay.innerHTML = `
+                    <div class="ios-notification-modal">
+                        <div class="ios-notification-header">
+                            <div class="ios-notification-icon">${status === 'arrived' ? '✅' : '🕐'}</div>
+                            <div class="ios-notification-title">Driver Update</div>
                         </div>
-                        <div class="floating-notification-body">
-                            <div><strong>${driverName}</strong> - ${status}</div>
-                            ${location && location !== 'Location unavailable' ? `<div>📍 ${location}</div>` : ''}
-                            ${estimatedArrival ? `<div>⏰ ETA: ${estimatedArrival}</div>` : ''}
+                        <div class="ios-notification-content">
+                            <div class="driver-name-large">${driverName}</div>
+                            <div class="status-large">${status.toUpperCase()}</div>
+                            ${location && location !== 'Location unavailable' ? `<div class="location-info">📍 ${location}</div>` : ''}
+                            ${estimatedArrival ? `<div class="eta-info">⏰ ETA: ${estimatedArrival}</div>` : ''}
+                            <div class="notification-time">${new Date().toLocaleTimeString()}</div>
                         </div>
-                        <div class="floating-notification-actions">
-                            <button onclick="this.parentElement.parentElement.parentElement.remove()" class="ack-btn">✅ Acknowledge</button>
-                            ${status === 'arrived' ? '<button onclick="this.parentElement.parentElement.parentElement.remove()" class="checkin-btn">📋 Check In</button>' : ''}
+                        <div class="ios-notification-actions">
+                            <button class="ios-btn ios-btn-primary" onclick="this.closest('.ios-notification-overlay').remove()">
+                                ✅ Acknowledge
+                            </button>
+                            ${status === 'arrived' ? `
+                                <button class="ios-btn ios-btn-success" onclick="this.closest('.ios-notification-overlay').remove(); toggleCheckIn('${driverName}-${Date.now()}', '${driverName}')">
+                                    📋 Check In Driver
+                                </button>
+                            ` : ''}
                         </div>
                     </div>
                 `;
 
-                document.body.appendChild(notification);
-
-                // Auto-remove after 15 seconds for non-arrival notifications
-                if (status !== 'arrived') {
-                    setTimeout(() => {
-                        if (notification.parentNode) {
-                            notification.remove();
-                        }
-                    }, 15000);
-                }
+                document.body.appendChild(overlay);
 
                 // Animate in
+                setTimeout(() => overlay.classList.add('show'), 10);
+
+                // Auto-remove for non-arrival notifications
+                if (status !== 'arrived') {
+                    setTimeout(() => {
+                        if (overlay.parentNode) {
+                            overlay.remove();
+                        }
+                    }, 8000);
+                }
+            }
+
+            static showBannerAlert(driverName, status, location, estimatedArrival) {
+                // Top banner notification
+                const banner = document.createElement('div');
+                banner.className = 'ios-banner-notification';
+                banner.innerHTML = `
+                    <div class="banner-content">
+                        <div class="banner-icon">${status === 'arrived' ? '✅' : '🕐'}</div>
+                        <div class="banner-text">
+                            <div class="banner-title">${driverName} - ${status}</div>
+                            <div class="banner-subtitle">${estimatedArrival || 'Driver update received'}</div>
+                        </div>
+                        <button class="banner-close" onclick="this.parentElement.parentElement.remove()">×</button>
+                    </div>
+                `;
+
+                document.body.appendChild(banner);
+
+                // Animate in
+                setTimeout(() => banner.classList.add('show'), 10);
+
+                // Auto-remove
                 setTimeout(() => {
-                    notification.classList.add('show');
-                }, 100);
-            }
-
-            static playNotificationSound() {
-                try {
-                    // Create audio element
-                    const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYQA0yo5O+pUxMNUKXh7q1ZFgVUqOPsqVMXEEul4+6rVxgIUKfj7K1ZFgxRpOHsrFgYCFCY0vPRVhQKTZ3Z8N1/QQsOYLPn6qNJGQVGn+Dtwk0uQHbIoFAXAQEGAQACABACARABAoGCAJAAqBAJAAdgAAA9' );
-                    audio.volume = 0.3;
-                    audio.play().catch(e => console.log('Audio play failed:', e));
-                } catch (error) {
-                    console.log('Audio notification failed:', error);
-                }
-            }
-
-            static flashBrowserTitle(driverName, status) {
-                const originalTitle = document.title;
-                let flashCount = 0;
-                const flashInterval = setInterval(() => {
-                    document.title = flashCount % 2 === 0 
-                        ? `🚚 ${driverName} - ${status}` 
-                        : originalTitle;
-                    flashCount++;
-                    
-                    if (flashCount >= 10) { // Flash 5 times
-                        clearInterval(flashInterval);
-                        document.title = originalTitle;
+                    if (banner.parentNode) {
+                        banner.classList.add('hide');
+                        setTimeout(() => banner.remove(), 300);
                     }
-                }, 1000);
+                }, 6000);
             }
 
-            static vibrate() {
-                if ('vibrate' in navigator) {
-                    navigator.vibrate([200, 100, 200]);
+            static flashScreen() {
+                // Flash the entire screen
+                const flash = document.createElement('div');
+                flash.className = 'screen-flash';
+                document.body.appendChild(flash);
+                
+                setTimeout(() => flash.classList.add('flash'), 10);
+                setTimeout(() => flash.remove(), 500);
+            }
+
+            static playIOSSound() {
+                // Multiple attempts to play sound on iOS
+                try {
+                    // Try Web Audio API
+                    if (window.AudioContext || window.webkitAudioContext) {
+                        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        const oscillator = audioContext.createOscillator();
+                        const gainNode = audioContext.createGain();
+                        
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioContext.destination);
+                        
+                        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                        
+                        oscillator.start();
+                        oscillator.stop(audioContext.currentTime + 0.2);
+                    }
+                } catch (error) {
+                    console.log('iOS sound failed:', error);
                 }
+
+                // Also try HTML5 audio as backup
+                try {
+                    const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYQA0yo5O+pUxMNUKXh7q1ZFgVUqOPsqVMXEEul4+6rVxgIUKfj7K1ZFgxRpOHsrFgYCFCY0vPRVhQKTZ3Z8N1/QQsOYLPn6qNJGQVGn+Dtwk0uQHbIoFAXAQEGAQACABACARABAoGCAJAAqBAJAAdgAAA9');
+                    audio.volume = 0.5;
+                    audio.play().catch(e => console.log('HTML5 audio failed:', e));
+                } catch (error) {
+                    console.log('Backup audio failed:', error);
+                }
+            }
+
+            static updatePageTitle(driverName, status) {
+                const originalTitle = document.title;
+                document.title = `🚚 ${driverName} - ${status}`;
+                
+                setTimeout(() => {
+                    document.title = originalTitle;
+                }, 5000);
             }
 
             static createNotificationIcon(status) {
@@ -611,6 +881,9 @@
             }
 
             static getPermissionStatus() {
+                if (this.isIOS()) {
+                    return 'ios-fallback';
+                }
                 if (!('Notification' in window)) {
                     return 'not-supported';
                 }
@@ -618,10 +891,13 @@
             }
 
             static getBrowserInfo() {
-                const userAgent = navigator.userAgent;
-                if (this.isSafari()) {
-                    return this.isIOS() ? 'Safari iOS' : 'Safari Desktop';
+                if (this.isIOS()) {
+                    return 'iPhone/iPad Safari';
                 }
+                if (this.isSafari()) {
+                    return 'Safari Desktop';
+                }
+                const userAgent = navigator.userAgent;
                 if (userAgent.includes('Chrome')) return 'Chrome';
                 if (userAgent.includes('Firefox')) return 'Firefox';
                 if (userAgent.includes('Edge')) return 'Edge';
@@ -645,41 +921,48 @@
             const browser = NotificationManager.getBrowserInfo();
             const notificationStatus = document.getElementById('notificationStatus');
             
-            if (status === 'not-supported' || NotificationManager.isSafari()) {
+            if (status === 'ios-fallback') {
+                notificationStatus.innerHTML = `
+                    <div class="message success">
+                        📱 iPhone/iPad detected - Using optimized mobile alerts<br>
+                        <small>You'll get full-screen notifications, sounds, and visual alerts designed for iOS</small>
+                    </div>`;
+            } else if (status === 'not-supported') {
                 notificationStatus.innerHTML = `
                     <div class="message info">
-                        🍎 Safari/iOS detected - Using enhanced in-page notifications<br>
-                        <small>You'll get visual alerts, sounds, and title flashing instead of push notifications</small>
+                        📱 Using enhanced mobile notifications<br>
+                        <small>You'll get visual alerts, sounds, and banner notifications</small>
                     </div>`;
             } else if (status === 'granted') {
-                notificationStatus.innerHTML = `<div class="message success">✅ Push notifications are enabled! (${browser})</div>`;
+                notificationStatus.innerHTML = `<div class="message success">✅ Push notifications enabled! (${browser})</div>`;
             } else if (status === 'denied') {
                 notificationStatus.innerHTML = `
-                    <div class="message error">
-                        ❌ Push notifications are blocked<br>
-                        <small>Don't worry! You'll still get in-page alerts, sounds, and visual notifications</small>
+                    <div class="message info">
+                        📱 Using mobile-optimized notifications<br>
+                        <small>You'll get full-screen alerts and audio notifications instead</small>
                     </div>`;
             } else {
-                notificationStatus.innerHTML = `<div class="message info">🔔 Enable push notifications to get alerts when drivers update their status (${browser})</div>`;
+                notificationStatus.innerHTML = `<div class="message info">🔔 Enable push notifications for ${browser} or use mobile alerts</div>`;
             }
         }
 
         async function enableNotifications() {
+            const isIOS = NotificationManager.isIOS();
+            
+            if (isIOS) {
+                showMessage('📱 iPhone/iPad detected! Mobile notifications are automatically enabled. Try the test button.', 'success');
+                checkNotificationPermission();
+                return;
+            }
+
             const granted = await NotificationManager.requestPermission();
             checkNotificationPermission();
             
             if (granted) {
                 showMessage('✅ Push notifications enabled! You will now receive alerts when drivers update their status.', 'success');
-            } else if (NotificationManager.isSafari()) {
-                showMessage('🍎 Safari detected! You will receive enhanced in-page notifications with sound and visual alerts.', 'info');
             } else {
-                showMessage('❌ Could not enable push notifications. You will still receive in-page alerts and sounds.', 'error');
+                showMessage('📱 Using mobile-optimized notifications instead. Try the test button to see how they work.', 'info');
             }
-            
-            // Always test the notification system
-            setTimeout(() => {
-                testNotification();
-            }, 1000);
         }
 
         function checkDateChange() {
@@ -981,6 +1264,9 @@
         }
 
         function testNotification() {
+            console.log('Test notification triggered');
+            
+            // Always trigger notification regardless of platform
             NotificationManager.sendDriverNotification(
                 'Test Driver',
                 'arrived',
@@ -989,10 +1275,10 @@
             );
             
             const browser = NotificationManager.getBrowserInfo();
-            if (NotificationManager.isSafari()) {
-                showMessage('🍎 Safari notification sent! Look for the floating alert, listen for sound, and watch the page title.', 'success');
+            if (NotificationManager.isIOS()) {
+                showMessage('📱 iPhone notification sent! Look for the full-screen alert and listen for the sound.', 'success');
             } else {
-                showMessage(`📱 Test notification sent! Check your device. (${browser})`, 'success');
+                showMessage(`🔔 Test notification sent! (${browser})`, 'success');
             }
         }
 
