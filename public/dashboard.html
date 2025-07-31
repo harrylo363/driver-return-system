@@ -291,10 +291,11 @@
             
             <div class="filter-controls">
                 <button class="refresh-btn" onclick="loadNotifications()">🔄 Refresh</button>
-                <button class="filter-btn active" onclick="filterNotifications('all')">All</button>
-                <button class="filter-btn" onclick="filterNotifications('en-route')">En Route</button>
-                <button class="filter-btn" onclick="filterNotifications('arrived')">Arrived</button>
-                <button class="filter-btn" onclick="filterNotifications('checked-in')">Checked In</button>
+                <button class="refresh-btn" onclick="clearAllCheckIns()" style="background: #dc3545;">🗑️ Clear Check-ins</button>
+                <button class="filter-btn active" onclick="filterNotifications('all', this)">All</button>
+                <button class="filter-btn" onclick="filterNotifications('en-route', this)">En Route</button>
+                <button class="filter-btn" onclick="filterNotifications('arrived', this)">Arrived</button>
+                <button class="filter-btn" onclick="filterNotifications('checked-in', this)">Checked In</button>
             </div>
 
             <div id="statusMessage"></div>
@@ -393,13 +394,14 @@
         }
 
         function showDemoNotifications() {
+            const now = new Date();
             notifications = [
                 {
                     _id: 'demo1',
                     driver: 'John Smith',
                     status: 'arrived',
                     location: '40.7128, -74.0060',
-                    timestamp: new Date(Date.now() - 300000).toISOString(),
+                    timestamp: new Date(now.getTime() - 300000).toISOString(),
                     estimatedArrival: 'At warehouse'
                 },
                 {
@@ -407,13 +409,21 @@
                     driver: 'Sarah Johnson',
                     status: '30 minutes away',
                     location: '40.7580, -73.9855',
-                    timestamp: new Date(Date.now() - 180000).toISOString(),
-                    estimatedArrival: new Date(Date.now() + 1800000).toLocaleTimeString()
+                    timestamp: new Date(now.getTime() - 180000).toISOString(),
+                    estimatedArrival: new Date(now.getTime() + 1800000).toLocaleTimeString()
+                },
+                {
+                    _id: 'demo3',
+                    driver: 'Mike Davis',
+                    status: 'arrived',
+                    location: '40.7589, -73.9851',
+                    timestamp: new Date(now.getTime() - 600000).toISOString(),
+                    estimatedArrival: 'At warehouse'
                 }
             ];
             displayNotifications();
             updateStatistics();
-            showMessage('Showing demo notifications. Connect to server for real data.', 'error');
+            showMessage('📝 Showing demo notifications - connect to server for real data', 'info');
         }
 
         function addNotification(data) {
@@ -505,16 +515,38 @@
             }
         }
 
-        function filterNotifications(type) {
+        function clearAllCheckIns() {
+            if (confirm('Are you sure you want to clear all check-ins? This will reset all checked-in drivers.')) {
+                checkedInDrivers.clear();
+                localStorage.removeItem('checkedInDrivers');
+                localStorage.removeItem('lastCheckInDate');
+                
+                // Set today as the new date
+                const today = new Date().toDateString();
+                localStorage.setItem('lastCheckInDate', today);
+                
+                // Refresh display
+                displayNotifications();
+                updateStatistics();
+                
+                showMessage('✅ All check-ins have been cleared', 'success');
+                console.log('Manually cleared all check-ins');
+            }
+        }
+
+        function filterNotifications(type, buttonElement) {
             currentFilter = type;
             
             // Update filter button states
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            event.target.classList.add('active');
+            if (buttonElement) {
+                buttonElement.classList.add('active');
+            }
             
             displayNotifications();
+            showMessage(`Filtered to show: ${type === 'all' ? 'all notifications' : type + ' notifications'}`, 'info');
         }
 
         function toggleCheckIn(notificationId, driverName) {
@@ -571,27 +603,44 @@
         }
 
         function saveCheckedInStatus() {
+            const today = new Date().toDateString();
             localStorage.setItem('checkedInDrivers', JSON.stringify([...checkedInDrivers]));
+            localStorage.setItem('lastCheckInDate', today);
         }
 
         function loadCheckedInStatus() {
-            const saved = localStorage.getItem('checkedInDrivers');
-            if (saved) {
-                checkedInDrivers = new Set(JSON.parse(saved));
-            }
+            // Force clear check-ins on load to sync with clean database
+            console.log('Clearing check-ins to sync with clean database');
+            checkedInDrivers.clear();
+            localStorage.removeItem('checkedInDrivers');
+            
+            const today = new Date().toDateString();
+            localStorage.setItem('lastCheckInDate', today);
         }
 
         function updateTime() {
-            // Update any time-sensitive elements if needed
+            // Update timestamps to show relative time
+            const now = new Date();
+            document.querySelectorAll('.notification-item .timestamp').forEach(element => {
+                const timeText = element.textContent;
+                if (timeText.includes('⏰')) {
+                    // Could add relative time updates here if needed
+                }
+            });
         }
 
         function showMessage(message, type) {
             const statusMessage = document.getElementById('statusMessage');
-            statusMessage.innerHTML = `<div class="message ${type}">${message}</div>`;
-            
-            setTimeout(() => {
-                statusMessage.innerHTML = '';
-            }, 3000);
+            if (statusMessage) {
+                statusMessage.innerHTML = `<div class="message ${type}">${message}</div>`;
+                
+                // Auto-clear success and info messages
+                if (type === 'success' || type === 'info') {
+                    setTimeout(() => {
+                        statusMessage.innerHTML = '';
+                    }, 4000);
+                }
+            }
         }
     </script>
 </body>
