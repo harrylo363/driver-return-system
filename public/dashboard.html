@@ -265,6 +265,16 @@
             <p>Driver Return Status Monitoring</p>
         </div>
 
+        <!-- Push Notifications Panel -->
+        <div class="card">
+            <h2>🔔 Push Notifications</h2>
+            <div id="notificationStatus">
+                <div class="message info">Checking notification support...</div>
+            </div>
+            <button class="refresh-btn" onclick="enableNotifications()">🔔 Enable Push Notifications</button>
+            <button class="refresh-btn" onclick="testNotification()" style="background: #28a745;">📱 Test Notification</button>
+        </div>
+
         <!-- Statistics Cards -->
         <div class="stats-grid">
             <div class="stat-card total-card">
@@ -318,15 +328,144 @@
         let currentFilter = 'all';
         let lastCheckInDate = null;
 
+        // Notification Manager for Push Notifications
+        class NotificationManager {
+            static async requestPermission() {
+                if (!('Notification' in window)) {
+                    console.log('Browser does not support notifications');
+                    return false;
+                }
+
+                if (Notification.permission === 'granted') {
+                    return true;
+                }
+
+                if (Notification.permission !== 'denied') {
+                    const permission = await Notification.requestPermission();
+                    return permission === 'granted';
+                }
+
+                return false;
+            }
+
+            static sendDriverNotification(driverName, status, location, estimatedArrival) {
+                if (Notification.permission !== 'granted') {
+                    console.log('Notification permission not granted');
+                    return;
+                }
+
+                const title = `🚚 Driver Update: ${status}`;
+                let body = `${driverName} - ${status}`;
+                if (location && location !== 'Location unavailable') {
+                    body += `\nLocation: ${location}`;
+                }
+                if (estimatedArrival) {
+                    body += `\nETA: ${estimatedArrival}`;
+                }
+
+                const options = {
+                    body: body,
+                    icon: this.createNotificationIcon(status),
+                    badge: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🚚</text></svg>',
+                    tag: `driver-${driverName}-${Date.now()}`,
+                    requireInteraction: true,
+                    timestamp: Date.now(),
+                    actions: status === 'arrived' ? [
+                        {
+                            action: 'acknowledge',
+                            title: '✅ Acknowledge'
+                        },
+                        {
+                            action: 'checkin',
+                            title: '📋 Check In'
+                        }
+                    ] : [
+                        {
+                            action: 'acknowledge',
+                            title: '✅ Acknowledge'
+                        }
+                    ]
+                };
+
+                const notification = new Notification(title, options);
+
+                notification.onclick = function() {
+                    window.focus();
+                    notification.close();
+                };
+
+                // Auto-close after 10 seconds for non-arrival notifications
+                if (status !== 'arrived') {
+                    setTimeout(() => {
+                        notification.close();
+                    }, 10000);
+                }
+
+                return notification;
+            }
+
+            static createNotificationIcon(status) {
+                const iconMap = {
+                    'arrived': 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">✅</text></svg>',
+                    '30 minutes away': 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🕐</text></svg>',
+                    'default': 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🚚</text></svg>'
+                };
+                return iconMap[status] || iconMap['default'];
+            }
+
+            static getPermissionStatus() {
+                if (!('Notification' in window)) {
+                    return 'not-supported';
+                }
+                return Notification.permission;
+            }
+        }
+
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', function() {
             initializeSocket();
             loadNotifications();
             loadCheckedInStatus();
             checkDateChange();
+            checkNotificationPermission();
             setInterval(updateTime, 1000);
             setInterval(checkDateChange, 60000); // Check date change every minute
         });
+
+        function checkNotificationPermission() {
+            const status = NotificationManager.getPermissionStatus();
+            const notificationStatus = document.getElementById('notificationStatus');
+            
+            if (status === 'not-supported') {
+                notificationStatus.innerHTML = '<div class="message error">❌ Browser does not support push notifications</div>';
+            } else if (status === 'granted') {
+                notificationStatus.innerHTML = '<div class="message success">✅ Push notifications are enabled!</div>';
+            } else if (status === 'denied') {
+                notificationStatus.innerHTML = '<div class="message error">❌ Push notifications are blocked. Please enable in browser settings.</div>';
+            } else {
+                notificationStatus.innerHTML = '<div class="message info">🔔 Enable push notifications to get alerts when drivers update their status</div>';
+            }
+        }
+
+        async function enableNotifications() {
+            const granted = await NotificationManager.requestPermission();
+            checkNotificationPermission();
+            
+            if (granted) {
+                showMessage('✅ Push notifications enabled! You will now receive alerts when drivers update their status.', 'success');
+                // Test notification
+                setTimeout(() => {
+                    NotificationManager.sendDriverNotification(
+                        'Test Driver', 
+                        'Test notification', 
+                        'Testing location', 
+                        'Test ETA'
+                    );
+                }, 1000);
+            } else {
+                showMessage('❌ Could not enable notifications. Please check your browser settings.', 'error');
+            }
+        }
 
         function checkDateChange() {
             const today = new Date().toDateString();
@@ -362,6 +501,14 @@
                 console.log('New notification received:', data);
                 addNotification(data);
                 showMessage(`New update from ${data.driver}: ${data.status}`, 'success');
+                
+                // Send push notification
+                NotificationManager.sendDriverNotification(
+                    data.driver,
+                    data.status,
+                    data.location,
+                    data.estimatedArrival
+                );
             });
 
             socket.on('disconnect', () => {
@@ -616,6 +763,24 @@
             
             const today = new Date().toDateString();
             localStorage.setItem('lastCheckInDate', today);
+        }
+
+        function testNotification() {
+            const status = NotificationManager.getPermissionStatus();
+            
+            if (status === 'granted') {
+                NotificationManager.sendDriverNotification(
+                    'Test Driver',
+                    'arrived',
+                    'Test Warehouse Location',
+                    'At warehouse'
+                );
+                showMessage('📱 Test notification sent! Check your device.', 'success');
+            } else if (status === 'not-supported') {
+                showMessage('❌ Your browser does not support push notifications.', 'error');
+            } else {
+                showMessage('❌ Please enable notifications first by clicking "Enable Push Notifications".', 'error');
+            }
         }
 
         function updateTime() {
