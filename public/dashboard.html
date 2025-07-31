@@ -315,14 +315,38 @@
         let notifications = [];
         let checkedInDrivers = new Set();
         let currentFilter = 'all';
+        let lastCheckInDate = null;
 
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', function() {
             initializeSocket();
             loadNotifications();
             loadCheckedInStatus();
+            checkDateChange();
             setInterval(updateTime, 1000);
+            setInterval(checkDateChange, 60000); // Check date change every minute
         });
+
+        function checkDateChange() {
+            const today = new Date().toDateString();
+            const savedDate = localStorage.getItem('lastCheckInDate');
+            
+            if (savedDate && savedDate !== today) {
+                // New day - clear all check-ins
+                checkedInDrivers.clear();
+                localStorage.removeItem('checkedInDrivers');
+                localStorage.setItem('lastCheckInDate', today);
+                console.log('New day detected - cleared all check-ins');
+                
+                // Refresh display
+                displayNotifications();
+                updateStatistics();
+                showMessage('New day detected - all check-ins have been reset', 'info');
+            } else if (!savedDate) {
+                // First time - set today's date
+                localStorage.setItem('lastCheckInDate', today);
+            }
+        }
 
         function initializeSocket() {
             socket = io();
@@ -346,6 +370,8 @@
 
         async function loadNotifications() {
             try {
+                showMessage('Loading notifications...', 'info');
+                
                 const response = await fetch('/api/notifications/simple-list');
                 
                 if (response.ok) {
@@ -353,12 +379,15 @@
                     notifications = data.notifications || [];
                     displayNotifications();
                     updateStatistics();
+                    showMessage(`✅ Loaded ${notifications.length} notifications`, 'success');
                 } else {
                     // If endpoint doesn't exist, show demo data
+                    console.log('API endpoint not found, showing demo data');
                     showDemoNotifications();
                 }
             } catch (error) {
                 console.error('Error loading notifications:', error);
+                showMessage('⚠️ Connection error - showing demo data', 'error');
                 showDemoNotifications();
             }
         }
