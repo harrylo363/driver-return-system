@@ -132,6 +132,20 @@
             grid-template-columns: 1fr 1fr;
             gap: 20px;
         }
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e1e5e9;
+        }
+        .action-buttons .btn {
+            margin: 0;
+            min-width: 160px;
+            font-size: 16px;
+            padding: 14px 28px;
+        }
         .panel-navigation {
             margin-top: 25px;
             padding-top: 20px;
@@ -140,6 +154,9 @@
         }
         .panel-navigation .btn {
             margin: 0 10px;
+            min-width: 180px;
+            font-size: 16px;
+            padding: 12px 24px;
         }
         .import-section {
             background: #f8f9fa;
@@ -360,9 +377,10 @@
                 </div>
             </div>
 
-            <button class="btn btn-success" onclick="createUser()">Create User</button>
-            <button class="btn btn-info" onclick="loadUsers()">Refresh User List</button>
-            <button class="btn btn-primary" onclick="createDefaultUsers()">Create Default Users</button>
+            <div class="action-buttons">
+                <button class="btn btn-success" onclick="createUser()">✅ Create User</button>
+                <button class="btn btn-info" onclick="loadUsers()">🔄 Refresh User List</button>
+            </div>
 
             <div id="createUserMessage"></div>
 
@@ -528,48 +546,6 @@
             } catch (error) {
                 showMessage('createUserMessage', 'Error creating user', 'error');
             }
-        }
-
-        async function createDefaultUsers() {
-            const defaultUsers = [
-                { username: 'admin', email: 'admin@company.com', password: 'admin123!@#', role: 'admin' },
-                { username: 'dispatcher1', email: 'dispatcher@company.com', password: 'dispatch123!@#', role: 'dispatcher' },
-                { username: 'driver1', email: 'driver@company.com', password: 'driver123!@#', role: 'driver' },
-                { username: 'driver2', email: 'driver2@company.com', password: 'driver123!@#', role: 'driver' },
-                { username: 'dispatcher2', email: 'dispatch2@company.com', password: 'dispatch123!@#', role: 'dispatcher' }
-            ];
-
-            let created = 0;
-            let errors = [];
-
-            for (const user of defaultUsers) {
-                try {
-                    const response = await fetch('/api/auth/register', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(user)
-                    });
-
-                    if (response.ok) {
-                        created++;
-                    } else {
-                        const data = await response.json();
-                        if (!data.error.includes('already exists')) {
-                            errors.push(`${user.username}: ${data.error}`);
-                        }
-                    }
-                } catch (error) {
-                    errors.push(`${user.username}: Connection error`);
-                }
-            }
-
-            let message = `✅ Created ${created} default users`;
-            if (errors.length > 0) {
-                message += `\n⚠️ Errors: ${errors.join(', ')}`;
-            }
-
-            showMessage('createUserMessage', message, created > 0 ? 'success' : 'error');
-            setTimeout(loadUsers, 1000);
         }
 
         function downloadTemplate() {
