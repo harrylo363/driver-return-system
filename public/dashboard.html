@@ -224,6 +224,100 @@
             animation: spin 1s ease-in-out infinite;
             margin-right: 8px;
         }
+        
+        /* Floating notification styles for Safari/fallback */
+        .floating-notification {
+            position: fixed;
+            top: 20px;
+            right: -400px;
+            width: 380px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            z-index: 10000;
+            transition: right 0.3s ease-in-out;
+            border-left: 4px solid #667eea;
+        }
+        
+        .floating-notification.show {
+            right: 20px;
+        }
+        
+        .floating-notification-content {
+            padding: 20px;
+        }
+        
+        .floating-notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 16px;
+            color: #333;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #999;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .close-btn:hover {
+            background: #f0f0f0;
+            color: #666;
+        }
+        
+        .floating-notification-body {
+            margin-bottom: 15px;
+        }
+        
+        .floating-notification-body div {
+            margin-bottom: 5px;
+            color: #666;
+        }
+        
+        .floating-notification-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .ack-btn, .checkin-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .ack-btn {
+            background: #28a745;
+            color: white;
+        }
+        
+        .ack-btn:hover {
+            background: #1e7e34;
+        }
+        
+        .checkin-btn {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .checkin-btn:hover {
+            background: #138496;
+        }
+        
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
@@ -328,7 +422,7 @@
         let currentFilter = 'all';
         let lastCheckInDate = null;
 
-        // Notification Manager for Push Notifications
+        // Enhanced Notification Manager with Safari Support
         class NotificationManager {
             static async requestPermission() {
                 if (!('Notification' in window)) {
@@ -336,72 +430,175 @@
                     return false;
                 }
 
+                // Safari specific handling
+                if (this.isSafari()) {
+                    console.log('Safari detected - using enhanced notification methods');
+                }
+
                 if (Notification.permission === 'granted') {
                     return true;
                 }
 
                 if (Notification.permission !== 'denied') {
-                    const permission = await Notification.requestPermission();
-                    return permission === 'granted';
+                    try {
+                        const permission = await Notification.requestPermission();
+                        return permission === 'granted';
+                    } catch (error) {
+                        console.log('Notification permission request failed:', error);
+                        return false;
+                    }
                 }
 
                 return false;
             }
 
+            static isSafari() {
+                return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+            }
+
+            static isIOS() {
+                return /iPad|iPhone|iPod/.test(navigator.userAgent);
+            }
+
             static sendDriverNotification(driverName, status, location, estimatedArrival) {
-                if (Notification.permission !== 'granted') {
-                    console.log('Notification permission not granted');
+                // Try browser notification first
+                if (this.sendBrowserNotification(driverName, status, location, estimatedArrival)) {
                     return;
                 }
 
-                const title = `🚚 Driver Update: ${status}`;
-                let body = `${driverName} - ${status}`;
-                if (location && location !== 'Location unavailable') {
-                    body += `\nLocation: ${location}`;
+                // Fallback to visual/audio notification
+                this.sendFallbackNotification(driverName, status, location, estimatedArrival);
+            }
+
+            static sendBrowserNotification(driverName, status, location, estimatedArrival) {
+                if (Notification.permission !== 'granted') {
+                    return false;
                 }
-                if (estimatedArrival) {
-                    body += `\nETA: ${estimatedArrival}`;
+
+                try {
+                    const title = `🚚 Driver Update: ${status}`;
+                    let body = `${driverName} - ${status}`;
+                    if (location && location !== 'Location unavailable') {
+                        body += `\nLocation: ${location}`;
+                    }
+                    if (estimatedArrival) {
+                        body += `\nETA: ${estimatedArrival}`;
+                    }
+
+                    const options = {
+                        body: body,
+                        icon: this.createNotificationIcon(status),
+                        tag: `driver-${driverName}-${Date.now()}`,
+                        requireInteraction: status === 'arrived'
+                    };
+
+                    const notification = new Notification(title, options);
+
+                    notification.onclick = function() {
+                        window.focus();
+                        notification.close();
+                    };
+
+                    // Auto-close for non-arrival notifications
+                    if (status !== 'arrived') {
+                        setTimeout(() => {
+                            notification.close();
+                        }, 10000);
+                    }
+
+                    return true;
+                } catch (error) {
+                    console.log('Browser notification failed:', error);
+                    return false;
                 }
+            }
 
-                const options = {
-                    body: body,
-                    icon: this.createNotificationIcon(status),
-                    badge: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🚚</text></svg>',
-                    tag: `driver-${driverName}-${Date.now()}`,
-                    requireInteraction: true,
-                    timestamp: Date.now(),
-                    actions: status === 'arrived' ? [
-                        {
-                            action: 'acknowledge',
-                            title: '✅ Acknowledge'
-                        },
-                        {
-                            action: 'checkin',
-                            title: '📋 Check In'
-                        }
-                    ] : [
-                        {
-                            action: 'acknowledge',
-                            title: '✅ Acknowledge'
-                        }
-                    ]
-                };
+            static sendFallbackNotification(driverName, status, location, estimatedArrival) {
+                console.log('Using fallback notification for Safari/iOS');
+                
+                // Visual notification in the page
+                this.showInPageNotification(driverName, status, location, estimatedArrival);
+                
+                // Audio alert
+                this.playNotificationSound();
+                
+                // Browser title flash
+                this.flashBrowserTitle(driverName, status);
+                
+                // Vibrate on mobile (if supported)
+                this.vibrate();
+            }
 
-                const notification = new Notification(title, options);
+            static showInPageNotification(driverName, status, location, estimatedArrival) {
+                // Create floating notification
+                const notification = document.createElement('div');
+                notification.className = 'floating-notification';
+                notification.innerHTML = `
+                    <div class="floating-notification-content">
+                        <div class="floating-notification-header">
+                            <strong>🚚 Driver Update: ${status}</strong>
+                            <button onclick="this.parentElement.parentElement.parentElement.remove()" class="close-btn">×</button>
+                        </div>
+                        <div class="floating-notification-body">
+                            <div><strong>${driverName}</strong> - ${status}</div>
+                            ${location && location !== 'Location unavailable' ? `<div>📍 ${location}</div>` : ''}
+                            ${estimatedArrival ? `<div>⏰ ETA: ${estimatedArrival}</div>` : ''}
+                        </div>
+                        <div class="floating-notification-actions">
+                            <button onclick="this.parentElement.parentElement.parentElement.remove()" class="ack-btn">✅ Acknowledge</button>
+                            ${status === 'arrived' ? '<button onclick="this.parentElement.parentElement.parentElement.remove()" class="checkin-btn">📋 Check In</button>' : ''}
+                        </div>
+                    </div>
+                `;
 
-                notification.onclick = function() {
-                    window.focus();
-                    notification.close();
-                };
+                document.body.appendChild(notification);
 
-                // Auto-close after 10 seconds for non-arrival notifications
+                // Auto-remove after 15 seconds for non-arrival notifications
                 if (status !== 'arrived') {
                     setTimeout(() => {
-                        notification.close();
-                    }, 10000);
+                        if (notification.parentNode) {
+                            notification.remove();
+                        }
+                    }, 15000);
                 }
 
-                return notification;
+                // Animate in
+                setTimeout(() => {
+                    notification.classList.add('show');
+                }, 100);
+            }
+
+            static playNotificationSound() {
+                try {
+                    // Create audio element
+                    const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYQA0yo5O+pUxMNUKXh7q1ZFgVUqOPsqVMXEEul4+6rVxgIUKfj7K1ZFgxRpOHsrFgYCFCY0vPRVhQKTZ3Z8N1/QQsOYLPn6qNJGQVGn+Dtwk0uQHbIoFAXAQEGAQACABACARABAoGCAJAAqBAJAAdgAAA9' );
+                    audio.volume = 0.3;
+                    audio.play().catch(e => console.log('Audio play failed:', e));
+                } catch (error) {
+                    console.log('Audio notification failed:', error);
+                }
+            }
+
+            static flashBrowserTitle(driverName, status) {
+                const originalTitle = document.title;
+                let flashCount = 0;
+                const flashInterval = setInterval(() => {
+                    document.title = flashCount % 2 === 0 
+                        ? `🚚 ${driverName} - ${status}` 
+                        : originalTitle;
+                    flashCount++;
+                    
+                    if (flashCount >= 10) { // Flash 5 times
+                        clearInterval(flashInterval);
+                        document.title = originalTitle;
+                    }
+                }, 1000);
+            }
+
+            static vibrate() {
+                if ('vibrate' in navigator) {
+                    navigator.vibrate([200, 100, 200]);
+                }
             }
 
             static createNotificationIcon(status) {
@@ -419,6 +616,17 @@
                 }
                 return Notification.permission;
             }
+
+            static getBrowserInfo() {
+                const userAgent = navigator.userAgent;
+                if (this.isSafari()) {
+                    return this.isIOS() ? 'Safari iOS' : 'Safari Desktop';
+                }
+                if (userAgent.includes('Chrome')) return 'Chrome';
+                if (userAgent.includes('Firefox')) return 'Firefox';
+                if (userAgent.includes('Edge')) return 'Edge';
+                return 'Unknown';
+            }
         }
 
         // Initialize dashboard
@@ -434,16 +642,25 @@
 
         function checkNotificationPermission() {
             const status = NotificationManager.getPermissionStatus();
+            const browser = NotificationManager.getBrowserInfo();
             const notificationStatus = document.getElementById('notificationStatus');
             
-            if (status === 'not-supported') {
-                notificationStatus.innerHTML = '<div class="message error">❌ Browser does not support push notifications</div>';
+            if (status === 'not-supported' || NotificationManager.isSafari()) {
+                notificationStatus.innerHTML = `
+                    <div class="message info">
+                        🍎 Safari/iOS detected - Using enhanced in-page notifications<br>
+                        <small>You'll get visual alerts, sounds, and title flashing instead of push notifications</small>
+                    </div>`;
             } else if (status === 'granted') {
-                notificationStatus.innerHTML = '<div class="message success">✅ Push notifications are enabled!</div>';
+                notificationStatus.innerHTML = `<div class="message success">✅ Push notifications are enabled! (${browser})</div>`;
             } else if (status === 'denied') {
-                notificationStatus.innerHTML = '<div class="message error">❌ Push notifications are blocked. Please enable in browser settings.</div>';
+                notificationStatus.innerHTML = `
+                    <div class="message error">
+                        ❌ Push notifications are blocked<br>
+                        <small>Don't worry! You'll still get in-page alerts, sounds, and visual notifications</small>
+                    </div>`;
             } else {
-                notificationStatus.innerHTML = '<div class="message info">🔔 Enable push notifications to get alerts when drivers update their status</div>';
+                notificationStatus.innerHTML = `<div class="message info">🔔 Enable push notifications to get alerts when drivers update their status (${browser})</div>`;
             }
         }
 
@@ -453,18 +670,16 @@
             
             if (granted) {
                 showMessage('✅ Push notifications enabled! You will now receive alerts when drivers update their status.', 'success');
-                // Test notification
-                setTimeout(() => {
-                    NotificationManager.sendDriverNotification(
-                        'Test Driver', 
-                        'Test notification', 
-                        'Testing location', 
-                        'Test ETA'
-                    );
-                }, 1000);
+            } else if (NotificationManager.isSafari()) {
+                showMessage('🍎 Safari detected! You will receive enhanced in-page notifications with sound and visual alerts.', 'info');
             } else {
-                showMessage('❌ Could not enable notifications. Please check your browser settings.', 'error');
+                showMessage('❌ Could not enable push notifications. You will still receive in-page alerts and sounds.', 'error');
             }
+            
+            // Always test the notification system
+            setTimeout(() => {
+                testNotification();
+            }, 1000);
         }
 
         function checkDateChange() {
@@ -766,20 +981,18 @@
         }
 
         function testNotification() {
-            const status = NotificationManager.getPermissionStatus();
+            NotificationManager.sendDriverNotification(
+                'Test Driver',
+                'arrived',
+                'Test Warehouse Location',
+                'At warehouse'
+            );
             
-            if (status === 'granted') {
-                NotificationManager.sendDriverNotification(
-                    'Test Driver',
-                    'arrived',
-                    'Test Warehouse Location',
-                    'At warehouse'
-                );
-                showMessage('📱 Test notification sent! Check your device.', 'success');
-            } else if (status === 'not-supported') {
-                showMessage('❌ Your browser does not support push notifications.', 'error');
+            const browser = NotificationManager.getBrowserInfo();
+            if (NotificationManager.isSafari()) {
+                showMessage('🍎 Safari notification sent! Look for the floating alert, listen for sound, and watch the page title.', 'success');
             } else {
-                showMessage('❌ Please enable notifications first by clicking "Enable Push Notifications".', 'error');
+                showMessage(`📱 Test notification sent! Check your device. (${browser})`, 'success');
             }
         }
 
