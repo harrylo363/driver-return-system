@@ -249,6 +249,202 @@
             border: 1px solid #bee5eb;
         }
 
+        /* Inspection Modal Styles */
+        .inspection-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .inspection-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .inspection-form {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        
+        .inspection-modal.show .inspection-form {
+            transform: scale(1);
+        }
+        
+        .inspection-header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e1e5e9;
+        }
+        
+        .inspection-header h2 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .driver-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        
+        .form-section {
+            margin-bottom: 25px;
+        }
+        
+        .form-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e1e5e9;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e1e5e9;
+            border-radius: 6px;
+            font-size: 14px;
+            background: #f8f9fa;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+        
+        .checkbox-item label {
+            margin: 0;
+            font-weight: normal;
+            cursor: pointer;
+            flex: 1;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e1e5e9;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .issue-section {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-good { background: #28a745; }
+        .status-issue { background: #dc3545; }
+        .status-na { background: #6c757d; }
+
         /* iPhone Notification Styles */
         .ios-notification-overlay {
             position: fixed;
@@ -466,6 +662,16 @@
             .status-large {
                 font-size: 18px;
             }
+            .inspection-form {
+                width: 95%;
+                padding: 20px;
+            }
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .modal-actions {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -521,12 +727,159 @@
         </div>
     </div>
 
+    <!-- Vehicle Inspection Modal -->
+    <div class="inspection-modal" id="inspectionModal">
+        <div class="inspection-form">
+            <div class="inspection-header">
+                <h2>🚛 Vehicle Inspection Report</h2>
+                <div class="driver-info" id="driverInfo">
+                    Driver: <span id="inspectionDriverName"></span><br>
+                    Check-in Time: <span id="inspectionTime"></span>
+                </div>
+            </div>
+
+            <form id="inspectionForm">
+                <!-- Vehicle Information -->
+                <div class="form-section">
+                    <h3>🚚 Vehicle Information</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="tractorNumber">Tractor Number</label>
+                            <input type="text" id="tractorNumber" name="tractorNumber" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="trailerNumber">Trailer Number</label>
+                            <input type="text" id="trailerNumber" name="trailerNumber" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="moffettNumber">Moffett Number</label>
+                            <input type="text" id="moffettNumber" name="moffettNumber">
+                        </div>
+                        <div class="form-group">
+                            <label for="odometerReading">Odometer Reading</label>
+                            <input type="number" id="odometerReading" name="odometerReading">
+                        </div>
+                        <div class="form-group">
+                            <label for="fuelLevel">Fuel Level</label>
+                            <select id="fuelLevel" name="fuelLevel">
+                                <option value="">Select Level</option>
+                                <option value="Full">Full</option>
+                                <option value="3/4">3/4</option>
+                                <option value="1/2">1/2</option>
+                                <option value="1/4">1/4</option>
+                                <option value="Empty">Empty</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Safety Inspection -->
+                <div class="form-section">
+                    <h3>🔍 Safety Inspection</h3>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="tiresGood" name="safetyChecks" value="tires">
+                            <label for="tiresGood">Tires - Good Condition</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="lightsGood" name="safetyChecks" value="lights">
+                            <label for="lightsGood">All Lights Working</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="brakesGood" name="safetyChecks" value="brakes">
+                            <label for="brakesGood">Brakes - Good Pressure</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="mirrorsGood" name="safetyChecks" value="mirrors">
+                            <label for="mirrorsGood">Mirrors - Good Condition</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="hornGood" name="safetyChecks" value="horn">
+                            <label for="hornGood">Horn/Warning Devices</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Equipment Inspection -->
+                <div class="form-section">
+                    <h3>🔧 Equipment Inspection</h3>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="moffettGood" name="equipmentChecks" value="moffett">
+                            <label for="moffettGood">Moffett/Forklift - Operating</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="hydraulicsGood" name="equipmentChecks" value="hydraulics">
+                            <label for="hydraulicsGood">Hydraulics - Working</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="chainsGood" name="equipmentChecks" value="chains">
+                            <label for="chainsGood">Chains/Straps - Good</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="tarpsGood" name="equipmentChecks" value="tarps">
+                            <label for="tarpsGood">Tarps - Good Condition</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="landingGearGood" name="equipmentChecks" value="landingGear">
+                            <label for="landingGearGood">Landing Gear - Working</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="fifthWheelGood" name="equipmentChecks" value="fifthWheel">
+                            <label for="fifthWheelGood">Fifth Wheel/Coupling - Secure</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Issues/Damage Reporting -->
+                <div class="form-section issue-section">
+                    <h3>⚠️ Issues & Damage Report</h3>
+                    <div class="form-group">
+                        <label for="damageFound">Damage/Issues Found</label>
+                        <textarea id="damageFound" name="damageFound" placeholder="Describe any damage, issues, or required repairs..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="repairsNeeded">Repairs Needed</label>
+                        <select id="repairsNeeded" name="repairsNeeded">
+                            <option value="">Select Priority</option>
+                            <option value="None">No Repairs Needed</option>
+                            <option value="Minor">Minor - Can Wait</option>
+                            <option value="Moderate">Moderate - Schedule Soon</option>
+                            <option value="Urgent">Urgent - Immediate Attention</option>
+                            <option value="Critical">Critical - Out of Service</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Driver Notes -->
+                <div class="form-section">
+                    <h3>📝 Driver Notes</h3>
+                    <div class="form-group">
+                        <label for="deliveryNotes">Delivery Notes</label>
+                        <textarea id="deliveryNotes" name="deliveryNotes" placeholder="Any incidents, customer feedback, route issues, etc..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="additionalComments">Additional Comments</label>
+                        <textarea id="additionalComments" name="additionalComments" placeholder="Any other comments or observations..."></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeInspectionModal()">❌ Cancel</button>
+                    <button type="button" class="btn btn-success" onclick="completeInspection()">✅ Complete Inspection & Check In</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script>
         let socket = null;
         let notifications = [];
         let checkedInDrivers = new Set();
         let currentFilter = 'all';
+        let currentInspectionDriver = null;
 
         // iPhone-Compatible Notification Manager
         class NotificationManager {
@@ -906,7 +1259,7 @@
                                     <input type="checkbox" 
                                            class="checkin-checkbox" 
                                            id="checkin-${notification._id}"
-                                           onchange="toggleCheckIn('${notification._id}', '${notification.driver}')">
+                                           onchange="startInspection('${notification._id}', '${notification.driver}')">
                                     <label for="checkin-${notification._id}" class="checkin-label">Check In</label>
                                 </div>`
                             ) : ''
@@ -946,23 +1299,258 @@
             showMessage(`Filtered to show: ${type === 'all' ? 'all notifications' : type + ' notifications'}`, 'info');
         }
 
-        function toggleCheckIn(notificationId, driverName) {
+        // NEW INSPECTION FUNCTIONALITY
+        function startInspection(notificationId, driverName) {
             const checkbox = document.getElementById(`checkin-${notificationId}`);
             
-            if (checkbox.checked) {
-                checkedInDrivers.add(notificationId);
-                showMessage(`✅ ${driverName} checked in successfully`, 'success');
-                saveCheckedInStatus();
-                sendCheckInStatus(notificationId, driverName, true);
-            } else {
-                checkedInDrivers.delete(notificationId);
-                showMessage(`${driverName} check-in removed`, 'success');
-                saveCheckedInStatus();
-                sendCheckInStatus(notificationId, driverName, false);
-            }
+            // Uncheck the checkbox since we need to complete inspection first
+            checkbox.checked = false;
             
-            displayNotifications();
-            updateStatistics();
+            // Store current inspection info
+            currentInspectionDriver = {
+                id: notificationId,
+                name: driverName,
+                time: new Date().toLocaleString()
+            };
+            
+            // Show inspection modal
+            showInspectionModal(driverName);
+        }
+
+        function showInspectionModal(driverName) {
+            const modal = document.getElementById('inspectionModal');
+            const driverNameSpan = document.getElementById('inspectionDriverName');
+            const timeSpan = document.getElementById('inspectionTime');
+            
+            driverNameSpan.textContent = driverName;
+            timeSpan.textContent = new Date().toLocaleString();
+            
+            // Reset form
+            document.getElementById('inspectionForm').reset();
+            
+            // Show modal
+            modal.classList.add('show');
+            
+            // Focus first input
+            setTimeout(() => {
+                document.getElementById('tractorNumber').focus();
+            }, 300);
+        }
+
+        function closeInspectionModal() {
+            const modal = document.getElementById('inspectionModal');
+            modal.classList.remove('show');
+            currentInspectionDriver = null;
+        }
+
+        async function completeInspection() {
+            if (!currentInspectionDriver) {
+                showMessage('Error: No driver selected for inspection', 'error');
+                return;
+            }
+
+            // Collect form data
+            const formData = collectInspectionData();
+            
+            // Validate required fields
+            if (!formData.tractorNumber || !formData.trailerNumber) {
+                showMessage('Please fill in required fields: Tractor and Trailer numbers', 'error');
+                return;
+            }
+
+            try {
+                // Generate PDF report
+                const pdfBlob = await generateInspectionPDF(formData);
+                
+                // Save inspection data
+                await saveInspectionReport(formData, pdfBlob);
+                
+                // Complete the check-in
+                checkedInDrivers.add(currentInspectionDriver.id);
+                saveCheckedInStatus();
+                
+                // Send check-in status
+                sendCheckInStatus(currentInspectionDriver.id, currentInspectionDriver.name, true);
+                
+                // Update UI
+                displayNotifications();
+                updateStatistics();
+                
+                // Close modal
+                closeInspectionModal();
+                
+                showMessage(`✅ ${currentInspectionDriver.name} checked in successfully with completed inspection report`, 'success');
+                
+            } catch (error) {
+                console.error('Inspection completion error:', error);
+                showMessage('Error completing inspection. Please try again.', 'error');
+            }
+        }
+
+        function collectInspectionData() {
+            const form = document.getElementById('inspectionForm');
+            const formData = new FormData(form);
+            
+            const data = {
+                driver: currentInspectionDriver.name,
+                checkInTime: currentInspectionDriver.time,
+                tractorNumber: formData.get('tractorNumber'),
+                trailerNumber: formData.get('trailerNumber'),
+                moffettNumber: formData.get('moffettNumber'),
+                odometerReading: formData.get('odometerReading'),
+                fuelLevel: formData.get('fuelLevel'),
+                safetyChecks: [],
+                equipmentChecks: [],
+                damageFound: formData.get('damageFound'),
+                repairsNeeded: formData.get('repairsNeeded'),
+                deliveryNotes: formData.get('deliveryNotes'),
+                additionalComments: formData.get('additionalComments')
+            };
+
+            // Collect safety checks
+            document.querySelectorAll('input[name="safetyChecks"]:checked').forEach(checkbox => {
+                data.safetyChecks.push(checkbox.value);
+            });
+
+            // Collect equipment checks
+            document.querySelectorAll('input[name="equipmentChecks"]:checked').forEach(checkbox => {
+                data.equipmentChecks.push(checkbox.value);
+            });
+
+            return data;
+        }
+
+        async function generateInspectionPDF(data) {
+            return new Promise((resolve) => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                // Header
+                doc.setFontSize(20);
+                doc.setFont(undefined, 'bold');
+                doc.text('VEHICLE INSPECTION REPORT', 105, 20, { align: 'center' });
+
+                // Driver info
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'normal');
+                doc.text(`Driver: ${data.driver}`, 20, 35);
+                doc.text(`Check-in Time: ${data.checkInTime}`, 20, 45);
+                doc.text(`Report Generated: ${new Date().toLocaleString()}`, 20, 55);
+
+                // Vehicle Information
+                doc.setFont(undefined, 'bold');
+                doc.text('VEHICLE INFORMATION', 20, 75);
+                doc.setFont(undefined, 'normal');
+                doc.text(`Tractor Number: ${data.tractorNumber || 'N/A'}`, 20, 85);
+                doc.text(`Trailer Number: ${data.trailerNumber || 'N/A'}`, 20, 95);
+                doc.text(`Moffett Number: ${data.moffettNumber || 'N/A'}`, 20, 105);
+                doc.text(`Odometer: ${data.odometerReading || 'N/A'}`, 120, 85);
+                doc.text(`Fuel Level: ${data.fuelLevel || 'N/A'}`, 120, 95);
+
+                // Safety Inspection
+                doc.setFont(undefined, 'bold');
+                doc.text('SAFETY INSPECTION', 20, 125);
+                doc.setFont(undefined, 'normal');
+                let yPos = 135;
+                const safetyItems = ['tires', 'lights', 'brakes', 'mirrors', 'horn'];
+                safetyItems.forEach(item => {
+                    const checked = data.safetyChecks.includes(item) ? '✓' : '✗';
+                    const status = data.safetyChecks.includes(item) ? 'PASS' : 'FAIL';
+                    doc.text(`${checked} ${item.toUpperCase()}: ${status}`, 20, yPos);
+                    yPos += 10;
+                });
+
+                // Equipment Inspection
+                doc.setFont(undefined, 'bold');
+                doc.text('EQUIPMENT INSPECTION', 20, yPos + 10);
+                doc.setFont(undefined, 'normal');
+                yPos += 20;
+                const equipmentItems = ['moffett', 'hydraulics', 'chains', 'tarps', 'landingGear', 'fifthWheel'];
+                equipmentItems.forEach(item => {
+                    const checked = data.equipmentChecks.includes(item) ? '✓' : '✗';
+                    const status = data.equipmentChecks.includes(item) ? 'PASS' : 'FAIL';
+                    doc.text(`${checked} ${item.toUpperCase()}: ${status}`, 20, yPos);
+                    yPos += 10;
+                });
+
+                // Issues and Notes
+                if (data.damageFound || data.repairsNeeded !== '' || data.deliveryNotes || data.additionalComments) {
+                    doc.addPage();
+                    doc.setFont(undefined, 'bold');
+                    doc.text('ISSUES & NOTES', 20, 20);
+                    doc.setFont(undefined, 'normal');
+                    
+                    let notesY = 35;
+                    
+                    if (data.repairsNeeded && data.repairsNeeded !== '') {
+                        doc.text(`Repairs Needed: ${data.repairsNeeded}`, 20, notesY);
+                        notesY += 15;
+                    }
+                    
+                    if (data.damageFound) {
+                        doc.text('Damage/Issues Found:', 20, notesY);
+                        const damageLines = doc.splitTextToSize(data.damageFound, 170);
+                        doc.text(damageLines, 20, notesY + 10);
+                        notesY += (damageLines.length * 5) + 20;
+                    }
+                    
+                    if (data.deliveryNotes) {
+                        doc.text('Delivery Notes:', 20, notesY);
+                        const deliveryLines = doc.splitTextToSize(data.deliveryNotes, 170);
+                        doc.text(deliveryLines, 20, notesY + 10);
+                        notesY += (deliveryLines.length * 5) + 20;
+                    }
+                    
+                    if (data.additionalComments) {
+                        doc.text('Additional Comments:', 20, notesY);
+                        const commentLines = doc.splitTextToSize(data.additionalComments, 170);
+                        doc.text(commentLines, 20, notesY + 10);
+                    }
+                }
+
+                // Generate blob
+                const pdfBlob = doc.output('blob');
+                resolve(pdfBlob);
+            });
+        }
+
+        async function saveInspectionReport(data, pdfBlob) {
+            try {
+                // Create filename
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+                const filename = `inspection_${data.driver.replace(/\s+/g, '_')}_${timestamp}.pdf`;
+                
+                // Try to save to server
+                const formData = new FormData();
+                formData.append('inspectionData', JSON.stringify(data));
+                formData.append('pdfFile', pdfBlob, filename);
+                
+                const response = await fetch('/api/inspections/save', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Server save failed');
+                }
+                
+                console.log('Inspection report saved to server');
+                
+            } catch (error) {
+                console.log('Server save failed, saving locally:', error);
+                
+                // Fallback: save locally
+                const url = URL.createObjectURL(pdfBlob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `inspection_${data.driver.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                showMessage('Inspection report downloaded locally (server not available)', 'info');
+            }
         }
 
         async function sendCheckInStatus(notificationId, driverName, isCheckedIn) {
@@ -1042,6 +1630,20 @@
                 }
             }
         }
+
+        // Close modal when clicking outside
+        document.getElementById('inspectionModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeInspectionModal();
+            }
+        });
+
+        // Escape key to close modal
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && document.getElementById('inspectionModal').classList.contains('show')) {
+                closeInspectionModal();
+            }
+        });
     </script>
 </body>
 </html>
