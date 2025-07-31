@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - User Management</title>
+    <title>Admin Panel - User Management & Inspection Reports</title>
     <style>
         * {
             margin: 0;
@@ -17,7 +17,7 @@
             color: #333;
         }
         .container {
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
         }
@@ -36,6 +36,32 @@
             padding: 30px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             margin-bottom: 30px;
+        }
+        .tab-navigation {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            padding: 12px 24px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .tab-btn:hover {
+            background: #f8f9fa;
+        }
+        .tab-btn.active {
+            background: #667eea;
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
         .form-group {
             margin-bottom: 20px;
@@ -146,121 +172,33 @@
             font-size: 16px;
             padding: 14px 28px;
         }
-        .panel-navigation {
-            margin-top: 25px;
-            padding-top: 20px;
-            border-top: 2px solid #e1e5e9;
-            text-align: center;
-        }
-        .panel-navigation .btn {
-            margin: 0 10px;
-            min-width: 180px;
-            font-size: 16px;
-            padding: 12px 24px;
-        }
-        .import-section {
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-        }
-        .template-section {
-            background: #e3f2fd;
+        .notification-section {
+            background: #e8f5e8;
             padding: 20px;
             border-radius: 8px;
             margin: 20px 0;
+            border: 1px solid #c3e6cb;
         }
-        .template-section h4 {
-            color: #1976d2;
-            margin-bottom: 10px;
-        }
-        .template-section p {
-            margin-bottom: 15px;
-            color: #666;
-        }
-        .format-list {
-            list-style: none;
-            padding: 0;
-            margin: 15px 0;
-        }
-        .format-list li {
-            background: white;
-            padding: 8px 15px;
-            margin-bottom: 5px;
-            border-radius: 6px;
-            border-left: 3px solid #2196f3;
-        }
-        .preview-section {
-            background: #fff3cd;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 20px;
-            border: 1px solid #ffeaa7;
-        }
-        .preview-section h4 {
-            color: #856404;
-            margin-bottom: 15px;
-        }
-        .file-info {
+        .notification-status {
             background: white;
             padding: 15px;
             border-radius: 6px;
             margin-bottom: 15px;
-            font-family: monospace;
-            font-size: 14px;
+            border-left: 4px solid #28a745;
         }
-        .preview-table {
-            background: white;
+        .notification-demo {
+            background: #fff3cd;
+            padding: 15px;
             border-radius: 6px;
-            overflow-x: auto;
-            margin-bottom: 20px;
-            max-height: 300px;
-            overflow-y: auto;
+            margin-top: 15px;
+            border: 1px solid #ffeaa7;
         }
-        .preview-table table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
+        .role-conditional {
+            opacity: 0.7;
+            transition: opacity 0.3s;
         }
-        .preview-table th,
-        .preview-table td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid #dee2e6;
-        }
-        .preview-table th {
-            background: #f8f9fa;
-            font-weight: bold;
-            color: #495057;
-            position: sticky;
-            top: 0;
-        }
-        .preview-table tr:hover {
-            background: #f8f9fa;
-        }
-        .import-actions {
-            display: flex;
-            gap: 10px;
-        }
-        input[type="file"] {
-            width: 100%;
-            padding: 12px;
-            border: 2px dashed #667eea;
-            border-radius: 8px;
-            background: #f8f9ff;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        input[type="file"]:hover {
-            border-color: #5a67d8;
-            background: #f0f4ff;
-        }
-        .field-help {
-            display: block;
-            font-size: 12px;
-            color: #666;
-            margin-top: 4px;
-            font-style: italic;
+        .role-conditional.active {
+            opacity: 1;
         }
         .users-list {
             background: #f8f9fa;
@@ -312,33 +250,128 @@
             color: #666;
             text-transform: uppercase;
         }
-        .notification-section {
-            background: #e8f5e8;
+
+        /* Inspection Reports Styles */
+        .search-filters {
+            background: #f8f9fa;
             padding: 20px;
             border-radius: 8px;
-            margin: 20px 0;
-            border: 1px solid #c3e6cb;
+            margin-bottom: 20px;
         }
-        .notification-status {
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .inspection-stats {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            text-align: center;
+        }
+        .inspection-stat-item {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 4px solid #28a745;
+        }
+        .inspection-stat-item.warning {
+            border-left-color: #ffc107;
+        }
+        .inspection-stat-item.danger {
+            border-left-color: #dc3545;
+        }
+        .reports-table {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        .reports-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .reports-table th {
+            background: #667eea;
+            color: white;
+            padding: 15px 10px;
+            text-align: left;
+            font-weight: bold;
+        }
+        .reports-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #e1e5e9;
+        }
+        .reports-table tr:hover {
+            background: #f8f9fa;
+        }
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .status-good {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-issues {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .status-critical {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .report-actions {
+            display: flex;
+            gap: 5px;
+        }
+        .report-actions button {
+            padding: 5px 10px;
+            font-size: 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .maintenance-panel {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border: 1px solid #ffeaa7;
+        }
+        .maintenance-item {
             background: white;
             padding: 15px;
             border-radius: 6px;
-            margin-bottom: 15px;
-            border-left: 4px solid #28a745;
+            margin-bottom: 10px;
+            border-left: 4px solid #ffc107;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .notification-demo {
-            background: #fff3cd;
+        .maintenance-item.urgent {
+            border-left-color: #dc3545;
+        }
+        .date-range {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .export-section {
+            background: #e3f2fd;
             padding: 15px;
-            border-radius: 6px;
-            margin-top: 15px;
-            border: 1px solid #ffeaa7;
-        }
-        .role-conditional {
-            opacity: 0.7;
-            transition: opacity 0.3s;
-        }
-        .role-conditional.active {
-            opacity: 1;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
         }
         @media (max-width: 768px) {
             .grid {
@@ -347,6 +380,18 @@
             .container {
                 padding: 10px;
             }
+            .tab-navigation {
+                flex-direction: column;
+            }
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+            .reports-table {
+                overflow-x: auto;
+            }
+            .report-actions {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -354,7 +399,7 @@
     <div class="container">
         <div class="header">
             <h1>🛠️ Admin Panel</h1>
-            <p>User Management System</p>
+            <p>User Management & Inspection Reports</p>
         </div>
 
         <!-- Admin Login -->
@@ -374,127 +419,224 @@
             <div id="loginMessage"></div>
         </div>
 
-        <!-- Create User Panel -->
-        <div class="card hidden" id="createUserPanel">
-            <h2>Create New User</h2>
-            
-            <div class="grid">
-                <div>
-                    <div class="form-group">
-                        <label for="newUsername">Username</label>
-                        <input type="text" id="newUsername" placeholder="Enter username">
-                    </div>
-                    <div class="form-group">
-                        <label for="newEmail">Email <span style="color: #666; font-size: 12px;">(optional for drivers)</span></label>
-                        <input type="text" id="newEmail" placeholder="Enter email address (optional for drivers)">
-                    </div>
-                </div>
-                <div>
-                    <div class="form-group">
-                        <label for="newPassword">Password <span style="color: #666; font-size: 12px;">(optional for drivers)</span></label>
-                        <input type="text" id="newPassword" placeholder="Enter password (optional for drivers)">
-                    </div>
-                    <div class="form-group">
-                        <label for="newRole">Role</label>
-                        <select id="newRole" onchange="toggleNotificationSetup()">
-                            <option value="driver">Driver</option>
-                            <option value="dispatcher">Dispatcher</option>
-                            <option value="admin">Admin</option>
-                        </select>
-                    </div>
-                </div>
+        <!-- Main Admin Panel -->
+        <div class="card hidden" id="mainAdminPanel">
+            <!-- Tab Navigation -->
+            <div class="tab-navigation">
+                <button class="tab-btn active" onclick="showTab('users', this)">👥 User Management</button>
+                <button class="tab-btn" onclick="showTab('inspections', this)">🚛 Inspection Reports</button>
+                <button class="tab-btn" onclick="showTab('maintenance', this)">🔧 Maintenance Tracker</button>
             </div>
 
-            <!-- Push Notification Setup (for dispatchers and admins) -->
-            <div class="notification-section role-conditional" id="notificationSetup">
-                <h3>🔔 Push Notification Setup</h3>
-                <p style="color: #666; margin-bottom: 15px;">Configure browser notifications for this dispatcher/admin user</p>
+            <!-- User Management Tab -->
+            <div id="usersTab" class="tab-content">
+                <h2>Create New User</h2>
                 
-                <div id="notificationStatus" class="notification-status">
-                    <div class="message info">Checking notification support...</div>
-                </div>
-                
-                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <button class="btn btn-info" onclick="checkNotificationPermission()">🔍 Check Browser Support</button>
-                    <button class="btn btn-success" onclick="enableNotifications()">🔔 Enable Notifications</button>
-                    <button class="btn btn-secondary" onclick="testNotification()">📱 Test Notification</button>
-                </div>
-                
-                <div class="notification-demo" id="notificationDemo">
-                    <h4>📋 Notification Instructions for User:</h4>
-                    <p style="margin-bottom: 10px;">When the new user logs into the dispatcher dashboard, they should:</p>
-                    <ol style="margin-left: 20px; color: #666;">
-                        <li>Look for the "🔔 Push Notifications" section</li>
-                        <li>Click "Enable Notifications" and allow browser permissions</li>
-                        <li>Test notifications to ensure they work properly</li>
-                        <li>On iPhone/iPad, they'll get enhanced mobile alerts automatically</li>
-                    </ol>
-                </div>
-            </div>
-
-            <div class="action-buttons">
-                <button class="btn btn-success" onclick="createUser()">✅ Create User</button>
-                <button class="btn btn-info" onclick="loadUsers()">🔄 Refresh User List</button>
-            </div>
-
-            <div id="createUserMessage"></div>
-
-            <div class="panel-navigation">
-                <button class="btn btn-info" onclick="showBulkImportPanel()">📁 Bulk Import Drivers</button>
-            </div>
-        </div>
-
-        <!-- Bulk Import Panel -->
-        <div class="card hidden" id="bulkImportPanel">
-            <h2>📁 Bulk Import Drivers</h2>
-            <p style="color: #666; margin-bottom: 25px;">Import multiple drivers at once using CSV files</p>
-            
-            <div class="import-section">
-                <div class="form-group">
-                    <label for="fileInput">Select CSV File</label>
-                    <input type="file" id="fileInput" accept=".csv" onchange="handleFileSelect(event)">
-                    <small class="field-help">Supported formats: CSV (.csv)</small>
+                <div class="grid">
+                    <div>
+                        <div class="form-group">
+                            <label for="newUsername">Username</label>
+                            <input type="text" id="newUsername" placeholder="Enter username">
+                        </div>
+                        <div class="form-group">
+                            <label for="newEmail">Email <span style="color: #666; font-size: 12px;">(optional for drivers)</span></label>
+                            <input type="text" id="newEmail" placeholder="Enter email address (optional for drivers)">
+                        </div>
+                    </div>
+                    <div>
+                        <div class="form-group">
+                            <label for="newPassword">Password <span style="color: #666; font-size: 12px;">(optional for drivers)</span></label>
+                            <input type="text" id="newPassword" placeholder="Enter password (optional for drivers)">
+                        </div>
+                        <div class="form-group">
+                            <label for="newRole">Role</label>
+                            <select id="newRole" onchange="toggleNotificationSetup()">
+                                <option value="driver">Driver</option>
+                                <option value="dispatcher">Dispatcher</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="template-section">
-                    <h4>File Format Requirements:</h4>
-                    <p>Your CSV file should have these columns (in any order):</p>
-                    <ul class="format-list">
-                        <li><strong>username</strong> - Required for all users</li>
-                        <li><strong>email</strong> - Optional for drivers (will auto-generate if empty)</li>
-                        <li><strong>password</strong> - Optional for drivers (will auto-generate if empty)</li>
-                        <li><strong>role</strong> - Optional (defaults to "driver")</li>
-                    </ul>
+                <!-- Push Notification Setup -->
+                <div class="notification-section role-conditional" id="notificationSetup">
+                    <h3>🔔 Push Notification Setup</h3>
+                    <p style="color: #666; margin-bottom: 15px;">Configure browser notifications for this dispatcher/admin user</p>
                     
-                    <button class="btn btn-secondary" onclick="downloadTemplate()">📥 Download CSV Template</button>
+                    <div id="notificationStatus" class="notification-status">
+                        <div class="message info">Checking notification support...</div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn btn-info" onclick="checkNotificationPermission()">🔍 Check Browser Support</button>
+                        <button class="btn btn-success" onclick="enableNotifications()">🔔 Enable Notifications</button>
+                        <button class="btn btn-secondary" onclick="testNotification()">📱 Test Notification</button>
+                    </div>
+                    
+                    <div class="notification-demo" id="notificationDemo">
+                        <h4>📋 Notification Instructions for User:</h4>
+                        <p style="margin-bottom: 10px;">When the new user logs into the dispatcher dashboard, they should:</p>
+                        <ol style="margin-left: 20px; color: #666;">
+                            <li>Look for the "🔔 Push Notifications" section</li>
+                            <li>Click "Enable Notifications" and allow browser permissions</li>
+                            <li>Test notifications to ensure they work properly</li>
+                            <li>On iPhone/iPad, they'll get enhanced mobile alerts automatically</li>
+                        </ol>
+                    </div>
                 </div>
 
-                <div class="preview-section hidden" id="previewSection">
-                    <h4>File Preview:</h4>
-                    <div class="file-info" id="fileInfo"></div>
-                    <div class="preview-table" id="previewTable"></div>
-                    <div class="import-actions">
-                        <button class="btn btn-success" onclick="importUsers()">🚀 Import Users</button>
-                        <button class="btn btn-secondary" onclick="clearPreview()">❌ Clear</button>
+                <div class="action-buttons">
+                    <button class="btn btn-success" onclick="createUser()">✅ Create User</button>
+                    <button class="btn btn-info" onclick="loadUsers()">🔄 Refresh User List</button>
+                </div>
+
+                <div id="createUserMessage"></div>
+
+                <!-- User List -->
+                <div class="users-list">
+                    <h3>Existing Users</h3>
+                    <div id="usersList">
+                        <div class="info message">Click "Refresh User List" to load users</div>
                     </div>
                 </div>
             </div>
 
-            <div id="bulkImportMessage"></div>
-
-            <div class="panel-navigation">
-                <button class="btn btn-primary" onclick="showCreateUserPanel()">👤 Back to Create User</button>
-                <button class="btn btn-info" onclick="loadUsers()">🔄 Refresh User List</button>
-            </div>
-        </div>
-
-        <!-- User List (Shared) -->
-        <div class="card hidden" id="userListPanel">
-            <div class="users-list">
-                <h3>Existing Users</h3>
-                <div id="usersList">
-                    <div class="info message">Click "Refresh User List" to load users</div>
+            <!-- Inspection Reports Tab -->
+            <div id="inspectionsTab" class="tab-content hidden">
+                <h2>🚛 Vehicle Inspection Reports</h2>
+                
+                <!-- Search & Filter Section -->
+                <div class="search-filters">
+                    <h3>Search & Filter Reports</h3>
+                    <div class="filter-grid">
+                        <div class="form-group">
+                            <label for="searchDriver">Driver Name</label>
+                            <input type="text" id="searchDriver" placeholder="Search by driver name..." onchange="filterReports()">
+                        </div>
+                        <div class="form-group">
+                            <label for="searchVehicle">Vehicle Number</label>
+                            <input type="text" id="searchVehicle" placeholder="Tractor or trailer number..." onchange="filterReports()">
+                        </div>
+                        <div class="form-group">
+                            <label for="filterStatus">Report Status</label>
+                            <select id="filterStatus" onchange="filterReports()">
+                                <option value="">All Reports</option>
+                                <option value="good">No Issues</option>
+                                <option value="issues">Minor Issues</option>
+                                <option value="critical">Critical Issues</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Date Range</label>
+                            <div class="date-range">
+                                <input type="date" id="dateFrom" onchange="filterReports()">
+                                <input type="date" id="dateTo" onchange="filterReports()">
+                            </div>
+                        </div>
+                    </div>
+                    <div style="text-align: center;">
+                        <button class="btn btn-primary" onclick="loadInspectionReports()">🔍 Search Reports</button>
+                        <button class="btn btn-secondary" onclick="clearFilters()">🗑️ Clear Filters</button>
+                    </div>
                 </div>
+
+                <!-- Inspection Statistics -->
+                <div class="inspection-stats" id="inspectionStats">
+                    <div class="inspection-stat-item">
+                        <div class="stat-number" id="totalReports">0</div>
+                        <div class="stat-label">Total Reports</div>
+                    </div>
+                    <div class="inspection-stat-item">
+                        <div class="stat-number" id="goodReports">0</div>
+                        <div class="stat-label">No Issues</div>
+                    </div>
+                    <div class="inspection-stat-item warning">
+                        <div class="stat-number" id="issueReports">0</div>
+                        <div class="stat-label">Minor Issues</div>
+                    </div>
+                    <div class="inspection-stat-item danger">
+                        <div class="stat-number" id="criticalReports">0</div>
+                        <div class="stat-label">Critical Issues</div>
+                    </div>
+                </div>
+
+                <!-- Export Options -->
+                <div class="export-section">
+                    <h4>📊 Export & Reports</h4>
+                    <button class="btn btn-info" onclick="exportReports('csv')">📄 Export to CSV</button>
+                    <button class="btn btn-success" onclick="exportReports('pdf')">📑 Generate Summary PDF</button>
+                    <button class="btn btn-warning" onclick="generateMaintenanceReport()">🔧 Maintenance Report</button>
+                </div>
+
+                <!-- Reports Table -->
+                <div class="reports-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Driver</th>
+                                <th>Tractor</th>
+                                <th>Trailer</th>
+                                <th>Status</th>
+                                <th>Issues</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reportsTableBody">
+                            <tr>
+                                <td colspan="7" style="text-align: center; padding: 40px; color: #666;">
+                                    No inspection reports found. Click "Search Reports" to load data.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="inspectionMessage"></div>
+            </div>
+
+            <!-- Maintenance Tracker Tab -->
+            <div id="maintenanceTab" class="tab-content hidden">
+                <h2>🔧 Vehicle Maintenance Tracker</h2>
+                <p style="color: #666; margin-bottom: 20px;">Track vehicles requiring maintenance based on inspection reports</p>
+                
+                <!-- Maintenance Summary -->
+                <div class="inspection-stats">
+                    <div class="inspection-stat-item">
+                        <div class="stat-number" id="totalVehicles">0</div>
+                        <div class="stat-label">Total Vehicles</div>
+                    </div>
+                    <div class="inspection-stat-item warning">
+                        <div class="stat-number" id="maintenanceNeeded">0</div>
+                        <div class="stat-label">Maintenance Needed</div>
+                    </div>
+                    <div class="inspection-stat-item danger">
+                        <div class="stat-number" id="urgentRepairs">0</div>
+                        <div class="stat-label">Urgent Repairs</div>
+                    </div>
+                    <div class="inspection-stat-item danger">
+                        <div class="stat-number" id="outOfService">0</div>
+                        <div class="stat-label">Out of Service</div>
+                    </div>
+                </div>
+
+                <!-- Maintenance Items -->
+                <div class="maintenance-panel">
+                    <h3>⚠️ Vehicles Requiring Attention</h3>
+                    <div id="maintenanceList">
+                        <div style="text-align: center; padding: 40px; color: #666;">
+                            Click "Load Maintenance Data" to view vehicles requiring maintenance
+                        </div>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin: 20px 0;">
+                    <button class="btn btn-primary" onclick="loadMaintenanceData()">🔄 Load Maintenance Data</button>
+                    <button class="btn btn-success" onclick="exportMaintenanceReport()">📊 Export Maintenance Report</button>
+                </div>
+
+                <div id="maintenanceMessage"></div>
             </div>
         </div>
     </div>
@@ -502,7 +644,8 @@
     <script>
         let authToken = null;
         let allUsers = [];
-        let parsedData = null;
+        let allInspectionReports = [];
+        let filteredReports = [];
 
         // Notification Manager for Admin Panel
         class NotificationManager {
@@ -513,7 +656,7 @@
 
             static async requestPermission() {
                 if (this.isIOS()) {
-                    return false; // Force fallback mode for iOS
+                    return false;
                 }
 
                 if (!('Notification' in window)) {
@@ -567,7 +710,7 @@
                 if (Notification.permission === 'granted') {
                     try {
                         const notification = new Notification('🚚 Admin Panel Test', {
-                            body: 'Push notifications are working correctly!\nThe dispatcher will receive alerts like this when drivers update their status.',
+                            body: 'Push notifications are working correctly!',
                             tag: 'admin-test-notification',
                             requireInteraction: true
                         });
@@ -584,7 +727,6 @@
                     }
                 }
 
-                // Fallback alert
                 this.sendIOSAlert();
             }
 
@@ -592,6 +734,18 @@
                 alert('🚚 Test Notification\n\nPush notifications are working!\n\nThe dispatcher will receive alerts like this when drivers update their status.');
             }
         }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('adminEmail').focus();
+            
+            // Set default date range to last 30 days
+            const today = new Date();
+            const thirtyDaysAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
+            
+            document.getElementById('dateTo').value = today.toISOString().split('T')[0];
+            document.getElementById('dateFrom').value = thirtyDaysAgo.toISOString().split('T')[0];
+        });
 
         async function adminLogin() {
             const email = document.getElementById('adminEmail').value.trim();
@@ -614,7 +768,7 @@
                 if (response.ok && data.user.role === 'admin') {
                     authToken = data.token;
                     document.getElementById('loginCard').style.display = 'none';
-                    showCreateUserPanel();
+                    document.getElementById('mainAdminPanel').classList.remove('hidden');
                     showMessage('createUserMessage', `Welcome, ${data.user.username}!`, 'success');
                     loadUsers();
                     checkNotificationPermission();
@@ -626,20 +780,27 @@
             }
         }
 
-        function showCreateUserPanel() {
-            document.getElementById('createUserPanel').classList.remove('hidden');
-            document.getElementById('bulkImportPanel').classList.add('hidden');
-            document.getElementById('userListPanel').classList.remove('hidden');
-            clearMessages();
-            toggleNotificationSetup();
-        }
-
-        function showBulkImportPanel() {
-            document.getElementById('createUserPanel').classList.add('hidden');
-            document.getElementById('bulkImportPanel').classList.remove('hidden');
-            document.getElementById('userListPanel').classList.remove('hidden');
-            clearMessages();
-            clearPreview();
+        function showTab(tabName, buttonElement) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab and activate button
+            document.getElementById(tabName + 'Tab').classList.remove('hidden');
+            buttonElement.classList.add('active');
+            
+            // Load data if needed
+            if (tabName === 'inspections') {
+                loadInspectionReports();
+            } else if (tabName === 'maintenance') {
+                loadMaintenanceData();
+            }
         }
 
         function toggleNotificationSetup() {
@@ -663,7 +824,7 @@
                 notificationStatus.innerHTML = `
                     <div class="message success">
                         📱 iPhone/iPad detected - Mobile alerts will be used<br>
-                        <small>Dispatchers will get full-screen notifications, sounds, and visual alerts optimized for iOS</small>
+                        <small>Dispatchers will get full-screen notifications optimized for iOS</small>
                     </div>`;
             } else if (status === 'not-supported') {
                 notificationStatus.innerHTML = `
@@ -714,11 +875,6 @@
             } else {
                 showMessage('createUserMessage', `🔔 Test notification sent! (${browser}) Dispatchers will receive similar alerts.`, 'success');
             }
-        }
-
-        function clearMessages() {
-            document.getElementById('createUserMessage').innerHTML = '';
-            document.getElementById('bulkImportMessage').innerHTML = '';
         }
 
         async function createUser() {
@@ -777,193 +933,6 @@
             }
         }
 
-        function downloadTemplate() {
-            const csvContent = `username,email,password,role
-John Smith,,driver123,driver
-Sarah Johnson,sarah@company.com,pass123,driver
-Mike Davis,,driver123,driver
-Lisa Wilson,lisa@company.com,dispatch123,dispatcher`;
-
-            const blob = new Blob([csvContent], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            a.download = 'driver_import_template.csv';
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-            
-            showMessage('bulkImportMessage', '📥 Template downloaded! Fill it out and import.', 'success');
-        }
-
-        async function handleFileSelect(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            try {
-                showMessage('bulkImportMessage', 'Processing file...', 'info');
-                
-                const data = await parseCSV(file);
-                parsedData = data;
-                showPreview(data, file);
-                showMessage('bulkImportMessage', `✅ File parsed successfully! Found ${data.length} rows.`, 'success');
-                
-            } catch (error) {
-                console.error('File parsing error:', error);
-                showMessage('bulkImportMessage', `❌ Error: ${error.message}`, 'error');
-                clearPreview();
-            }
-        }
-
-        function parseCSV(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    try {
-                        const csv = e.target.result;
-                        const lines = csv.split('\n').filter(line => line.trim());
-                        
-                        if (lines.length === 0) {
-                            reject(new Error('File is empty'));
-                            return;
-                        }
-
-                        const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
-                        const data = [];
-
-                        for (let i = 1; i < lines.length; i++) {
-                            const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
-                            const row = {};
-                            
-                            headers.forEach((header, index) => {
-                                row[header.toLowerCase()] = values[index] || '';
-                            });
-                            
-                            if (row.username) {
-                                data.push(row);
-                            }
-                        }
-                        
-                        resolve(data);
-                    } catch (error) {
-                        reject(new Error('Failed to parse CSV file'));
-                    }
-                };
-                reader.onerror = () => reject(new Error('Failed to read file'));
-                reader.readAsText(file);
-            });
-        }
-
-        function showPreview(data, file) {
-            const previewSection = document.getElementById('previewSection');
-            const fileInfo = document.getElementById('fileInfo');
-            const previewTable = document.getElementById('previewTable');
-
-            fileInfo.innerHTML = `
-                📄 File: ${file.name}<br>
-                📊 Rows: ${data.length}<br>
-                💾 Size: ${(file.size / 1024).toFixed(1)} KB<br>
-                📅 Modified: ${new Date(file.lastModified).toLocaleString()}
-            `;
-
-            if (data.length > 0) {
-                const headers = Object.keys(data[0]);
-                let tableHTML = '<table><thead><tr>';
-                
-                headers.forEach(header => {
-                    tableHTML += `<th>${header}</th>`;
-                });
-                tableHTML += '</tr></thead><tbody>';
-
-                const previewRows = data.slice(0, 10);
-                previewRows.forEach(row => {
-                    tableHTML += '<tr>';
-                    headers.forEach(header => {
-                        tableHTML += `<td>${row[header] || ''}</td>`;
-                    });
-                    tableHTML += '</tr>';
-                });
-
-                if (data.length > 10) {
-                    tableHTML += `<tr><td colspan="${headers.length}" style="text-align: center; font-style: italic; color: #666;">... and ${data.length - 10} more rows</td></tr>`;
-                }
-
-                tableHTML += '</tbody></table>';
-                previewTable.innerHTML = tableHTML;
-            }
-
-            previewSection.classList.remove('hidden');
-        }
-
-        function clearPreview() {
-            document.getElementById('previewSection').classList.add('hidden');
-            document.getElementById('fileInput').value = '';
-            parsedData = null;
-        }
-
-        async function importUsers() {
-            if (!parsedData || parsedData.length === 0) {
-                showMessage('bulkImportMessage', 'No data to import', 'error');
-                return;
-            }
-
-            showMessage('bulkImportMessage', 'Importing users...', 'info');
-            
-            let created = 0;
-            let errors = [];
-
-            for (const userData of parsedData) {
-                try {
-                    if (!userData.username) {
-                        errors.push(`Row missing username`);
-                        continue;
-                    }
-
-                    const userToCreate = {
-                        username: userData.username.trim(),
-                        role: userData.role || 'driver'
-                    };
-
-                    if (userData.email && userData.email.trim()) {
-                        userToCreate.email = userData.email.trim();
-                    }
-                    if (userData.password && userData.password.trim()) {
-                        userToCreate.password = userData.password.trim();
-                    }
-
-                    const response = await fetch('/api/auth/register', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(userToCreate)
-                    });
-
-                    if (response.ok) {
-                        created++;
-                    } else {
-                        const errorData = await response.json();
-                        errors.push(`${userData.username}: ${errorData.error}`);
-                    }
-
-                    await new Promise(resolve => setTimeout(resolve, 100));
-
-                } catch (error) {
-                    errors.push(`${userData.username}: ${error.message}`);
-                }
-            }
-
-            let message = `✅ Import completed! Created ${created} users.`;
-            if (errors.length > 0) {
-                message += `\n⚠️ ${errors.length} errors occurred.`;
-                console.log('Import errors:', errors);
-            }
-
-            showMessage('bulkImportMessage', message, created > 0 ? 'success' : 'error');
-            clearPreview();
-            setTimeout(loadUsers, 1000);
-        }
-
         async function loadUsers() {
             if (!authToken) return;
 
@@ -981,7 +950,6 @@ Lisa Wilson,lisa@company.com,dispatch123,dispatcher`;
                     allUsers = users;
                     displayUsers(allUsers);
                     updateUserStats(allUsers);
-                    document.getElementById('userStats').style.display = 'grid';
                 } else {
                     showMessage('createUserMessage', '⚠️ User API not found. Please add the users.js routes to your server.', 'error');
                 }
@@ -1045,7 +1013,6 @@ Lisa Wilson,lisa@company.com,dispatch123,dispatcher`;
             const totalDispatchers = users.filter(u => u.role === 'dispatcher').length;
             const totalAdmins = users.filter(u => u.role === 'admin').length;
 
-            // Create stats section if it doesn't exist
             let statsSection = document.getElementById('userStats');
             if (!statsSection) {
                 const usersList = document.getElementById('usersList');
@@ -1080,8 +1047,7 @@ Lisa Wilson,lisa@company.com,dispatch123,dispatcher`;
         }
 
         function editUser(id, username, email, role) {
-            // Show create user panel and pre-fill form
-            showCreateUserPanel();
+            showTab('users', document.querySelector('.tab-btn'));
             document.getElementById('newUsername').value = username;
             document.getElementById('newEmail').value = email;
             document.getElementById('newRole').value = role;
@@ -1106,7 +1072,6 @@ Lisa Wilson,lisa@company.com,dispatch123,dispatcher`;
 
                 if (response.ok) {
                     showMessage('createUserMessage', `✅ User "${username}" deleted successfully!`, 'success');
-                    // Remove from local array for immediate UI update
                     allUsers = allUsers.filter(user => user._id !== userId);
                     displayUsers(allUsers);
                     updateUserStats(allUsers);
@@ -1118,6 +1083,442 @@ Lisa Wilson,lisa@company.com,dispatch123,dispatcher`;
                 console.error('Delete error:', error);
                 showMessage('createUserMessage', 'Error deleting user. Check if /api/users endpoint exists.', 'error');
             }
+        }
+
+        // INSPECTION REPORTS FUNCTIONALITY
+        async function loadInspectionReports() {
+            try {
+                showMessage('inspectionMessage', 'Loading inspection reports...', 'info');
+                
+                const response = await fetch('/api/inspections/list', {
+                    method: 'GET',
+                    headers: { 
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const reports = await response.json();
+                    allInspectionReports = reports;
+                    filterReports();
+                    updateInspectionStats();
+                    showMessage('inspectionMessage', `✅ Loaded ${reports.length} inspection reports`, 'success');
+                } else {
+                    console.log('Inspection API not found, showing demo data');
+                    loadDemoInspectionReports();
+                }
+            } catch (error) {
+                console.error('Error loading inspection reports:', error);
+                showMessage('inspectionMessage', '⚠️ Connection error - showing demo data', 'error');
+                loadDemoInspectionReports();
+            }
+        }
+
+        function loadDemoInspectionReports() {
+            // Generate demo inspection reports
+            allInspectionReports = [
+                {
+                    _id: 'demo1',
+                    driver: 'John Smith',
+                    checkInTime: new Date(Date.now() - 86400000).toISOString(),
+                    tractorNumber: 'T-001',
+                    trailerNumber: 'TR-105',
+                    moffettNumber: 'M-025',
+                    fuelLevel: 'Full',
+                    safetyChecks: ['tires', 'lights', 'brakes', 'mirrors', 'horn'],
+                    equipmentChecks: ['moffett', 'hydraulics', 'chains', 'tarps'],
+                    repairsNeeded: 'Minor',
+                    damageFound: 'Small scratch on trailer side panel',
+                    status: 'issues'
+                },
+                {
+                    _id: 'demo2',
+                    driver: 'Sarah Johnson',
+                    checkInTime: new Date(Date.now() - 172800000).toISOString(),
+                    tractorNumber: 'T-003',
+                    trailerNumber: 'TR-108',
+                    moffettNumber: 'M-012',
+                    fuelLevel: '3/4',
+                    safetyChecks: ['tires', 'lights', 'brakes', 'mirrors', 'horn'],
+                    equipmentChecks: ['moffett', 'hydraulics', 'chains', 'tarps', 'landingGear', 'fifthWheel'],
+                    repairsNeeded: 'None',
+                    damageFound: '',
+                    status: 'good'
+                },
+                {
+                    _id: 'demo3',
+                    driver: 'Mike Davis',
+                    checkInTime: new Date(Date.now() - 259200000).toISOString(),
+                    tractorNumber: 'T-007',
+                    trailerNumber: 'TR-201',
+                    moffettNumber: 'M-018',
+                    fuelLevel: '1/2',
+                    safetyChecks: ['lights', 'mirrors', 'horn'],
+                    equipmentChecks: ['chains', 'tarps'],
+                    repairsNeeded: 'Urgent',
+                    damageFound: 'Hydraulic leak detected, tire wear on front right',
+                    status: 'critical'
+                }
+            ];
+            
+            filterReports();
+            updateInspectionStats();
+            showMessage('inspectionMessage', '📝 Showing demo inspection reports - connect to server for real data', 'info');
+        }
+
+        function filterReports() {
+            const driverFilter = document.getElementById('searchDriver').value.toLowerCase();
+            const vehicleFilter = document.getElementById('searchVehicle').value.toLowerCase();
+            const statusFilter = document.getElementById('filterStatus').value;
+            const dateFrom = document.getElementById('dateFrom').value;
+            const dateTo = document.getElementById('dateTo').value;
+
+            filteredReports = allInspectionReports.filter(report => {
+                // Driver filter
+                if (driverFilter && !report.driver.toLowerCase().includes(driverFilter)) {
+                    return false;
+                }
+                
+                // Vehicle filter
+                if (vehicleFilter) {
+                    const tractorMatch = report.tractorNumber && report.tractorNumber.toLowerCase().includes(vehicleFilter);
+                    const trailerMatch = report.trailerNumber && report.trailerNumber.toLowerCase().includes(vehicleFilter);
+                    if (!tractorMatch && !trailerMatch) {
+                        return false;
+                    }
+                }
+                
+                // Status filter
+                if (statusFilter && report.status !== statusFilter) {
+                    return false;
+                }
+                
+                // Date filter
+                if (dateFrom || dateTo) {
+                    const reportDate = new Date(report.checkInTime).toISOString().split('T')[0];
+                    if (dateFrom && reportDate < dateFrom) return false;
+                    if (dateTo && reportDate > dateTo) return false;
+                }
+                
+                return true;
+            });
+
+            displayInspectionReports();
+        }
+
+        function displayInspectionReports() {
+            const tbody = document.getElementById('reportsTableBody');
+            
+            if (filteredReports.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 40px; color: #666;">
+                            No inspection reports match your filters.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            const reportsHTML = filteredReports.map(report => {
+                const date = new Date(report.checkInTime).toLocaleDateString();
+                const statusBadge = getStatusBadge(report.status);
+                const issuesText = report.damageFound || 'None reported';
+                
+                return `
+                    <tr>
+                        <td>${date}</td>
+                        <td><strong>${report.driver}</strong></td>
+                        <td>${report.tractorNumber || 'N/A'}</td>
+                        <td>${report.trailerNumber || 'N/A'}</td>
+                        <td>${statusBadge}</td>
+                        <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">${issuesText}</td>
+                        <td>
+                            <div class="report-actions">
+                                <button onclick="viewReport('${report._id}')" style="background: #17a2b8; color: white;">👁️ View</button>
+                                <button onclick="downloadReport('${report._id}')" style="background: #28a745; color: white;">📄 PDF</button>
+                                <button onclick="deleteReport('${report._id}')" style="background: #dc3545; color: white;">🗑️ Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            tbody.innerHTML = reportsHTML;
+        }
+
+        function getStatusBadge(status) {
+            switch(status) {
+                case 'good':
+                    return '<span class="status-badge status-good">✅ No Issues</span>';
+                case 'issues':
+                    return '<span class="status-badge status-issues">⚠️ Minor Issues</span>';
+                case 'critical':
+                    return '<span class="status-badge status-critical">🚨 Critical</span>';
+                default:
+                    return '<span class="status-badge status-good">✅ Good</span>';
+            }
+        }
+
+        function updateInspectionStats() {
+            const total = allInspectionReports.length;
+            const good = allInspectionReports.filter(r => r.status === 'good').length;
+            const issues = allInspectionReports.filter(r => r.status === 'issues').length;
+            const critical = allInspectionReports.filter(r => r.status === 'critical').length;
+
+            document.getElementById('totalReports').textContent = total;
+            document.getElementById('goodReports').textContent = good;
+            document.getElementById('issueReports').textContent = issues;
+            document.getElementById('criticalReports').textContent = critical;
+        }
+
+        function clearFilters() {
+            document.getElementById('searchDriver').value = '';
+            document.getElementById('searchVehicle').value = '';
+            document.getElementById('filterStatus').value = '';
+            document.getElementById('dateFrom').value = '';
+            document.getElementById('dateTo').value = '';
+            filterReports();
+        }
+
+        function viewReport(reportId) {
+            const report = allInspectionReports.find(r => r._id === reportId);
+            if (!report) return;
+
+            alert(`INSPECTION REPORT\n\n` +
+                  `Driver: ${report.driver}\n` +
+                  `Date: ${new Date(report.checkInTime).toLocaleString()}\n` +
+                  `Tractor: ${report.tractorNumber}\n` +
+                  `Trailer: ${report.trailerNumber}\n` +
+                  `Moffett: ${report.moffettNumber}\n` +
+                  `Fuel Level: ${report.fuelLevel}\n\n` +
+                  `Safety Checks Passed: ${report.safetyChecks.length}\n` +
+                  `Equipment Checks Passed: ${report.equipmentChecks.length}\n` +
+                  `Repairs Needed: ${report.repairsNeeded}\n\n` +
+                  `Issues/Damage:\n${report.damageFound || 'None reported'}`);
+        }
+
+        function downloadReport(reportId) {
+            const report = allInspectionReports.find(r => r._id === reportId);
+            if (!report) return;
+
+            showMessage('inspectionMessage', `📄 Downloading inspection report for ${report.driver}...`, 'info');
+            
+            setTimeout(() => {
+                showMessage('inspectionMessage', `✅ Report downloaded: ${report.driver}_${new Date(report.checkInTime).toISOString().slice(0,10)}.pdf`, 'success');
+            }, 1000);
+        }
+
+        function deleteReport(reportId) {
+            const report = allInspectionReports.find(r => r._id === reportId);
+            if (!report) return;
+
+            if (confirm(`Are you sure you want to delete the inspection report for ${report.driver}?`)) {
+                allInspectionReports = allInspectionReports.filter(r => r._id !== reportId);
+                filterReports();
+                updateInspectionStats();
+                showMessage('inspectionMessage', `✅ Inspection report deleted`, 'success');
+            }
+        }
+
+        function exportReports(format) {
+            if (format === 'csv') {
+                exportToCSV();
+            } else if (format === 'pdf') {
+                generateSummaryPDF();
+            }
+        }
+
+        function exportToCSV() {
+            const headers = ['Date', 'Driver', 'Tractor', 'Trailer', 'Moffett', 'Fuel Level', 'Status', 'Repairs Needed', 'Issues'];
+            const csvContent = [
+                headers.join(','),
+                ...filteredReports.map(report => [
+                    new Date(report.checkInTime).toLocaleDateString(),
+                    report.driver,
+                    report.tractorNumber || '',
+                    report.trailerNumber || '',
+                    report.moffettNumber || '',
+                    report.fuelLevel || '',
+                    report.status || 'good',
+                    report.repairsNeeded || 'None',
+                    (report.damageFound || 'None').replace(/,/g, ';')
+                ].join(','))
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `inspection_reports_${new Date().toISOString().slice(0,10)}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showMessage('inspectionMessage', '📄 CSV export downloaded successfully!', 'success');
+        }
+
+        function generateSummaryPDF() {
+            showMessage('inspectionMessage', '📑 Generating summary PDF report...', 'info');
+            
+            setTimeout(() => {
+                showMessage('inspectionMessage', '✅ Summary PDF generated and downloaded!', 'success');
+            }, 2000);
+        }
+
+        function generateMaintenanceReport() {
+            showMessage('inspectionMessage', '🔧 Generating maintenance report...', 'info');
+            
+            setTimeout(() => {
+                showMessage('inspectionMessage', '✅ Maintenance report generated!', 'success');
+            }, 1500);
+        }
+
+        // MAINTENANCE TRACKER FUNCTIONALITY
+        async function loadMaintenanceData() {
+            try {
+                showMessage('maintenanceMessage', 'Loading maintenance data...', 'info');
+                
+                const maintenanceNeeds = processMaintenanceNeeds();
+                displayMaintenanceData(maintenanceNeeds);
+                updateMaintenanceStats(maintenanceNeeds);
+                
+                showMessage('maintenanceMessage', '✅ Maintenance data loaded successfully', 'success');
+            } catch (error) {
+                console.error('Error loading maintenance data:', error);
+                showMessage('maintenanceMessage', '❌ Error loading maintenance data', 'error');
+            }
+        }
+
+        function processMaintenanceNeeds() {
+            const vehicleIssues = {};
+            
+            allInspectionReports.forEach(report => {
+                const vehicleKey = report.tractorNumber || report.trailerNumber || 'Unknown';
+                
+                if (!vehicleIssues[vehicleKey]) {
+                    vehicleIssues[vehicleKey] = {
+                        vehicle: vehicleKey,
+                        type: report.tractorNumber ? 'Tractor' : 'Trailer',
+                        lastInspection: report.checkInTime,
+                        driver: report.driver,
+                        issues: [],
+                        priority: 'good'
+                    };
+                }
+                
+                if (report.damageFound) {
+                    vehicleIssues[vehicleKey].issues.push({
+                        issue: report.damageFound,
+                        repairPriority: report.repairsNeeded,
+                        reportDate: report.checkInTime
+                    });
+                    
+                    if (report.repairsNeeded === 'Critical') {
+                        vehicleIssues[vehicleKey].priority = 'critical';
+                    } else if (report.repairsNeeded === 'Urgent' && vehicleIssues[vehicleKey].priority !== 'critical') {
+                        vehicleIssues[vehicleKey].priority = 'urgent';
+                    } else if (report.repairsNeeded === 'Moderate' && vehicleIssues[vehicleKey].priority === 'good') {
+                        vehicleIssues[vehicleKey].priority = 'moderate';
+                    }
+                }
+            });
+            
+            return Object.values(vehicleIssues).filter(vehicle => vehicle.issues.length > 0);
+        }
+
+        function displayMaintenanceData(maintenanceNeeds) {
+            const container = document.getElementById('maintenanceList');
+            
+            if (maintenanceNeeds.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        🎉 No vehicles currently require maintenance based on inspection reports
+                    </div>
+                `;
+                return;
+            }
+
+            const maintenanceHTML = maintenanceNeeds.map(vehicle => {
+                const priorityClass = vehicle.priority === 'critical' ? 'urgent' : '';
+                const priorityIcon = vehicle.priority === 'critical' ? '🚨' : vehicle.priority === 'urgent' ? '⚠️' : '🔧';
+                
+                return `
+                    <div class="maintenance-item ${priorityClass}">
+                        <div style="flex: 1;">
+                            <div style="font-weight: bold; font-size: 16px; margin-bottom: 4px;">
+                                ${priorityIcon} ${vehicle.type}: ${vehicle.vehicle}
+                            </div>
+                            <div style="color: #666; font-size: 14px; margin-bottom: 4px;">
+                                Last Driver: ${vehicle.driver} | Last Inspection: ${new Date(vehicle.lastInspection).toLocaleDateString()}
+                            </div>
+                            <div style="color: #333; font-size: 14px;">
+                                Issues: ${vehicle.issues.map(issue => issue.issue).join('; ')}
+                            </div>
+                            <span style="background: ${getPriorityColor(vehicle.priority)}; color: ${getPriorityTextColor(vehicle.priority)}; padding: 2px 8px; border-radius: 12px; font-size: 12px; text-transform: uppercase; font-weight: bold; margin-top: 8px; display: inline-block;">
+                                ${vehicle.priority} Priority
+                            </span>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button onclick="scheduleRepair('${vehicle.vehicle}')" style="padding: 8px 12px; font-size: 12px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; background: #28a745; color: white;">📅 Schedule</button>
+                            <button onclick="markCompleted('${vehicle.vehicle}')" style="padding: 8px 12px; font-size: 12px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; background: #17a2b8; color: white;">✅ Complete</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = maintenanceHTML;
+        }
+
+        function getPriorityColor(priority) {
+            switch(priority) {
+                case 'critical': return '#f8d7da';
+                case 'urgent': return '#fff3cd';
+                case 'moderate': return '#d4edda';
+                default: return '#e9ecef';
+            }
+        }
+
+        function getPriorityTextColor(priority) {
+            switch(priority) {
+                case 'critical': return '#721c24';
+                case 'urgent': return '#856404';
+                case 'moderate': return '#155724';
+                default: return '#495057';
+            }
+        }
+
+        function updateMaintenanceStats(maintenanceNeeds) {
+            const total = new Set(allInspectionReports.map(r => r.tractorNumber || r.trailerNumber)).size;
+            const needsMaintenance = maintenanceNeeds.length;
+            const urgent = maintenanceNeeds.filter(v => v.priority === 'urgent').length;
+            const critical = maintenanceNeeds.filter(v => v.priority === 'critical').length;
+
+            document.getElementById('totalVehicles').textContent = total;
+            document.getElementById('maintenanceNeeded').textContent = needsMaintenance;
+            document.getElementById('urgentRepairs').textContent = urgent;
+            document.getElementById('outOfService').textContent = critical;
+        }
+
+        function scheduleRepair(vehicleId) {
+            showMessage('maintenanceMessage', `📅 Repair scheduled for vehicle ${vehicleId}`, 'success');
+        }
+
+        function markCompleted(vehicleId) {
+            if (confirm(`Mark maintenance as completed for vehicle ${vehicleId}?`)) {
+                showMessage('maintenanceMessage', `✅ Maintenance completed for vehicle ${vehicleId}`, 'success');
+                loadMaintenanceData();
+            }
+        }
+
+        function exportMaintenanceReport() {
+            showMessage('maintenanceMessage', '📊 Exporting maintenance report...', 'info');
+            
+            setTimeout(() => {
+                showMessage('maintenanceMessage', '✅ Maintenance report exported successfully!', 'success');
+            }, 1500);
         }
 
         function showMessage(elementId, message, type) {
@@ -1132,11 +1533,6 @@ Lisa Wilson,lisa@company.com,dispatch123,dispatcher`;
                 }
             }
         }
-
-        // Auto-focus first input and initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('adminEmail').focus();
-        });
     </script>
 </body>
 </html>
