@@ -11,7 +11,7 @@
             box-sizing: border-box;
         }
         body {
-            font-family: Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             color: #333;
@@ -30,15 +30,54 @@
             margin-bottom: 30px;
         }
         .header h1 {
-            font-size: 24px;
+            font-size: 28px;
             margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        
+        /* Connection Status */
+        .connection-status {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: bold;
+            z-index: 1000;
+            transition: all 0.3s;
+        }
+        
+        .connection-status.connected {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .connection-status.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .connection-status.demo {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
         .card {
             background: white;
             border-radius: 20px;
             padding: 30px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
             flex: 1;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
         }
         .form-group {
             margin-bottom: 25px;
@@ -46,7 +85,7 @@
         label {
             display: block;
             margin-bottom: 8px;
-            font-weight: bold;
+            font-weight: 600;
             color: #555;
             font-size: 16px;
         }
@@ -57,11 +96,13 @@
             border-radius: 12px;
             font-size: 16px;
             background: #f8f9fa;
+            transition: all 0.3s;
         }
         input:focus, select:focus {
             outline: none;
             border-color: #667eea;
             background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
         .btn {
             width: 100%;
@@ -69,14 +110,17 @@
             border: none;
             border-radius: 12px;
             font-size: 18px;
-            font-weight: bold;
+            font-weight: 600;
             cursor: pointer;
             margin-bottom: 15px;
             transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
         }
         .btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
+            transform: none;
         }
         .btn-primary {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -84,6 +128,7 @@
         }
         .btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
         }
         .btn-status {
             background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
@@ -94,94 +139,135 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+        .btn-status:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
         }
         .btn-arrived {
             background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+        .btn-arrived:hover:not(:disabled) {
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
         }
         .message {
             padding: 15px;
-            border-radius: 8px;
+            border-radius: 12px;
             margin: 15px 0;
             text-align: center;
-            font-weight: bold;
+            font-weight: 600;
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         .success {
-            background: #d4edda;
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
             color: #155724;
             border: 1px solid #c3e6cb;
         }
         .error {
-            background: #f8d7da;
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
         .warning {
-            background: #fff3cd;
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
             color: #856404;
             border: 1px solid #ffeaa7;
+        }
+        .info {
+            background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+            color: #0c5460;
+            border: 1px solid #bee5eb;
         }
         .hidden {
             display: none;
         }
         .driver-info {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
             border-left: 4px solid #667eea;
             text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
         .driver-name {
             font-size: 24px;
-            font-weight: bold;
+            font-weight: 700;
             color: #333;
             margin-bottom: 10px;
         }
         .current-time {
             color: #666;
             font-size: 16px;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            font-family: 'Courier New', monospace;
         }
         .logout-btn {
             background: transparent;
             color: #dc3545;
-            border: 1px solid #dc3545;
+            border: 2px solid #dc3545;
             padding: 8px 16px;
             font-size: 14px;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
         }
         .logout-btn:hover {
             background: #dc3545;
             color: white;
+            transform: translateY(-1px);
         }
         .notification-history {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 25px;
+            border: 1px solid #e1e5e9;
         }
         .notification-history h3 {
-            font-size: 16px;
-            margin-bottom: 10px;
+            font-size: 18px;
+            margin-bottom: 15px;
             color: #555;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         .history-item {
             background: white;
-            padding: 10px;
-            border-radius: 6px;
-            margin-bottom: 8px;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
             font-size: 14px;
             color: #666;
             border-left: 3px solid #667eea;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+        }
+        .history-item:hover {
+            transform: translateX(3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .history-item.arrived {
+            border-left-color: #28a745;
+        }
+        .history-item.en-route {
+            border-left-color: #ffc107;
         }
         .loading {
             display: inline-block;
             width: 20px;
             height: 20px;
-            border: 3px solid #ffffff;
+            border: 3px solid rgba(255,255,255,0.3);
             border-radius: 50%;
-            border-top-color: transparent;
+            border-top-color: #ffffff;
             animation: spin 1s ease-in-out infinite;
             margin-right: 10px;
         }
@@ -192,8 +278,10 @@
             text-align: center;
         }
         .login-form h2 {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             color: #333;
+            font-size: 24px;
+            font-weight: 700;
         }
         .status-buttons {
             display: flex;
@@ -202,32 +290,106 @@
         }
         .admin-link {
             text-align: center;
-            margin-top: 20px;
-            padding: 15px;
-            background: #e3f2fd;
-            border-radius: 8px;
+            margin-top: 25px;
+            padding: 20px;
+            background: linear-gradient(135deg, #e3f2fd 0%, #f8f9fa 100%);
+            border-radius: 12px;
+            border: 1px solid #e1e5e9;
         }
         .admin-link a {
             color: #667eea;
             text-decoration: none;
-            font-weight: bold;
+            font-weight: 600;
+            font-size: 16px;
         }
         .admin-link a:hover {
             text-decoration: underline;
         }
+        
+        /* API Setup Banner */
+        .api-setup {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .api-input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 2px solid #ffc107;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .api-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .api-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .api-btn.connect {
+            background: #28a745;
+            color: white;
+        }
+        .api-btn.demo {
+            background: #6c757d;
+            color: white;
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+            .card {
+                padding: 20px;
+            }
+            .btn-status {
+                font-size: 18px;
+                padding: 20px;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Connection Status -->
+    <div id="connectionStatus" class="connection-status demo">
+        🔄 Starting...
+    </div>
+
     <div class="container">
         <div class="header">
             <h1>🚚 Driver App</h1>
             <p>Quick warehouse return notification</p>
         </div>
 
+        <!-- API Setup (shows if not configured) -->
+        <div class="api-setup" id="apiSetup" style="display: none;">
+            <h4>🔗 Connect to Your System</h4>
+            <p>Enter your Railway API URL or use demo mode:</p>
+            <input type="text" id="apiUrlInput" class="api-input" 
+                   placeholder="https://driver-return-system-production.up.railway.app"
+                   value="https://driver-return-system-production.up.railway.app">
+            <div class="api-buttons">
+                <button class="api-btn connect" onclick="connectToAPI()">🔗 Connect</button>
+                <button class="api-btn demo" onclick="useDemoMode()">📋 Demo Mode</button>
+            </div>
+        </div>
+
         <!-- Driver Selection Screen -->
         <div class="card" id="loginScreen">
             <div class="login-form">
-                <h2>Select Your Name</h2>
+                <h2>👤 Select Your Name</h2>
                 
                 <div class="form-group">
                     <label for="driverSelect">Choose your name from the list:</label>
@@ -237,11 +399,12 @@
                 </div>
 
                 <button class="btn btn-primary" onclick="selectDriver()" id="loginBtn" disabled>
-                    Begin Check-Out
+                    🚀 Begin Check-Out
                 </button>
 
                 <div class="admin-link">
-                    <p>Don't see your name? <a href="/admin" target="_blank">Contact Dispatch</a></p>
+                    <p>📞 Don't see your name? <a href="javascript:void(0)" onclick="contactDispatch()">Contact Dispatch</a></p>
+                    <p style="margin-top: 10px;"><a href="javascript:void(0)" onclick="showAdminPanel()">🛠️ Admin Panel</a></p>
                 </div>
             </div>
 
@@ -269,7 +432,7 @@
             <div id="statusMessage"></div>
 
             <div class="notification-history">
-                <h3>📋 Your Recent Notifications</h3>
+                <h3>📋 Recent Notifications</h3>
                 <div id="notificationHistory">
                     <div class="history-item">No notifications sent yet</div>
                 </div>
@@ -277,43 +440,196 @@
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
     <script>
+        // Configuration
+        let API_BASE_URL = '';
+        let CONNECTION_MODE = 'demo'; // 'demo', 'api', 'offline'
+        
+        // App State
         let currentDriver = null;
-        let authToken = null;
-        let socket = null;
         let notificationHistory = [];
+        let connectionStatus = 'starting';
 
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Driver App Starting...');
+            
             updateTime();
             setInterval(updateTime, 1000);
-            checkExistingLogin();
-            loadDriversList();
+            
+            initializeApp();
         });
 
-        async function loadDriversList() {
-            try {
-                // Get all users from the database
-                const response = await fetch('/api/auth/drivers');
+        async function initializeApp() {
+            // Check for saved API URL
+            const savedApiUrl = localStorage.getItem('driverAppApiUrl');
+            
+            if (savedApiUrl && savedApiUrl !== 'demo-mode') {
+                API_BASE_URL = savedApiUrl;
+                CONNECTION_MODE = 'api';
                 
-                if (response.ok) {
-                    const drivers = await response.json();
-                    populateDriverDropdown(drivers);
+                // Test connection
+                const connected = await testAPIConnection();
+                if (connected) {
+                    updateConnectionStatus('connected');
+                    hideAPISetup();
                 } else {
-                    // Fallback to demo drivers if API not available
-                    const demoDrivers = [
-                        { id: 'demo1', username: 'John Smith' },
-                        { id: 'demo2', username: 'Sarah Johnson' },
-                        { id: 'demo3', username: 'Mike Davis' },
-                        { id: 'demo4', username: 'Lisa Wilson' }
-                    ];
-                    populateDriverDropdown(demoDrivers);
-                    showMessage('loginMessage', 'Using demo drivers. Add /api/auth/drivers endpoint for real drivers.', 'warning');
+                    updateConnectionStatus('disconnected');
+                    showAPISetup();
+                    return;
                 }
+            } else if (savedApiUrl === 'demo-mode') {
+                CONNECTION_MODE = 'demo';
+                updateConnectionStatus('demo');
+                hideAPISetup();
+            } else {
+                // First time setup
+                showAPISetup();
+                return;
+            }
+            
+            // Continue with app initialization
+            await loadDriversList();
+            checkExistingLogin();
+        }
+
+        function showAPISetup() {
+            document.getElementById('apiSetup').style.display = 'block';
+            updateConnectionStatus('disconnected');
+        }
+
+        function hideAPISetup() {
+            document.getElementById('apiSetup').style.display = 'none';
+        }
+
+        async function connectToAPI() {
+            const apiUrl = document.getElementById('apiUrlInput').value.trim();
+            
+            if (!apiUrl) {
+                showMessage('loginMessage', '❌ Please enter your API URL', 'error');
+                return;
+            }
+            
+            // Clean URL
+            API_BASE_URL = apiUrl.endsWith('/api') ? apiUrl : apiUrl + '/api';
+            CONNECTION_MODE = 'api';
+            
+            updateConnectionStatus('connecting');
+            
+            // Test connection
+            const connected = await testAPIConnection();
+            
+            if (connected) {
+                localStorage.setItem('driverAppApiUrl', API_BASE_URL);
+                updateConnectionStatus('connected');
+                hideAPISetup();
+                showMessage('loginMessage', '✅ Connected to API successfully!', 'success');
+                
+                await loadDriversList();
+                checkExistingLogin();
+            } else {
+                updateConnectionStatus('disconnected');
+                showMessage('loginMessage', '❌ Cannot connect to API. Check URL or use Demo Mode.', 'error');
+            }
+        }
+
+        function useDemoMode() {
+            CONNECTION_MODE = 'demo';
+            API_BASE_URL = 'demo-mode';
+            localStorage.setItem('driverAppApiUrl', 'demo-mode');
+            
+            updateConnectionStatus('demo');
+            hideAPISetup();
+            showMessage('loginMessage', '📋 Demo mode activated!', 'info');
+            
+            loadDriversList();
+            checkExistingLogin();
+        }
+
+        async function testAPIConnection() {
+            if (CONNECTION_MODE === 'demo') return true;
+            
+            try {
+                const response = await fetch(API_BASE_URL + '/health', {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' },
+                    mode: 'cors'
+                });
+                return response.ok;
+            } catch (error) {
+                console.warn('API connection test failed:', error);
+                return false;
+            }
+        }
+
+        function updateConnectionStatus(status) {
+            connectionStatus = status;
+            const statusElement = document.getElementById('connectionStatus');
+            
+            switch (status) {
+                case 'connected':
+                    statusElement.className = 'connection-status connected';
+                    statusElement.textContent = '🟢 Connected';
+                    break;
+                case 'disconnected':
+                    statusElement.className = 'connection-status disconnected';
+                    statusElement.textContent = '🔴 Disconnected';
+                    break;
+                case 'demo':
+                    statusElement.className = 'connection-status demo';
+                    statusElement.textContent = '📋 Demo Mode';
+                    break;
+                case 'connecting':
+                    statusElement.className = 'connection-status demo';
+                    statusElement.textContent = '🔄 Connecting...';
+                    break;
+                default:
+                    statusElement.className = 'connection-status demo';
+                    statusElement.textContent = '⚙️ Starting...';
+            }
+        }
+
+        async function loadDriversList() {
+            const driverSelect = document.getElementById('driverSelect');
+            const loginBtn = document.getElementById('loginBtn');
+            
+            try {
+                let drivers = [];
+                
+                if (CONNECTION_MODE === 'api' && connectionStatus === 'connected') {
+                    // Try to load from API
+                    try {
+                        const response = await fetch(API_BASE_URL + '/users?role=driver');
+                        if (response.ok) {
+                            const data = await response.json();
+                            drivers = data.users || data || [];
+                        }
+                    } catch (error) {
+                        console.warn('API call failed, using demo drivers:', error);
+                    }
+                }
+                
+                // Fallback to demo drivers
+                if (drivers.length === 0) {
+                    drivers = [
+                        { _id: 'demo1', username: 'John Smith', role: 'driver' },
+                        { _id: 'demo2', username: 'Sarah Johnson', role: 'driver' },
+                        { _id: 'demo3', username: 'Mike Davis', role: 'driver' },
+                        { _id: 'demo4', username: 'Lisa Wilson', role: 'driver' },
+                        { _id: 'demo5', username: 'Tom Anderson', role: 'driver' },
+                        { _id: 'demo6', username: 'Emily Brown', role: 'driver' }
+                    ];
+                    
+                    if (CONNECTION_MODE === 'api') {
+                        showMessage('loginMessage', '⚠️ Using demo drivers (API unavailable)', 'warning');
+                    }
+                }
+                
+                populateDriverDropdown(drivers);
+                
             } catch (error) {
                 console.error('Error loading drivers:', error);
-                showMessage('loginMessage', 'Error loading drivers list', 'error');
+                showMessage('loginMessage', '❌ Error loading drivers list', 'error');
             }
         }
 
@@ -327,7 +643,10 @@
             // Add drivers to dropdown
             drivers.forEach(driver => {
                 const option = document.createElement('option');
-                option.value = JSON.stringify({ id: driver.id || driver._id, username: driver.username });
+                option.value = JSON.stringify({ 
+                    id: driver._id || driver.id, 
+                    username: driver.username 
+                });
                 option.textContent = driver.username;
                 driverSelect.appendChild(option);
             });
@@ -336,16 +655,22 @@
             driverSelect.addEventListener('change', function() {
                 loginBtn.disabled = this.value === '';
             });
+            
+            console.log(`✅ Loaded ${drivers.length} drivers`);
         }
 
         function checkExistingLogin() {
-            // Check if driver was previously selected
             const savedDriver = localStorage.getItem('selectedDriver');
             if (savedDriver) {
-                currentDriver = JSON.parse(savedDriver);
-                showMainScreen();
-                initializeSocket();
-                loadStoredHistory();
+                try {
+                    currentDriver = JSON.parse(savedDriver);
+                    showMainScreen();
+                    loadStoredHistory();
+                    console.log('✅ Restored driver session:', currentDriver.username);
+                } catch (error) {
+                    console.error('Error restoring session:', error);
+                    localStorage.removeItem('selectedDriver');
+                }
             } else {
                 showLoginScreen();
             }
@@ -356,11 +681,14 @@
             const loginBtn = document.getElementById('loginBtn');
             
             if (!driverSelect.value) {
-                showMessage('loginMessage', 'Please select your name', 'error');
+                showMessage('loginMessage', '❌ Please select your name', 'error');
                 return;
             }
 
             try {
+                loginBtn.disabled = true;
+                loginBtn.innerHTML = '<span class="loading"></span>Logging in...';
+                
                 // Parse selected driver data
                 currentDriver = JSON.parse(driverSelect.value);
                 
@@ -369,34 +697,35 @@
                 
                 // Show main screen
                 showMainScreen();
-                initializeSocket();
                 loadStoredHistory();
                 
-                showMessage('statusMessage', `Welcome, ${currentDriver.username}!`, 'success');
+                showMessage('statusMessage', `🎉 Welcome, ${currentDriver.username}!`, 'success');
+                console.log('✅ Driver logged in:', currentDriver.username);
                 
             } catch (error) {
                 console.error('Driver selection error:', error);
-                showMessage('loginMessage', 'Error selecting driver', 'error');
+                showMessage('loginMessage', '❌ Error selecting driver', 'error');
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = '🚀 Begin Check-Out';
             }
         }
 
         function logoutDriver() {
-            localStorage.removeItem('selectedDriver');
-            if (socket) socket.disconnect();
-            
-            currentDriver = null;
-            notificationHistory = [];
-            
-            // Reset dropdown
-            document.getElementById('driverSelect').value = '';
-            document.getElementById('loginBtn').disabled = true;
-            
-            showLoginScreen();
-            showMessage('loginMessage', 'Logged out successfully', 'success');
-        }
-
-        function clearStoredAuth() {
-            localStorage.removeItem('selectedDriver');
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('selectedDriver');
+                
+                currentDriver = null;
+                notificationHistory = [];
+                
+                // Reset dropdown
+                document.getElementById('driverSelect').value = '';
+                document.getElementById('loginBtn').disabled = true;
+                
+                showLoginScreen();
+                showMessage('loginMessage', '👋 Logged out successfully', 'success');
+                console.log('✅ Driver logged out');
+            }
         }
 
         function showMainScreen() {
@@ -410,20 +739,6 @@
             document.getElementById('loginScreen').classList.remove('hidden');
             document.getElementById('mainScreen').classList.add('hidden');
             clearMessages();
-        }
-
-        function initializeSocket() {
-            socket = io();
-            
-            socket.on('connect', () => {
-                console.log('Connected to server');
-                // Join driver room
-                socket.emit('join-room', { role: 'driver', driverId: currentDriver.id });
-            });
-
-            socket.on('status-update', (data) => {
-                showMessage('statusMessage', '✅ Notification confirmed by dispatch', 'success');
-            });
         }
 
         function updateTime() {
@@ -444,7 +759,7 @@
 
         async function sendNotification(status, button) {
             if (!currentDriver) {
-                showMessage('statusMessage', 'Please select a driver first', 'error');
+                showMessage('statusMessage', '❌ Please select a driver first', 'error');
                 return;
             }
 
@@ -465,46 +780,70 @@
                 // Create notification data
                 const notificationData = {
                     driver: currentDriver.username,
+                    driverId: currentDriver.id,
                     status: status,
                     location: location,
                     estimatedArrival: estimatedArrival,
+                    timestamp: new Date().toISOString(),
                     warehouse: 'Main Warehouse',
                     company: 'Your Company Inc.'
                 };
 
-                // Try to send to server
-                try {
-                    const response = await fetch('/api/notifications/simple', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(notificationData)
-                    });
+                let success = false;
+                let responseMessage = '';
 
-                    if (response.ok) {
-                        showMessage('statusMessage', `✅ Status "${status}" sent successfully to dispatch!`, 'success');
-                    } else {
-                        // Fallback to local mode
-                        showMessage('statusMessage', `✅ Status "${status}" recorded! (Demo mode)`, 'success');
+                // Try to send to server if connected
+                if (CONNECTION_MODE === 'api' && connectionStatus === 'connected') {
+                    try {
+                        const response = await fetch(API_BASE_URL + '/notifications/driver-update', {
+                            method: 'POST',
+                            headers: { 
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            },
+                            mode: 'cors',
+                            body: JSON.stringify(notificationData)
+                        });
+
+                        if (response.ok) {
+                            success = true;
+                            responseMessage = `✅ Status "${status}" sent to dispatch successfully!`;
+                        } else {
+                            throw new Error(`Server error: ${response.status}`);
+                        }
+                    } catch (fetchError) {
+                        console.warn('API call failed:', fetchError);
+                        success = true; // Still count as success for local storage
+                        responseMessage = `⚠️ Status "${status}" saved locally (API unavailable)`;
                     }
-                } catch (fetchError) {
-                    // If server not available, still allow local functionality
-                    showMessage('statusMessage', `✅ Status "${status}" recorded! (Offline mode)`, 'warning');
+                } else {
+                    // Demo/offline mode
+                    success = true;
+                    responseMessage = CONNECTION_MODE === 'demo' 
+                        ? `✅ Status "${status}" recorded! (Demo mode)` 
+                        : `⚠️ Status "${status}" saved locally (Offline mode)`;
                 }
 
-                // Add to local history
-                addToHistory({
-                    ...notificationData,
-                    timestamp: new Date().toISOString()
-                });
-                
-                // Send real-time update if socket is connected
-                if (socket && socket.connected) {
-                    socket.emit('driver-notification', notificationData);
+                if (success) {
+                    showMessage('statusMessage', responseMessage, 
+                               CONNECTION_MODE === 'demo' ? 'success' : 'warning');
+                    
+                    // Add to local history
+                    addToHistory(notificationData);
+                    
+                    // Log to console
+                    console.log('📤 Notification sent:', { 
+                        driver: currentDriver.username, 
+                        status: status, 
+                        time: new Date().toLocaleTimeString() 
+                    });
+                } else {
+                    showMessage('statusMessage', '❌ Failed to send notification', 'error');
                 }
 
             } catch (error) {
                 console.error('Notification error:', error);
-                showMessage('statusMessage', 'Failed to send notification', 'error');
+                showMessage('statusMessage', '❌ Failed to send notification', 'error');
             } finally {
                 // Re-enable button and restore text
                 setTimeout(() => {
@@ -523,8 +862,11 @@
                             const lng = position.coords.longitude.toFixed(6);
                             resolve(`${lat}, ${lng}`);
                         },
-                        () => resolve('Location unavailable'),
-                        { timeout: 5000 }
+                        (error) => {
+                            console.warn('Geolocation error:', error);
+                            resolve('Location unavailable');
+                        },
+                        { timeout: 5000, enableHighAccuracy: false }
                     );
                 } else {
                     resolve('Location unavailable');
@@ -534,10 +876,13 @@
 
         function calculateETA(status) {
             if (status === 'arrived') {
-                return 'At warehouse';
+                return 'At warehouse now';
             } else if (status === '30 minutes away') {
                 const eta = new Date(Date.now() + 30 * 60000);
-                return eta.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                return eta.toLocaleTimeString('en-US', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
             }
             return 'Unknown';
         }
@@ -545,7 +890,8 @@
         function addToHistory(notification) {
             notificationHistory.unshift({
                 ...notification,
-                id: Date.now()
+                id: Date.now(),
+                localTime: new Date().toLocaleTimeString()
             });
             
             // Keep only last 10 notifications
@@ -565,17 +911,20 @@
                 return;
             }
 
-            historyContainer.innerHTML = notificationHistory.map(item => {
-                const time = new Date(item.timestamp).toLocaleTimeString('en-US', { 
+            historyContainer.innerHTML = notificationHistory.map((item, index) => {
+                const time = item.localTime || new Date(item.timestamp).toLocaleTimeString('en-US', { 
                     hour: '2-digit', 
                     minute: '2-digit' 
                 });
                 const icon = item.status === 'arrived' ? '✅' : '🕐';
+                const statusClass = item.status === 'arrived' ? 'arrived' : 'en-route';
                 
                 return `
-                    <div class="history-item">
+                    <div class="history-item ${statusClass}">
                         ${icon} ${time} - ${item.status}
-                        <br><small>ETA: ${item.estimatedArrival}</small>
+                        <br><small style="color: #888;">ETA: ${item.estimatedArrival}</small>
+                        ${item.location && item.location !== 'Location unavailable' ? 
+                          `<br><small style="color: #888;">📍 ${item.location}</small>` : ''}
                     </div>
                 `;
             }).join('');
@@ -594,8 +943,14 @@
             const stored = localStorage.getItem(historyKey);
             
             if (stored) {
-                notificationHistory = JSON.parse(stored);
-                displayNotificationHistory();
+                try {
+                    notificationHistory = JSON.parse(stored);
+                    displayNotificationHistory();
+                    console.log(`✅ Loaded ${notificationHistory.length} notifications from history`);
+                } catch (error) {
+                    console.error('Error loading history:', error);
+                    notificationHistory = [];
+                }
             }
         }
 
@@ -604,7 +959,7 @@
             if (element) {
                 element.innerHTML = `<div class="message ${type}">${message}</div>`;
                 
-                if (type === 'success') {
+                if (type === 'success' || type === 'info') {
                     setTimeout(() => {
                         element.innerHTML = '';
                     }, 5000);
@@ -618,10 +973,49 @@
             if (statusMsg) statusMsg.innerHTML = '';
         }
 
-        // Handle Enter key and dropdown selection
+        // Utility functions
+        function contactDispatch() {
+            alert('📞 Contact Information:\n\nDispatch: (555) 123-4567\nEmail: dispatch@company.com\n\nOr ask your supervisor to add you to the driver list.');
+        }
+
+        function showAdminPanel() {
+            if (confirm('Open Admin Panel in new tab?')) {
+                // Try to open admin panel
+                const adminUrl = window.location.origin + '/admin.html';
+                window.open(adminUrl, '_blank');
+            }
+        }
+
+        // Handle Enter key for login
         document.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && !document.getElementById('loginScreen').classList.contains('hidden')) {
-                selectDriver();
+            if (e.key === 'Enter') {
+                const loginScreen = document.getElementById('loginScreen');
+                if (!loginScreen.classList.contains('hidden')) {
+                    selectDriver();
+                }
+            }
+        });
+
+        // Handle visibility changes (app focus/blur)
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden && currentDriver) {
+                // App became visible, refresh time
+                updateTime();
+            }
+        });
+
+        // Handle online/offline status
+        window.addEventListener('online', function() {
+            if (CONNECTION_MODE === 'api') {
+                updateConnectionStatus('connected');
+                showMessage('statusMessage', '🟢 Connection restored', 'success');
+            }
+        });
+
+        window.addEventListener('offline', function() {
+            if (CONNECTION_MODE === 'api') {
+                updateConnectionStatus('disconnected');
+                showMessage('statusMessage', '🔴 Working offline', 'warning');
             }
         });
     </script>
