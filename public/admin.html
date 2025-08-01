@@ -628,6 +628,7 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script>
         // Global variables
         let authToken = null;
@@ -956,32 +957,60 @@
             const report = allInspectionReports.find(r => r._id === reportId);
             if (!report) return;
 
-            showMessage('inspectionMessage', `📄 Downloading report for ${report.driver}...`, 'info');
+            showMessage('inspectionMessage', `📄 Generating PDF for ${report.driver}...`, 'info');
 
-            const reportContent = `VEHICLE INSPECTION REPORT
-============================
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
 
-Driver: ${report.driver}
-Date: ${new Date(report.checkInTime).toLocaleString()}
-Vehicle: ${report.tractorNumber} / ${report.trailerNumber}
-Status: ${report.status}
+                // Header
+                doc.setFontSize(20);
+                doc.setFont(undefined, 'bold');
+                doc.text('VEHICLE INSPECTION REPORT', 105, 20, { align: 'center' });
 
-Issues/Damage: ${report.damageFound || 'None reported'}
+                // Driver info
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'normal');
+                doc.text(`Driver: ${report.driver}`, 20, 40);
+                doc.text(`Check-in Time: ${new Date(report.checkInTime).toLocaleString()}`, 20, 50);
+                doc.text(`Report Generated: ${new Date().toLocaleString()}`, 20, 60);
 
-Report generated: ${new Date().toLocaleString()}
-`;
+                // Vehicle Information
+                doc.setFont(undefined, 'bold');
+                doc.text('VEHICLE INFORMATION', 20, 80);
+                doc.setFont(undefined, 'normal');
+                doc.text(`Tractor Number: ${report.tractorNumber || 'N/A'}`, 20, 90);
+                doc.text(`Trailer Number: ${report.trailerNumber || 'N/A'}`, 20, 100);
 
-            const blob = new Blob([reportContent], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `inspection_${report.driver.replace(/\s+/g, '_')}_${new Date(report.checkInTime).toISOString().slice(0,10)}.txt`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+                // Status
+                doc.setFont(undefined, 'bold');
+                doc.text('INSPECTION STATUS', 20, 120);
+                doc.setFont(undefined, 'normal');
+                doc.text(`Overall Status: ${report.status.toUpperCase()}`, 20, 130);
 
-            showMessage('inspectionMessage', `✅ Report downloaded successfully`, 'success');
+                // Issues
+                if (report.damageFound) {
+                    doc.setFont(undefined, 'bold');
+                    doc.text('ISSUES FOUND', 20, 150);
+                    doc.setFont(undefined, 'normal');
+                    const issueLines = doc.splitTextToSize(report.damageFound, 170);
+                    doc.text(issueLines, 20, 160);
+                } else {
+                    doc.setFont(undefined, 'bold');
+                    doc.text('NO ISSUES FOUND', 20, 150);
+                    doc.setFont(undefined, 'normal');
+                    doc.text('Vehicle passed inspection with no issues reported.', 20, 160);
+                }
+
+                // Download PDF
+                const filename = `inspection_${report.driver.replace(/\s+/g, '_')}_${new Date(report.checkInTime).toISOString().slice(0,10)}.pdf`;
+                doc.save(filename);
+                
+                showMessage('inspectionMessage', `✅ PDF downloaded: ${filename}`, 'success');
+            } catch (error) {
+                console.error('PDF generation error:', error);
+                showMessage('inspectionMessage', '❌ Error generating PDF. Check if jsPDF is loaded.', 'error');
+            }
         }
 
         // Export functions
@@ -1013,91 +1042,170 @@ Report generated: ${new Date().toLocaleString()}
         }
 
         function generateSummaryReport() {
-            showMessage('inspectionMessage', '📑 Generating summary report...', 'info');
+            showMessage('inspectionMessage', '📑 Generating summary PDF...', 'info');
             
-            const total = allInspectionReports.length;
-            const good = allInspectionReports.filter(r => r.status === 'good').length;
-            const issues = allInspectionReports.filter(r => r.status === 'issues').length;
-            const critical = allInspectionReports.filter(r => r.status === 'critical').length;
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
 
-            const summaryContent = `INSPECTION REPORTS SUMMARY
-=========================
+                // Header
+                doc.setFontSize(20);
+                doc.setFont(undefined, 'bold');
+                doc.text('INSPECTION REPORTS SUMMARY', 105, 20, { align: 'center' });
 
-Generated: ${new Date().toLocaleString()}
+                // Summary stats
+                doc.setFontSize(14);
+                doc.setFont(undefined, 'bold');
+                doc.text('SUMMARY STATISTICS', 20, 40);
+                
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'normal');
+                const total = allInspectionReports.length;
+                const good = allInspectionReports.filter(r => r.status === 'good').length;
+                const issues = allInspectionReports.filter(r => r.status === 'issues').length;
+                const critical = allInspectionReports.filter(r => r.status === 'critical').length;
+                
+                doc.text(`Total Reports: ${total}`, 20, 55);
+                doc.text(`No Issues: ${good} (${Math.round(good/total*100)}%)`, 20, 65);
+                doc.text(`Minor Issues: ${issues} (${Math.round(issues/total*100)}%)`, 20, 75);
+                doc.text(`Critical Issues: ${critical} (${Math.round(critical/total*100)}%)`, 20, 85);
 
-SUMMARY STATISTICS
-------------------
-Total Reports: ${total}
-No Issues: ${good} (${Math.round(good/total*100)}%)
-Minor Issues: ${issues} (${Math.round(issues/total*100)}%)
-Critical Issues: ${critical} (${Math.round(critical/total*100)}%)
+                // Recent reports
+                doc.setFont(undefined, 'bold');
+                doc.text('RECENT REPORTS', 20, 105);
+                
+                let yPos = 120;
+                const recentReports = filteredReports.slice(0, 10);
+                recentReports.forEach(report => {
+                    doc.setFont(undefined, 'normal');
+                    const date = new Date(report.checkInTime).toLocaleDateString();
+                    const status = report.status === 'good' ? '✓' : report.status === 'issues' ? '⚠' : '✗';
+                    doc.text(`${date} - ${report.driver} (${report.tractorNumber}) ${status}`, 20, yPos);
+                    yPos += 10;
+                });
 
-RECENT REPORTS
---------------
-${filteredReports.slice(0, 10).map(report => {
-    const date = new Date(report.checkInTime).toLocaleDateString();
-    const status = report.status === 'good' ? '✓' : report.status === 'issues' ? '⚠' : '✗';
-    return `${date} - ${report.driver} (${report.tractorNumber}) ${status}`;
-}).join('\n')}
-`;
-
-            const blob = new Blob([summaryContent], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `inspection_summary_${new Date().toISOString().slice(0,10)}.txt`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-
-            showMessage('inspectionMessage', `✅ Summary report downloaded successfully`, 'success');
+                // Download PDF
+                const filename = `inspection_summary_${new Date().toISOString().slice(0,10)}.pdf`;
+                doc.save(filename);
+                
+                showMessage('inspectionMessage', `✅ Summary PDF downloaded: ${filename}`, 'success');
+            } catch (error) {
+                console.error('PDF generation error:', error);
+                showMessage('inspectionMessage', '❌ Error generating PDF. Check if jsPDF is loaded.', 'error');
+            }
         }
 
         function generateMaintenanceReport() {
-            showMessage('inspectionMessage', '🔧 Generating maintenance report...', 'info');
+            showMessage('inspectionMessage', '🔧 Generating maintenance PDF...', 'info');
             
-            const maintenanceNeeds = allInspectionReports.filter(r => r.status === 'issues' || r.status === 'critical');
-            
-            const maintenanceContent = `MAINTENANCE REPORT
-==================
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
 
-Generated: ${new Date().toLocaleString()}
+                // Header
+                doc.setFontSize(20);
+                doc.setFont(undefined, 'bold');
+                doc.text('MAINTENANCE REPORT', 105, 20, { align: 'center' });
 
-VEHICLES REQUIRING MAINTENANCE
-------------------------------
-${maintenanceNeeds.length === 0 ? 'No vehicles currently require maintenance.' :
-maintenanceNeeds.map(vehicle => `
-Vehicle: ${vehicle.tractorNumber} / ${vehicle.trailerNumber}
-Driver: ${vehicle.driver}
-Priority: ${vehicle.status === 'critical' ? 'URGENT' : 'MODERATE'}
-Issues: ${vehicle.damageFound}
-Date: ${new Date(vehicle.checkInTime).toLocaleDateString()}
-`).join('\n')}
-`;
+                // Process maintenance needs
+                const maintenanceNeeds = allInspectionReports.filter(r => r.status === 'issues' || r.status === 'critical');
+                
+                doc.setFontSize(14);
+                doc.setFont(undefined, 'bold');
+                doc.text('VEHICLES REQUIRING MAINTENANCE', 20, 40);
+                
+                let yPos = 55;
+                
+                if (maintenanceNeeds.length === 0) {
+                    doc.setFont(undefined, 'normal');
+                    doc.text('No vehicles currently require maintenance based on inspection reports.', 20, yPos);
+                } else {
+                    maintenanceNeeds.forEach(vehicle => {
+                        doc.setFont(undefined, 'bold');
+                        doc.text(`Vehicle: ${vehicle.tractorNumber} / ${vehicle.trailerNumber}`, 20, yPos);
+                        yPos += 10;
+                        
+                        doc.setFont(undefined, 'normal');
+                        doc.text(`Priority: ${vehicle.status === 'critical' ? 'URGENT' : 'MODERATE'}`, 30, yPos);
+                        yPos += 8;
+                        doc.text(`Driver: ${vehicle.driver}`, 30, yPos);
+                        yPos += 8;
+                        doc.text(`Date: ${new Date(vehicle.checkInTime).toLocaleDateString()}`, 30, yPos);
+                        yPos += 8;
+                        const issueLines = doc.splitTextToSize(`Issues: ${vehicle.damageFound}`, 150);
+                        doc.text(issueLines, 30, yPos);
+                        yPos += (issueLines.length * 5) + 10;
+                        
+                        if (yPos > 250) {
+                            doc.addPage();
+                            yPos = 20;
+                        }
+                    });
+                }
 
-            const blob = new Blob([maintenanceContent], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `maintenance_report_${new Date().toISOString().slice(0,10)}.txt`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-
-            showMessage('inspectionMessage', `✅ Maintenance report downloaded successfully`, 'success');
+                // Download PDF
+                const filename = `maintenance_report_${new Date().toISOString().slice(0,10)}.pdf`;
+                doc.save(filename);
+                
+                showMessage('inspectionMessage', `✅ Maintenance PDF downloaded: ${filename}`, 'success');
+            } catch (error) {
+                console.error('PDF generation error:', error);
+                showMessage('inspectionMessage', '❌ Error generating PDF. Check if jsPDF is loaded.', 'error');
+            }
         }
 
         // Maintenance tracker functions
         function loadMaintenanceData() {
             showMessage('maintenanceMessage', 'Loading maintenance data...', 'info');
             
+            // Ensure we have inspection data first
+            if (allInspectionReports.length === 0) {
+                // Load demo inspection data if not already loaded
+                allInspectionReports = [
+                    {
+                        _id: 'demo1',
+                        driver: 'John Smith',
+                        checkInTime: new Date(Date.now() - 86400000).toISOString(),
+                        tractorNumber: 'T-001',
+                        trailerNumber: 'TR-105',
+                        status: 'issues',
+                        damageFound: 'Small scratch on trailer side panel'
+                    },
+                    {
+                        _id: 'demo2',
+                        driver: 'Sarah Johnson',
+                        checkInTime: new Date(Date.now() - 172800000).toISOString(),
+                        tractorNumber: 'T-003',
+                        trailerNumber: 'TR-108',
+                        status: 'good',
+                        damageFound: ''
+                    },
+                    {
+                        _id: 'demo3',
+                        driver: 'Mike Davis',
+                        checkInTime: new Date(Date.now() - 259200000).toISOString(),
+                        tractorNumber: 'T-007',
+                        trailerNumber: 'TR-201',
+                        status: 'critical',
+                        damageFound: 'Hydraulic leak detected, tire wear on front right'
+                    },
+                    {
+                        _id: 'demo4',
+                        driver: 'Lisa Wilson',
+                        checkInTime: new Date(Date.now() - 345600000).toISOString(),
+                        tractorNumber: 'T-012',
+                        trailerNumber: 'TR-304',
+                        status: 'issues',
+                        damageFound: 'Brake pad wear, needs replacement soon'
+                    }
+                ];
+            }
+            
             const maintenanceNeeds = allInspectionReports.filter(r => r.status === 'issues' || r.status === 'critical');
             displayMaintenanceData(maintenanceNeeds);
             updateMaintenanceStats(maintenanceNeeds);
             
-            showMessage('maintenanceMessage', '✅ Maintenance data loaded successfully', 'success');
+            showMessage('maintenanceMessage', `✅ Loaded ${maintenanceNeeds.length} vehicles requiring maintenance`, 'success');
         }
 
         function displayMaintenanceData(maintenanceNeeds) {
@@ -1156,11 +1264,38 @@ Date: ${new Date(vehicle.checkInTime).toLocaleDateString()}
         }
 
         function scheduleRepair(vehicleId) {
-            showMessage('maintenanceMessage', `📅 Repair scheduled for vehicle ${vehicleId}`, 'success');
+            const scheduledDate = prompt(`Schedule repair for vehicle ${vehicleId}.\n\nEnter scheduled date (YYYY-MM-DD):`);
+            
+            if (scheduledDate) {
+                // Store the scheduled repair
+                const repair = {
+                    vehicleId: vehicleId,
+                    scheduledDate: scheduledDate,
+                    status: 'scheduled',
+                    scheduledBy: 'Admin',
+                    scheduledOn: new Date().toISOString()
+                };
+                
+                // Store in localStorage for demo purposes
+                let scheduledRepairs = JSON.parse(localStorage.getItem('scheduledRepairs') || '[]');
+                scheduledRepairs.push(repair);
+                localStorage.setItem('scheduledRepairs', JSON.stringify(scheduledRepairs));
+                
+                showMessage('maintenanceMessage', `📅 Repair scheduled for vehicle ${vehicleId} on ${scheduledDate}`, 'success');
+                
+                // Update the maintenance item to show it's scheduled
+                const maintenanceItem = document.querySelector(`button[onclick="scheduleRepair('${vehicleId}')"]`).closest('.maintenance-item');
+                if (maintenanceItem) {
+                    const statusSpan = maintenanceItem.querySelector('span');
+                    statusSpan.style.background = '#d1ecf1';
+                    statusSpan.style.color = '#0c5460';
+                    statusSpan.textContent = 'SCHEDULED';
+                }
+            }
         }
 
         function markCompleted(vehicleId) {
-            if (confirm(`Mark maintenance as completed for vehicle ${vehicleId}?`)) {
+            if (confirm(`Mark maintenance as completed for vehicle ${vehicleId}?\n\nThis will update the vehicle status to "Good" and remove it from the maintenance list.`)) {
                 // Update the vehicle status to good
                 allInspectionReports.forEach(report => {
                     if (report.tractorNumber === vehicleId || report.trailerNumber === vehicleId) {
@@ -1168,50 +1303,87 @@ Date: ${new Date(vehicle.checkInTime).toLocaleDateString()}
                         report.damageFound = '';
                     }
                 });
+                
+                // Remove from scheduled repairs if it exists
+                let scheduledRepairs = JSON.parse(localStorage.getItem('scheduledRepairs') || '[]');
+                scheduledRepairs = scheduledRepairs.filter(repair => repair.vehicleId !== vehicleId);
+                localStorage.setItem('scheduledRepairs', JSON.stringify(scheduledRepairs));
+                
+                // Reload maintenance data to reflect changes
                 loadMaintenanceData();
-                showMessage('maintenanceMessage', `✅ Maintenance completed for vehicle ${vehicleId}`, 'success');
+                
+                showMessage('maintenanceMessage', `✅ Maintenance completed for vehicle ${vehicleId}. Vehicle status updated to "Good".`, 'success');
             }
         }
 
         function exportMaintenanceReport() {
-            showMessage('maintenanceMessage', '📊 Generating maintenance export...', 'info');
+            showMessage('maintenanceMessage', '📊 Generating maintenance PDF export...', 'info');
             
-            const maintenanceNeeds = allInspectionReports.filter(r => r.status === 'issues' || r.status === 'critical');
-            
-            const maintenanceContent = `MAINTENANCE EXPORT REPORT
-=========================
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
 
-Generated: ${new Date().toLocaleString()}
+                // Header
+                doc.setFontSize(20);
+                doc.setFont(undefined, 'bold');
+                doc.text('MAINTENANCE EXPORT REPORT', 105, 20, { align: 'center' });
 
-MAINTENANCE SUMMARY
--------------------
-Total Vehicles: ${new Set(allInspectionReports.map(r => r.tractorNumber || r.trailerNumber)).size}
-Vehicles Needing Maintenance: ${maintenanceNeeds.length}
-Critical Issues: ${maintenanceNeeds.filter(v => v.status === 'critical').length}
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'normal');
+                doc.text(`Generated: ${new Date().toLocaleString()}`, 20, 35);
 
-DETAILED MAINTENANCE LIST
--------------------------
-${maintenanceNeeds.length === 0 ? 'No vehicles currently require maintenance.' :
-maintenanceNeeds.map(vehicle => `
-Vehicle: ${vehicle.tractorNumber} / ${vehicle.trailerNumber}
-Priority: ${vehicle.status === 'critical' ? 'CRITICAL' : 'MODERATE'}
-Driver: ${vehicle.driver}
-Date: ${new Date(vehicle.checkInTime).toLocaleDateString()}
-Issues: ${vehicle.damageFound}
-`).join('\n')}
-`;
+                const maintenanceNeeds = allInspectionReports.filter(r => r.status === 'issues' || r.status === 'critical');
 
-            const blob = new Blob([maintenanceContent], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `maintenance_export_${new Date().toISOString().slice(0,10)}.txt`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+                // Summary
+                doc.setFont(undefined, 'bold');
+                doc.text('MAINTENANCE SUMMARY', 20, 50);
+                doc.setFont(undefined, 'normal');
+                doc.text(`Total Vehicles: ${new Set(allInspectionReports.map(r => r.tractorNumber || r.trailerNumber)).size}`, 20, 65);
+                doc.text(`Vehicles Needing Maintenance: ${maintenanceNeeds.length}`, 20, 75);
+                doc.text(`Critical Issues: ${maintenanceNeeds.filter(v => v.status === 'critical').length}`, 20, 85);
 
-            showMessage('maintenanceMessage', `✅ Maintenance report exported successfully`, 'success');
+                // Detailed list
+                let yPos = 105;
+                doc.setFont(undefined, 'bold');
+                doc.text('DETAILED MAINTENANCE LIST', 20, yPos);
+                yPos += 15;
+
+                if (maintenanceNeeds.length === 0) {
+                    doc.setFont(undefined, 'normal');
+                    doc.text('No vehicles currently require maintenance.', 20, yPos);
+                } else {
+                    maintenanceNeeds.forEach(vehicle => {
+                        doc.setFont(undefined, 'bold');
+                        doc.text(`Vehicle: ${vehicle.tractorNumber} / ${vehicle.trailerNumber}`, 20, yPos);
+                        yPos += 8;
+                        
+                        doc.setFont(undefined, 'normal');
+                        doc.text(`Priority: ${vehicle.status === 'critical' ? 'CRITICAL' : 'MODERATE'}`, 30, yPos);
+                        yPos += 6;
+                        doc.text(`Driver: ${vehicle.driver}`, 30, yPos);
+                        yPos += 6;
+                        doc.text(`Date: ${new Date(vehicle.checkInTime).toLocaleDateString()}`, 30, yPos);
+                        yPos += 6;
+                        const issueLines = doc.splitTextToSize(`Issues: ${vehicle.damageFound}`, 150);
+                        doc.text(issueLines, 30, yPos);
+                        yPos += (issueLines.length * 5) + 10;
+                        
+                        if (yPos > 260) {
+                            doc.addPage();
+                            yPos = 20;
+                        }
+                    });
+                }
+
+                // Download PDF
+                const filename = `maintenance_export_${new Date().toISOString().slice(0,10)}.pdf`;
+                doc.save(filename);
+                
+                showMessage('maintenanceMessage', `✅ Maintenance PDF exported: ${filename}`, 'success');
+            } catch (error) {
+                console.error('Export error:', error);
+                showMessage('maintenanceMessage', '❌ Error exporting PDF. Check if jsPDF is loaded.', 'error');
+            }
         }
 
         // Utility function to show messages
