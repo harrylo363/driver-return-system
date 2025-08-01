@@ -1711,3 +1711,1040 @@
                     <div class="data-info">
                         <div style="font-weight: 600;">${activity.icon} ${activity.message}</div>
                         <div style="font-size: 12px; color: #666; margin-top: 5px;">${activity.time}</div>
+                    </div>
+                </div>
+            `).join('');
+            
+            activityContainer.innerHTML = activityHTML;
+        }
+
+        // User Management Functions
+        async function loadUsers() {
+            try {
+                showMessage('userMessage', '👥 Loading users...', 'info');
+                
+                if (AppState.connectionStatus === 'connected' && AppState.authToken !== 'demo-token') {
+                    const response = await APIClient.get('/users');
+                    AppState.users = response.users || response || [];
+                } else {
+                    // Demo data fallback
+                    AppState.users = [
+                        { _id: 'user1', username: 'admin', email: 'admin@company.com', role: 'admin', createdAt: new Date(Date.now() - 86400000 * 30).toISOString(), lastLogin: new Date().toISOString() },
+                        { _id: 'user2', username: 'dispatcher1', email: 'dispatch@company.com', role: 'dispatcher', createdAt: new Date(Date.now() - 86400000 * 25).toISOString(), lastLogin: new Date(Date.now() - 3600000).toISOString() },
+                        { _id: 'user3', username: 'John Smith', email: 'john.smith@company.com', role: 'driver', createdAt: new Date(Date.now() - 86400000 * 20).toISOString(), lastLogin: new Date(Date.now() - 7200000).toISOString() },
+                        { _id: 'user4', username: 'Sarah Johnson', email: 'sarah.johnson@company.com', role: 'driver', createdAt: new Date(Date.now() - 86400000 * 15).toISOString(), lastLogin: new Date(Date.now() - 1800000).toISOString() },
+                        { _id: 'user5', username: 'Mike Davis', email: 'mike.davis@company.com', role: 'driver', createdAt: new Date(Date.now() - 86400000 * 10).toISOString(), lastLogin: new Date(Date.now() - 3600000).toISOString() },
+                        { _id: 'user6', username: 'Lisa Wilson', email: 'lisa.wilson@company.com', role: 'driver', createdAt: new Date(Date.now() - 86400000 * 5).toISOString(), lastLogin: new Date(Date.now() - 900000).toISOString() }
+                    ];
+                }
+                
+                displayUsers();
+                updateUserStats();
+                updateDashboardStats();
+                showMessage('userMessage', `✅ Loaded ${AppState.users.length} users successfully`, 'success');
+                
+            } catch (error) {
+                console.error('Error loading users:', error);
+                showMessage('userMessage', `❌ Error loading users: ${error.message}`, 'error');
+            }
+        }
+
+        async function createUser() {
+            const username = document.getElementById('newUsername').value.trim();
+            const email = document.getElementById('newEmail').value.trim();
+            const password = document.getElementById('newPassword').value.trim();
+            const role = document.getElementById('newRole').value;
+
+            if (!username || !password) {
+                showMessage('userMessage', 'Username and password are required', 'error');
+                return;
+            }
+
+            // Check for duplicate usernames
+            if (AppState.users.some(user => user.username.toLowerCase() === username.toLowerCase())) {
+                showMessage('userMessage', 'Username already exists. Please choose a different username.', 'error');
+                return;
+            }
+
+            const createBtn = document.getElementById('createUserBtn');
+            createBtn.classList.add('loading');
+            createBtn.disabled = true;
+
+            try {
+                const userData = {
+                    username,
+                    email: email || `${username.toLowerCase().replace(/\s+/g, '.')}@company.com`,
+                    password,
+                    role
+                };
+
+                let newUser;
+                if (AppState.connectionStatus === 'connected' && AppState.authToken !== 'demo-token') {
+                    const response = await APIClient.post('/users', userData);
+                    newUser = response.user || response;
+                } else {
+                    // Demo mode
+                    newUser = {
+                        _id: generateId(),
+                        ...userData,
+                        createdAt: new Date().toISOString(),
+                        lastLogin: null
+                    };
+                    AppState.users.push(newUser);
+                }
+
+                // Clear form
+                document.getElementById('newUsername').value = '';
+                document.getElementById('newEmail').value = '';
+                document.getElementById('newPassword').value = '';
+                
+                displayUsers();
+                updateUserStats();
+                updateDashboardStats();
+                showMessage('userMessage', `✅ ${role.charAt(0).toUpperCase() + role.slice(1)} "${username}" created successfully!`, 'success');
+                
+            } catch (error) {
+                console.error('Error creating user:', error);
+                showMessage('userMessage', `❌ Error creating user: ${error.message}`, 'error');
+            } finally {
+                createBtn.classList.remove('loading');
+                createBtn.disabled = false;
+            }
+        }
+
+        function displayUsers() {
+            const usersList = document.getElementById('usersList');
+            const searchTerm = document.getElementById('userSearch')?.value.toLowerCase() || '';
+            
+            let usersToShow = AppState.users;
+            if (searchTerm) {
+                usersToShow = AppState.users.filter(user => 
+                    user.username.toLowerCase().includes(searchTerm) ||
+                    user.email.toLowerCase().includes(searchTerm) ||
+                    user.role.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            if (usersToShow.length === 0) {
+                usersList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">👥</div>
+                        <h3>${searchTerm ? 'No matching users' : 'No users found'}</h3>
+                        <p>${searchTerm ? 'Try adjusting your search terms' : 'Click "Refresh Users" to load user data'}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const usersHTML = usersToShow.map(user => `
+                <div class="data-item ${user.role}">
+                    <div class="data-info">
+                        <div style="font-weight: bold; font-size: 16px; margin-bottom: 6px;">${user.username}</div>
+                        <div style="color: #666; font-size: 14px; margin-bottom: 8px;">${user.email}</div>
+                        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                            <span class="status-badge" style="background: ${getRoleColor(user.role)}; color: ${getRoleTextColor(user.role)};">${user.role}</span>
+                            ${user.createdAt ? `<span style="color: #888; font-size: 11px;">📅 ${new Date(user.createdAt).toLocaleDateString()}</span>` : ''}
+                            ${user.lastLogin ? `<span style="color: #28a745; font-size: 11px;">🟢 ${formatDate(user.lastLogin)}</span>` : '<span style="color: #dc3545; font-size: 11px;">🔴 Never</span>'}
+                        </div>
+                    </div>
+                    <div class="data-actions">
+                        <button onclick="viewUser('${user._id}')" style="background: #17a2b8; color: white;">👁️ View</button>
+                        <button onclick="editUser('${user._id}')" style="background: #ffc107; color: #212529;">✏️ Edit</button>
+                        <button onclick="deleteUser('${user._id}', '${user.username}')" style="background: #dc3545; color: white;">🗑️ Delete</button>
+                    </div>
+                </div>
+            `).join('');
+
+            usersList.innerHTML = usersHTML;
+        }
+
+        function filterUsers() {
+            displayUsers();
+        }
+
+        function getRoleColor(role) {
+            switch(role) {
+                case 'admin': return '#f8d7da';
+                case 'dispatcher': return '#fff3cd';
+                case 'driver': return '#d4edda';
+                default: return '#e9ecef';
+            }
+        }
+
+        function getRoleTextColor(role) {
+            switch(role) {
+                case 'admin': return '#721c24';
+                case 'dispatcher': return '#856404';
+                case 'driver': return '#155724';
+                default: return '#495057';
+            }
+        }
+
+        function updateUserStats() {
+            const totalUsers = AppState.users.length;
+            const totalDrivers = AppState.users.filter(u => u.role === 'driver').length;
+            const totalDispatchers = AppState.users.filter(u => u.role === 'dispatcher').length;
+            const totalAdmins = AppState.users.filter(u => u.role === 'admin').length;
+
+            document.getElementById('totalUsers').textContent = totalUsers;
+            document.getElementById('totalDrivers').textContent = totalDrivers;
+            document.getElementById('totalDispatchers').textContent = totalDispatchers;
+            document.getElementById('totalAdmins').textContent = totalAdmins;
+        }
+
+        function viewUser(userId) {
+            const user = AppState.users.find(u => u._id === userId);
+            if (!user) return;
+
+            const modalContent = `
+                <div style="text-align: left;">
+                    <div class="grid" style="gap: 20px;">
+                        <div>
+                            <h4>👤 User Information</h4>
+                            <div style="margin: 15px 0;">
+                                <strong>Username:</strong> ${user.username}
+                            </div>
+                            <div style="margin: 15px 0;">
+                                <strong>Email:</strong> ${user.email}
+                            </div>
+                            <div style="margin: 15px 0;">
+                                <strong>Role:</strong> <span class="status-badge" style="background: ${getRoleColor(user.role)}; color: ${getRoleTextColor(user.role)};">${user.role}</span>
+                            </div>
+                        </div>
+                        <div>
+                            <h4>📊 Activity</h4>
+                            ${user.createdAt ? `<div style="margin: 15px 0;"><strong>Created:</strong> ${formatDate(user.createdAt)}</div>` : ''}
+                            ${user.lastLogin ? `<div style="margin: 15px 0;"><strong>Last Login:</strong> ${formatDate(user.lastLogin)}</div>` : '<div style="margin: 15px 0;"><strong>Last Login:</strong> <span style="color: #dc3545;">Never</span></div>'}
+                            <div style="margin: 15px 0;">
+                                <strong>Status:</strong> <span style="color: #28a745; font-weight: bold;">✅ Active</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            showModal('User Details', user.username, modalContent, 'Edit User', () => editUser(userId));
+        }
+
+        async function editUser(userId) {
+            const user = AppState.users.find(u => u._id === userId);
+            if (!user) return;
+
+            const newUsername = prompt(`Edit username for ${user.username}:`, user.username);
+            if (!newUsername || newUsername.trim() === user.username) return;
+
+            const trimmedUsername = newUsername.trim();
+            
+            // Check for duplicates
+            if (AppState.users.some(u => u._id !== userId && u.username.toLowerCase() === trimmedUsername.toLowerCase())) {
+                showMessage('userMessage', 'Username already exists. Please choose a different username.', 'error');
+                return;
+            }
+
+            try {
+                if (AppState.connectionStatus === 'connected' && AppState.authToken !== 'demo-token') {
+                    await APIClient.put(`/users/${userId}`, { username: trimmedUsername });
+                }
+                
+                user.username = trimmedUsername;
+                displayUsers();
+                closeModal();
+                showMessage('userMessage', `✅ User updated to "${trimmedUsername}"`, 'success');
+                
+            } catch (error) {
+                console.error('Error updating user:', error);
+                showMessage('userMessage', `❌ Error updating user: ${error.message}`, 'error');
+            }
+        }
+
+        async function deleteUser(userId, username) {
+            if (!confirm(`Delete user "${username}"?\n\nThis action cannot be undone and will remove all associated data.`)) {
+                return;
+            }
+
+            try {
+                if (AppState.connectionStatus === 'connected' && AppState.authToken !== 'demo-token') {
+                    await APIClient.delete(`/users/${userId}`);
+                }
+                
+                AppState.users = AppState.users.filter(user => user._id !== userId);
+                displayUsers();
+                updateUserStats();
+                updateDashboardStats();
+                showMessage('userMessage', `✅ User "${username}" deleted successfully`, 'success');
+                
+            } catch (error) {
+                console.error('Error deleting user:', error);
+                showMessage('userMessage', `❌ Error deleting user: ${error.message}`, 'error');
+            }
+        }
+
+        // Inspection Reports Functions
+        async function loadInspectionReports() {
+            try {
+                showMessage('inspectionMessage', '🚛 Loading inspection reports...', 'info');
+                
+                if (AppState.connectionStatus === 'connected' && AppState.authToken !== 'demo-token') {
+                    const response = await APIClient.get('/inspections');
+                    AppState.inspectionReports = response.reports || response || [];
+                } else {
+                    // Demo data
+                    AppState.inspectionReports = generateDemoInspectionData();
+                }
+                
+                filterReports();
+                updateInspectionStats();
+                updateDashboardStats();
+                showMessage('inspectionMessage', `✅ Loaded ${AppState.inspectionReports.length} inspection reports`, 'success');
+                
+            } catch (error) {
+                console.error('Error loading inspection reports:', error);
+                showMessage('inspectionMessage', `❌ Error loading reports: ${error.message}`, 'error');
+            }
+        }
+
+        function generateDemoInspectionData() {
+            const drivers = ['John Smith', 'Sarah Johnson', 'Mike Davis', 'Lisa Wilson', 'Tom Anderson', 'Emily Brown'];
+            const statuses = ['good', 'issues', 'critical'];
+            const tractors = ['T-001', 'T-003', 'T-007', 'T-012', 'T-015', 'T-018', 'T-021', 'T-025'];
+            const trailers = ['TR-105', 'TR-108', 'TR-201', 'TR-304', 'TR-210', 'TR-150', 'TR-275', 'TR-320'];
+            const locations = ['Main Depot', 'North Terminal', 'South Hub', 'East Facility', 'West Gate'];
+            
+            const issues = {
+                good: [''],
+                issues: [
+                    'Minor tire wear on rear axle',
+                    'Small scratch on trailer side panel',
+                    'Brake pad wear, replacement recommended',
+                    'Oil leak, minor maintenance required',
+                    'Air filter needs replacement',
+                    'Minor electrical issue with turn signals'
+                ],
+                critical: [
+                    'Hydraulic leak detected, immediate attention required',
+                    'Severe tire wear, unsafe for operation',
+                    'Brake system failure, vehicle out of service',
+                    'Engine overheating, transmission problems',
+                    'Structural damage to trailer frame',
+                    'Critical electrical system failure'
+                ]
+            };
+
+            const reports = [];
+            for (let i = 0; i < 30; i++) {
+                const status = statuses[Math.floor(Math.random() * statuses.length)];
+                const checkInTime = new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000);
+                
+                reports.push({
+                    _id: generateId(),
+                    driver: drivers[Math.floor(Math.random() * drivers.length)],
+                    checkInTime: checkInTime.toISOString(),
+                    tractorNumber: tractors[Math.floor(Math.random() * tractors.length)],
+                    trailerNumber: trailers[Math.floor(Math.random() * trailers.length)],
+                    status: status,
+                    damageFound: issues[status][Math.floor(Math.random() * issues[status].length)],
+                    mileage: Math.floor(Math.random() * 100000) + 50000,
+                    location: locations[Math.floor(Math.random() * locations.length)],
+                    inspectorNotes: status === 'critical' ? 'Immediate attention required' : status === 'issues' ? 'Schedule maintenance soon' : 'All systems operational'
+                });
+            }
+
+            return reports.sort((a, b) => new Date(b.checkInTime) - new Date(a.checkInTime));
+        }
+
+        function filterReports() {
+            const driverFilter = document.getElementById('searchDriver')?.value.toLowerCase() || '';
+            const vehicleFilter = document.getElementById('searchVehicle')?.value.toLowerCase() || '';
+            const statusFilter = document.getElementById('filterStatus')?.value || '';
+            const dateFilter = document.getElementById('dateFilter')?.value || '';
+
+            AppState.filters.inspections = {
+                driver: driverFilter,
+                vehicle: vehicleFilter,
+                status: statusFilter,
+                date: dateFilter
+            };
+
+            const filteredReports = AppState.inspectionReports.filter(report => {
+                // Driver filter
+                if (driverFilter && !report.driver.toLowerCase().includes(driverFilter)) {
+                    return false;
+                }
+                
+                // Vehicle filter
+                if (vehicleFilter) {
+                    const tractorMatch = report.tractorNumber && report.tractorNumber.toLowerCase().includes(vehicleFilter);
+                    const trailerMatch = report.trailerNumber && report.trailerNumber.toLowerCase().includes(vehicleFilter);
+                    if (!tractorMatch && !trailerMatch) {
+                        return false;
+                    }
+                }
+                
+                // Status filter
+                if (statusFilter && report.status !== statusFilter) {
+                    return false;
+                }
+                
+                // Date filter
+                if (dateFilter) {
+                    const reportDate = new Date(report.checkInTime);
+                    const now = new Date();
+                    
+                    switch(dateFilter) {
+                        case 'today':
+                            if (reportDate.toDateString() !== now.toDateString()) return false;
+                            break;
+                        case 'week':
+                            const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                            if (reportDate < weekAgo) return false;
+                            break;
+                        case 'month':
+                            const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                            if (reportDate < monthAgo) return false;
+                            break;
+                    }
+                }
+                
+                return true;
+            });
+
+            displayInspectionReports(filteredReports);
+        }
+
+        function displayInspectionReports(reports = null) {
+            const tbody = document.getElementById('reportsTableBody');
+            const reportsToShow = reports || AppState.inspectionReports;
+            
+            if (reportsToShow.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6">
+                            <div class="empty-state">
+                                <div class="icon">🚛</div>
+                                <h3>No inspection reports found</h3>
+                                <p>No reports match your search criteria or none have been loaded yet</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            const reportsHTML = reportsToShow.map(report => {
+                const date = new Date(report.checkInTime).toLocaleDateString();
+                const time = new Date(report.checkInTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                const statusBadge = getStatusBadge(report.status);
+                const issues = report.damageFound || 'None reported';
+                
+                return `
+                    <tr>
+                        <td>
+                            <div style="font-weight: bold;">${date}</div>
+                            <div style="font-size: 12px; color: #666;">${time}</div>
+                            ${report.location ? `<div style="font-size: 11px; color: #999;">📍 ${report.location}</div>` : ''}
+                        </td>
+                        <td>
+                            <div style="font-weight: bold;">${report.driver}</div>
+                            ${report.mileage ? `<div style="font-size: 12px; color: #666;">🛣️ ${report.mileage.toLocaleString()} mi</div>` : ''}
+                        </td>
+                        <td>
+                            <div style="font-size: 13px; color: #666;">🚛 ${report.tractorNumber || 'N/A'}</div>
+                            <div style="font-size: 13px; color: #666;">📦 ${report.trailerNumber || 'N/A'}</div>
+                        </td>
+                        <td>${statusBadge}</td>
+                        <td style="max-width: 250px;">
+                            <div style="overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                                ${issues}
+                            </div>
+                            ${report.inspectorNotes ? `<div style="font-size: 11px; color: #666; margin-top: 4px;">📝 ${report.inspectorNotes}</div>` : ''}
+                        </td>
+                        <td>
+                            <button onclick="viewReport('${report._id}')" style="background: #17a2b8; color: white; padding: 6px 12px; font-size: 12px; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 4px;">👁️ View</button>
+                            <button onclick="downloadReport('${report._id}')" style="background: #28a745; color: white; padding: 6px 12px; font-size: 12px; border: none; border-radius: 4px; cursor: pointer;">📄 Export</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            tbody.innerHTML = reportsHTML;
+        }
+
+        function getStatusBadge(status) {
+            switch(status) {
+                case 'good':
+                    return '<span class="status-badge status-good">✅ No Issues</span>';
+                case 'issues':
+                    return '<span class="status-badge status-issues">⚠️ Minor Issues</span>';
+                case 'critical':
+                    return '<span class="status-badge status-critical">🚨 Critical</span>';
+                default:
+                    return '<span class="status-badge status-good">✅ Good</span>';
+            }
+        }
+
+        function updateInspectionStats() {
+            const total = AppState.inspectionReports.length;
+            const good = AppState.inspectionReports.filter(r => r.status === 'good').length;
+            const issues = AppState.inspectionReports.filter(r => r.status === 'issues').length;
+            const critical = AppState.inspectionReports.filter(r => r.status === 'critical').length;
+
+            document.getElementById('totalReports').textContent = total;
+            document.getElementById('goodReports').textContent = good;
+            document.getElementById('issueReports').textContent = issues;
+            document.getElementById('criticalReports').textContent = critical;
+        }
+
+        function clearFilters() {
+            document.getElementById('searchDriver').value = '';
+            document.getElementById('searchVehicle').value = '';
+            document.getElementById('filterStatus').value = '';
+            document.getElementById('dateFilter').value = '';
+            filterReports();
+            showMessage('inspectionMessage', '🗑️ Search filters cleared', 'info');
+        }
+
+        function viewReport(reportId) {
+            const report = AppState.inspectionReports.find(r => r._id === reportId);
+            if (!report) return;
+
+            const modalContent = `
+                <div style="text-align: left;">
+                    <div class="grid" style="gap: 20px;">
+                        <div>
+                            <h4>🚛 Vehicle Information</h4>
+                            <div style="margin: 10px 0;"><strong>Tractor:</strong> ${report.tractorNumber || 'N/A'}</div>
+                            <div style="margin: 10px 0;"><strong>Trailer:</strong> ${report.trailerNumber || 'N/A'}</div>
+                            ${report.mileage ? `<div style="margin: 10px 0;"><strong>Mileage:</strong> ${report.mileage.toLocaleString()} mi</div>` : ''}
+                            ${report.location ? `<div style="margin: 10px 0;"><strong>Location:</strong> ${report.location}</div>` : ''}
+                            
+                            <h4 style="margin-top: 20px;">👤 Inspection Details</h4>
+                            <div style="margin: 10px 0;"><strong>Driver:</strong> ${report.driver}</div>
+                            <div style="margin: 10px 0;"><strong>Date & Time:</strong> ${formatDate(report.checkInTime)}</div>
+                            <div style="margin: 10px 0;"><strong>Status:</strong> ${getStatusBadge(report.status)}</div>
+                        </div>
+                        <div>
+                            <h4>⚠️ Issues & Notes</h4>
+                            <div style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                                <strong>Issues Found:</strong><br>
+                                ${report.damageFound || 'No issues reported - vehicle passed inspection'}
+                            </div>
+                            ${report.inspectorNotes ? `
+                                <div style="margin: 15px 0; padding: 15px; background: #e3f2fd; border-radius: 8px;">
+                                    <strong>Inspector Notes:</strong><br>
+                                    ${report.inspectorNotes}
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            showModal('Inspection Report Details', `${report.tractorNumber} / ${report.trailerNumber}`, modalContent, 'Export PDF', () => downloadReport(reportId));
+        }
+
+        // Maintenance Functions
+        async function loadMaintenanceData() {
+            try {
+                showMessage('maintenanceMessage', '🔧 Loading maintenance data...', 'info');
+                
+                // Generate maintenance items from inspection reports
+                const maintenanceNeeds = AppState.inspectionReports
+                    .filter(r => r.status === 'issues' || r.status === 'critical')
+                    .map(report => ({
+                        _id: `maint_${report._id}`,
+                        vehicleId: `${report.tractorNumber}/${report.trailerNumber}`,
+                        tractorNumber: report.tractorNumber,
+                        trailerNumber: report.trailerNumber,
+                        priority: report.status === 'critical' ? 'urgent' : 'moderate',
+                        issue: report.damageFound,
+                        reportDate: report.checkInTime,
+                        driver: report.driver,
+                        status: 'pending',
+                        estimatedCost: Math.floor(Math.random() * 5000) + 500,
+                        scheduledDate: null
+                    }));
+                
+                AppState.maintenanceItems = maintenanceNeeds;
+                displayMaintenanceData();
+                updateMaintenanceStats();
+                
+                showMessage('maintenanceMessage', `✅ Loaded ${maintenanceNeeds.length} maintenance items`, 'success');
+                
+            } catch (error) {
+                console.error('Error loading maintenance data:', error);
+                showMessage('maintenanceMessage', `❌ Error loading maintenance data: ${error.message}`, 'error');
+            }
+        }
+
+        function displayMaintenanceData() {
+            const container = document.getElementById('maintenanceList');
+            
+            if (AppState.maintenanceItems.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">🎉</div>
+                        <h3>No Maintenance Required</h3>
+                        <p>All vehicles are in good condition based on recent inspections</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const maintenanceHTML = AppState.maintenanceItems.map(item => {
+                const priorityClass = item.priority === 'urgent' ? 'critical' : 'issues';
+                const priorityIcon = item.priority === 'urgent' ? '🚨' : '⚠️';
+                
+                return `
+                    <div class="data-item ${priorityClass}">
+                        <div class="data-info">
+                            <div style="font-weight: bold; font-size: 16px; margin-bottom: 6px;">
+                                ${priorityIcon} Vehicle: ${item.vehicleId}
+                            </div>
+                            <div style="color: #666; font-size: 14px; margin-bottom: 6px;">
+                                Last Driver: ${item.driver} | Date: ${new Date(item.reportDate).toLocaleDateString()}
+                            </div>
+                            <div style="color: #333; font-size: 14px; margin-bottom: 10px;">
+                                <strong>Issues:</strong> ${item.issue}
+                            </div>
+                            <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
+                                <span class="status-badge" style="background: ${item.priority === 'urgent' ? '#f8d7da' : '#fff3cd'}; color: ${item.priority === 'urgent' ? '#721c24' : '#856404'};">
+                                    ${item.priority.toUpperCase()} Priority
+                                </span>
+                                <span style="font-size: 12px; color: #666;">💰 Est. Cost: ${item.estimatedCost.toLocaleString()}</span>
+                                ${item.scheduledDate ? `<span style="font-size: 12px; color: #28a745;">📅 Scheduled: ${new Date(item.scheduledDate).toLocaleDateString()}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="data-actions">
+                            <button onclick="scheduleRepair('${item._id}')" style="background: #28a745; color: white;" ${item.scheduledDate ? 'disabled' : ''}>
+                                📅 ${item.scheduledDate ? 'Scheduled' : 'Schedule'}
+                            </button>
+                            <button onclick="markCompleted('${item._id}')" style="background: #17a2b8; color: white;">✅ Complete</button>
+                            <button onclick="viewMaintenanceItem('${item._id}')" style="background: #ffc107; color: #212529;">👁️ Details</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = maintenanceHTML;
+        }
+
+        function updateMaintenanceStats() {
+            const totalVehicles = new Set([
+                ...AppState.inspectionReports.map(r => r.tractorNumber),
+                ...AppState.inspectionReports.map(r => r.trailerNumber)
+            ]).size;
+            
+            const maintenanceNeeded = AppState.maintenanceItems.length;
+            const urgent = AppState.maintenanceItems.filter(v => v.priority === 'urgent').length;
+            const scheduled = AppState.maintenanceItems.filter(v => v.scheduledDate).length;
+
+            document.getElementById('totalVehicles').textContent = totalVehicles;
+            document.getElementById('maintenanceNeeded').textContent = maintenanceNeeded;
+            document.getElementById('urgentRepairs').textContent = urgent;
+            document.getElementById('scheduledMaintenance').textContent = scheduled;
+        }
+
+        function scheduleRepair(itemId) {
+            const item = AppState.maintenanceItems.find(i => i._id === itemId);
+            if (!item) return;
+
+            const dateInput = prompt(`Schedule repair for ${item.vehicleId}\n\nEnter date (YYYY-MM-DD):`, 
+                new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+            
+            if (dateInput) {
+                const scheduledDate = new Date(dateInput);
+                if (scheduledDate > new Date()) {
+                    item.scheduledDate = scheduledDate.toISOString();
+                    displayMaintenanceData();
+                    updateMaintenanceStats();
+                    showMessage('maintenanceMessage', `📅 Repair scheduled for ${item.vehicleId} on ${scheduledDate.toLocaleDateString()}`, 'success');
+                } else {
+                    showMessage('maintenanceMessage', '❌ Please select a future date', 'error');
+                }
+            }
+        }
+
+        function markCompleted(itemId) {
+            const item = AppState.maintenanceItems.find(i => i._id === itemId);
+            if (!item) return;
+
+            if (confirm(`Mark maintenance as completed for ${item.vehicleId}?\n\nThis will remove it from the maintenance list and update the vehicle status.`)) {
+                // Remove from maintenance list
+                AppState.maintenanceItems = AppState.maintenanceItems.filter(i => i._id !== itemId);
+                
+                // Update corresponding inspection report
+                const report = AppState.inspectionReports.find(r => 
+                    r.tractorNumber === item.tractorNumber && r.trailerNumber === item.trailerNumber);
+                if (report) {
+                    report.status = 'good';
+                    report.damageFound = '';
+                }
+                
+                displayMaintenanceData();
+                updateMaintenanceStats();
+                updateInspectionStats();
+                updateDashboardStats();
+                showMessage('maintenanceMessage', `✅ Maintenance completed for ${item.vehicleId}`, 'success');
+            }
+        }
+
+        function viewMaintenanceItem(itemId) {
+            const item = AppState.maintenanceItems.find(i => i._id === itemId);
+            if (!item) return;
+
+            const modalContent = `
+                <div style="text-align: left;">
+                    <div class="grid" style="gap: 20px;">
+                        <div>
+                            <h4>🚛 Vehicle Information</h4>
+                            <div style="margin: 10px 0;"><strong>Vehicle ID:</strong> ${item.vehicleId}</div>
+                            <div style="margin: 10px 0;"><strong>Tractor:</strong> ${item.tractorNumber}</div>
+                            <div style="margin: 10px 0;"><strong>Trailer:</strong> ${item.trailerNumber}</div>
+                            <div style="margin: 10px 0;"><strong>Last Driver:</strong> ${item.driver}</div>
+                            <div style="margin: 10px 0;"><strong>Report Date:</strong> ${formatDate(item.reportDate)}</div>
+                        </div>
+                        <div>
+                            <h4>🔧 Maintenance Details</h4>
+                            <div style="margin: 10px 0;"><strong>Priority:</strong> 
+                                <span class="status-badge" style="background: ${item.priority === 'urgent' ? '#f8d7da' : '#fff3cd'}; color: ${item.priority === 'urgent' ? '#721c24' : '#856404'};">
+                                    ${item.priority.toUpperCase()}
+                                </span>
+                            </div>
+                            <div style="margin: 10px 0;"><strong>Estimated Cost:</strong> ${item.estimatedCost.toLocaleString()}</div>
+                            <div style="margin: 10px 0;"><strong>Status:</strong> ${item.status}</div>
+                            ${item.scheduledDate ? `<div style="margin: 10px 0;"><strong>Scheduled Date:</strong> ${formatDate(item.scheduledDate)}</div>` : ''}
+                        </div>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <h4>⚠️ Issues Reported</h4>
+                        <div style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                            ${item.issue}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            showModal('Maintenance Details', item.vehicleId, modalContent, 'Schedule Repair', () => scheduleRepair(itemId));
+        }
+
+        // Export Functions
+        function exportToCSV() {
+            const headers = ['Date', 'Time', 'Driver', 'Tractor', 'Trailer', 'Status', 'Issues', 'Location'];
+            const csvContent = [
+                headers.join(','),
+                ...AppState.inspectionReports.map(report => [
+                    new Date(report.checkInTime).toLocaleDateString(),
+                    new Date(report.checkInTime).toLocaleTimeString(),
+                    `"${report.driver}"`,
+                    report.tractorNumber || '',
+                    report.trailerNumber || '',
+                    report.status,
+                    `"${(report.damageFound || 'None').replace(/"/g, '""')}"`,
+                    `"${report.location || ''}"`
+                ].join(','))
+            ].join('\n');
+
+            downloadFile(csvContent, `inspection_reports_${new Date().toISOString().slice(0,10)}.csv`, 'text/csv');
+            showMessage('inspectionMessage', '📄 CSV export downloaded successfully!', 'success');
+        }
+
+        function exportUsers() {
+            const headers = ['Username', 'Email', 'Role', 'Created', 'Last Login', 'Status'];
+            const csvContent = [
+                headers.join(','),
+                ...AppState.users.map(user => [
+                    `"${user.username}"`,
+                    `"${user.email}"`,
+                    user.role,
+                    user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '',
+                    user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never',
+                    'Active'
+                ].join(','))
+            ].join('\n');
+
+            downloadFile(csvContent, `users_export_${new Date().toISOString().slice(0,10)}.csv`, 'text/csv');
+            showMessage('userMessage', '📄 Users CSV export downloaded successfully!', 'success');
+        }
+
+        function downloadFile(content, filename, mimeType) {
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // System Functions
+        async function runSystemCheck() {
+            showMessage('settingsMessage', '🔍 Running system health check...', 'info');
+            
+            const checks = [
+                { name: 'API Connection', test: () => APIClient.get('/health') },
+                { name: 'Database Connection', test: () => new Promise(resolve => setTimeout(resolve, 1000)) },
+                { name: 'User Authentication', test: () => AppState.isAuthenticated },
+                { name: 'Data Integrity', test: () => AppState.users.length > 0 }
+            ];
+            
+            const results = [];
+            
+            for (const check of checks) {
+                try {
+                    await check.test();
+                    results.push(`✅ ${check.name}: OK`);
+                } catch (error) {
+                    results.push(`❌ ${check.name}: ${error.message || 'Failed'}`);
+                }
+            }
+            
+            const reportContent = `
+                <div style="text-align: left;">
+                    <h4>🔍 System Health Report</h4>
+                    <div style="margin: 20px 0; font-family: monospace; background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                        ${results.join('<br>')}
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <strong>Environment:</strong> ${CONFIG.ENVIRONMENT}<br>
+                        <strong>API URL:</strong> ${CONFIG.API_BASE_URL}<br>
+                        <strong>Connection Status:</strong> ${AppState.connectionStatus}<br>
+                        <strong>Total Users:</strong> ${AppState.users.length}<br>
+                        <strong>Total Reports:</strong> ${AppState.inspectionReports.length}<br>
+                        <strong>Maintenance Items:</strong> ${AppState.maintenanceItems.length}
+                    </div>
+                </div>
+            `;
+            
+            showModal('System Health Check', 'Health Report', reportContent, 'Close', closeModal);
+            showMessage('settingsMessage', '✅ System health check completed', 'success');
+        }
+
+        function exportSystemReport() {
+            const reportData = {
+                timestamp: new Date().toISOString(),
+                environment: CONFIG.ENVIRONMENT,
+                api_url: CONFIG.API_BASE_URL,
+                connection_status: AppState.connectionStatus,
+                stats: {
+                    total_users: AppState.users.length,
+                    total_drivers: AppState.users.filter(u => u.role === 'driver').length,
+                    total_reports: AppState.inspectionReports.length,
+                    critical_issues: AppState.inspectionReports.filter(r => r.status === 'critical').length,
+                    maintenance_needed: AppState.maintenanceItems.length
+                },
+                recent_activity: AppState.inspectionReports.slice(0, 5).map(r => ({
+                    date: r.checkInTime,
+                    driver: r.driver,
+                    status: r.status,
+                    vehicle: `${r.tractorNumber}/${r.trailerNumber}`
+                }))
+            };
+            
+            downloadFile(JSON.stringify(reportData, null, 2), 
+                `system_report_${new Date().toISOString().slice(0,10)}.json`, 
+                'application/json');
+            
+            showMessage('settingsMessage', '📊 System report exported successfully!', 'success');
+        }
+
+        function clearCache() {
+            AppState.cache.clear();
+            localStorage.removeItem('adminCache');
+            showMessage('settingsMessage', '🗑️ Cache cleared successfully', 'success');
+        }
+
+        // Settings Functions
+        function saveSettings() {
+            const apiEndpoint = document.getElementById('apiEndpoint').value.trim();
+            const refreshInterval = document.getElementById('refreshInterval').value;
+            const timeoutDuration = document.getElementById('timeoutDuration').value;
+            
+            if (apiEndpoint) {
+                CONFIG.API_BASE_URL = apiEndpoint;
+                updateDebugInfo('api', apiEndpoint);
+            }
+            
+            if (refreshInterval) {
+                CONFIG.REFRESH_INTERVAL = parseInt(refreshInterval) * 1000;
+            }
+            
+            if (timeoutDuration) {
+                CONFIG.REQUEST_TIMEOUT = parseInt(timeoutDuration) * 1000;
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('adminSettings', JSON.stringify({
+                apiEndpoint: CONFIG.API_BASE_URL,
+                refreshInterval: CONFIG.REFRESH_INTERVAL,
+                requestTimeout: CONFIG.REQUEST_TIMEOUT
+            }));
+            
+            showMessage('settingsMessage', '💾 Settings saved successfully', 'success');
+        }
+
+        function changePassword() {
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                showMessage('settingsMessage', 'All password fields are required', 'error');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                showMessage('settingsMessage', 'New passwords do not match', 'error');
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                showMessage('settingsMessage', 'New password must be at least 6 characters long', 'error');
+                return;
+            }
+            
+            // Clear form
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+            
+            showMessage('settingsMessage', '🔑 Password changed successfully', 'success');
+        }
+
+        // Modal Functions
+        function showModal(title, subtitle, content, actionText = 'OK', actionCallback = closeModal) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalSubtitle').textContent = subtitle;
+            document.getElementById('modalContent').innerHTML = content;
+            
+            const actionBtn = document.getElementById('modalAction');
+            actionBtn.textContent = actionText;
+            actionBtn.onclick = actionCallback;
+            
+            document.getElementById('detailModal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').classList.remove('show');
+        }
+
+        function handleModalAction() {
+            // This will be overridden by specific modal actions
+            closeModal();
+        }
+
+        // Debug Functions
+        function toggleDebug() {
+            const debugPanel = document.getElementById('debugPanel');
+            const isVisible = debugPanel.classList.contains('show');
+            
+            if (isVisible) {
+                debugPanel.classList.remove('show');
+                CONFIG.DEBUG_MODE = false;
+            } else {
+                debugPanel.classList.add('show');
+                CONFIG.DEBUG_MODE = true;
+                updateAllDebugInfo();
+            }
+            
+            localStorage.setItem('adminDebugMode', CONFIG.DEBUG_MODE.toString());
+        }
+
+        function updateDebugInfo(key, value) {
+            if (!CONFIG.DEBUG_MODE) return;
+            
+            const element = document.getElementById(`debug${key.charAt(0).toUpperCase() + key.slice(1)}`);
+            if (element) {
+                element.textContent = value;
+            }
+        }
+
+        function updateAllDebugInfo() {
+            updateDebugInfo('env', CONFIG.ENVIRONMENT);
+            updateDebugInfo('api', CONFIG.API_BASE_URL);
+            updateDebugInfo('connection', AppState.connectionStatus);
+            updateDebugInfo('errors', AppState.errorCount);
+        }
+
+        // Utility Functions
+        function showMessage(containerId, message, type) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            
+            const icons = {
+                success: '✅',
+                error: '❌',
+                warning: '⚠️',
+                info: 'ℹ️'
+            };
+            
+            container.innerHTML = `<div class="message ${type}">${icons[type] || ''} ${message}</div>`;
+            
+            if (type === 'success' || type === 'info') {
+                setTimeout(() => {
+                    container.innerHTML = '';
+                }, 5000);
+            }
+        }
+
+        async function refreshData() {
+            if (!AppState.isAuthenticated) return;
+            
+            try {
+                await Promise.all([
+                    loadUsers(),
+                    loadInspectionReports(),
+                    loadMaintenanceData()
+                ]);
+                updateDashboardStats();
+            } catch (error) {
+                console.error('Error refreshing data:', error);
+            }
+        }
+
+        // Placeholder functions for buttons that don't have full implementations yet
+        function createNewInspection() {
+            showMessage('inspectionMessage', '🚛 New inspection feature coming soon!', 'info');
+        }
+
+        function scheduleReport() {
+            showMessage('inspectionMessage', '📅 Report scheduling feature coming soon!', 'info');
+        }
+
+        function scheduleMaintenanceBulk() {
+            showMessage('maintenanceMessage', '📅 Bulk scheduling feature coming soon!', 'info');
+        }
+
+        function generateWorkOrders() {
+            showMessage('maintenanceMessage', '📋 Work order generation feature coming soon!', 'info');
+        }
+
+        function downloadReport() {
+            showMessage('inspectionMessage', '📄 PDF export feature coming soon!', 'info');
+        }
+
+        function generateSummaryReport() {
+            showMessage('inspectionMessage', '📑 PDF report generation feature coming soon!', 'info');
+        }
+
+        function generateMaintenanceReport() {
+            showMessage('inspectionMessage', '🔧 Maintenance PDF feature coming soon!', 'info');
+        }
+
+        function exportMaintenanceReport() {
+            showMessage('maintenanceMessage', '📊 Export feature coming soon!', 'info');
+        }
+
+        // Initialize debug mode if previously enabled
+        if (CONFIG.DEBUG_MODE) {
+            document.addEventListener('DOMContentLoaded', () => {
+                setTimeout(() => {
+                    document.getElementById('debugPanel').classList.add('show');
+                    updateAllDebugInfo();
+                }, 1000);
+            });
+        }
+    </script>
+</body>
+</html>
