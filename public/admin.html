@@ -523,7 +523,7 @@
             padding: 10px 20px;
         }
         
-        /* Simple Scheduled Status */
+        /* Scheduled Status - Permanently Visible */
         .schedule-confirmation {
             background: #d4edda;
             border: 1px solid #c3e6cb;
@@ -533,7 +533,6 @@
             margin-top: 10px;
             font-weight: bold;
             font-size: 14px;
-            text-align: center;
         }
         
         .schedule-btn.scheduled {
@@ -541,6 +540,9 @@
             color: white !important;
             cursor: not-allowed;
         }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
             .grid {
                 grid-template-columns: 1fr;
             }
@@ -845,6 +847,7 @@
         let currentCalendarDate = new Date();
         let selectedDate = null;
         let currentVehicleId = null;
+        let scheduledRepairs = {}; // Store scheduled repairs in memory
 
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', function() {
@@ -1433,9 +1436,13 @@
             const maintenanceHTML = maintenanceNeeds.map(vehicle => {
                 const priorityClass = vehicle.status === 'critical' ? 'urgent' : '';
                 const priorityIcon = vehicle.status === 'critical' ? '🚨' : '⚠️';
+                const vehicleKey = vehicle.tractorNumber;
+                
+                // Check if this vehicle is already scheduled
+                const isScheduled = scheduledRepairs[vehicleKey];
                 
                 return `
-                    <div class="maintenance-item ${priorityClass}">
+                    <div class="maintenance-item ${priorityClass}" id="maintenance-${vehicleKey}">
                         <div class="maintenance-info">
                             <div style="font-weight: bold; font-size: 16px; margin-bottom: 4px;">
                                 ${priorityIcon} Vehicle: ${vehicle.tractorNumber} / ${vehicle.trailerNumber}
@@ -1449,9 +1456,20 @@
                             <span style="background: ${vehicle.status === 'critical' ? '#f8d7da' : '#fff3cd'}; color: ${vehicle.status === 'critical' ? '#721c24' : '#856404'}; padding: 2px 8px; border-radius: 12px; font-size: 12px; text-transform: uppercase; font-weight: bold;">
                                 ${vehicle.status === 'critical' ? 'URGENT' : 'MODERATE'} Priority
                             </span>
+                            ${isScheduled ? `
+                                <div class="schedule-confirmation">
+                                    ✅ <strong>Repair Scheduled</strong><br>
+                                    📅 Date: ${isScheduled.formattedDate}
+                                </div>
+                            ` : ''}
                         </div>
                         <div class="maintenance-actions">
-                            <button class="schedule-btn" onclick="scheduleRepair('${vehicle.tractorNumber}')" style="background: #28a745; color: white;">📅 Schedule</button>
+                            <button class="schedule-btn ${isScheduled ? 'scheduled' : ''}" 
+                                    onclick="scheduleRepair('${vehicle.tractorNumber}')" 
+                                    ${isScheduled ? 'disabled' : ''}
+                                    style="background: ${isScheduled ? '#6c757d' : '#28a745'}; color: white;">
+                                ${isScheduled ? '✅ Scheduled' : '📅 Schedule'}
+                            </button>
                             <button onclick="markCompleted('${vehicle.tractorNumber}')" style="background: #17a2b8; color: white;">✅ Complete</button>
                         </div>
                     </div>
@@ -1474,6 +1492,12 @@
         }
 
         function scheduleRepair(vehicleId) {
+            // Don't allow scheduling if already scheduled
+            if (scheduledRepairs[vehicleId]) {
+                showMessage('maintenanceMessage', `Vehicle ${vehicleId} is already scheduled for repair on ${scheduledRepairs[vehicleId].formattedDate}`, 'info');
+                return;
+            }
+            
             currentVehicleId = vehicleId;
             selectedDate = null;
             currentCalendarDate = new Date();
@@ -1613,8 +1637,8 @@
                 day: 'numeric'
             });
             
-            // Store the scheduled repair
-            const repair = {
+            // Store the scheduled repair in memory
+            scheduledRepairs[currentVehicleId] = {
                 vehicleId: currentVehicleId,
                 scheduledDate: scheduledDateString,
                 formattedDate: formattedDate,
@@ -1623,45 +1647,14 @@
                 scheduledOn: new Date().toISOString()
             };
             
-            // Store in localStorage for demo purposes
-            let scheduledRepairs = JSON.parse(localStorage.getItem('scheduledRepairs') || '[]');
-            scheduledRepairs.push(repair);
-            localStorage.setItem('scheduledRepairs', JSON.stringify(scheduledRepairs));
-            
             // Close calendar
             closeCalendar();
             
-            // Update the maintenance item with confirmation message
-            updateMaintenanceItemWithConfirmation(currentVehicleId, formattedDate);
+            // Reload maintenance data to show the scheduled status
+            loadMaintenanceData();
             
-            // Show success message in main message area
+            // Show success message
             showMessage('maintenanceMessage', `📅 Repair scheduled for vehicle ${currentVehicleId} on ${formattedDate}`, 'success');
-        }
-
-        function updateMaintenanceItemWithConfirmation(vehicleId, formattedDate) {
-            // Find the maintenance item
-            const scheduleButton = document.querySelector(`button[onclick="scheduleRepair('${vehicleId}')"]`);
-            if (scheduleButton) {
-                const maintenanceItem = scheduleButton.closest('.maintenance-item');
-                const maintenanceInfo = maintenanceItem.querySelector('.maintenance-info');
-                
-                // Update schedule button
-                scheduleButton.classList.add('scheduled');
-                scheduleButton.textContent = '✅ Scheduled';
-                scheduleButton.disabled = true;
-                
-                // Add confirmation message to the maintenance info box
-                const existingConfirmation = maintenanceInfo.querySelector('.schedule-confirmation');
-                if (!existingConfirmation) {
-                    const confirmationDiv = document.createElement('div');
-                    confirmationDiv.className = 'schedule-confirmation';
-                    confirmationDiv.innerHTML = `
-                        ✅ <strong>Repair Scheduled</strong><br>
-                        📅 Date: ${formattedDate}
-                    `;
-                    maintenanceInfo.appendChild(confirmationDiv);
-                }
-            }
         }
 
         function markCompleted(vehicleId) {
@@ -1674,10 +1667,8 @@
                     }
                 });
                 
-                // Remove from scheduled repairs if it exists
-                let scheduledRepairs = JSON.parse(localStorage.getItem('scheduledRepairs') || '[]');
-                scheduledRepairs = scheduledRepairs.filter(repair => repair.vehicleId !== vehicleId);
-                localStorage.setItem('scheduledRepairs', JSON.stringify(scheduledRepairs));
+                // Remove from scheduled repairs
+                delete scheduledRepairs[vehicleId];
                 
                 // Reload maintenance data to reflect changes
                 loadMaintenanceData();
@@ -1711,9 +1702,10 @@
                 doc.text(`Total Vehicles: ${new Set(allInspectionReports.map(r => r.tractorNumber || r.trailerNumber)).size}`, 20, 65);
                 doc.text(`Vehicles Needing Maintenance: ${maintenanceNeeds.length}`, 20, 75);
                 doc.text(`Critical Issues: ${maintenanceNeeds.filter(v => v.status === 'critical').length}`, 20, 85);
+                doc.text(`Scheduled Repairs: ${Object.keys(scheduledRepairs).length}`, 20, 95);
 
                 // Detailed list
-                let yPos = 105;
+                let yPos = 115;
                 doc.setFont(undefined, 'bold');
                 doc.text('DETAILED MAINTENANCE LIST', 20, yPos);
                 yPos += 15;
@@ -1734,6 +1726,14 @@
                         yPos += 6;
                         doc.text(`Date: ${new Date(vehicle.checkInTime).toLocaleDateString()}`, 30, yPos);
                         yPos += 6;
+                        
+                        // Check if scheduled
+                        const scheduled = scheduledRepairs[vehicle.tractorNumber];
+                        if (scheduled) {
+                            doc.text(`Scheduled Repair: ${scheduled.formattedDate}`, 30, yPos);
+                            yPos += 6;
+                        }
+                        
                         const issueLines = doc.splitTextToSize(`Issues: ${vehicle.damageFound}`, 150);
                         doc.text(issueLines, 30, yPos);
                         yPos += (issueLines.length * 5) + 10;
