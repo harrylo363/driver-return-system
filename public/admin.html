@@ -372,6 +372,157 @@
             font-weight: bold;
         }
         
+        /* Calendar Modal Styles */
+        .calendar-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .calendar-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .calendar-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        
+        .calendar-modal.show .calendar-container {
+            transform: scale(1);
+        }
+        
+        .calendar-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .calendar-header h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .calendar-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .calendar-nav button {
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .calendar-nav button:hover {
+            background: #5a67d8;
+        }
+        
+        .calendar-month-year {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            margin-bottom: 20px;
+        }
+        
+        .calendar-day-header {
+            text-align: center;
+            padding: 10px 5px;
+            font-weight: bold;
+            background: #f8f9fa;
+            color: #666;
+            font-size: 12px;
+        }
+        
+        .calendar-day {
+            text-align: center;
+            padding: 10px 5px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .calendar-day:hover {
+            background: #e3f2fd;
+        }
+        
+        .calendar-day.today {
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .calendar-day.selected {
+            background: #28a745;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .calendar-day.other-month {
+            color: #ccc;
+            cursor: default;
+        }
+        
+        .calendar-day.other-month:hover {
+            background: transparent;
+        }
+        
+        .calendar-day.past {
+            color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .calendar-day.past:hover {
+            background: transparent;
+        }
+        
+        .calendar-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .calendar-actions .btn {
+            margin: 0;
+            padding: 10px 20px;
+        }
+        
         @media (max-width: 768px) {
             .grid {
                 grid-template-columns: 1fr;
@@ -392,6 +543,16 @@
             .user-item, .maintenance-item {
                 flex-direction: column;
                 align-items: stretch;
+            }
+            
+            .calendar-container {
+                width: 95%;
+                padding: 20px;
+            }
+            
+            .calendar-day {
+                padding: 8px 2px;
+                font-size: 14px;
             }
         }
     </style>
@@ -628,6 +789,35 @@
         </div>
     </div>
 
+    <!-- Calendar Modal -->
+    <div class="calendar-modal" id="calendarModal">
+        <div class="calendar-container">
+            <div class="calendar-header">
+                <h3>📅 Schedule Repair Date</h3>
+                <p>Vehicle: <span id="calendarVehicleId"></span></p>
+            </div>
+            
+            <div class="calendar-nav">
+                <button onclick="changeMonth(-1)">‹</button>
+                <div class="calendar-month-year" id="monthYear"></div>
+                <button onclick="changeMonth(1)">›</button>
+            </div>
+            
+            <div class="calendar-grid" id="calendarGrid">
+                <!-- Calendar will be generated here -->
+            </div>
+            
+            <div class="selected-date-display" id="selectedDateDisplay" style="display: none;">
+                Selected Date: <span id="selectedDateText"></span>
+            </div>
+            
+            <div class="calendar-actions">
+                <button class="btn btn-secondary" onclick="closeCalendar()">❌ Cancel</button>
+                <button class="btn btn-success" id="confirmDateBtn" onclick="confirmScheduleDate()" disabled>✅ Schedule Repair</button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script>
         // Global variables
@@ -635,6 +825,9 @@
         let allUsers = [];
         let allInspectionReports = [];
         let filteredReports = [];
+        let currentCalendarDate = new Date();
+        let selectedDate = null;
+        let currentVehicleId = null;
 
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', function() {
@@ -1264,34 +1457,166 @@
         }
 
         function scheduleRepair(vehicleId) {
-            const scheduledDate = prompt(`Schedule repair for vehicle ${vehicleId}.\n\nEnter scheduled date (YYYY-MM-DD):`);
+            currentVehicleId = vehicleId;
+            selectedDate = null;
+            currentCalendarDate = new Date();
             
-            if (scheduledDate) {
-                // Store the scheduled repair
-                const repair = {
-                    vehicleId: vehicleId,
-                    scheduledDate: scheduledDate,
-                    status: 'scheduled',
-                    scheduledBy: 'Admin',
-                    scheduledOn: new Date().toISOString()
-                };
-                
-                // Store in localStorage for demo purposes
-                let scheduledRepairs = JSON.parse(localStorage.getItem('scheduledRepairs') || '[]');
-                scheduledRepairs.push(repair);
-                localStorage.setItem('scheduledRepairs', JSON.stringify(scheduledRepairs));
-                
-                showMessage('maintenanceMessage', `📅 Repair scheduled for vehicle ${vehicleId} on ${scheduledDate}`, 'success');
-                
-                // Update the maintenance item to show it's scheduled
-                const maintenanceItem = document.querySelector(`button[onclick="scheduleRepair('${vehicleId}')"]`).closest('.maintenance-item');
-                if (maintenanceItem) {
-                    const statusSpan = maintenanceItem.querySelector('span');
-                    statusSpan.style.background = '#d1ecf1';
-                    statusSpan.style.color = '#0c5460';
-                    statusSpan.textContent = 'SCHEDULED';
-                }
+            // Update modal header
+            document.getElementById('calendarVehicleId').textContent = vehicleId;
+            
+            // Generate calendar
+            generateCalendar();
+            
+            // Show modal
+            document.getElementById('calendarModal').classList.add('show');
+        }
+
+        function generateCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            const monthYearElement = document.getElementById('monthYear');
+            
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+            
+            // Set month/year display
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                               'July', 'August', 'September', 'October', 'November', 'December'];
+            monthYearElement.textContent = `${monthNames[month]} ${year}`;
+            
+            // Clear grid
+            grid.innerHTML = '';
+            
+            // Add day headers
+            const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            dayHeaders.forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'calendar-day-header';
+                dayHeader.textContent = day;
+                grid.appendChild(dayHeader);
+            });
+            
+            // Get first day of month and number of days
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            const startingDayOfWeek = firstDay.getDay();
+            
+            // Get today's date for comparison
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            // Add empty cells for days before the first day of the month
+            for (let i = 0; i < startingDayOfWeek; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day other-month';
+                grid.appendChild(emptyDay);
             }
+            
+            // Add days of the month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.textContent = day;
+                
+                const dayDate = new Date(year, month, day);
+                dayDate.setHours(0, 0, 0, 0);
+                
+                // Check if this day is today
+                if (dayDate.getTime() === today.getTime()) {
+                    dayElement.classList.add('today');
+                }
+                
+                // Check if this day is in the past (disable past dates)
+                if (dayDate < today) {
+                    dayElement.classList.add('past');
+                } else {
+                    // Add click handler for future dates
+                    dayElement.addEventListener('click', function() {
+                        selectDate(year, month, day);
+                    });
+                }
+                
+                grid.appendChild(dayElement);
+            }
+        }
+
+        function selectDate(year, month, day) {
+            // Remove previous selection
+            document.querySelectorAll('.calendar-day.selected').forEach(el => {
+                el.classList.remove('selected');
+            });
+            
+            // Add selection to clicked day
+            event.target.classList.add('selected');
+            
+            // Store selected date
+            selectedDate = new Date(year, month, day);
+            
+            // Update display
+            const selectedDateDisplay = document.getElementById('selectedDateDisplay');
+            const selectedDateText = document.getElementById('selectedDateText');
+            selectedDateText.textContent = selectedDate.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            selectedDateDisplay.style.display = 'block';
+            
+            // Enable confirm button
+            document.getElementById('confirmDateBtn').disabled = false;
+        }
+
+        function changeMonth(direction) {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + direction);
+            generateCalendar();
+            
+            // Clear selection when changing months
+            selectedDate = null;
+            document.getElementById('selectedDateDisplay').style.display = 'none';
+            document.getElementById('confirmDateBtn').disabled = true;
+        }
+
+        function closeCalendar() {
+            document.getElementById('calendarModal').classList.remove('show');
+            selectedDate = null;
+            currentVehicleId = null;
+            document.getElementById('selectedDateDisplay').style.display = 'none';
+            document.getElementById('confirmDateBtn').disabled = true;
+        }
+
+        function confirmScheduleDate() {
+            if (!selectedDate || !currentVehicleId) return;
+            
+            const scheduledDateString = selectedDate.toISOString().split('T')[0];
+            
+            // Store the scheduled repair
+            const repair = {
+                vehicleId: currentVehicleId,
+                scheduledDate: scheduledDateString,
+                status: 'scheduled',
+                scheduledBy: 'Admin',
+                scheduledOn: new Date().toISOString()
+            };
+            
+            // Store in localStorage for demo purposes
+            let scheduledRepairs = JSON.parse(localStorage.getItem('scheduledRepairs') || '[]');
+            scheduledRepairs.push(repair);
+            localStorage.setItem('scheduledRepairs', JSON.stringify(scheduledRepairs));
+            
+            showMessage('maintenanceMessage', `📅 Repair scheduled for vehicle ${currentVehicleId} on ${selectedDate.toLocaleDateString()}`, 'success');
+            
+            // Update the maintenance item to show it's scheduled
+            const maintenanceItem = document.querySelector(`button[onclick="scheduleRepair('${currentVehicleId}')"]`).closest('.maintenance-item');
+            if (maintenanceItem) {
+                const statusSpan = maintenanceItem.querySelector('span');
+                statusSpan.style.background = '#d1ecf1';
+                statusSpan.style.color = '#0c5460';
+                statusSpan.textContent = 'SCHEDULED';
+            }
+            
+            // Close calendar
+            closeCalendar();
         }
 
         function markCompleted(vehicleId) {
@@ -1405,6 +1730,13 @@
             document.getElementById('searchDriver').addEventListener('input', filterReports);
             document.getElementById('searchVehicle').addEventListener('input', filterReports);
             document.getElementById('filterStatus').addEventListener('change', filterReports);
+            
+            // Close calendar when clicking outside
+            document.getElementById('calendarModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeCalendar();
+                }
+            });
         });
     </script>
 </body>
