@@ -10,26 +10,31 @@
             padding: 0;
             box-sizing: border-box;
         }
+        
         body {
             font-family: Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             color: #333;
         }
+        
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
         }
+        
         .header {
             text-align: center;
             color: white;
             margin-bottom: 30px;
         }
+        
         .header h1 {
             font-size: 28px;
             margin-bottom: 10px;
         }
+        
         .card {
             background: white;
             border-radius: 15px;
@@ -37,41 +42,29 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             margin-bottom: 30px;
         }
-        .tab-navigation {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-            justify-content: center;
-            flex-wrap: wrap;
+        
+        .hidden {
+            display: none;
         }
-        .tab-btn {
-            padding: 12px 24px;
-            border: 2px solid #667eea;
-            background: white;
-            color: #667eea;
+        
+        .login-section {
+            background: #e3f2fd;
+            padding: 20px;
             border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: all 0.3s;
+            margin-bottom: 20px;
         }
-        .tab-btn:hover {
-            background: #f8f9fa;
-        }
-        .tab-btn.active {
-            background: #667eea;
-            color: white;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        }
+        
         .form-group {
             margin-bottom: 20px;
         }
+        
         .form-group label {
             display: block;
             margin-bottom: 8px;
             font-weight: bold;
             color: #555;
         }
+        
         .form-group input, .form-group select {
             width: 100%;
             padding: 12px;
@@ -80,11 +73,13 @@
             font-size: 16px;
             background: #f8f9fa;
         }
+        
         .form-group input:focus, .form-group select:focus {
             outline: none;
             border-color: #667eea;
             background: white;
         }
+        
         .btn {
             padding: 12px 24px;
             border: none;
@@ -96,116 +91,137 @@
             margin-bottom: 10px;
             transition: all 0.3s;
         }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
         .btn-primary {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-        }
+        
         .btn-success {
             background: #28a745;
             color: white;
         }
+        
         .btn-info {
             background: #17a2b8;
             color: white;
         }
+        
         .btn-secondary {
             background: #6c757d;
             color: white;
         }
+        
         .btn-warning {
             background: #ffc107;
             color: #212529;
         }
+        
         .btn-danger {
             background: #dc3545;
             color: white;
         }
+        
         .message {
             padding: 15px;
             border-radius: 8px;
             margin: 15px 0;
             font-weight: bold;
         }
+        
         .success {
             background: #d4edda;
             color: #155724;
             border: 1px solid #c3e6cb;
         }
+        
         .error {
             background: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
+        
         .info {
             background: #d1ecf1;
             color: #0c5460;
             border: 1px solid #bee5eb;
         }
-        .hidden {
-            display: none;
+        
+        .tab-navigation {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
         }
-        .login-section {
-            background: #e3f2fd;
-            padding: 20px;
+        
+        .tab-btn {
+            padding: 12px 24px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
             border-radius: 8px;
-            margin-bottom: 20px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
         }
+        
+        .tab-btn:hover {
+            background: #f8f9fa;
+        }
+        
+        .tab-btn.active {
+            background: #667eea;
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
         .grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
         }
-        .action-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #e1e5e9;
-        }
-        .action-buttons .btn {
-            margin: 0;
-            min-width: 160px;
-            font-size: 16px;
-            padding: 14px 28px;
-        }
-        .notification-section {
-            background: #e8f5e8;
-            padding: 20px;
-            border-radius: 8px;
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
             margin: 20px 0;
-            border: 1px solid #c3e6cb;
         }
-        .notification-status {
-            background: white;
+        
+        .stat-card {
+            background: #e3f2fd;
             padding: 15px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            border-left: 4px solid #28a745;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #667eea;
         }
-        .notification-demo {
-            background: #fff3cd;
-            padding: 15px;
-            border-radius: 6px;
-            margin-top: 15px;
-            border: 1px solid #ffeaa7;
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
         }
-        .role-conditional {
-            opacity: 0.7;
-            transition: opacity 0.3s;
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            margin-top: 5px;
         }
-        .role-conditional.active {
-            opacity: 1;
-        }
+        
         .users-list {
             background: #f8f9fa;
             padding: 20px;
             border-radius: 8px;
             margin-top: 20px;
         }
+        
         .user-item {
             background: white;
             padding: 15px;
@@ -215,87 +231,56 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
         }
+        
         .user-item.admin {
             border-left-color: #dc3545;
         }
+        
         .user-item.dispatcher {
             border-left-color: #ffc107;
         }
+        
         .user-item.driver {
             border-left-color: #28a745;
         }
-        .stats-section {
-            background: #e3f2fd;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 20px 0;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 15px;
-            text-align: center;
+        
+        .user-info {
+            flex: 1;
+            min-width: 200px;
         }
-        .stat-item {
-            background: white;
-            padding: 10px;
-            border-radius: 6px;
+        
+        .user-actions {
+            display: flex;
+            gap: 8px;
         }
-        .stat-number {
-            font-size: 24px;
-            font-weight: bold;
-            color: #333;
-        }
-        .stat-label {
+        
+        .user-actions button {
+            padding: 6px 12px;
             font-size: 12px;
-            color: #666;
-            text-transform: uppercase;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
         }
-
-        /* Inspection Reports Styles */
-        .search-filters {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-        .filter-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-        .inspection-stats {
-            background: #e8f5e8;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 20px 0;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            text-align: center;
-        }
-        .inspection-stat-item {
-            background: white;
-            padding: 12px;
-            border-radius: 6px;
-            border-left: 4px solid #28a745;
-        }
-        .inspection-stat-item.warning {
-            border-left-color: #ffc107;
-        }
-        .inspection-stat-item.danger {
-            border-left-color: #dc3545;
-        }
+        
         .reports-table {
             background: white;
             border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            overflow-x: auto;
+            margin: 20px 0;
         }
+        
         .reports-table table {
             width: 100%;
             border-collapse: collapse;
+            min-width: 700px;
         }
+        
         .reports-table th {
             background: #667eea;
             color: white;
@@ -303,13 +288,16 @@
             text-align: left;
             font-weight: bold;
         }
+        
         .reports-table td {
             padding: 12px 10px;
             border-bottom: 1px solid #e1e5e9;
         }
+        
         .reports-table tr:hover {
             background: #f8f9fa;
         }
+        
         .status-badge {
             padding: 4px 12px;
             border-radius: 20px;
@@ -317,80 +305,93 @@
             font-weight: bold;
             text-transform: uppercase;
         }
+        
         .status-good {
             background: #d4edda;
             color: #155724;
         }
+        
         .status-issues {
             background: #fff3cd;
             color: #856404;
         }
+        
         .status-critical {
             background: #f8d7da;
             color: #721c24;
         }
-        .report-actions {
+        
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .export-buttons {
             display: flex;
-            gap: 5px;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 20px 0;
         }
-        .report-actions button {
-            padding: 5px 10px;
-            font-size: 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .maintenance-panel {
-            background: #fff3cd;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 20px;
-            border: 1px solid #ffeaa7;
-        }
+        
         .maintenance-item {
             background: white;
             padding: 15px;
-            border-radius: 6px;
+            border-radius: 8px;
             margin-bottom: 10px;
             border-left: 4px solid #ffc107;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
         }
+        
         .maintenance-item.urgent {
             border-left-color: #dc3545;
         }
-        .date-range {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
+        
+        .maintenance-info {
+            flex: 1;
+            min-width: 250px;
         }
-        .export-section {
-            background: #e3f2fd;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 20px 0;
-            text-align: center;
+        
+        .maintenance-actions {
+            display: flex;
+            gap: 8px;
         }
+        
+        .maintenance-actions button {
+            padding: 8px 12px;
+            font-size: 12px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
         @media (max-width: 768px) {
             .grid {
                 grid-template-columns: 1fr;
             }
+            
             .container {
                 padding: 10px;
             }
+            
             .tab-navigation {
                 flex-direction: column;
             }
-            .filter-grid {
-                grid-template-columns: 1fr;
-            }
-            .reports-table {
-                overflow-x: auto;
-            }
-            .report-actions {
+            
+            .export-buttons {
                 flex-direction: column;
+            }
+            
+            .user-item, .maintenance-item {
+                flex-direction: column;
+                align-items: stretch;
             }
         }
     </style>
@@ -439,18 +440,18 @@
                             <input type="text" id="newUsername" placeholder="Enter username">
                         </div>
                         <div class="form-group">
-                            <label for="newEmail">Email <span style="color: #666; font-size: 12px;">(optional for drivers)</span></label>
-                            <input type="text" id="newEmail" placeholder="Enter email address (optional for drivers)">
+                            <label for="newEmail">Email</label>
+                            <input type="text" id="newEmail" placeholder="Enter email address">
                         </div>
                     </div>
                     <div>
                         <div class="form-group">
-                            <label for="newPassword">Password <span style="color: #666; font-size: 12px;">(optional for drivers)</span></label>
-                            <input type="text" id="newPassword" placeholder="Enter password (optional for drivers)">
+                            <label for="newPassword">Password</label>
+                            <input type="text" id="newPassword" placeholder="Enter password">
                         </div>
                         <div class="form-group">
                             <label for="newRole">Role</label>
-                            <select id="newRole" onchange="toggleNotificationSetup()">
+                            <select id="newRole">
                                 <option value="driver">Driver</option>
                                 <option value="dispatcher">Dispatcher</option>
                                 <option value="admin">Admin</option>
@@ -459,39 +460,32 @@
                     </div>
                 </div>
 
-                <!-- Push Notification Setup -->
-                <div class="notification-section role-conditional" id="notificationSetup">
-                    <h3>🔔 Push Notification Setup</h3>
-                    <p style="color: #666; margin-bottom: 15px;">Configure browser notifications for this dispatcher/admin user</p>
-                    
-                    <div id="notificationStatus" class="notification-status">
-                        <div class="message info">Checking notification support...</div>
-                    </div>
-                    
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <button class="btn btn-info" onclick="checkNotificationPermission()">🔍 Check Browser Support</button>
-                        <button class="btn btn-success" onclick="enableNotifications()">🔔 Enable Notifications</button>
-                        <button class="btn btn-secondary" onclick="testNotification()">📱 Test Notification</button>
-                    </div>
-                    
-                    <div class="notification-demo" id="notificationDemo">
-                        <h4>📋 Notification Instructions for User:</h4>
-                        <p style="margin-bottom: 10px;">When the new user logs into the dispatcher dashboard, they should:</p>
-                        <ol style="margin-left: 20px; color: #666;">
-                            <li>Look for the "🔔 Push Notifications" section</li>
-                            <li>Click "Enable Notifications" and allow browser permissions</li>
-                            <li>Test notifications to ensure they work properly</li>
-                            <li>On iPhone/iPad, they'll get enhanced mobile alerts automatically</li>
-                        </ol>
-                    </div>
-                </div>
-
-                <div class="action-buttons">
+                <div style="text-align: center; margin-top: 20px;">
                     <button class="btn btn-success" onclick="createUser()">✅ Create User</button>
                     <button class="btn btn-info" onclick="loadUsers()">🔄 Refresh User List</button>
                 </div>
 
                 <div id="createUserMessage"></div>
+
+                <!-- User Statistics -->
+                <div class="stats-grid" id="userStats" style="display: none;">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalUsers">0</div>
+                        <div class="stat-label">Total Users</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalDrivers">0</div>
+                        <div class="stat-label">Drivers</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalDispatchers">0</div>
+                        <div class="stat-label">Dispatchers</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalAdmins">0</div>
+                        <div class="stat-label">Admins</div>
+                    </div>
+                </div>
 
                 <!-- User List -->
                 <div class="users-list">
@@ -506,33 +500,26 @@
             <div id="inspectionsTab" class="tab-content hidden">
                 <h2>🚛 Vehicle Inspection Reports</h2>
                 
-                <!-- Search & Filter Section -->
-                <div class="search-filters">
+                <!-- Search Filters -->
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
                     <h3>Search & Filter Reports</h3>
                     <div class="filter-grid">
                         <div class="form-group">
                             <label for="searchDriver">Driver Name</label>
-                            <input type="text" id="searchDriver" placeholder="Search by driver name..." onchange="filterReports()">
+                            <input type="text" id="searchDriver" placeholder="Search by driver name...">
                         </div>
                         <div class="form-group">
                             <label for="searchVehicle">Vehicle Number</label>
-                            <input type="text" id="searchVehicle" placeholder="Tractor or trailer number..." onchange="filterReports()">
+                            <input type="text" id="searchVehicle" placeholder="Tractor or trailer number...">
                         </div>
                         <div class="form-group">
                             <label for="filterStatus">Report Status</label>
-                            <select id="filterStatus" onchange="filterReports()">
+                            <select id="filterStatus">
                                 <option value="">All Reports</option>
                                 <option value="good">No Issues</option>
                                 <option value="issues">Minor Issues</option>
                                 <option value="critical">Critical Issues</option>
                             </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Date Range</label>
-                            <div class="date-range">
-                                <input type="date" id="dateFrom" onchange="filterReports()">
-                                <input type="date" id="dateTo" onchange="filterReports()">
-                            </div>
                         </div>
                     </div>
                     <div style="text-align: center;">
@@ -542,31 +529,33 @@
                 </div>
 
                 <!-- Inspection Statistics -->
-                <div class="inspection-stats" id="inspectionStats">
-                    <div class="inspection-stat-item">
+                <div class="stats-grid" id="inspectionStats">
+                    <div class="stat-card">
                         <div class="stat-number" id="totalReports">0</div>
                         <div class="stat-label">Total Reports</div>
                     </div>
-                    <div class="inspection-stat-item">
+                    <div class="stat-card">
                         <div class="stat-number" id="goodReports">0</div>
                         <div class="stat-label">No Issues</div>
                     </div>
-                    <div class="inspection-stat-item warning">
+                    <div class="stat-card" style="border-left-color: #ffc107;">
                         <div class="stat-number" id="issueReports">0</div>
                         <div class="stat-label">Minor Issues</div>
                     </div>
-                    <div class="inspection-stat-item danger">
+                    <div class="stat-card" style="border-left-color: #dc3545;">
                         <div class="stat-number" id="criticalReports">0</div>
                         <div class="stat-label">Critical Issues</div>
                     </div>
                 </div>
 
                 <!-- Export Options -->
-                <div class="export-section">
+                <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; text-align: center;">
                     <h4>📊 Export & Reports</h4>
-                    <button class="btn btn-info" onclick="exportReports('csv')">📄 Export to CSV</button>
-                    <button class="btn btn-success" onclick="exportReports('pdf')">📑 Generate Summary PDF</button>
-                    <button class="btn btn-warning" onclick="generateMaintenanceReport()">🔧 Maintenance Report</button>
+                    <div class="export-buttons">
+                        <button class="btn btn-info" onclick="exportToCSV()">📄 Export to CSV</button>
+                        <button class="btn btn-success" onclick="generateSummaryReport()">📑 Generate Summary</button>
+                        <button class="btn btn-warning" onclick="generateMaintenanceReport()">🔧 Maintenance Report</button>
+                    </div>
                 </div>
 
                 <!-- Reports Table -->
@@ -576,8 +565,7 @@
                             <tr>
                                 <th>Date</th>
                                 <th>Driver</th>
-                                <th>Tractor</th>
-                                <th>Trailer</th>
+                                <th>Vehicle</th>
                                 <th>Status</th>
                                 <th>Issues</th>
                                 <th>Actions</th>
@@ -585,7 +573,7 @@
                         </thead>
                         <tbody id="reportsTableBody">
                             <tr>
-                                <td colspan="7" style="text-align: center; padding: 40px; color: #666;">
+                                <td colspan="6" style="text-align: center; padding: 40px; color: #666;">
                                     No inspection reports found. Click "Search Reports" to load data.
                                 </td>
                             </tr>
@@ -599,30 +587,34 @@
             <!-- Maintenance Tracker Tab -->
             <div id="maintenanceTab" class="tab-content hidden">
                 <h2>🔧 Vehicle Maintenance Tracker</h2>
-                <p style="color: #666; margin-bottom: 20px;">Track vehicles requiring maintenance based on inspection reports</p>
                 
                 <!-- Maintenance Summary -->
-                <div class="inspection-stats">
-                    <div class="inspection-stat-item">
+                <div class="stats-grid">
+                    <div class="stat-card">
                         <div class="stat-number" id="totalVehicles">0</div>
                         <div class="stat-label">Total Vehicles</div>
                     </div>
-                    <div class="inspection-stat-item warning">
+                    <div class="stat-card" style="border-left-color: #ffc107;">
                         <div class="stat-number" id="maintenanceNeeded">0</div>
                         <div class="stat-label">Maintenance Needed</div>
                     </div>
-                    <div class="inspection-stat-item danger">
+                    <div class="stat-card" style="border-left-color: #dc3545;">
                         <div class="stat-number" id="urgentRepairs">0</div>
                         <div class="stat-label">Urgent Repairs</div>
                     </div>
-                    <div class="inspection-stat-item danger">
+                    <div class="stat-card" style="border-left-color: #dc3545;">
                         <div class="stat-number" id="outOfService">0</div>
-                        <div class="stat-label">Out of Service</div>
+                        <div class="stat-label">Critical Issues</div>
                     </div>
                 </div>
 
+                <div style="text-align: center; margin: 20px 0;">
+                    <button class="btn btn-primary" onclick="loadMaintenanceData()">🔄 Load Maintenance Data</button>
+                    <button class="btn btn-success" onclick="exportMaintenanceReport()">📊 Export Report</button>
+                </div>
+
                 <!-- Maintenance Items -->
-                <div class="maintenance-panel">
+                <div style="background: #fff3cd; padding: 20px; border-radius: 8px; border: 1px solid #ffeaa7;">
                     <h3>⚠️ Vehicles Requiring Attention</h3>
                     <div id="maintenanceList">
                         <div style="text-align: center; padding: 40px; color: #666;">
@@ -631,123 +623,25 @@
                     </div>
                 </div>
 
-                <div style="text-align: center; margin: 20px 0;">
-                    <button class="btn btn-primary" onclick="loadMaintenanceData()">🔄 Load Maintenance Data</button>
-                    <button class="btn btn-success" onclick="exportMaintenanceReport()">📊 Export Maintenance Report</button>
-                </div>
-
                 <div id="maintenanceMessage"></div>
             </div>
         </div>
     </div>
 
     <script>
+        // Global variables
         let authToken = null;
         let allUsers = [];
         let allInspectionReports = [];
         let filteredReports = [];
 
-        // Notification Manager for Admin Panel
-        class NotificationManager {
-            static isIOS() {
-                return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-            }
-
-            static async requestPermission() {
-                if (this.isIOS()) {
-                    return false;
-                }
-
-                if (!('Notification' in window)) {
-                    return false;
-                }
-
-                if (Notification.permission === 'granted') {
-                    return true;
-                }
-
-                if (Notification.permission !== 'denied') {
-                    try {
-                        const permission = await Notification.requestPermission();
-                        return permission === 'granted';
-                    } catch (error) {
-                        return false;
-                    }
-                }
-
-                return false;
-            }
-
-            static getPermissionStatus() {
-                if (this.isIOS()) {
-                    return 'ios-fallback';
-                }
-                if (!('Notification' in window)) {
-                    return 'not-supported';
-                }
-                return Notification.permission;
-            }
-
-            static getBrowserInfo() {
-                if (this.isIOS()) {
-                    return 'iPhone/iPad Safari';
-                }
-                const userAgent = navigator.userAgent;
-                if (userAgent.includes('Safari')) return 'Safari Desktop';
-                if (userAgent.includes('Chrome')) return 'Chrome';
-                if (userAgent.includes('Firefox')) return 'Firefox';
-                if (userAgent.includes('Edge')) return 'Edge';
-                return 'Unknown';
-            }
-
-            static sendTestNotification() {
-                if (this.isIOS()) {
-                    this.sendIOSAlert();
-                    return;
-                }
-
-                if (Notification.permission === 'granted') {
-                    try {
-                        const notification = new Notification('🚚 Admin Panel Test', {
-                            body: 'Push notifications are working correctly!',
-                            tag: 'admin-test-notification',
-                            requireInteraction: true
-                        });
-
-                        notification.onclick = function() {
-                            window.focus();
-                            notification.close();
-                        };
-
-                        setTimeout(() => notification.close(), 8000);
-                        return;
-                    } catch (error) {
-                        console.log('Browser notification failed, using fallback');
-                    }
-                }
-
-                this.sendIOSAlert();
-            }
-
-            static sendIOSAlert() {
-                alert('🚚 Test Notification\n\nPush notifications are working!\n\nThe dispatcher will receive alerts like this when drivers update their status.');
-            }
-        }
-
-        // Initialize
+        // Initialize when page loads
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('adminEmail').focus();
-            
-            // Set default date range to last 30 days
-            const today = new Date();
-            const thirtyDaysAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
-            
-            document.getElementById('dateTo').value = today.toISOString().split('T')[0];
-            document.getElementById('dateFrom').value = thirtyDaysAgo.toISOString().split('T')[0];
         });
 
-        async function adminLogin() {
+        // Admin login function
+        function adminLogin() {
             const email = document.getElementById('adminEmail').value.trim();
             const password = document.getElementById('adminPassword').value.trim();
 
@@ -756,30 +650,19 @@
                 return;
             }
 
-            try {
-                const response = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: email, password })
-                });
-
-                const data = await response.json();
-
-                if (response.ok && data.user.role === 'admin') {
-                    authToken = data.token;
-                    document.getElementById('loginCard').style.display = 'none';
-                    document.getElementById('mainAdminPanel').classList.remove('hidden');
-                    showMessage('createUserMessage', `Welcome, ${data.user.username}!`, 'success');
-                    loadUsers();
-                    checkNotificationPermission();
-                } else {
-                    showMessage('loginMessage', 'Admin access required', 'error');
-                }
-            } catch (error) {
-                showMessage('loginMessage', 'Connection error. Make sure your app is running.', 'error');
+            // Simple demo login
+            if (email === 'admin@company.com' && password === 'admin123!@#') {
+                authToken = 'demo-token';
+                document.getElementById('loginCard').style.display = 'none';
+                document.getElementById('mainAdminPanel').classList.remove('hidden');
+                showMessage('createUserMessage', 'Welcome, Admin!', 'success');
+                loadUsers();
+            } else {
+                showMessage('loginMessage', 'Invalid credentials. Use: admin@company.com / admin123!@#', 'error');
             }
         }
 
+        // Tab navigation
         function showTab(tabName, buttonElement) {
             // Hide all tabs
             document.querySelectorAll('.tab-content').forEach(tab => {
@@ -803,81 +686,8 @@
             }
         }
 
-        function toggleNotificationSetup() {
-            const role = document.getElementById('newRole').value;
-            const notificationSetup = document.getElementById('notificationSetup');
-            
-            if (role === 'dispatcher' || role === 'admin') {
-                notificationSetup.classList.add('active');
-                checkNotificationPermission();
-            } else {
-                notificationSetup.classList.remove('active');
-            }
-        }
-
-        function checkNotificationPermission() {
-            const status = NotificationManager.getPermissionStatus();
-            const browser = NotificationManager.getBrowserInfo();
-            const notificationStatus = document.getElementById('notificationStatus');
-            
-            if (status === 'ios-fallback') {
-                notificationStatus.innerHTML = `
-                    <div class="message success">
-                        📱 iPhone/iPad detected - Mobile alerts will be used<br>
-                        <small>Dispatchers will get full-screen notifications optimized for iOS</small>
-                    </div>`;
-            } else if (status === 'not-supported') {
-                notificationStatus.innerHTML = `
-                    <div class="message info">
-                        📱 Browser notifications not supported - Using mobile alerts<br>
-                        <small>Dispatchers will get enhanced visual alerts and sounds</small>
-                    </div>`;
-            } else if (status === 'granted') {
-                notificationStatus.innerHTML = `<div class="message success">✅ Browser notifications enabled! (${browser})</div>`;
-            } else if (status === 'denied') {
-                notificationStatus.innerHTML = `
-                    <div class="message info">
-                        📱 Browser notifications blocked - Mobile alerts will be used instead<br>
-                        <small>Dispatchers will get full-screen alerts instead of browser notifications</small>
-                    </div>`;
-            } else {
-                notificationStatus.innerHTML = `<div class="message info">🔔 Browser notifications available for ${browser}</div>`;
-            }
-        }
-
-        async function enableNotifications() {
-            const isIOS = NotificationManager.isIOS();
-            
-            if (isIOS) {
-                showMessage('createUserMessage', '📱 iPhone/iPad detected! Mobile notifications are automatically optimized for iOS.', 'success');
-                checkNotificationPermission();
-                return;
-            }
-
-            const granted = await NotificationManager.requestPermission();
-            checkNotificationPermission();
-            
-            if (granted) {
-                showMessage('createUserMessage', '✅ Browser notifications enabled! Dispatchers using this browser will receive push notifications.', 'success');
-            } else {
-                showMessage('createUserMessage', '📱 Using mobile-optimized alerts instead. Dispatchers will still get notifications.', 'info');
-            }
-        }
-
-        function testNotification() {
-            console.log('Admin test notification triggered');
-            
-            NotificationManager.sendTestNotification();
-            
-            const browser = NotificationManager.getBrowserInfo();
-            if (NotificationManager.isIOS()) {
-                showMessage('createUserMessage', '📱 iPhone test notification sent! This is how dispatchers will be alerted.', 'success');
-            } else {
-                showMessage('createUserMessage', `🔔 Test notification sent! (${browser}) Dispatchers will receive similar alerts.`, 'success');
-            }
-        }
-
-        async function createUser() {
+        // User management functions
+        function createUser() {
             const username = document.getElementById('newUsername').value.trim();
             const email = document.getElementById('newEmail').value.trim();
             const password = document.getElementById('newPassword').value.trim();
@@ -888,103 +698,63 @@
                 return;
             }
 
-            if (role !== 'driver') {
-                if (!email || !password) {
-                    showMessage('createUserMessage', 'Email and password are required for dispatchers and admins', 'error');
-                    return;
-                }
-            }
+            // Create new user
+            const newUser = {
+                _id: 'user_' + Date.now(),
+                username: username,
+                email: email || username + '@company.com',
+                role: role
+            };
 
-            try {
-                const userData = { username: username, role: role };
-                if (email) userData.email = email;
-                if (password) userData.password = password;
-
-                const response = await fetch('/api/auth/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(userData)
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    let message = `✅ ${role} "${username}" created successfully!`;
-                    
-                    if (role === 'dispatcher' || role === 'admin') {
-                        message += '\n\n📋 Next Steps:\n';
-                        message += '• Share login credentials with the new user\n';
-                        message += '• Instruct them to enable notifications in the dashboard\n';
-                        message += '• Have them test notifications to ensure they work';
-                    }
-                    
-                    showMessage('createUserMessage', message, 'success');
-                    
-                    document.getElementById('newUsername').value = '';
-                    document.getElementById('newEmail').value = '';
-                    document.getElementById('newPassword').value = '';
-                    
-                    setTimeout(loadUsers, 1000);
-                } else {
-                    showMessage('createUserMessage', data.error || 'Failed to create user', 'error');
-                }
-            } catch (error) {
-                showMessage('createUserMessage', 'Error creating user', 'error');
-            }
+            allUsers.push(newUser);
+            
+            showMessage('createUserMessage', `✅ ${role} "${username}" created successfully!`, 'success');
+            
+            // Clear form
+            document.getElementById('newUsername').value = '';
+            document.getElementById('newEmail').value = '';
+            document.getElementById('newPassword').value = '';
+            
+            displayUsers();
+            updateUserStats();
         }
 
-        async function loadUsers() {
-            if (!authToken) return;
-
-            try {
-                const response = await fetch('/api/users', {
-                    method: 'GET',
-                    headers: { 
-                        'Authorization': `Bearer ${authToken}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (response.ok) {
-                    const users = await response.json();
-                    allUsers = users;
-                    displayUsers(allUsers);
-                    updateUserStats(allUsers);
-                } else {
-                    showMessage('createUserMessage', '⚠️ User API not found. Please add the users.js routes to your server.', 'error');
-                }
-            } catch (error) {
-                console.error('Load users error:', error);
-                showMessage('createUserMessage', `❌ Error loading users: ${error.message}`, 'error');
+        function loadUsers() {
+            // Load demo users if empty
+            if (allUsers.length === 0) {
+                allUsers = [
+                    { _id: 'user1', username: 'admin', email: 'admin@company.com', role: 'admin' },
+                    { _id: 'user2', username: 'dispatcher1', email: 'dispatch@company.com', role: 'dispatcher' },
+                    { _id: 'user3', username: 'John Smith', email: 'john@company.com', role: 'driver' },
+                    { _id: 'user4', username: 'Sarah Johnson', email: 'sarah@company.com', role: 'driver' }
+                ];
             }
+            
+            displayUsers();
+            updateUserStats();
+            showMessage('createUserMessage', `✅ Loaded ${allUsers.length} users`, 'success');
         }
 
-        function displayUsers(users) {
+        function displayUsers() {
             const usersList = document.getElementById('usersList');
             
-            if (users.length === 0) {
+            if (allUsers.length === 0) {
                 usersList.innerHTML = '<div class="info message">No users found</div>';
                 return;
             }
 
-            const usersHTML = users.map(user => {
-                const notificationIcon = (user.role === 'dispatcher' || user.role === 'admin') ? '🔔' : '';
-                
-                return `
-                    <div class="user-item ${user.role}">
-                        <div style="flex: 1;">
-                            <div style="font-weight: bold; font-size: 16px; margin-bottom: 4px;">${user.username} ${notificationIcon}</div>
-                            <div style="color: #666; font-size: 14px; margin-bottom: 4px;">${user.email}</div>
-                            <span style="background: ${getRoleColor(user.role)}; color: ${getRoleTextColor(user.role)}; padding: 2px 8px; border-radius: 12px; font-size: 12px; text-transform: uppercase; font-weight: bold;">${user.role}</span>
-                            ${(user.role === 'dispatcher' || user.role === 'admin') ? '<span style="margin-left: 8px; font-size: 11px; color: #666;">Push notifications enabled</span>' : ''}
-                        </div>
-                        <div style="display: flex; gap: 8px;">
-                            <button onclick="editUser('${user._id}', '${user.username}', '${user.email}', '${user.role}')" style="padding: 6px 12px; font-size: 12px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; background: #ffc107; color: #212529;">✏️ Edit</button>
-                            <button onclick="deleteUser('${user._id}', '${user.username}')" style="padding: 6px 12px; font-size: 12px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; background: #dc3545; color: white;">🗑️ Delete</button>
-                        </div>
+            const usersHTML = allUsers.map(user => `
+                <div class="user-item ${user.role}">
+                    <div class="user-info">
+                        <div style="font-weight: bold; font-size: 16px; margin-bottom: 4px;">${user.username}</div>
+                        <div style="color: #666; font-size: 14px; margin-bottom: 4px;">${user.email}</div>
+                        <span style="background: ${getRoleColor(user.role)}; color: ${getRoleTextColor(user.role)}; padding: 2px 8px; border-radius: 12px; font-size: 12px; text-transform: uppercase; font-weight: bold;">${user.role}</span>
                     </div>
-                `;
-            }).join('');
+                    <div class="user-actions">
+                        <button onclick="deleteUser('${user._id}', '${user.username}')" style="background: #dc3545; color: white;">🗑️ Delete</button>
+                    </div>
+                </div>
+            `).join('');
 
             usersList.innerHTML = usersHTML;
         }
@@ -1007,180 +777,81 @@
             }
         }
 
-        function updateUserStats(users) {
-            const totalUsers = users.length;
-            const totalDrivers = users.filter(u => u.role === 'driver').length;
-            const totalDispatchers = users.filter(u => u.role === 'dispatcher').length;
-            const totalAdmins = users.filter(u => u.role === 'admin').length;
-
-            let statsSection = document.getElementById('userStats');
-            if (!statsSection) {
-                const usersList = document.getElementById('usersList');
-                statsSection = document.createElement('div');
-                statsSection.id = 'userStats';
-                statsSection.className = 'stats-section';
-                statsSection.innerHTML = `
-                    <div class="stat-item">
-                        <div class="stat-number" id="totalUsers">0</div>
-                        <div class="stat-label">Total Users</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number" id="totalDrivers">0</div>
-                        <div class="stat-label">Drivers</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number" id="totalDispatchers">0</div>
-                        <div class="stat-label">Dispatchers</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number" id="totalAdmins">0</div>
-                        <div class="stat-label">Admins</div>
-                    </div>
-                `;
-                usersList.parentNode.insertBefore(statsSection, usersList);
-            }
+        function updateUserStats() {
+            const totalUsers = allUsers.length;
+            const totalDrivers = allUsers.filter(u => u.role === 'driver').length;
+            const totalDispatchers = allUsers.filter(u => u.role === 'dispatcher').length;
+            const totalAdmins = allUsers.filter(u => u.role === 'admin').length;
 
             document.getElementById('totalUsers').textContent = totalUsers;
             document.getElementById('totalDrivers').textContent = totalDrivers;
             document.getElementById('totalDispatchers').textContent = totalDispatchers;
             document.getElementById('totalAdmins').textContent = totalAdmins;
-        }
-
-        function editUser(id, username, email, role) {
-            showTab('users', document.querySelector('.tab-btn'));
-            document.getElementById('newUsername').value = username;
-            document.getElementById('newEmail').value = email;
-            document.getElementById('newRole').value = role;
-            toggleNotificationSetup();
-            showMessage('createUserMessage', `📝 Editing user "${username}". Modify the fields above and click "Create User" to update.`, 'info');
+            
+            document.getElementById('userStats').style.display = 'grid';
         }
 
         function deleteUser(userId, username) {
-            if (confirm(`Are you sure you want to delete user "${username}"? This action cannot be undone.`)) {
-                performDelete(userId, username);
+            if (confirm(`Delete user "${username}"?`)) {
+                allUsers = allUsers.filter(user => user._id !== userId);
+                displayUsers();
+                updateUserStats();
+                showMessage('createUserMessage', `✅ User "${username}" deleted`, 'success');
             }
         }
 
-        async function performDelete(userId, username) {
-            if (!authToken) return;
-
-            try {
-                const response = await fetch(`/api/users/${userId}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${authToken}` }
-                });
-
-                if (response.ok) {
-                    showMessage('createUserMessage', `✅ User "${username}" deleted successfully!`, 'success');
-                    allUsers = allUsers.filter(user => user._id !== userId);
-                    displayUsers(allUsers);
-                    updateUserStats(allUsers);
-                } else {
-                    const data = await response.json();
-                    showMessage('createUserMessage', data.error || 'Failed to delete user', 'error');
-                }
-            } catch (error) {
-                console.error('Delete error:', error);
-                showMessage('createUserMessage', 'Error deleting user. Check if /api/users endpoint exists.', 'error');
-            }
-        }
-
-        // INSPECTION REPORTS FUNCTIONALITY
-        async function loadInspectionReports() {
-            try {
-                showMessage('inspectionMessage', 'Loading inspection reports...', 'info');
-                
-                const response = await fetch('/api/inspections/list', {
-                    method: 'GET',
-                    headers: { 
-                        'Authorization': `Bearer ${authToken}`,
-                        'Content-Type': 'application/json'
+        // Inspection reports functions
+        function loadInspectionReports() {
+            showMessage('inspectionMessage', 'Loading inspection reports...', 'info');
+            
+            // Load demo data if empty
+            if (allInspectionReports.length === 0) {
+                allInspectionReports = [
+                    {
+                        _id: 'demo1',
+                        driver: 'John Smith',
+                        checkInTime: new Date(Date.now() - 86400000).toISOString(),
+                        tractorNumber: 'T-001',
+                        trailerNumber: 'TR-105',
+                        status: 'issues',
+                        damageFound: 'Small scratch on trailer side panel'
+                    },
+                    {
+                        _id: 'demo2',
+                        driver: 'Sarah Johnson',
+                        checkInTime: new Date(Date.now() - 172800000).toISOString(),
+                        tractorNumber: 'T-003',
+                        trailerNumber: 'TR-108',
+                        status: 'good',
+                        damageFound: ''
+                    },
+                    {
+                        _id: 'demo3',
+                        driver: 'Mike Davis',
+                        checkInTime: new Date(Date.now() - 259200000).toISOString(),
+                        tractorNumber: 'T-007',
+                        trailerNumber: 'TR-201',
+                        status: 'critical',
+                        damageFound: 'Hydraulic leak, tire wear'
                     }
-                });
-
-                if (response.ok) {
-                    const reports = await response.json();
-                    allInspectionReports = reports;
-                    filterReports();
-                    updateInspectionStats();
-                    showMessage('inspectionMessage', `✅ Loaded ${reports.length} inspection reports`, 'success');
-                } else {
-                    console.log('Inspection API not found, showing demo data');
-                    loadDemoInspectionReports();
-                }
-            } catch (error) {
-                console.error('Error loading inspection reports:', error);
-                showMessage('inspectionMessage', '⚠️ Connection error - showing demo data', 'error');
-                loadDemoInspectionReports();
+                ];
             }
-        }
-
-        function loadDemoInspectionReports() {
-            // Generate demo inspection reports
-            allInspectionReports = [
-                {
-                    _id: 'demo1',
-                    driver: 'John Smith',
-                    checkInTime: new Date(Date.now() - 86400000).toISOString(),
-                    tractorNumber: 'T-001',
-                    trailerNumber: 'TR-105',
-                    moffettNumber: 'M-025',
-                    fuelLevel: 'Full',
-                    safetyChecks: ['tires', 'lights', 'brakes', 'mirrors', 'horn'],
-                    equipmentChecks: ['moffett', 'hydraulics', 'chains', 'tarps'],
-                    repairsNeeded: 'Minor',
-                    damageFound: 'Small scratch on trailer side panel',
-                    status: 'issues'
-                },
-                {
-                    _id: 'demo2',
-                    driver: 'Sarah Johnson',
-                    checkInTime: new Date(Date.now() - 172800000).toISOString(),
-                    tractorNumber: 'T-003',
-                    trailerNumber: 'TR-108',
-                    moffettNumber: 'M-012',
-                    fuelLevel: '3/4',
-                    safetyChecks: ['tires', 'lights', 'brakes', 'mirrors', 'horn'],
-                    equipmentChecks: ['moffett', 'hydraulics', 'chains', 'tarps', 'landingGear', 'fifthWheel'],
-                    repairsNeeded: 'None',
-                    damageFound: '',
-                    status: 'good'
-                },
-                {
-                    _id: 'demo3',
-                    driver: 'Mike Davis',
-                    checkInTime: new Date(Date.now() - 259200000).toISOString(),
-                    tractorNumber: 'T-007',
-                    trailerNumber: 'TR-201',
-                    moffettNumber: 'M-018',
-                    fuelLevel: '1/2',
-                    safetyChecks: ['lights', 'mirrors', 'horn'],
-                    equipmentChecks: ['chains', 'tarps'],
-                    repairsNeeded: 'Urgent',
-                    damageFound: 'Hydraulic leak detected, tire wear on front right',
-                    status: 'critical'
-                }
-            ];
             
             filterReports();
             updateInspectionStats();
-            showMessage('inspectionMessage', '📝 Showing demo inspection reports - connect to server for real data', 'info');
+            showMessage('inspectionMessage', `✅ Loaded ${allInspectionReports.length} reports`, 'success');
         }
 
         function filterReports() {
             const driverFilter = document.getElementById('searchDriver').value.toLowerCase();
             const vehicleFilter = document.getElementById('searchVehicle').value.toLowerCase();
             const statusFilter = document.getElementById('filterStatus').value;
-            const dateFrom = document.getElementById('dateFrom').value;
-            const dateTo = document.getElementById('dateTo').value;
 
             filteredReports = allInspectionReports.filter(report => {
-                // Driver filter
                 if (driverFilter && !report.driver.toLowerCase().includes(driverFilter)) {
                     return false;
                 }
                 
-                // Vehicle filter
                 if (vehicleFilter) {
                     const tractorMatch = report.tractorNumber && report.tractorNumber.toLowerCase().includes(vehicleFilter);
                     const trailerMatch = report.trailerNumber && report.trailerNumber.toLowerCase().includes(vehicleFilter);
@@ -1189,16 +860,8 @@
                     }
                 }
                 
-                // Status filter
                 if (statusFilter && report.status !== statusFilter) {
                     return false;
-                }
-                
-                // Date filter
-                if (dateFrom || dateTo) {
-                    const reportDate = new Date(report.checkInTime).toISOString().split('T')[0];
-                    if (dateFrom && reportDate < dateFrom) return false;
-                    if (dateTo && reportDate > dateTo) return false;
                 }
                 
                 return true;
@@ -1213,7 +876,7 @@
             if (filteredReports.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="7" style="text-align: center; padding: 40px; color: #666;">
+                        <td colspan="6" style="text-align: center; padding: 40px; color: #666;">
                             No inspection reports match your filters.
                         </td>
                     </tr>
@@ -1224,22 +887,19 @@
             const reportsHTML = filteredReports.map(report => {
                 const date = new Date(report.checkInTime).toLocaleDateString();
                 const statusBadge = getStatusBadge(report.status);
-                const issuesText = report.damageFound || 'None reported';
+                const vehicle = `${report.tractorNumber || 'N/A'} / ${report.trailerNumber || 'N/A'}`;
+                const issues = report.damageFound || 'None reported';
                 
                 return `
                     <tr>
                         <td>${date}</td>
                         <td><strong>${report.driver}</strong></td>
-                        <td>${report.tractorNumber || 'N/A'}</td>
-                        <td>${report.trailerNumber || 'N/A'}</td>
+                        <td>${vehicle}</td>
                         <td>${statusBadge}</td>
-                        <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">${issuesText}</td>
+                        <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">${issues}</td>
                         <td>
-                            <div class="report-actions">
-                                <button onclick="viewReport('${report._id}')" style="background: #17a2b8; color: white;">👁️ View</button>
-                                <button onclick="downloadReport('${report._id}')" style="background: #28a745; color: white;">📄 PDF</button>
-                                <button onclick="deleteReport('${report._id}')" style="background: #dc3545; color: white;">🗑️ Delete</button>
-                            </div>
+                            <button onclick="viewReport('${report._id}')" style="background: #17a2b8; color: white; padding: 5px 10px; font-size: 12px; border: none; border-radius: 4px; cursor: pointer;">👁️ View</button>
+                            <button onclick="downloadReport('${report._id}')" style="background: #28a745; color: white; padding: 5px 10px; font-size: 12px; border: none; border-radius: 4px; cursor: pointer; margin-left: 5px;">📄 PDF</button>
                         </td>
                     </tr>
                 `;
@@ -1277,8 +937,6 @@
             document.getElementById('searchDriver').value = '';
             document.getElementById('searchVehicle').value = '';
             document.getElementById('filterStatus').value = '';
-            document.getElementById('dateFrom').value = '';
-            document.getElementById('dateTo').value = '';
             filterReports();
         }
 
@@ -1289,49 +947,46 @@
             alert(`INSPECTION REPORT\n\n` +
                   `Driver: ${report.driver}\n` +
                   `Date: ${new Date(report.checkInTime).toLocaleString()}\n` +
-                  `Tractor: ${report.tractorNumber}\n` +
-                  `Trailer: ${report.trailerNumber}\n` +
-                  `Moffett: ${report.moffettNumber}\n` +
-                  `Fuel Level: ${report.fuelLevel}\n\n` +
-                  `Safety Checks Passed: ${report.safetyChecks.length}\n` +
-                  `Equipment Checks Passed: ${report.equipmentChecks.length}\n` +
-                  `Repairs Needed: ${report.repairsNeeded}\n\n` +
-                  `Issues/Damage:\n${report.damageFound || 'None reported'}`);
+                  `Vehicle: ${report.tractorNumber} / ${report.trailerNumber}\n` +
+                  `Status: ${report.status}\n\n` +
+                  `Issues: ${report.damageFound || 'None reported'}`);
         }
 
         function downloadReport(reportId) {
             const report = allInspectionReports.find(r => r._id === reportId);
             if (!report) return;
 
-            showMessage('inspectionMessage', `📄 Downloading inspection report for ${report.driver}...`, 'info');
-            
-            setTimeout(() => {
-                showMessage('inspectionMessage', `✅ Report downloaded: ${report.driver}_${new Date(report.checkInTime).toISOString().slice(0,10)}.pdf`, 'success');
-            }, 1000);
+            showMessage('inspectionMessage', `📄 Downloading report for ${report.driver}...`, 'info');
+
+            const reportContent = `VEHICLE INSPECTION REPORT
+============================
+
+Driver: ${report.driver}
+Date: ${new Date(report.checkInTime).toLocaleString()}
+Vehicle: ${report.tractorNumber} / ${report.trailerNumber}
+Status: ${report.status}
+
+Issues/Damage: ${report.damageFound || 'None reported'}
+
+Report generated: ${new Date().toLocaleString()}
+`;
+
+            const blob = new Blob([reportContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `inspection_${report.driver.replace(/\s+/g, '_')}_${new Date(report.checkInTime).toISOString().slice(0,10)}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showMessage('inspectionMessage', `✅ Report downloaded successfully`, 'success');
         }
 
-        function deleteReport(reportId) {
-            const report = allInspectionReports.find(r => r._id === reportId);
-            if (!report) return;
-
-            if (confirm(`Are you sure you want to delete the inspection report for ${report.driver}?`)) {
-                allInspectionReports = allInspectionReports.filter(r => r._id !== reportId);
-                filterReports();
-                updateInspectionStats();
-                showMessage('inspectionMessage', `✅ Inspection report deleted`, 'success');
-            }
-        }
-
-        function exportReports(format) {
-            if (format === 'csv') {
-                exportToCSV();
-            } else if (format === 'pdf') {
-                generateSummaryPDF();
-            }
-        }
-
+        // Export functions
         function exportToCSV() {
-            const headers = ['Date', 'Driver', 'Tractor', 'Trailer', 'Moffett', 'Fuel Level', 'Status', 'Repairs Needed', 'Issues'];
+            const headers = ['Date', 'Driver', 'Tractor', 'Trailer', 'Status', 'Issues'];
             const csvContent = [
                 headers.join(','),
                 ...filteredReports.map(report => [
@@ -1339,10 +994,7 @@
                     report.driver,
                     report.tractorNumber || '',
                     report.trailerNumber || '',
-                    report.moffettNumber || '',
-                    report.fuelLevel || '',
-                    report.status || 'good',
-                    report.repairsNeeded || 'None',
+                    report.status,
                     (report.damageFound || 'None').replace(/,/g, ';')
                 ].join(','))
             ].join('\n');
@@ -1360,73 +1012,92 @@
             showMessage('inspectionMessage', '📄 CSV export downloaded successfully!', 'success');
         }
 
-        function generateSummaryPDF() {
-            showMessage('inspectionMessage', '📑 Generating summary PDF report...', 'info');
+        function generateSummaryReport() {
+            showMessage('inspectionMessage', '📑 Generating summary report...', 'info');
             
-            setTimeout(() => {
-                showMessage('inspectionMessage', '✅ Summary PDF generated and downloaded!', 'success');
-            }, 2000);
+            const total = allInspectionReports.length;
+            const good = allInspectionReports.filter(r => r.status === 'good').length;
+            const issues = allInspectionReports.filter(r => r.status === 'issues').length;
+            const critical = allInspectionReports.filter(r => r.status === 'critical').length;
+
+            const summaryContent = `INSPECTION REPORTS SUMMARY
+=========================
+
+Generated: ${new Date().toLocaleString()}
+
+SUMMARY STATISTICS
+------------------
+Total Reports: ${total}
+No Issues: ${good} (${Math.round(good/total*100)}%)
+Minor Issues: ${issues} (${Math.round(issues/total*100)}%)
+Critical Issues: ${critical} (${Math.round(critical/total*100)}%)
+
+RECENT REPORTS
+--------------
+${filteredReports.slice(0, 10).map(report => {
+    const date = new Date(report.checkInTime).toLocaleDateString();
+    const status = report.status === 'good' ? '✓' : report.status === 'issues' ? '⚠' : '✗';
+    return `${date} - ${report.driver} (${report.tractorNumber}) ${status}`;
+}).join('\n')}
+`;
+
+            const blob = new Blob([summaryContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `inspection_summary_${new Date().toISOString().slice(0,10)}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showMessage('inspectionMessage', `✅ Summary report downloaded successfully`, 'success');
         }
 
         function generateMaintenanceReport() {
             showMessage('inspectionMessage', '🔧 Generating maintenance report...', 'info');
             
-            setTimeout(() => {
-                showMessage('inspectionMessage', '✅ Maintenance report generated!', 'success');
-            }, 1500);
+            const maintenanceNeeds = allInspectionReports.filter(r => r.status === 'issues' || r.status === 'critical');
+            
+            const maintenanceContent = `MAINTENANCE REPORT
+==================
+
+Generated: ${new Date().toLocaleString()}
+
+VEHICLES REQUIRING MAINTENANCE
+------------------------------
+${maintenanceNeeds.length === 0 ? 'No vehicles currently require maintenance.' :
+maintenanceNeeds.map(vehicle => `
+Vehicle: ${vehicle.tractorNumber} / ${vehicle.trailerNumber}
+Driver: ${vehicle.driver}
+Priority: ${vehicle.status === 'critical' ? 'URGENT' : 'MODERATE'}
+Issues: ${vehicle.damageFound}
+Date: ${new Date(vehicle.checkInTime).toLocaleDateString()}
+`).join('\n')}
+`;
+
+            const blob = new Blob([maintenanceContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `maintenance_report_${new Date().toISOString().slice(0,10)}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showMessage('inspectionMessage', `✅ Maintenance report downloaded successfully`, 'success');
         }
 
-        // MAINTENANCE TRACKER FUNCTIONALITY
-        async function loadMaintenanceData() {
-            try {
-                showMessage('maintenanceMessage', 'Loading maintenance data...', 'info');
-                
-                const maintenanceNeeds = processMaintenanceNeeds();
-                displayMaintenanceData(maintenanceNeeds);
-                updateMaintenanceStats(maintenanceNeeds);
-                
-                showMessage('maintenanceMessage', '✅ Maintenance data loaded successfully', 'success');
-            } catch (error) {
-                console.error('Error loading maintenance data:', error);
-                showMessage('maintenanceMessage', '❌ Error loading maintenance data', 'error');
-            }
-        }
-
-        function processMaintenanceNeeds() {
-            const vehicleIssues = {};
+        // Maintenance tracker functions
+        function loadMaintenanceData() {
+            showMessage('maintenanceMessage', 'Loading maintenance data...', 'info');
             
-            allInspectionReports.forEach(report => {
-                const vehicleKey = report.tractorNumber || report.trailerNumber || 'Unknown';
-                
-                if (!vehicleIssues[vehicleKey]) {
-                    vehicleIssues[vehicleKey] = {
-                        vehicle: vehicleKey,
-                        type: report.tractorNumber ? 'Tractor' : 'Trailer',
-                        lastInspection: report.checkInTime,
-                        driver: report.driver,
-                        issues: [],
-                        priority: 'good'
-                    };
-                }
-                
-                if (report.damageFound) {
-                    vehicleIssues[vehicleKey].issues.push({
-                        issue: report.damageFound,
-                        repairPriority: report.repairsNeeded,
-                        reportDate: report.checkInTime
-                    });
-                    
-                    if (report.repairsNeeded === 'Critical') {
-                        vehicleIssues[vehicleKey].priority = 'critical';
-                    } else if (report.repairsNeeded === 'Urgent' && vehicleIssues[vehicleKey].priority !== 'critical') {
-                        vehicleIssues[vehicleKey].priority = 'urgent';
-                    } else if (report.repairsNeeded === 'Moderate' && vehicleIssues[vehicleKey].priority === 'good') {
-                        vehicleIssues[vehicleKey].priority = 'moderate';
-                    }
-                }
-            });
+            const maintenanceNeeds = allInspectionReports.filter(r => r.status === 'issues' || r.status === 'critical');
+            displayMaintenanceData(maintenanceNeeds);
+            updateMaintenanceStats(maintenanceNeeds);
             
-            return Object.values(vehicleIssues).filter(vehicle => vehicle.issues.length > 0);
+            showMessage('maintenanceMessage', '✅ Maintenance data loaded successfully', 'success');
         }
 
         function displayMaintenanceData(maintenanceNeeds) {
@@ -1442,28 +1113,28 @@
             }
 
             const maintenanceHTML = maintenanceNeeds.map(vehicle => {
-                const priorityClass = vehicle.priority === 'critical' ? 'urgent' : '';
-                const priorityIcon = vehicle.priority === 'critical' ? '🚨' : vehicle.priority === 'urgent' ? '⚠️' : '🔧';
+                const priorityClass = vehicle.status === 'critical' ? 'urgent' : '';
+                const priorityIcon = vehicle.status === 'critical' ? '🚨' : '⚠️';
                 
                 return `
                     <div class="maintenance-item ${priorityClass}">
-                        <div style="flex: 1;">
+                        <div class="maintenance-info">
                             <div style="font-weight: bold; font-size: 16px; margin-bottom: 4px;">
-                                ${priorityIcon} ${vehicle.type}: ${vehicle.vehicle}
+                                ${priorityIcon} Vehicle: ${vehicle.tractorNumber} / ${vehicle.trailerNumber}
                             </div>
                             <div style="color: #666; font-size: 14px; margin-bottom: 4px;">
-                                Last Driver: ${vehicle.driver} | Last Inspection: ${new Date(vehicle.lastInspection).toLocaleDateString()}
+                                Last Driver: ${vehicle.driver} | Date: ${new Date(vehicle.checkInTime).toLocaleDateString()}
                             </div>
-                            <div style="color: #333; font-size: 14px;">
-                                Issues: ${vehicle.issues.map(issue => issue.issue).join('; ')}
+                            <div style="color: #333; font-size: 14px; margin-bottom: 8px;">
+                                Issues: ${vehicle.damageFound}
                             </div>
-                            <span style="background: ${getPriorityColor(vehicle.priority)}; color: ${getPriorityTextColor(vehicle.priority)}; padding: 2px 8px; border-radius: 12px; font-size: 12px; text-transform: uppercase; font-weight: bold; margin-top: 8px; display: inline-block;">
-                                ${vehicle.priority} Priority
+                            <span style="background: ${vehicle.status === 'critical' ? '#f8d7da' : '#fff3cd'}; color: ${vehicle.status === 'critical' ? '#721c24' : '#856404'}; padding: 2px 8px; border-radius: 12px; font-size: 12px; text-transform: uppercase; font-weight: bold;">
+                                ${vehicle.status === 'critical' ? 'URGENT' : 'MODERATE'} Priority
                             </span>
                         </div>
-                        <div style="display: flex; gap: 8px;">
-                            <button onclick="scheduleRepair('${vehicle.vehicle}')" style="padding: 8px 12px; font-size: 12px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; background: #28a745; color: white;">📅 Schedule</button>
-                            <button onclick="markCompleted('${vehicle.vehicle}')" style="padding: 8px 12px; font-size: 12px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; background: #17a2b8; color: white;">✅ Complete</button>
+                        <div class="maintenance-actions">
+                            <button onclick="scheduleRepair('${vehicle.tractorNumber}')" style="background: #28a745; color: white;">📅 Schedule</button>
+                            <button onclick="markCompleted('${vehicle.tractorNumber}')" style="background: #17a2b8; color: white;">✅ Complete</button>
                         </div>
                     </div>
                 `;
@@ -1472,29 +1143,11 @@
             container.innerHTML = maintenanceHTML;
         }
 
-        function getPriorityColor(priority) {
-            switch(priority) {
-                case 'critical': return '#f8d7da';
-                case 'urgent': return '#fff3cd';
-                case 'moderate': return '#d4edda';
-                default: return '#e9ecef';
-            }
-        }
-
-        function getPriorityTextColor(priority) {
-            switch(priority) {
-                case 'critical': return '#721c24';
-                case 'urgent': return '#856404';
-                case 'moderate': return '#155724';
-                default: return '#495057';
-            }
-        }
-
         function updateMaintenanceStats(maintenanceNeeds) {
             const total = new Set(allInspectionReports.map(r => r.tractorNumber || r.trailerNumber)).size;
             const needsMaintenance = maintenanceNeeds.length;
-            const urgent = maintenanceNeeds.filter(v => v.priority === 'urgent').length;
-            const critical = maintenanceNeeds.filter(v => v.priority === 'critical').length;
+            const urgent = maintenanceNeeds.filter(v => v.status === 'urgent').length;
+            const critical = maintenanceNeeds.filter(v => v.status === 'critical').length;
 
             document.getElementById('totalVehicles').textContent = total;
             document.getElementById('maintenanceNeeded').textContent = needsMaintenance;
@@ -1508,31 +1161,79 @@
 
         function markCompleted(vehicleId) {
             if (confirm(`Mark maintenance as completed for vehicle ${vehicleId}?`)) {
-                showMessage('maintenanceMessage', `✅ Maintenance completed for vehicle ${vehicleId}`, 'success');
+                // Update the vehicle status to good
+                allInspectionReports.forEach(report => {
+                    if (report.tractorNumber === vehicleId || report.trailerNumber === vehicleId) {
+                        report.status = 'good';
+                        report.damageFound = '';
+                    }
+                });
                 loadMaintenanceData();
+                showMessage('maintenanceMessage', `✅ Maintenance completed for vehicle ${vehicleId}`, 'success');
             }
         }
 
         function exportMaintenanceReport() {
-            showMessage('maintenanceMessage', '📊 Exporting maintenance report...', 'info');
+            showMessage('maintenanceMessage', '📊 Generating maintenance export...', 'info');
             
-            setTimeout(() => {
-                showMessage('maintenanceMessage', '✅ Maintenance report exported successfully!', 'success');
-            }, 1500);
+            const maintenanceNeeds = allInspectionReports.filter(r => r.status === 'issues' || r.status === 'critical');
+            
+            const maintenanceContent = `MAINTENANCE EXPORT REPORT
+=========================
+
+Generated: ${new Date().toLocaleString()}
+
+MAINTENANCE SUMMARY
+-------------------
+Total Vehicles: ${new Set(allInspectionReports.map(r => r.tractorNumber || r.trailerNumber)).size}
+Vehicles Needing Maintenance: ${maintenanceNeeds.length}
+Critical Issues: ${maintenanceNeeds.filter(v => v.status === 'critical').length}
+
+DETAILED MAINTENANCE LIST
+-------------------------
+${maintenanceNeeds.length === 0 ? 'No vehicles currently require maintenance.' :
+maintenanceNeeds.map(vehicle => `
+Vehicle: ${vehicle.tractorNumber} / ${vehicle.trailerNumber}
+Priority: ${vehicle.status === 'critical' ? 'CRITICAL' : 'MODERATE'}
+Driver: ${vehicle.driver}
+Date: ${new Date(vehicle.checkInTime).toLocaleDateString()}
+Issues: ${vehicle.damageFound}
+`).join('\n')}
+`;
+
+            const blob = new Blob([maintenanceContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `maintenance_export_${new Date().toISOString().slice(0,10)}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showMessage('maintenanceMessage', `✅ Maintenance report exported successfully`, 'success');
         }
 
+        // Utility function to show messages
         function showMessage(elementId, message, type) {
             const element = document.getElementById(elementId);
             if (element) {
-                element.innerHTML = `<div class="message ${type}">${message.replace(/\n/g, '<br>')}</div>`;
+                element.innerHTML = `<div class="message ${type}">${message}</div>`;
                 
                 if (type === 'success') {
                     setTimeout(() => {
                         element.innerHTML = '';
-                    }, 5000);
+                    }, 4000);
                 }
             }
         }
+
+        // Add event listeners for search filters
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('searchDriver').addEventListener('input', filterReports);
+            document.getElementById('searchVehicle').addEventListener('input', filterReports);
+            document.getElementById('filterStatus').addEventListener('change', filterReports);
+        });
     </script>
 </body>
 </html>
