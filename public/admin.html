@@ -523,165 +523,23 @@
             padding: 10px 20px;
         }
         
-        /* Success Animation Styles */
-        .success-animation {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: linear-gradient(135deg, #28a745, #20c997);
-            color: white;
-            padding: 30px 40px;
-            border-radius: 15px;
-            box-shadow: 0 20px 60px rgba(40, 167, 69, 0.4);
-            z-index: 15000;
+        /* Simple Scheduled Status */
+        .schedule-confirmation {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-weight: bold;
+            font-size: 14px;
             text-align: center;
-            opacity: 0;
-            transform: translate(-50%, -50%) scale(0.5);
-            transition: all 0.5s ease;
-        }
-        
-        .success-animation.show {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-        }
-        
-        .success-animation h3 {
-            margin: 0 0 10px 0;
-            font-size: 24px;
-        }
-        
-        .success-animation p {
-            margin: 0;
-            font-size: 16px;
-        }
-        
-        .success-checkmark {
-            font-size: 60px;
-            margin-bottom: 15px;
-            animation: checkmarkBounce 0.6s ease;
-        }
-        
-        @keyframes checkmarkBounce {
-            0% { transform: scale(0); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
-        }
-        
-        /* Scheduled Status Badge */
-        .scheduled-badge {
-            background: linear-gradient(135deg, #17a2b8, #138496) !important;
-            color: white !important;
-            animation: scheduleGlow 2s ease-in-out;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .scheduled-badge::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -100%;
-            width: 100%;
-            height: calc(100% + 4px);
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-            animation: shimmer 2s ease-in-out;
-        }
-        
-        @keyframes scheduleGlow {
-            0% { box-shadow: 0 0 5px rgba(23, 162, 184, 0.5); }
-            50% { box-shadow: 0 0 20px rgba(23, 162, 184, 0.8), 0 0 30px rgba(23, 162, 184, 0.6); }
-            100% { box-shadow: 0 0 5px rgba(23, 162, 184, 0.5); }
-        }
-        
-        @keyframes shimmer {
-            0% { left: -100%; }
-            100% { left: 100%; }
-        }
-        
-        /* Button State Changes */
-        .schedule-btn {
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s ease;
         }
         
         .schedule-btn.scheduled {
-            background: linear-gradient(135deg, #28a745, #20c997) !important;
+            background: #6c757d !important;
             color: white !important;
-            pointer-events: none;
-        }
-        
-        .schedule-btn.scheduled::after {
-            content: '✅ Scheduled';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: inherit;
-        }
-        
-        /* Maintenance Item Highlight */
-        .maintenance-item.scheduled {
-            background: linear-gradient(135deg, #e8f5e9, #f0f9ff) !important;
-            border-left: 4px solid #28a745 !important;
-            box-shadow: 0 4px 20px rgba(40, 167, 69, 0.2) !important;
-            animation: scheduleHighlight 3s ease-in-out;
-        }
-        
-        @keyframes scheduleHighlight {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-            100% { transform: scale(1); }
-        }
-        
-        /* Notification Toast */
-        .toast-notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, #28a745, #20c997);
-            color: white;
-            padding: 20px 25px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(40, 167, 69, 0.3);
-            z-index: 12000;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            transform: translateX(400px);
-            transition: transform 0.4s ease;
-            max-width: 400px;
-        }
-        
-        .toast-notification.show {
-            transform: translateX(0);
-        }
-        
-        .toast-icon {
-            font-size: 24px;
-            animation: toastIconSpin 0.6s ease;
-        }
-        
-        @keyframes toastIconSpin {
-            0% { transform: rotate(0deg) scale(0.5); }
-            50% { transform: rotate(180deg) scale(1.2); }
-            100% { transform: rotate(360deg) scale(1); }
-        }
-        
-        .toast-content h4 {
-            margin: 0 0 5px 0;
-            font-size: 16px;
-        }
-        
-        .toast-content p {
-            margin: 0;
-            font-size: 14px;
-            opacity: 0.9;
+            cursor: not-allowed;
         }
             .grid {
                 grid-template-columns: 1fr;
@@ -1770,105 +1628,38 @@
             scheduledRepairs.push(repair);
             localStorage.setItem('scheduledRepairs', JSON.stringify(scheduledRepairs));
             
-            // Close calendar first
+            // Close calendar
             closeCalendar();
             
-            // Show multiple visual confirmations
-            showScheduleConfirmations(currentVehicleId, formattedDate);
+            // Update the maintenance item with confirmation message
+            updateMaintenanceItemWithConfirmation(currentVehicleId, formattedDate);
             
-            // Update the maintenance item visual state
-            updateMaintenanceItemScheduled(currentVehicleId, formattedDate);
+            // Show success message in main message area
+            showMessage('maintenanceMessage', `📅 Repair scheduled for vehicle ${currentVehicleId} on ${formattedDate}`, 'success');
         }
 
-        function showScheduleConfirmations(vehicleId, formattedDate) {
-            // 1. Success Animation Popup
-            showSuccessAnimation(vehicleId, formattedDate);
-            
-            // 2. Toast Notification
-            showToastNotification(vehicleId, formattedDate);
-            
-            // 3. Update main message area
-            showMessage('maintenanceMessage', `📅 Repair successfully scheduled for vehicle ${vehicleId} on ${formattedDate}`, 'success');
-        }
-
-        function showSuccessAnimation(vehicleId, formattedDate) {
-            // Create success animation element
-            const successDiv = document.createElement('div');
-            successDiv.className = 'success-animation';
-            successDiv.innerHTML = `
-                <div class="success-checkmark">✅</div>
-                <h3>Repair Scheduled!</h3>
-                <p><strong>Vehicle:</strong> ${vehicleId}</p>
-                <p><strong>Date:</strong> ${formattedDate}</p>
-            `;
-            
-            document.body.appendChild(successDiv);
-            
-            // Show animation
-            setTimeout(() => successDiv.classList.add('show'), 100);
-            
-            // Remove after 3 seconds
-            setTimeout(() => {
-                successDiv.classList.remove('show');
-                setTimeout(() => document.body.removeChild(successDiv), 500);
-            }, 3000);
-        }
-
-        function showToastNotification(vehicleId, formattedDate) {
-            // Create toast notification
-            const toast = document.createElement('div');
-            toast.className = 'toast-notification';
-            toast.innerHTML = `
-                <div class="toast-icon">🔧</div>
-                <div class="toast-content">
-                    <h4>Maintenance Scheduled</h4>
-                    <p>Vehicle ${vehicleId} scheduled for ${formattedDate}</p>
-                </div>
-            `;
-            
-            document.body.appendChild(toast);
-            
-            // Show toast
-            setTimeout(() => toast.classList.add('show'), 100);
-            
-            // Remove after 5 seconds
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => document.body.removeChild(toast), 400);
-            }, 5000);
-        }
-
-        function updateMaintenanceItemScheduled(vehicleId, formattedDate) {
+        function updateMaintenanceItemWithConfirmation(vehicleId, formattedDate) {
             // Find the maintenance item
             const scheduleButton = document.querySelector(`button[onclick="scheduleRepair('${vehicleId}')"]`);
             if (scheduleButton) {
                 const maintenanceItem = scheduleButton.closest('.maintenance-item');
+                const maintenanceInfo = maintenanceItem.querySelector('.maintenance-info');
                 
-                // Update maintenance item styling
-                maintenanceItem.classList.add('scheduled');
-                
-                // Update status badge
-                const statusSpan = maintenanceItem.querySelector('span');
-                statusSpan.className = 'scheduled-badge';
-                statusSpan.style.background = 'linear-gradient(135deg, #17a2b8, #138496)';
-                statusSpan.style.color = 'white';
-                statusSpan.textContent = 'SCHEDULED';
-                
-                // Update button
+                // Update schedule button
                 scheduleButton.classList.add('scheduled');
-                scheduleButton.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
-                scheduleButton.innerHTML = '✅ Scheduled';
+                scheduleButton.textContent = '✅ Scheduled';
                 scheduleButton.disabled = true;
                 
-                // Add scheduled date info
-                const infoDiv = maintenanceItem.querySelector('.maintenance-info');
-                const existingScheduleInfo = infoDiv.querySelector('.schedule-info');
-                if (!existingScheduleInfo) {
-                    const scheduleInfo = document.createElement('div');
-                    scheduleInfo.className = 'schedule-info';
-                    scheduleInfo.style.cssText = 'color: #17a2b8; font-weight: bold; font-size: 14px; margin-top: 8px;';
-                    scheduleInfo.innerHTML = `📅 Scheduled for: ${formattedDate}`;
-                    infoDiv.appendChild(scheduleInfo);
+                // Add confirmation message to the maintenance info box
+                const existingConfirmation = maintenanceInfo.querySelector('.schedule-confirmation');
+                if (!existingConfirmation) {
+                    const confirmationDiv = document.createElement('div');
+                    confirmationDiv.className = 'schedule-confirmation';
+                    confirmationDiv.innerHTML = `
+                        ✅ <strong>Repair Scheduled</strong><br>
+                        📅 Date: ${formattedDate}
+                    `;
+                    maintenanceInfo.appendChild(confirmationDiv);
                 }
             }
         }
