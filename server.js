@@ -49,8 +49,8 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(mongoSanitize()); // Prevent MongoDB injection attacks
 app.use(compression()); // Compress responses
 
-// Serve static files
-app.use(express.static('public'));
+// Serve static files from root directory
+app.use(express.static(__dirname));
 
 // Request logging middleware
 app.use((req, res, next) => {
