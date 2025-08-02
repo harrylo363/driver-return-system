@@ -3,1484 +3,972 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dispatcher Dashboard</title>
+    <title>Dispatch Dashboard - Driver Return System</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: #333;
+        
+        :root {
+            --primary-color: #4A6CF7;
+            --primary-dark: #3651D8;
+            --secondary-color: #7C3AED;
+            --success-color: #10B981;
+            --warning-color: #F59E0B;
+            --danger-color: #EF4444;
+            --info-color: #3B82F6;
+            --dark-color: #1F2937;
+            --gray-color: #6B7280;
+            --light-gray: #F3F4F6;
+            --border-color: #E5E7EB;
+            --white: #FFFFFF;
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
-        .container {
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #F9FAFB;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+        
+        /* Header */
+        .header {
+            background: var(--white);
+            border-bottom: 1px solid var(--border-color);
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+        
+        .header-content {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 20px;
-        }
-        .header {
-            text-align: center;
-            color: white;
-            margin-bottom: 30px;
-        }
-        .header h1 {
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
-        .card {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-            border: 1px solid rgba(0,0,0,0.05);
-        }
-        .card h2 {
-            font-size: 28px;
-            margin-bottom: 25px;
-            color: #2c3e50;
-            font-weight: 600;
-        }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-            margin-bottom: 40px;
-        }
-        .stat-card {
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-            color: white;
-            padding: 30px;
-            border-radius: 15px;
-            text-align: center;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: transform 0.3s ease;
-        }
-        .stat-card:hover {
-            transform: translateY(-5px);
-        }
-        .stat-number {
-            font-size: 42px;
-            font-weight: bold;
-            margin-bottom: 8px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-        .stat-label {
-            font-size: 16px;
-            opacity: 0.9;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .total-card {
-            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-        }
-        .en-route-card {
-            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
-        }
-        .arrived-card {
-            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
-        }
-        .checked-in-card {
-            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
-        }
-        .notifications-section {
-            background: #f8f9fa;
-            padding: 30px;
-            border-radius: 15px;
-            min-height: 400px;
-        }
-        .notification-item {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            border-left: 5px solid #667eea;
+            padding: 0 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
         }
-        .notification-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
-        }
-        .notification-item.arrived {
-            border-left-color: #28a745;
-        }
-        .notification-item.checked-in {
-            background: #d4edda;
-            opacity: 0.8;
-        }
-        .notification-details {
-            flex: 1;
-        }
-        .driver-name {
-            font-size: 20px;
-            font-weight: bold;
-            color: #2c3e50;
-            margin-bottom: 8px;
-        }
-        .status-info {
-            color: #666;
-            font-size: 15px;
-            margin-bottom: 5px;
-        }
-        .timestamp {
-            color: #999;
-            font-size: 13px;
-        }
-        .status-badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            text-transform: uppercase;
-            margin-right: 10px;
-        }
-        .status-en-route {
-            background: #fff3cd;
-            color: #856404;
-        }
-        .status-arrived {
-            background: #d4edda;
-            color: #155724;
-        }
-        .checkin-section {
+        
+        .header-title {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 16px;
         }
-        .checkin-checkbox {
-            width: 24px;
-            height: 24px;
-            cursor: pointer;
-            transform: scale(1.3);
-        }
-        .checkin-label {
-            font-size: 16px;
-            color: #28a745;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .checked-in-text {
-            color: #28a745;
-            font-weight: bold;
-            font-size: 16px;
-            padding: 10px 20px;
-            background: #d4edda;
-            border-radius: 8px;
-            border: 2px solid #28a745;
-        }
-        .no-notifications {
-            text-align: center;
-            color: #666;
-            font-style: italic;
-            padding: 40px;
-        }
-        .refresh-btn {
-            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 15px;
-            box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
-            transition: all 0.3s;
-            margin-right: 15px;
-            margin-bottom: 15px;
-        }
-        .refresh-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(23, 162, 184, 0.4);
-        }
-        .filter-controls {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 25px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .filter-btn {
-            padding: 10px 20px;
-            border: 2px solid #667eea;
-            background: white;
-            color: #667eea;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 15px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        .filter-btn:hover {
-            background: #f8f9fa;
-        }
-        .filter-btn.active {
-            background: #667eea;
-            color: white;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        }
-        .message {
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            font-weight: bold;
-        }
-        .success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        .info {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
-        }
-
-        /* Inspection Modal Styles */
-        .inspection-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 10000;
+        
+        .logo {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
+            font-size: 28px;
+            color: white;
         }
         
-        .inspection-modal.show {
-            opacity: 1;
-            visibility: visible;
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--dark-color);
         }
         
-        .inspection-form {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            max-width: 800px;
-            width: 90%;
-            max-height: 90%;
-            overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            transform: scale(0.9);
-            transition: transform 0.3s ease;
-        }
-        
-        .inspection-modal.show .inspection-form {
-            transform: scale(1);
-        }
-        
-        .inspection-header {
-            text-align: center;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #e1e5e9;
-        }
-        
-        .inspection-header h2 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-        
-        .driver-info {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-weight: bold;
-        }
-        
-        .form-section {
-            margin-bottom: 25px;
-        }
-        
-        .form-section h3 {
-            color: #667eea;
-            margin-bottom: 15px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid #e1e5e9;
-        }
-        
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-        }
-        
-        .form-group {
-            margin-bottom: 15px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #555;
-        }
-        
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #e1e5e9;
-            border-radius: 6px;
+        .page-subtitle {
             font-size: 14px;
-            background: #f8f9fa;
+            color: var(--gray-color);
+            margin-top: 4px;
         }
         
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #667eea;
-            background: white;
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
         }
         
-        .form-group textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-        
-        .checkbox-group {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 10px;
-            margin-top: 10px;
-        }
-        
-        .checkbox-item {
+        .connection-badge {
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 8px;
-            background: #f8f9fa;
-            border-radius: 6px;
+            padding: 8px 16px;
+            background: var(--light-gray);
+            border-radius: 100px;
+            font-size: 14px;
+            font-weight: 500;
         }
         
-        .checkbox-item input[type="checkbox"] {
-            width: auto;
-            margin: 0;
+        .connection-badge.connected {
+            background: #D1FAE5;
+            color: #065F46;
         }
         
-        .checkbox-item label {
-            margin: 0;
-            font-weight: normal;
-            cursor: pointer;
-            flex: 1;
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: pulse 2s infinite;
         }
         
-        .modal-actions {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 2px solid #e1e5e9;
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
         }
         
-        .btn {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 32px 24px;
         }
         
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
         }
         
-        .btn-success {
-            background: #28a745;
-            color: white;
+        .stat-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
         }
         
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
         }
         
-        .btn:hover {
-            transform: translateY(-2px);
-        }
-        
-        .issue-section {
-            background: #fff3cd;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #ffeaa7;
-        }
-
-        /* iOS Notification Styles */
-        .ios-notification-overlay {
-            position: fixed;
+        .stat-card::before {
+            content: '';
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 20000;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        }
+        
+        .stat-card.success::before {
+            background: var(--success-color);
+        }
+        
+        .stat-card.warning::before {
+            background: var(--warning-color);
+        }
+        
+        .stat-card.danger::before {
+            background: var(--danger-color);
+        }
+        
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+        
+        .stat-icon {
+            width: 56px;
+            height: 56px;
+            background: var(--light-gray);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        
-        .ios-notification-overlay.show {
-            opacity: 1;
-        }
-        
-        .ios-notification-modal {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            margin: 20px;
-            max-width: 90%;
-            width: 400px;
-            text-align: center;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            transform: scale(0.8);
-            transition: transform 0.3s ease;
-        }
-        
-        .ios-notification-overlay.show .ios-notification-modal {
-            transform: scale(1);
-        }
-        
-        .ios-notification-header {
-            margin-bottom: 20px;
-        }
-        
-        .ios-notification-icon {
-            font-size: 60px;
-            margin-bottom: 15px;
-        }
-        
-        .ios-notification-title {
-            font-size: 24px;
-            font-weight: bold;
-            color: #333;
-        }
-        
-        .driver-name-large {
             font-size: 28px;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 10px;
         }
         
-        .status-large {
-            font-size: 20px;
-            color: #667eea;
-            font-weight: bold;
-            margin-bottom: 15px;
-            text-transform: uppercase;
+        .stat-trend {
+            font-size: 14px;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: #D1FAE5;
+            color: #065F46;
         }
         
-        .location-info,
-        .eta-info {
-            font-size: 16px;
-            color: #666;
+        .stat-trend.down {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+        
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--dark-color);
             margin-bottom: 8px;
         }
         
-        .notification-time {
+        .stat-label {
+            font-size: 16px;
+            color: var(--gray-color);
+            font-weight: 500;
+        }
+        
+        .stat-sublabel {
             font-size: 14px;
-            color: #999;
-            margin-bottom: 25px;
+            color: var(--gray-color);
+            margin-top: 4px;
         }
         
-        .ios-notification-actions {
+        /* Activity Card */
+        .activity-card {
+            background: var(--white);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+        
+        .card-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border-color);
             display: flex;
-            flex-direction: column;
-            gap: 15px;
+            justify-content: space-between;
+            align-items: center;
         }
         
-        .ios-btn {
-            padding: 15px 25px;
-            border: none;
-            border-radius: 12px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            width: 100%;
-        }
-        
-        .ios-btn-primary {
-            background: #667eea;
-            color: white;
-        }
-        
-        .ios-btn-primary:hover {
-            background: #5a67d8;
-        }
-        
-        .ios-btn-success {
-            background: #28a745;
-            color: white;
-        }
-        
-        .ios-btn-success:hover {
-            background: #1e7e34;
-        }
-
-        /* Banner notification */
-        .ios-banner-notification {
-            position: fixed;
-            top: -100px;
-            left: 20px;
-            right: 20px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-            z-index: 15000;
-            transition: top 0.3s ease;
-        }
-        
-        .ios-banner-notification.show {
-            top: 20px;
-        }
-        
-        .ios-banner-notification.hide {
-            top: -100px;
-        }
-        
-        .banner-content {
+        .card-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--dark-color);
             display: flex;
             align-items: center;
-            padding: 15px;
+            gap: 12px;
         }
         
-        .banner-icon {
-            font-size: 30px;
-            margin-right: 15px;
+        /* Activity Items */
+        .activity-list {
+            max-height: 600px;
+            overflow-y: auto;
         }
         
-        .banner-text {
+        .activity-item {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: background 0.2s ease;
+        }
+        
+        .activity-item:hover {
+            background: var(--light-gray);
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+        
+        .activity-icon.en-route {
+            background: #FEF3C7;
+            color: #92400E;
+        }
+        
+        .activity-icon.arrived {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+        
+        .activity-icon.checked-in {
+            background: #DBEAFE;
+            color: #1E40AF;
+        }
+        
+        .activity-icon.issue {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+        
+        .activity-content {
             flex: 1;
         }
         
-        .banner-title {
-            font-weight: bold;
-            font-size: 16px;
-            color: #333;
-            margin-bottom: 5px;
+        .activity-title {
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 4px;
         }
         
-        .banner-subtitle {
+        .activity-details {
             font-size: 14px;
-            color: #666;
+            color: var(--gray-color);
+            display: flex;
+            gap: 16px;
+            align-items: center;
         }
         
-        .banner-close {
-            background: none;
+        .activity-time {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .activity-location {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .activity-status {
+            margin-left: auto;
+        }
+        
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        .badge-success {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+        
+        .badge-warning {
+            background: #FEF3C7;
+            color: #92400E;
+        }
+        
+        .badge-danger {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+        
+        .badge-info {
+            background: #DBEAFE;
+            color: #1E40AF;
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
             border: none;
-            font-size: 24px;
-            color: #999;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
             cursor: pointer;
-            padding: 5px;
-            margin-left: 10px;
-        }
-
-        /* Screen flash effect */
-        .screen-flash {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.8);
-            z-index: 25000;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.1s ease;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
         
-        .screen-flash.flash {
-            opacity: 1;
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
         }
-
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .btn-secondary {
+            background: var(--light-gray);
+            color: var(--dark-color);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--border-color);
+        }
+        
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        
+        /* Filter Pills */
+        .filter-pills {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-pill {
+            padding: 8px 20px;
+            border: 2px solid var(--border-color);
+            background: var(--white);
+            border-radius: 100px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--gray-color);
+        }
+        
+        .filter-pill:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .filter-pill.active {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+        
+        /* Check-in Button */
+        .check-in-btn {
+            background: var(--success-color);
+            color: white;
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+        
+        .check-in-btn:hover {
+            background: #059669;
+        }
+        
+        /* No Data State */
+        .no-data {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--gray-color);
+        }
+        
+        .no-data-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        
+        /* Loading */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--light-gray);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Responsive */
         @media (max-width: 768px) {
-            .container {
-                padding: 10px;
-            }
             .stats-grid {
                 grid-template-columns: 1fr;
             }
-            .notification-item {
+            
+            .header-content {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+            }
+            
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .activity-item {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 10px;
             }
-            .filter-controls {
+            
+            .activity-details {
                 flex-direction: column;
-                align-items: stretch;
+                align-items: flex-start;
+                gap: 8px;
             }
-            .ios-notification-modal {
-                margin: 10px;
-                padding: 25px;
+            
+            .activity-status {
+                margin-left: 0;
+                margin-top: 8px;
             }
-            .driver-name-large {
-                font-size: 24px;
+        }
+        
+        /* Grid Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+        
+        @media (min-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: 2fr 1fr;
             }
-            .status-large {
-                font-size: 18px;
+        }
+        
+        /* Live Indicator */
+        .live-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--danger-color);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--danger-color);
+            border-radius: 50%;
+            animation: live-pulse 1.5s infinite;
+        }
+        
+        @keyframes live-pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.2); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        
+        /* Summary Panel */
+        .summary-panel {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+        
+        .summary-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 20px;
+        }
+        
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+        
+        .summary-label {
+            color: var(--gray-color);
+            font-weight: 500;
+        }
+        
+        .summary-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--dark-color);
+        }
+        
+        /* Message Toast */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 20px;
+            background: var(--white);
+            border-radius: 10px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 300px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
             }
-            .inspection-form {
-                width: 95%;
-                padding: 20px;
+            to {
+                transform: translateX(0);
+                opacity: 1;
             }
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-            .modal-actions {
-                flex-direction: column;
-            }
+        }
+        
+        .toast.success {
+            border-left: 4px solid var(--success-color);
+        }
+        
+        .toast.error {
+            border-left: 4px solid var(--danger-color);
+        }
+        
+        .toast.info {
+            border-left: 4px solid var(--info-color);
         }
     </style>
 </head>
 <body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-title">
+                <div class="logo">📋</div>
+                <div>
+                    <h1 class="page-title">Dispatch Dashboard</h1>
+                    <p class="page-subtitle">Real-time driver monitoring and tracking</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <div class="connection-badge connected">
+                    <span class="status-dot"></span>
+                    <span>Connected</span>
+                </div>
+                <div class="live-indicator">
+                    <span class="live-dot"></span>
+                    <span>Live</span>
+                </div>
+                <button class="btn btn-icon btn-secondary" onclick="refreshDashboard()">
+                    <span>🔄</span>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main Container -->
     <div class="container">
-        <div class="header">
-            <h1>📋 Dispatcher Dashboard</h1>
-            <p>Driver Return Status Monitoring</p>
-        </div>
-
-        <!-- Statistics Cards -->
+        <!-- Stats Cards -->
         <div class="stats-grid">
-            <div class="stat-card total-card">
-                <div class="stat-number" id="totalNotifications">0</div>
-                <div class="stat-label">Total Notifications</div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-trend">+2 today</div>
+                </div>
+                <div class="stat-value" id="totalDrivers">24</div>
+                <div class="stat-label">Total Active Drivers</div>
+                <div class="stat-sublabel">Currently on duty</div>
             </div>
-            <div class="stat-card en-route-card">
-                <div class="stat-number" id="enRouteCount">0</div>
-                <div class="stat-label">En Route (30 min)</div>
+            
+            <div class="stat-card warning">
+                <div class="stat-header">
+                    <div class="stat-icon">🚚</div>
+                    <div class="stat-trend">↑ 3</div>
+                </div>
+                <div class="stat-value" id="enRouteCount">12</div>
+                <div class="stat-label">En Route</div>
+                <div class="stat-sublabel">Heading to warehouse</div>
             </div>
-            <div class="stat-card arrived-card">
-                <div class="stat-number" id="arrivedCount">0</div>
+            
+            <div class="stat-card success">
+                <div class="stat-header">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-trend">↑ 5</div>
+                </div>
+                <div class="stat-value" id="arrivedCount">7</div>
                 <div class="stat-label">Arrived</div>
+                <div class="stat-sublabel">Awaiting check-in</div>
             </div>
-            <div class="stat-card checked-in-card">
-                <div class="stat-number" id="checkedInCount">0</div>
-                <div class="stat-label">Checked In</div>
+            
+            <div class="stat-card danger">
+                <div class="stat-header">
+                    <div class="stat-icon">📍</div>
+                    <div class="stat-trend down">↓ 1</div>
+                </div>
+                <div class="stat-value" id="stillOutCount">5</div>
+                <div class="stat-label">Still Out</div>
+                <div class="stat-sublabel">No status update</div>
             </div>
         </div>
-
-        <!-- Main Dashboard -->
-        <div class="card">
-            <h2>Real-Time Driver Notifications</h2>
-            
-            <div class="filter-controls">
-                <button class="refresh-btn" onclick="loadNotifications()">🔄 Refresh</button>
-                <button class="refresh-btn" onclick="clearAllCheckIns()" style="background: #dc3545;">🗑️ Clear Check-ins</button>
-                <button class="filter-btn active" onclick="filterNotifications('all', this)">All</button>
-                <button class="filter-btn" onclick="filterNotifications('en-route', this)">En Route</button>
-                <button class="filter-btn" onclick="filterNotifications('arrived', this)">Arrived</button>
-                <button class="filter-btn" onclick="filterNotifications('checked-in', this)">Checked In</button>
-            </div>
-
-            <div id="statusMessage"></div>
-
-            <div class="notifications-section">
-                <div id="notificationsList">
-                    <div class="no-notifications">
-                        <p>No driver notifications yet. Waiting for driver updates...</p>
-                    </div>
-                </div>
-            </div>
+        
+        <!-- Filter Pills -->
+        <div class="filter-pills">
+            <button class="filter-pill active" onclick="filterActivity('all', this)">All Activity</button>
+            <button class="filter-pill" onclick="filterActivity('en-route', this)">En Route</button>
+            <button class="filter-pill" onclick="filterActivity('arrived', this)">Arrived</button>
+            <button class="filter-pill" onclick="filterActivity('checked-in', this)">Checked In</button>
+            <button class="filter-pill" onclick="filterActivity('issues', this)">Issues</button>
         </div>
-    </div>
-
-    <!-- Vehicle Inspection Modal -->
-    <div class="inspection-modal" id="inspectionModal">
-        <div class="inspection-form">
-            <div class="inspection-header">
-                <h2>🚛 Vehicle Inspection Report</h2>
-                <div class="driver-info" id="driverInfo">
-                    Driver: <span id="inspectionDriverName"></span><br>
-                    Check-in Time: <span id="inspectionTime"></span>
+        
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- Recent Activity -->
+            <div class="activity-card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <span>🕐</span>
+                        <span>Recent Activity</span>
+                    </h2>
+                    <button class="btn btn-secondary" onclick="exportActivity()">
+                        <span>📥</span>
+                        <span>Export</span>
+                    </button>
                 </div>
-            </div>
-
-            <form id="inspectionForm">
-                <!-- Vehicle Information -->
-                <div class="form-section">
-                    <h3>🚚 Vehicle Information</h3>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="tractorNumber">Tractor Number</label>
-                            <input type="text" id="tractorNumber" name="tractorNumber" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="trailerNumber">Trailer Number</label>
-                            <input type="text" id="trailerNumber" name="trailerNumber" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="moffettNumber">Moffett Number</label>
-                            <input type="text" id="moffettNumber" name="moffettNumber">
-                        </div>
-                        <div class="form-group">
-                            <label for="odometerReading">Odometer Reading</label>
-                            <input type="number" id="odometerReading" name="odometerReading">
-                        </div>
-                        <div class="form-group">
-                            <label for="fuelLevel">Fuel Level</label>
-                            <select id="fuelLevel" name="fuelLevel">
-                                <option value="">Select Level</option>
-                                <option value="Full">Full</option>
-                                <option value="3/4">3/4</option>
-                                <option value="1/2">1/2</option>
-                                <option value="1/4">1/4</option>
-                                <option value="Empty">Empty</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Safety Inspection -->
-                <div class="form-section">
-                    <h3>🔍 Safety Inspection</h3>
-                    <div class="checkbox-group">
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="tiresGood" name="safetyChecks" value="tires">
-                            <label for="tiresGood">Tires - Good Condition</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="lightsGood" name="safetyChecks" value="lights">
-                            <label for="lightsGood">All Lights Working</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="brakesGood" name="safetyChecks" value="brakes">
-                            <label for="brakesGood">Brakes - Good Pressure</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="mirrorsGood" name="safetyChecks" value="mirrors">
-                            <label for="mirrorsGood">Mirrors - Good Condition</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="hornGood" name="safetyChecks" value="horn">
-                            <label for="hornGood">Horn/Warning Devices</label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Equipment Inspection -->
-                <div class="form-section">
-                    <h3>🔧 Equipment Inspection</h3>
-                    <div class="checkbox-group">
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="moffettGood" name="equipmentChecks" value="moffett">
-                            <label for="moffettGood">Moffett/Forklift - Operating</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="hydraulicsGood" name="equipmentChecks" value="hydraulics">
-                            <label for="hydraulicsGood">Hydraulics - Working</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="chainsGood" name="equipmentChecks" value="chains">
-                            <label for="chainsGood">Chains/Straps - Good</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="tarpsGood" name="equipmentChecks" value="tarps">
-                            <label for="tarpsGood">Tarps - Good Condition</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="landingGearGood" name="equipmentChecks" value="landingGear">
-                            <label for="landingGearGood">Landing Gear - Working</label>
-                        </div>
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="fifthWheelGood" name="equipmentChecks" value="fifthWheel">
-                            <label for="fifthWheelGood">Fifth Wheel/Coupling - Secure</label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Issues/Damage Reporting -->
-                <div class="form-section issue-section">
-                    <h3>⚠️ Issues & Damage Report</h3>
-                    <div class="form-group">
-                        <label for="damageFound">Damage/Issues Found</label>
-                        <textarea id="damageFound" name="damageFound" placeholder="Describe any damage, issues, or required repairs..."></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="repairsNeeded">Repairs Needed</label>
-                        <select id="repairsNeeded" name="repairsNeeded">
-                            <option value="">Select Priority</option>
-                            <option value="None">No Repairs Needed</option>
-                            <option value="Minor">Minor - Can Wait</option>
-                            <option value="Moderate">Moderate - Schedule Soon</option>
-                            <option value="Urgent">Urgent - Immediate Attention</option>
-                            <option value="Critical">Critical - Out of Service</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Driver Notes -->
-                <div class="form-section">
-                    <h3>📝 Driver Notes</h3>
-                    <div class="form-group">
-                        <label for="deliveryNotes">Delivery Notes</label>
-                        <textarea id="deliveryNotes" name="deliveryNotes" placeholder="Any incidents, customer feedback, route issues, etc..."></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="additionalComments">Additional Comments</label>
-                        <textarea id="additionalComments" name="additionalComments" placeholder="Any other comments or observations..."></textarea>
-                    </div>
-                </div>
-
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeInspectionModal()">❌ Cancel</button>
-                    <button type="button" class="btn btn-success" onclick="completeInspection()">✅ Complete Inspection & Check In</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <script>
-        let notifications = [];
-        let checkedInDrivers = new Set();
-        let currentFilter = 'all';
-        let currentInspectionDriver = null;
-
-        // Initialize dashboard
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeSocket();
-            loadNotifications();
-            loadCheckedInStatus();
-            checkDateChange();
-            setInterval(updateTime, 1000);
-            setInterval(checkDateChange, 60000);
-
-            // Request notification permission
-            NotificationManager.requestPermission();
-        });
-
-        function initializeSocket() {
-            try {
-                socket = io();
                 
-                socket.on('connect', () => {
-                    console.log('Connected to server');
-                    socket.emit('join-room', { role: 'dispatcher' });
-                    showMessage('✅ Connected to real-time updates', 'success');
-                });
-
-                socket.on('driver-notification', (data) => {
-                    console.log('New notification received:', data);
-                    addNotification(data);
-                    showMessage(`📢 New update from ${data.driver}: ${data.status}`, 'success');
-                    
-                    // Send push notification
-                    NotificationManager.sendDriverNotification(
-                        data.driver,
-                        data.status,
-                        data.location,
-                        data.estimatedArrival
-                    );
-                });
-
-                socket.on('disconnect', () => {
-                    console.log('Disconnected from server');
-                    showMessage('⚠️ Connection lost - attempting to reconnect', 'warning');
-                });
-
-                socket.on('connect_error', (error) => {
-                    console.log('Connection error:', error);
-                    showMessage('❌ Cannot connect to server - check your connection', 'error');
-                });
-                
-            } catch (error) {
-                console.log('Socket.IO not available:', error);
-                showMessage('⚠️ Real-time updates unavailable - using polling mode', 'warning');
-                // Fallback to polling
-                setInterval(loadNotifications, 30000); // Poll every 30 seconds
-            }
-        }
-        class NotificationManager {
-            static isIOS() {
-                return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-            }
-
-            static async requestPermission() {
-                if (this.isIOS()) {
-                    return false; // Force fallback mode for iOS
-                }
-
-                if (!('Notification' in window)) {
-                    return false;
-                }
-
-                if (Notification.permission === 'granted') {
-                    return true;
-                }
-
-                if (Notification.permission !== 'denied') {
-                    try {
-                        const permission = await Notification.requestPermission();
-                        return permission === 'granted';
-                    } catch (error) {
-                        return false;
-                    }
-                }
-
-                return false;
-            }
-
-            static sendDriverNotification(driverName, status, location, estimatedArrival) {
-                console.log('Sending notification:', { driverName, status, location, estimatedArrival });
-                
-                // For iPhone/iPad, always use our custom system
-                if (this.isIOS()) {
-                    this.sendIOSNotification(driverName, status, location, estimatedArrival);
-                    return;
-                }
-
-                // Try browser notification for other platforms
-                if (Notification.permission === 'granted') {
-                    try {
-                        this.sendBrowserNotification(driverName, status, location, estimatedArrival);
-                        return;
-                    } catch (error) {
-                        console.log('Browser notification failed, using fallback');
-                    }
-                }
-
-                // Fallback for all other cases
-                this.sendIOSNotification(driverName, status, location, estimatedArrival);
-            }
-
-            static sendBrowserNotification(driverName, status, location, estimatedArrival) {
-                const title = `🚚 Driver Update: ${status}`;
-                let body = `${driverName} - ${status}`;
-                if (location && location !== 'Location unavailable') {
-                    body += `\nLocation: ${location}`;
-                }
-                if (estimatedArrival) {
-                    body += `\nETA: ${estimatedArrival}`;
-                }
-
-                const notification = new Notification(title, {
-                    body: body,
-                    tag: `driver-${driverName}-${Date.now()}`,
-                    requireInteraction: status === 'arrived'
-                });
-
-                notification.onclick = function() {
-                    window.focus();
-                    notification.close();
-                };
-
-                if (status !== 'arrived') {
-                    setTimeout(() => notification.close(), 10000);
-                }
-            }
-
-            static sendIOSNotification(driverName, status, location, estimatedArrival) {
-                // Multiple alert methods for iPhone
-                this.showIOSAlert(driverName, status, location, estimatedArrival);
-                this.flashScreen();
-                this.playIOSSound();
-                this.updatePageTitle(driverName, status);
-                this.showBannerAlert(driverName, status, location, estimatedArrival);
-            }
-
-            static showIOSAlert(driverName, status, location, estimatedArrival) {
-                // Full-screen overlay alert for iPhone
-                const overlay = document.createElement('div');
-                overlay.className = 'ios-notification-overlay';
-                overlay.innerHTML = `
-                    <div class="ios-notification-modal">
-                        <div class="ios-notification-header">
-                            <div class="ios-notification-icon">${status === 'arrived' ? '✅' : '🕐'}</div>
-                            <div class="ios-notification-title">Driver Update</div>
-                        </div>
-                        <div class="ios-notification-content">
-                            <div class="driver-name-large">${driverName}</div>
-                            <div class="status-large">${status.toUpperCase()}</div>
-                            ${location && location !== 'Location unavailable' ? `<div class="location-info">📍 ${location}</div>` : ''}
-                            ${estimatedArrival ? `<div class="eta-info">⏰ ETA: ${estimatedArrival}</div>` : ''}
-                            <div class="notification-time">${new Date().toLocaleTimeString()}</div>
-                        </div>
-                        <div class="ios-notification-actions">
-                            <button class="ios-btn ios-btn-primary" onclick="this.closest('.ios-notification-overlay').remove()">
-                                ✅ Acknowledge
-                            </button>
-                            ${status === 'arrived' ? `
-                                <button class="ios-btn ios-btn-success" onclick="this.closest('.ios-notification-overlay').remove();">
-                                    📋 Check In Driver
-                                </button>
-                            ` : ''}
-                        </div>
-                    </div>
-                `;
-
-                document.body.appendChild(overlay);
-
-                // Animate in
-                setTimeout(() => overlay.classList.add('show'), 10);
-
-                // Auto-remove for non-arrival notifications
-                if (status !== 'arrived') {
-                    setTimeout(() => {
-                        if (overlay.parentNode) {
-                            overlay.remove();
-                        }
-                    }, 8000);
-                }
-            }
-
-            static showBannerAlert(driverName, status, location, estimatedArrival) {
-                // Top banner notification
-                const banner = document.createElement('div');
-                banner.className = 'ios-banner-notification';
-                banner.innerHTML = `
-                    <div class="banner-content">
-                        <div class="banner-icon">${status === 'arrived' ? '✅' : '🕐'}</div>
-                        <div class="banner-text">
-                            <div class="banner-title">${driverName} - ${status}</div>
-                            <div class="banner-subtitle">${estimatedArrival || 'Driver update received'}</div>
-                        </div>
-                        <button class="banner-close" onclick="this.parentElement.parentElement.remove()">×</button>
-                    </div>
-                `;
-
-                document.body.appendChild(banner);
-
-                // Animate in
-                setTimeout(() => banner.classList.add('show'), 10);
-
-                // Auto-remove
-                setTimeout(() => {
-                    if (banner.parentNode) {
-                        banner.classList.add('hide');
-                        setTimeout(() => banner.remove(), 300);
-                    }
-                }, 6000);
-            }
-
-            static flashScreen() {
-                // Flash the entire screen
-                const flash = document.createElement('div');
-                flash.className = 'screen-flash';
-                document.body.appendChild(flash);
-                
-                setTimeout(() => flash.classList.add('flash'), 10);
-                setTimeout(() => flash.remove(), 500);
-            }
-
-            static playIOSSound() {
-                // Try Web Audio API for better iOS compatibility
-                try {
-                    if (window.AudioContext || window.webkitAudioContext) {
-                        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                        const oscillator = audioContext.createOscillator();
-                        const gainNode = audioContext.createGain();
-                        
-                        oscillator.connect(gainNode);
-                        gainNode.connect(audioContext.destination);
-                        
-                        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-                        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-                        
-                        oscillator.start();
-                        oscillator.stop(audioContext.currentTime + 0.2);
-                    }
-                } catch (error) {
-                    console.log('iOS sound failed:', error);
-                }
-            }
-
-            static updatePageTitle(driverName, status) {
-                const originalTitle = document.title;
-                document.title = `🚚 ${driverName} - ${status}`;
-                
-                setTimeout(() => {
-                    document.title = originalTitle;
-                }, 5000);
-            }
-        }
-
-        // Initialize dashboard
-        document.addEventListener('DOMContentLoaded', function() {
-            loadNotifications();
-            loadCheckedInStatus();
-            checkDateChange();
-            setInterval(updateTime, 1000);
-            setInterval(checkDateChange, 60000);
-
-            // Request notification permission
-            NotificationManager.requestPermission();
-        });
-
-        function checkDateChange() {
-            const today = new Date().toDateString();
-            const savedDate = localStorage.getItem('lastCheckInDate');
-            
-            if (savedDate && savedDate !== today) {
-                checkedInDrivers.clear();
-                localStorage.removeItem('checkedInDrivers');
-                localStorage.setItem('lastCheckInDate', today);
-                console.log('New day detected - cleared all check-ins');
-                
-                displayNotifications();
-                updateStatistics();
-                showMessage('New day detected - all check-ins have been reset', 'info');
-            } else if (!savedDate) {
-                localStorage.setItem('lastCheckInDate', today);
-            }
-        }
-
-        async function loadNotifications() {
-            try {
-                showMessage('Loading notifications...', 'info');
-                
-                const response = await fetch('/api/notifications/list');
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    notifications = data.notifications || [];
-                    displayNotifications();
-                    updateStatistics();
-                    showMessage(`✅ Loaded ${notifications.length} notifications`, 'success');
-                } else {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-            } catch (error) {
-                console.error('Error loading notifications:', error);
-                notifications = [];
-                displayNotifications();
-                updateStatistics();
-                showMessage('⚠️ No connection to server - waiting for notifications', 'warning');
-            }
-        }
-
-        function simulateArrival() {
-            showMessage('⚠️ Simulation disabled - waiting for real driver notifications', 'warning');
-        }
-
-        function addNotification(data) {
-            notifications.unshift({
-                _id: data.id || data._id || Date.now().toString(),
-                driver: data.driver,
-                status: data.status,
-                location: data.location,
-                timestamp: data.timestamp || new Date().toISOString(),
-                estimatedArrival: data.estimatedArrival
-            });
-
-            if (notifications.length > 50) {
-                notifications = notifications.slice(0, 50);
-            }
-
-            displayNotifications();
-            updateStatistics();
-        }
-
-        function displayNotifications() {
-            const container = document.getElementById('notificationsList');
-            
-            if (notifications.length === 0) {
-                container.innerHTML = '<div class="no-notifications"><p>No driver notifications yet. Waiting for driver updates...</p></div>';
-                return;
-            }
-
-            let filteredNotifications = filterNotificationsByType(notifications, currentFilter);
-
-            if (filteredNotifications.length === 0) {
-                container.innerHTML = `<div class="no-notifications"><p>No ${currentFilter} notifications found.</p></div>`;
-                return;
-            }
-
-            const notificationsHTML = filteredNotifications.map(notification => {
-                const isCheckedIn = checkedInDrivers.has(notification._id);
-                const time = new Date(notification.timestamp).toLocaleTimeString();
-                const statusClass = notification.status === 'arrived' ? 'arrived' : 'en-route';
-                const itemClass = isCheckedIn ? 'checked-in' : '';
-
-                return `
-                    <div class="notification-item ${statusClass} ${itemClass}">
-                        <div class="notification-details">
-                            <div class="driver-name">${notification.driver}</div>
-                            <div class="status-info">
-                                <span class="status-badge status-${notification.status === 'arrived' ? 'arrived' : 'en-route'}">
-                                    ${notification.status === 'arrived' ? '✅ Arrived' : '🕐 30 min away'}
-                                </span>
-                                ETA: ${notification.estimatedArrival}
+                <div class="activity-list" id="activityList">
+                    <!-- Activity items will be dynamically loaded here -->
+                    <div class="activity-item">
+                        <div class="activity-icon arrived">✅</div>
+                        <div class="activity-content">
+                            <div class="activity-title">John Smith arrived at warehouse</div>
+                            <div class="activity-details">
+                                <span class="activity-time">🕐 2 minutes ago</span>
+                                <span class="activity-location">📍 Main Warehouse</span>
                             </div>
-                            <div class="status-info">📍 Location: ${notification.location}</div>
-                            <div class="timestamp">⏰ ${time}</div>
                         </div>
-                        
-                        ${notification.status === 'arrived' ? 
-                            (isCheckedIn ? 
-                                '<div class="checked-in-text">✅ Checked In</div>' :
-                                `<div class="checkin-section">
-                                    <input type="checkbox" 
-                                           class="checkin-checkbox" 
-                                           id="checkin-${notification._id}"
-                                           onchange="startInspection('${notification._id}', '${notification.driver}')">
-                                    <label for="checkin-${notification._id}" class="checkin-label">Check In</label>
-                                </div>`
-                            ) : ''
-                        }
+                        <div class="activity-status">
+                            <button class="btn check-in-btn" onclick="checkInDriver('John Smith')">Check In</button>
+                        </div>
                     </div>
-                `;
-            }).join('');
-
-            container.innerHTML = notificationsHTML;
-        }
-
-        function filterNotificationsByType(notifications, type) {
-            switch(type) {
-                case 'en-route':
-                    return notifications.filter(n => n.status !== 'arrived');
-                case 'arrived':
-                    return notifications.filter(n => n.status === 'arrived' && !checkedInDrivers.has(n._id));
-                case 'checked-in':
-                    return notifications.filter(n => checkedInDrivers.has(n._id));
-                case 'all':
-                default:
-                    return notifications;
-            }
-        }
-
-        function filterNotifications(type, buttonElement) {
-            currentFilter = type;
+                    
+                    <div class="activity-item">
+                        <div class="activity-icon en-route">🚚</div>
+                        <div class="activity-content">
+                            <div class="activity-title">Sarah Johnson is 30 minutes away</div>
+                            <div class="activity-details">
+                                <span class="activity-time">🕐 5 minutes ago</span>
+                                <span class="activity-location">📍 Route I-95 North</span>
+                            </div>
+                        </div>
+                        <div class="activity-status">
+                            <span class="badge badge-warning">ETA: 2:45 PM</span>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-item">
+                        <div class="activity-icon checked-in">📋</div>
+                        <div class="activity-content">
+                            <div class="activity-title">Mike Davis checked in</div>
+                            <div class="activity-details">
+                                <span class="activity-time">🕐 15 minutes ago</span>
+                                <span class="activity-location">📍 Bay 3</span>
+                            </div>
+                        </div>
+                        <div class="activity-status">
+                            <span class="badge badge-info">Inspection Complete</span>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-item">
+                        <div class="activity-icon issue">⚠️</div>
+                        <div class="activity-content">
+                            <div class="activity-title">Robert Taylor reported vehicle issue</div>
+                            <div class="activity-details">
+                                <span class="activity-time">🕐 20 minutes ago</span>
+                                <span class="activity-location">📍 Mile Marker 142</span>
+                            </div>
+                        </div>
+                        <div class="activity-status">
+                            <span class="badge badge-danger">Tire Problem</span>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-item">
+                        <div class="activity-icon en-route">🚚</div>
+                        <div class="activity-content">
+                            <div class="activity-title">Lisa Wilson is 30 minutes away</div>
+                            <div class="activity-details">
+                                <span class="activity-time">🕐 25 minutes ago</span>
+                                <span class="activity-location">📍 Highway 287</span>
+                            </div>
+                        </div>
+                        <div class="activity-status">
+                            <span class="badge badge-warning">ETA: 3:10 PM</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
             
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.remove('active');
+            <!-- Summary Panel -->
+            <div>
+                <div class="summary-panel">
+                    <h3 class="summary-title">📊 Today's Summary</h3>
+                    <div class="summary-item">
+                        <span class="summary-label">Total Trips</span>
+                        <span class="summary-value">47</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Completed</span>
+                        <span class="summary-value" style="color: var(--success-color);">35</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">In Progress</span>
+                        <span class="summary-value" style="color: var(--warning-color);">12</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Issues Reported</span>
+                        <span class="summary-value" style="color: var(--danger-color);">3</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Avg. Trip Time</span>
+                        <span class="summary-value">2h 34m</span>
+                    </div>
+                </div>
+                
+                <div class="summary-panel" style="margin-top: 24px;">
+                    <h3 class="summary-title">⏰ Peak Hours</h3>
+                    <div class="summary-item">
+                        <span class="summary-label">Morning Peak</span>
+                        <span class="summary-value">6-9 AM</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Afternoon Peak</span>
+                        <span class="summary-value">2-5 PM</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Busiest Day</span>
+                        <span class="summary-value">Thursday</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            startLiveUpdates();
+            updateTime();
+        });
+        
+        // Filter Activity
+        function filterActivity(filter, button) {
+            // Update active button
+            document.querySelectorAll('.filter-pill').forEach(pill => {
+                pill.classList.remove('active');
             });
-            if (buttonElement) {
-                buttonElement.classList.add('active');
+            button.classList.add('active');
+            
+            // Show toast
+            showToast(`Filtering by: ${filter}`, 'info');
+            
+            // In real implementation, this would filter the activity list
+            // For now, just showing the UI interaction
+        }
+        
+        // Check In Driver
+        function checkInDriver(driverName) {
+            if (confirm(`Check in ${driverName}?`)) {
+                showToast(`${driverName} has been checked in`, 'success');
+                // Update the button to show checked in status
+                event.target.textContent = 'Checked In';
+                event.target.disabled = true;
+                event.target.classList.remove('check-in-btn');
+                event.target.classList.add('btn-secondary');
             }
-            
-            displayNotifications();
-            showMessage(`Filtered to show: ${type === 'all' ? 'all notifications' : type + ' notifications'}`, 'info');
         }
-
-        // Inspection functionality
-        function startInspection(notificationId, driverName) {
-            const checkbox = document.getElementById(`checkin-${notificationId}`);
-            
-            // Uncheck the checkbox since we need to complete inspection first
-            checkbox.checked = false;
-            
-            // Store current inspection info
-            currentInspectionDriver = {
-                id: notificationId,
-                name: driverName,
-                time: new Date().toLocaleString()
-            };
-            
-            // Show inspection modal
-            showInspectionModal(driverName);
-        }
-
-        function showInspectionModal(driverName) {
-            const modal = document.getElementById('inspectionModal');
-            const driverNameSpan = document.getElementById('inspectionDriverName');
-            const timeSpan = document.getElementById('inspectionTime');
-            
-            driverNameSpan.textContent = driverName;
-            timeSpan.textContent = new Date().toLocaleString();
-            
-            // Reset form
-            document.getElementById('inspectionForm').reset();
-            
-            // Show modal
-            modal.classList.add('show');
-            
-            // Focus first input
+        
+        // Refresh Dashboard
+        function refreshDashboard() {
+            showToast('Refreshing dashboard...', 'info');
+            // Simulate refresh
             setTimeout(() => {
-                document.getElementById('tractorNumber').focus();
-            }, 300);
+                showToast('Dashboard updated', 'success');
+                updateStats();
+            }, 1000);
         }
-
-        function closeInspectionModal() {
-            const modal = document.getElementById('inspectionModal');
-            modal.classList.remove('show');
-            currentInspectionDriver = null;
+        
+        // Export Activity
+        function exportActivity() {
+            showToast('Exporting activity data...', 'info');
+            setTimeout(() => {
+                showToast('Activity data exported successfully', 'success');
+            }, 1500);
         }
-
-        function completeInspection() {
-            if (!currentInspectionDriver) {
-                showMessage('Error: No driver selected for inspection', 'error');
-                return;
-            }
-
-            // Collect form data
-            const formData = collectInspectionData();
+        
+        // Update Stats (simulate live updates)
+        function updateStats() {
+            // Simulate random stat changes
+            const enRoute = document.getElementById('enRouteCount');
+            const arrived = document.getElementById('arrivedCount');
+            const stillOut = document.getElementById('stillOutCount');
             
-            // Validate required fields
-            if (!formData.tractorNumber || !formData.trailerNumber) {
-                showMessage('Please fill in required fields: Tractor and Trailer numbers', 'error');
-                return;
-            }
-
-            try {
-                // Complete the check-in
-                checkedInDrivers.add(currentInspectionDriver.id);
-                saveCheckedInStatus();
-                
-                // Update UI
-                displayNotifications();
-                updateStatistics();
-                
-                // Close modal
-                closeInspectionModal();
-                
-                showMessage(`✅ ${currentInspectionDriver.name} checked in successfully with completed inspection report`, 'success');
-                
-            } catch (error) {
-                console.error('Inspection completion error:', error);
-                showMessage('Error completing inspection. Please try again.', 'error');
-            }
+            // Random updates for demo
+            enRoute.textContent = Math.floor(Math.random() * 5) + 10;
+            arrived.textContent = Math.floor(Math.random() * 3) + 6;
+            stillOut.textContent = Math.floor(Math.random() * 3) + 4;
         }
-
-        function collectInspectionData() {
-            const form = document.getElementById('inspectionForm');
-            const formData = new FormData(form);
+        
+        // Start Live Updates
+        function startLiveUpdates() {
+            // Simulate live updates every 30 seconds
+            setInterval(() => {
+                updateStats();
+                addNewActivity();
+            }, 30000);
+        }
+        
+        // Add New Activity (simulate)
+        function addNewActivity() {
+            const activities = [
+                { name: 'David Brown', status: 'arrived', location: 'North Gate' },
+                { name: 'Anna Martinez', status: 'en-route', location: 'Highway 45' },
+                { name: 'James Wilson', status: 'checked-in', location: 'Bay 5' }
+            ];
             
-            const data = {
-                driver: currentInspectionDriver.name,
-                checkInTime: currentInspectionDriver.time,
-                tractorNumber: formData.get('tractorNumber'),
-                trailerNumber: formData.get('trailerNumber'),
-                moffettNumber: formData.get('moffettNumber'),
-                odometerReading: formData.get('odometerReading'),
-                fuelLevel: formData.get('fuelLevel'),
-                safetyChecks: [],
-                equipmentChecks: [],
-                damageFound: formData.get('damageFound'),
-                repairsNeeded: formData.get('repairsNeeded'),
-                deliveryNotes: formData.get('deliveryNotes'),
-                additionalComments: formData.get('additionalComments')
-            };
-
-            // Collect safety checks
-            document.querySelectorAll('input[name="safetyChecks"]:checked').forEach(checkbox => {
-                data.safetyChecks.push(checkbox.value);
-            });
-
-            // Collect equipment checks
-            document.querySelectorAll('input[name="equipmentChecks"]:checked').forEach(checkbox => {
-                data.equipmentChecks.push(checkbox.value);
-            });
-
-            return data;
+            const random = activities[Math.floor(Math.random() * activities.length)];
+            showToast(`New update: ${random.name} - ${random.status}`, 'info');
         }
-
-        function updateStatistics() {
-            const total = notifications.length;
-            const enRoute = notifications.filter(n => n.status !== 'arrived').length;
-            const arrived = notifications.filter(n => n.status === 'arrived' && !checkedInDrivers.has(n._id)).length;
-            const checkedIn = checkedInDrivers.size;
-
-            document.getElementById('totalNotifications').textContent = total;
-            document.getElementById('enRouteCount').textContent = enRoute;
-            document.getElementById('arrivedCount').textContent = arrived;
-            document.getElementById('checkedInCount').textContent = checkedIn;
-            
-            // Update dashboard stats
-            document.getElementById('activeVehicles').textContent = total;
-            document.getElementById('onlineDrivers').textContent = total;
-            document.getElementById('activeRoutes').textContent = enRoute;
-            document.getElementById('alerts').textContent = arrived;
-        }
-
-        function clearAllCheckIns() {
-            if (confirm('Are you sure you want to clear all check-ins? This will reset all checked-in drivers.')) {
-                checkedInDrivers.clear();
-                localStorage.removeItem('checkedInDrivers');
-                localStorage.removeItem('lastCheckInDate');
-                
-                const today = new Date().toDateString();
-                localStorage.setItem('lastCheckInDate', today);
-                
-                displayNotifications();
-                updateStatistics();
-                
-                showMessage('✅ All check-ins have been cleared', 'success');
-                console.log('Manually cleared all check-ins');
-            }
-        }
-
-        function saveCheckedInStatus() {
-            const today = new Date().toDateString();
-            localStorage.setItem('checkedInDrivers', JSON.stringify([...checkedInDrivers]));
-            localStorage.setItem('lastCheckInDate', today);
-        }
-
-        function loadCheckedInStatus() {
-            try {
-                const saved = localStorage.getItem('checkedInDrivers');
-                if (saved) {
-                    checkedInDrivers = new Set(JSON.parse(saved));
-                }
-            } catch (error) {
-                console.log('Error loading checked-in status:', error);
-                checkedInDrivers = new Set();
-            }
-            
-            const today = new Date().toDateString();
-            localStorage.setItem('lastCheckInDate', today);
-        }
-
+        
+        // Update Time
         function updateTime() {
-            // Update any time-sensitive elements if needed
+            // Update time displays
+            const timeElements = document.querySelectorAll('.activity-time');
+            // In real implementation, this would update relative times
         }
-
-        function showMessage(message, type) {
-            const statusMessage = document.getElementById('statusMessage');
-            if (statusMessage) {
-                statusMessage.innerHTML = `<div class="message ${type}">${message}</div>`;
-                
-                if (type === 'success' || type === 'info') {
-                    setTimeout(() => {
-                        statusMessage.innerHTML = '';
-                    }, 4000);
-                }
-            }
+        
+        // Show Toast Message
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const icons = {
+                success: '✅',
+                error: '❌',
+                info: 'ℹ️'
+            };
+            
+            toast.innerHTML = `
+                <span style="font-size: 20px;">${icons[type]}</span>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                toast.style.animation = 'slideIn 0.3s ease reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
         }
-
-        // Close modal when clicking outside
-        document.getElementById('inspectionModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeInspectionModal();
-            }
-        });
-
-        // Escape key to close modal
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && document.getElementById('inspectionModal').classList.contains('show')) {
-                closeInspectionModal();
-            }
-        });
     </script>
 </body>
 </html>
