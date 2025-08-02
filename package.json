@@ -1,24 +1,14 @@
 {
-  "name": "driver-return-system",
+  "name": "driver-return-system-simple",
   "version": "1.0.0",
-  "description": "Driver Return System API for Railway deployment",
-  "main": "app.js",
+  "description": "Simple Driver Return System API for Railway",
+  "main": "index.js",
   "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js"
   },
-  "keywords": ["express", "mongodb", "railway", "driver", "dispatch"],
-  "author": "Your Name",
-  "license": "MIT",
   "dependencies": {
     "express": "^4.18.2",
-    "mongoose": "^7.5.0",
-    "cors": "^2.8.5",
-    "dotenv": "^16.3.1"
-  },
-  "devDependencies": {
-    "nodemon": "^3.0.1"
+    "cors": "^2.8.5"
   },
   "engines": {
     "node": ">=18.0.0"
