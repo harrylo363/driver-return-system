@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dispatch Center - Driver Return System</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
     <style>
         * {
             margin: 0;
@@ -43,7 +47,7 @@
             padding: 20px 0;
             position: sticky;
             top: 0;
-            z-index: 100;
+            z-index: 1000;
             box-shadow: var(--shadow);
         }
         
@@ -54,6 +58,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
         }
         
         .header-title {
@@ -90,6 +96,7 @@
             display: flex;
             gap: 12px;
             align-items: center;
+            flex-wrap: wrap;
         }
         
         .connection-badge {
@@ -132,6 +139,38 @@
             max-width: 1600px;
             margin: 0 auto;
             padding: 32px 24px;
+        }
+        
+        /* Map Container */
+        .map-container {
+            background: var(--white);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+        
+        .map-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .map-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--dark-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        #map {
+            height: 400px;
+            width: 100%;
         }
         
         /* Stats Grid */
@@ -270,6 +309,7 @@
             align-items: center;
             gap: 16px;
             transition: background 0.2s ease;
+            cursor: pointer;
         }
         
         .activity-item:hover {
@@ -327,6 +367,7 @@
             display: flex;
             gap: 16px;
             align-items: center;
+            flex-wrap: wrap;
         }
         
         .activity-time {
@@ -521,6 +562,10 @@
                 margin-left: 0;
                 margin-top: 8px;
             }
+            
+            #map {
+                height: 300px;
+            }
         }
         
         /* Grid Layout */
@@ -614,7 +659,7 @@
             align-items: center;
             gap: 12px;
             min-width: 300px;
-            z-index: 1000;
+            z-index: 2000;
             animation: slideIn 0.3s ease;
         }
         
@@ -646,10 +691,12 @@
             display: flex;
             gap: 12px;
             margin-bottom: 24px;
+            flex-wrap: wrap;
         }
         
         .action-card {
             flex: 1;
+            min-width: 200px;
             background: var(--white);
             border-radius: 12px;
             padding: 20px;
@@ -698,6 +745,41 @@
             outline: none;
             border-color: var(--primary-color);
         }
+        
+        /* Map Controls */
+        .map-controls {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .map-legend {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            font-size: 12px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+        
+        .legend-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
     </style>
 </head>
 <body>
@@ -714,9 +796,10 @@
             <div class="header-actions">
                 <select class="warehouse-selector" id="warehouseFilter" onchange="filterByWarehouse()">
                     <option value="all">All Warehouses</option>
-                    <option value="main">Main Warehouse</option>
-                    <option value="north">North Distribution</option>
-                    <option value="south">South Hub</option>
+                    <option value="Miami Distribution Center">Miami Distribution Center</option>
+                    <option value="Orlando Warehouse">Orlando Warehouse</option>
+                    <option value="Fort Lauderdale Hub">Fort Lauderdale Hub</option>
+                    <option value="Tampa Depot">Tampa Depot</option>
                 </select>
                 <div id="connectionStatus" class="connection-badge connected">
                     <span class="status-dot"></span>
@@ -736,6 +819,45 @@
     
     <!-- Main Container -->
     <div class="container">
+        <!-- Map Container -->
+        <div class="map-container">
+            <div class="map-header">
+                <h3 class="map-title">
+                    <span>🗺️</span>
+                    <span>Live Driver Locations</span>
+                </h3>
+                <div class="map-controls">
+                    <button class="btn btn-secondary" onclick="centerMap()">
+                        <span>📍</span>
+                        <span>Center View</span>
+                    </button>
+                    <button class="btn btn-secondary" onclick="toggleTraffic()">
+                        <span>🚦</span>
+                        <span>Traffic</span>
+                    </button>
+                </div>
+            </div>
+            <div id="map"></div>
+            <div class="map-legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #F59E0B;"></div>
+                    <span>En Route</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #10B981;"></div>
+                    <span>Arrived</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #EF4444;"></div>
+                    <span>Delayed</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #3B82F6;"></div>
+                    <span>Warehouse</span>
+                </div>
+            </div>
+        </div>
+        
         <!-- Quick Actions -->
         <div class="quick-actions">
             <div class="action-card" onclick="showNewNotification()">
@@ -885,21 +1007,152 @@
         </div>
     </div>
     
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
     <script>
         // API Configuration
         const API_URL = '/api';
         let currentFilter = 'all';
+        let currentWarehouse = 'all';
         let activityData = [];
+        let filteredData = [];
         let statsCache = {};
         let refreshInterval;
         let connectionCheckInterval;
+        let map;
+        let markers = {};
+        let warehouseMarkers = {};
+        
+        // Miami area coordinates
+        const MIAMI_CENTER = [25.7617, -80.1918];
+        const WAREHOUSES = {
+            'Miami Distribution Center': [25.7617, -80.1918],
+            'Orlando Warehouse': [28.5383, -81.3792],
+            'Fort Lauderdale Hub': [26.1224, -80.1373],
+            'Tampa Depot': [27.9506, -82.4572]
+        };
         
         // Initialize Dashboard
         document.addEventListener('DOMContentLoaded', function() {
+            initializeMap();
             initializeDashboard();
             startLiveUpdates();
             updateClock();
         });
+        
+        // Initialize Map
+        function initializeMap() {
+            // Create map centered on Miami
+            map = L.map('map').setView(MIAMI_CENTER, 10);
+            
+            // Add tile layer
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(map);
+            
+            // Add warehouse markers
+            Object.entries(WAREHOUSES).forEach(([name, coords]) => {
+                const marker = L.marker(coords, {
+                    icon: L.divIcon({
+                        className: 'custom-div-icon',
+                        html: `<div style="background: #3B82F6; color: white; padding: 8px; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">🏢</div>`,
+                        iconSize: [40, 40],
+                        iconAnchor: [20, 40]
+                    })
+                }).addTo(map);
+                
+                marker.bindPopup(`<strong>${name}</strong><br>Warehouse Location`);
+                warehouseMarkers[name] = marker;
+            });
+        }
+        
+        // Add driver marker to map
+        function addDriverMarker(driver) {
+            const driverId = driver._id;
+            
+            // Generate random coordinates near warehouse for demo
+            const warehouse = WAREHOUSES[driver.warehouse] || MIAMI_CENTER;
+            const lat = warehouse[0] + (Math.random() - 0.5) * 0.2;
+            const lng = warehouse[1] + (Math.random() - 0.5) * 0.2;
+            
+            // Remove existing marker if any
+            if (markers[driverId]) {
+                map.removeLayer(markers[driverId]);
+            }
+            
+            // Get marker color based on status
+            const colors = {
+                'en-route': '#F59E0B',
+                'arrived': '#10B981',
+                'delayed': '#EF4444',
+                'completed': '#3B82F6'
+            };
+            const color = colors[driver.status] || '#6B7280';
+            
+            // Create custom marker
+            const marker = L.marker([lat, lng], {
+                icon: L.divIcon({
+                    className: 'custom-div-icon',
+                    html: `<div style="background: ${color}; color: white; padding: 8px; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">🚚</div>`,
+                    iconSize: [36, 36],
+                    iconAnchor: [18, 36]
+                })
+            }).addTo(map);
+            
+            // Add popup
+            marker.bindPopup(`
+                <strong>${driver.driver}</strong><br>
+                Status: ${driver.status}<br>
+                Location: ${driver.location}<br>
+                Warehouse: ${driver.warehouse}
+                ${driver.estimatedArrival ? `<br>ETA: ${driver.estimatedArrival}` : ''}
+            `);
+            
+            markers[driverId] = marker;
+            
+            // Animate marker if en route
+            if (driver.status === 'en-route') {
+                animateMarker(marker, warehouse);
+            }
+        }
+        
+        // Animate marker movement
+        function animateMarker(marker, destination) {
+            const currentPos = marker.getLatLng();
+            const destLatLng = L.latLng(destination[0], destination[1]);
+            
+            // Calculate new position (small movement towards destination)
+            const lat = currentPos.lat + (destLatLng.lat - currentPos.lat) * 0.02;
+            const lng = currentPos.lng + (destLatLng.lng - currentPos.lng) * 0.02;
+            
+            marker.setLatLng([lat, lng]);
+        }
+        
+        // Center map on all drivers
+        function centerMap() {
+            const bounds = L.latLngBounds();
+            
+            // Include all driver markers
+            Object.values(markers).forEach(marker => {
+                bounds.extend(marker.getLatLng());
+            });
+            
+            // Include warehouse markers
+            Object.values(warehouseMarkers).forEach(marker => {
+                bounds.extend(marker.getLatLng());
+            });
+            
+            if (bounds.isValid()) {
+                map.fitBounds(bounds, { padding: [50, 50] });
+            }
+        }
+        
+        // Toggle traffic layer (mock)
+        function toggleTraffic() {
+            showToast('Traffic layer toggled', 'info');
+        }
         
         // Initialize all dashboard components
         async function initializeDashboard() {
@@ -936,81 +1189,114 @@
         function updateStatsDisplay(stats) {
             // Update main stats
             const overview = stats.overview || {};
-            document.getElementById('totalDrivers').textContent = overview.activeDrivers || '24';
-            document.getElementById('enRouteCount').textContent = countByStatus('en-route');
-            document.getElementById('arrivedCount').textContent = countByStatus('arrived');
-            document.getElementById('issuesCount').textContent = overview.criticalIssues || '0';
+            
+            // Count by status from actual data
+            const enRoute = countByStatus('en-route');
+            const arrived = countByStatus('arrived');
+            const delayed = countByStatus('delayed');
+            const completed = countByStatus('completed');
+            
+            document.getElementById('totalDrivers').textContent = activityData.length || '0';
+            document.getElementById('enRouteCount').textContent = enRoute;
+            document.getElementById('arrivedCount').textContent = arrived;
+            document.getElementById('issuesCount').textContent = delayed;
             
             // Update summary panel
-            document.getElementById('totalTrips').textContent = overview.totalNotifications || '0';
-            document.getElementById('completedTrips').textContent = countByStatus('completed');
-            document.getElementById('inProgressTrips').textContent = countByStatus('en-route');
-            document.getElementById('issuesReported').textContent = overview.criticalIssues || '0';
+            document.getElementById('totalTrips').textContent = activityData.length;
+            document.getElementById('completedTrips').textContent = completed;
+            document.getElementById('inProgressTrips').textContent = enRoute;
+            document.getElementById('issuesReported').textContent = delayed;
             
             // Calculate average trip time (mock calculation)
-            const avgMinutes = Math.floor(Math.random() * 120) + 60;
-            document.getElementById('avgTripTime').textContent = `${Math.floor(avgMinutes/60)}h ${avgMinutes%60}m`;
+            const avgMinutes = activityData.length > 0 ? Math.floor(Math.random() * 120) + 60 : 0;
+            document.getElementById('avgTripTime').textContent = avgMinutes > 0 ? `${Math.floor(avgMinutes/60)}h ${avgMinutes%60}m` : '0h 0m';
             
             // Update other stats
-            document.getElementById('busiestTime').textContent = '2-4 PM';
+            document.getElementById('busiestTime').textContent = activityData.length > 0 ? '2-4 PM' : '-';
             document.getElementById('topDriver').textContent = getTopDriver();
-            document.getElementById('fleetUtilization').textContent = Math.floor(Math.random() * 30) + 60 + '%';
+            document.getElementById('fleetUtilization').textContent = activityData.length > 0 ? Math.floor((enRoute + arrived) / activityData.length * 100) + '%' : '0%';
         }
         
         // Count activities by status
         function countByStatus(status) {
-            return activityData.filter(item => item.status === status).length;
+            return filteredData.filter(item => item.status === status).length;
         }
         
-        // Get top driver (mock)
+        // Get top driver
         function getTopDriver() {
-            const drivers = ['John Smith', 'Sarah Johnson', 'Mike Davis', 'Lisa Wilson'];
-            return drivers[Math.floor(Math.random() * drivers.length)];
+            if (activityData.length === 0) return '-';
+            
+            const driverCounts = {};
+            activityData.forEach(item => {
+                driverCounts[item.driver] = (driverCounts[item.driver] || 0) + 1;
+            });
+            
+            const topDriver = Object.entries(driverCounts).sort((a, b) => b[1] - a[1])[0];
+            return topDriver ? topDriver[0] : '-';
         }
         
         // Load recent activity
         async function loadRecentActivity() {
             try {
-                const response = await fetch(`${API_URL}/notifications?limit=20`);
+                const response = await fetch(`${API_URL}/notifications?limit=50`);
                 const result = await response.json();
                 
                 if (result.success && result.data) {
                     activityData = result.data;
-                    displayActivity(activityData);
+                    applyFilters();
+                    
+                    // Update map markers
+                    activityData.forEach(driver => {
+                        if (driver.status !== 'completed') {
+                            addDriverMarker(driver);
+                        }
+                    });
                 }
             } catch (error) {
                 console.error('Error loading activity:', error);
             }
         }
         
+        // Apply filters to activity data
+        function applyFilters() {
+            filteredData = activityData;
+            
+            // Apply status filter
+            if (currentFilter !== 'all') {
+                filteredData = filteredData.filter(item => item.status === currentFilter);
+            }
+            
+            // Apply warehouse filter
+            if (currentWarehouse !== 'all') {
+                filteredData = filteredData.filter(item => item.warehouse === currentWarehouse);
+            }
+            
+            displayActivity(filteredData);
+            updateStatsDisplay(statsCache);
+        }
+        
         // Display activity items
         function displayActivity(data) {
             const activityList = document.getElementById('activityList');
             
-            // Filter data based on current filter
-            let filteredData = data;
-            if (currentFilter !== 'all') {
-                filteredData = data.filter(item => item.status === currentFilter);
-            }
-            
-            if (filteredData.length === 0) {
+            if (data.length === 0) {
                 activityList.innerHTML = `
                     <div class="no-data">
                         <div class="no-data-icon">📭</div>
-                        <p>No ${currentFilter === 'all' ? '' : currentFilter} activities found.</p>
+                        <p>No activities found for selected filters.</p>
                     </div>
                 `;
                 return;
             }
             
-            activityList.innerHTML = filteredData.map(item => {
+            activityList.innerHTML = data.map(item => {
                 const timeAgo = getTimeAgo(new Date(item.timestamp));
                 const iconClass = getStatusIconClass(item.status);
                 const icon = getStatusIcon(item.status);
                 const actionButton = getActionButton(item);
                 
                 return `
-                    <div class="activity-item" data-id="${item._id}">
+                    <div class="activity-item" data-id="${item._id}" onclick="focusOnDriver('${item._id}')">
                         <div class="activity-icon ${iconClass}">${icon}</div>
                         <div class="activity-content">
                             <div class="activity-title">${item.driver} - ${getStatusText(item.status)}</div>
@@ -1027,6 +1313,15 @@
                     </div>
                 `;
             }).join('');
+        }
+        
+        // Focus map on specific driver
+        function focusOnDriver(driverId) {
+            if (markers[driverId]) {
+                const marker = markers[driverId];
+                map.setView(marker.getLatLng(), 13);
+                marker.openPopup();
+            }
         }
         
         // Get status icon class
@@ -1065,8 +1360,8 @@
         // Get action button for activity item
         function getActionButton(item) {
             if (item.status === 'arrived' && !item.isRead) {
-                return `<button class="btn check-in-btn" onclick="checkInDriver('${item._id}', '${item.driver}')">Check In</button>`;
-            } else if (item.estimatedArrival) {
+                return `<button class="btn check-in-btn" onclick="checkInDriver(event, '${item._id}', '${item.driver}')">Check In</button>`;
+            } else if (item.estimatedArrival && item.status === 'en-route') {
                 return `<span class="badge badge-warning">ETA: ${item.estimatedArrival}</span>`;
             } else if (item.status === 'completed') {
                 return `<span class="badge badge-success">Completed</span>`;
@@ -1077,7 +1372,9 @@
         }
         
         // Check in driver
-        async function checkInDriver(notificationId, driverName) {
+        async function checkInDriver(event, notificationId, driverName) {
+            event.stopPropagation(); // Prevent triggering the parent onclick
+            
             if (confirm(`Check in ${driverName}?`)) {
                 try {
                     const response = await fetch(`${API_URL}/notifications/${notificationId}/read`, {
@@ -1086,6 +1383,13 @@
                     
                     if (response.ok) {
                         showToast(`${driverName} has been checked in`, 'success');
+                        
+                        // Remove marker from map
+                        if (markers[notificationId]) {
+                            map.removeLayer(markers[notificationId]);
+                            delete markers[notificationId];
+                        }
+                        
                         await loadRecentActivity();
                         await loadStats();
                     }
@@ -1105,15 +1409,25 @@
             });
             button.classList.add('active');
             
-            // Re-display filtered activity
-            displayActivity(activityData);
+            // Apply filters
+            applyFilters();
+            
+            showToast(`Showing ${filter === 'all' ? 'all' : filter} activities`, 'info');
         }
         
         // Filter by warehouse
         function filterByWarehouse() {
             const warehouse = document.getElementById('warehouseFilter').value;
+            currentWarehouse = warehouse;
+            
+            applyFilters();
+            
+            // Center map on warehouse if specific one selected
+            if (warehouse !== 'all' && WAREHOUSES[warehouse]) {
+                map.setView(WAREHOUSES[warehouse], 11);
+            }
+            
             showToast(`Filtering by ${warehouse === 'all' ? 'all warehouses' : warehouse}`, 'info');
-            // In real implementation, this would filter the data
         }
         
         // Start live updates
@@ -1122,6 +1436,15 @@
             refreshInterval = setInterval(() => {
                 loadRecentActivity();
                 loadStats();
+                
+                // Animate en-route markers
+                Object.entries(markers).forEach(([id, marker]) => {
+                    const driver = activityData.find(d => d._id === id);
+                    if (driver && driver.status === 'en-route') {
+                        const warehouse = WAREHOUSES[driver.warehouse] || MIAMI_CENTER;
+                        animateMarker(marker, warehouse);
+                    }
+                });
             }, 30000);
             
             // Check connection every 10 seconds
@@ -1182,26 +1505,39 @@
         
         // Quick Actions
         function showNewNotification() {
-            window.location.href = '/index.html#new-notification';
+            window.location.href = '/index.html';
+            // After page loads, trigger the new notification tab
+            setTimeout(() => {
+                const event = new Event('click');
+                document.querySelector('[onclick*="new-notification"]')?.dispatchEvent(event);
+            }, 100);
         }
         
         function showInspectionForm() {
-            window.location.href = '/index.html#new-inspection';
+            window.location.href = '/index.html';
+            // After page loads, trigger the inspection tab
+            setTimeout(() => {
+                const event = new Event('click');
+                document.querySelector('[onclick*="new-inspection"]')?.dispatchEvent(event);
+            }, 100);
         }
         
         function viewReports() {
-            showToast('Opening reports dashboard...', 'info');
-            // In real implementation, navigate to reports
+            showToast('Reports feature coming soon!', 'info');
         }
         
         function manageDrivers() {
-            showToast('Opening driver management...', 'info');
-            // In real implementation, navigate to driver management
+            showToast('Driver management feature coming soon!', 'info');
         }
         
         // Refresh Dashboard
         function refreshDashboard() {
             showToast('Refreshing dashboard...', 'info');
+            
+            // Clear and reload everything
+            Object.values(markers).forEach(marker => map.removeLayer(marker));
+            markers = {};
+            
             loadRecentActivity();
             loadStats();
         }
@@ -1213,7 +1549,7 @@
             // Create CSV content
             const csv = [
                 ['Driver', 'Status', 'Location', 'Warehouse', 'Time', 'Notes'],
-                ...activityData.map(item => [
+                ...filteredData.map(item => [
                     item.driver,
                     item.status,
                     item.location,
@@ -1221,7 +1557,7 @@
                     new Date(item.timestamp).toLocaleString(),
                     item.notes || ''
                 ])
-            ].map(row => row.join(',')).join('\n');
+            ].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
             
             // Download file
             const blob = new Blob([csv], { type: 'text/csv' });
@@ -1229,13 +1565,19 @@
             const a = document.createElement('a');
             a.href = url;
             a.download = `dispatch-activity-${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
             a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
             
             showToast('Activity exported successfully', 'success');
         }
         
         // Show Toast Message
         function showToast(message, type = 'info') {
+            // Remove any existing toasts
+            document.querySelectorAll('.toast').forEach(toast => toast.remove());
+            
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
             
