@@ -1,44 +1,27 @@
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public'));
 
-// Serve static files from public directory
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Root endpoint - REQUIRED for Railway
+// Root endpoint
 app.get('/', (req, res) => {
   res.send('Driver Return System API is running');
 });
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.status(200).json({ 
-    status: 'OK', 
-    message: 'Driver Return System is running',
-    timestamp: new Date().toISOString()
-  });
+  res.json({ status: 'OK', message: 'Driver Return System is running' });
 });
 
-// API endpoints
-app.get('/api/status', (req, res) => {
-  res.json({ 
-    service: 'Driver Return System',
-    version: '1.0.0',
-    status: 'operational'
-  });
-});
-
-// Store driver data (in-memory for now)
+// Simple driver storage
 let drivers = [];
 
-// Driver endpoints
+// API endpoints
 app.post('/api/checkin', (req, res) => {
   const { driverId, name, vehicle } = req.body;
   const checkIn = {
@@ -49,7 +32,7 @@ app.post('/api/checkin', (req, res) => {
     status: 'out'
   };
   drivers.push(checkIn);
-  res.status(201).json({ message: 'Driver checked in successfully', checkIn });
+  res.json({ message: 'Driver checked in successfully', checkIn });
 });
 
 app.post('/api/return', (req, res) => {
@@ -64,4 +47,11 @@ app.post('/api/return', (req, res) => {
   }
 });
 
-app.get('/api/drivers',
+app.get('/api/drivers', (req, res) => {
+  res.json(drivers);
+});
+
+// Start server
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT}`);
+});
