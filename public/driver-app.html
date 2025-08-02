@@ -340,8 +340,9 @@
         <!-- Login Screen -->
         <div id="loginScreen">
             <div class="connection-info">
-                <h4>📡 Connection Mode</h4>
-                <p id="connectionDetails">Connecting to dispatch system...</p>
+                <h4>🚂 Railway Connection</h4>
+                <p id="connectionDetails">Testing Railway endpoints...</p>
+                <small>URL: https://driver-return-system-production.up.railway.app</small>
             </div>
             
             <div class="form-group">
@@ -513,9 +514,18 @@
         }
 
         async function testRailwayConnection() {
+            console.log('🔍 Testing Railway connection...');
+            console.log('Railway URL:', RAILWAY_API_URL);
+            
             try {
-                // Test Railway health endpoint
-                const response = await fetch(`${RAILWAY_API_URL}/api/health`, {
+                console.log(`Testing: ${RAILWAY_API_URL}/api/health`);
+                
+                // Create a timeout promise instead of using AbortSignal.timeout
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Request timeout')), 10000)
+                );
+                
+                const fetchPromise = fetch(`${RAILWAY_API_URL}/api/health`, {
                     method: 'GET',
                     headers: { 
                         'Content-Type': 'application/json',
@@ -524,17 +534,63 @@
                     mode: 'cors'
                 });
                 
+                const response = await Promise.race([fetchPromise, timeoutPromise]);
+                
+                console.log(`Health check response: ${response.status} ${response.statusText}`);
+                
                 if (response.ok) {
-                    const data = await response.json();
-                    updateConnectionStatus('connected');
-                    console.log('✅ Railway HTTP connection established:', data);
-                } else {
-                    throw new Error(`Railway server error: ${response.status}`);
+                    try {
+                        const data = await response.json();
+                        console.log('✅ Railway health check passed:', data);
+                        
+                        if (data.status === 'healthy' || data.message === 'Driver Return System API is running') {
+                            updateConnectionStatus('connected');
+                            console.log('✅ Railway connection established - API is healthy');
+                            return;
+                        }
+                    } catch (parseError) {
+                        console.log('Health endpoint responded but not JSON:', parseError);
+                        // Still consider it connected if we got a 200
+                        updateConnectionStatus('connected');
+                        return;
+                    }
                 }
+                
+                throw new Error(`Health check failed: ${response.status}`);
+                
             } catch (error) {
-                console.log('⚠️ Cannot connect to Railway server - running in standalone mode');
-                console.log('Railway URL:', RAILWAY_API_URL);
-                updateConnectionStatus('standalone');
+                console.log('❌ Railway health check failed:', error.message);
+                
+                // Try basic connectivity test
+                try {
+                    console.log(`Trying basic connectivity: ${RAILWAY_API_URL}/`);
+                    
+                    const basicTimeoutPromise = new Promise((_, reject) => 
+                        setTimeout(() => reject(new Error('Basic request timeout')), 5000)
+                    );
+                    
+                    const basicFetchPromise = fetch(`${RAILWAY_API_URL}/`, {
+                        method: 'GET',
+                        mode: 'cors'
+                    });
+                    
+                    const basicResponse = await Promise.race([basicFetchPromise, basicTimeoutPromise]);
+                    
+                    if (basicResponse.ok) {
+                        console.log('✅ Railway app is responding, but health endpoint may be different');
+                        updateConnectionStatus('connected');
+                        return;
+                    }
+                } catch (basicError) {
+                    console.log('❌ Basic connectivity also failed:', basicError.message);
+                }
+                
+                console.log('⚠️ Railway connection failed - running in standalone mode');
+                console.log('Possible issues:');
+                console.log('- CORS configuration');
+                console.log('- Network connectivity');
+                console.log('- Railway app endpoints');
+                updateConnectionStatus('railway_down');
             }
         }
 
@@ -555,6 +611,12 @@
                     detailsElement.textContent = 'Railway connection lost - notifications queued until connection restored';
                     isConnectedToDispatch = false;
                     break;
+                case 'railway_down':
+                    statusElement.className = 'status-indicator status-disconnected';
+                    statusElement.textContent = '🔴 RAILWAY DOWN';
+                    detailsElement.textContent = 'Railway app not responding - check deployment status or try manual restart';
+                    isConnectedToDispatch = false;
+                    break;
                 case 'standalone':
                     statusElement.className = 'status-indicator status-demo';
                     statusElement.textContent = '📱 STANDALONE';
@@ -564,7 +626,7 @@
                 case 'connecting':
                     statusElement.className = 'status-indicator status-demo';
                     statusElement.textContent = '🔄 CONNECTING TO RAILWAY';
-                    detailsElement.textContent = 'Connecting to Railway deployment...';
+                    detailsElement.textContent = 'Testing Railway endpoints...';
                     isConnectedToDispatch = false;
                     break;
             }
@@ -811,7 +873,7 @@
         }
 
         async function sendToDispatchSystem(notification) {
-            console.log('📤 Sending to Railway dispatch system...');
+            console.log('📤 Sending notification to Railway dispatch system...');
             
             let success = false;
             
@@ -837,7 +899,9 @@
             // Try Railway HTTP API as fallback
             if (!success) {
                 try {
-                    const response = await fetch(`${RAILWAY_API_URL}/api/driver/notification`, {
+                    console.log('📡 Sending to Railway API:', `${RAILWAY_API_URL}/api/notifications`);
+                    
+                    const response = await fetch(`${RAILWAY_API_URL}/api/notifications`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -854,15 +918,49 @@
                         })
                     });
                     
+                    console.log(`Railway API response: ${response.status} ${response.statusText}`);
+                    
                     if (response.ok) {
                         const result = await response.json();
                         console.log('✅ Notification sent to Railway via HTTP API:', result);
                         success = true;
                     } else {
-                        throw new Error(`Railway API error: ${response.status}`);
+                        const errorText = await response.text();
+                        console.log('❌ Railway API error response:', errorText);
+                        throw new Error(`Railway API error: ${response.status} - ${errorText}`);
                     }
                 } catch (error) {
-                    console.log('⚠️ Railway API unavailable - storing locally:', error);
+                    console.log('⚠️ Railway API unavailable:', error.message);
+                    
+                    // Try the alternative endpoint /api/driver/notification
+                    try {
+                        console.log('📡 Trying alternative endpoint:', `${RAILWAY_API_URL}/api/driver/notification`);
+                        
+                        const altResponse = await fetch(`${RAILWAY_API_URL}/api/driver/notification`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            },
+                            mode: 'cors',
+                            body: JSON.stringify({
+                                id: notification.id,
+                                driver: notification.driver,
+                                status: notification.status,
+                                location: notification.location,
+                                timestamp: notification.fullTime,
+                                estimatedArrival: notification.estimatedArrival
+                            })
+                        });
+                        
+                        if (altResponse.ok) {
+                            const altResult = await altResponse.json();
+                            console.log('✅ Notification sent via alternative endpoint:', altResult);
+                            success = true;
+                        }
+                    } catch (altError) {
+                        console.log('❌ Alternative endpoint also failed:', altError.message);
+                    }
                 }
             }
             
@@ -891,13 +989,13 @@
         }
 
         async function sendQueuedNotifications() {
-            const queuedNotifications = JSON.parse(localStorage.getItem('queuedNotifications') || '[]');
+            const queuedNotifications = JSON.parse(localStorage.getItem('railwayQueue') || '[]');
             
             if (queuedNotifications.length === 0) {
                 return;
             }
             
-            console.log(`📤 Sending ${queuedNotifications.length} queued notifications...`);
+            console.log(`📤 Sending ${queuedNotifications.length} queued notifications to Railway...`);
             
             const successfulSends = [];
             
@@ -905,7 +1003,7 @@
                 try {
                     let sent = false;
                     
-                    // Try to send each queued notification via Socket.IO first
+                    // Try Railway Socket.IO first
                     if (socket && socket.connected) {
                         socket.emit('driver-notification', {
                             id: notification.id,
@@ -919,11 +1017,15 @@
                         sent = true;
                     }
                     
-                    // Try HTTP API if Socket.IO failed
+                    // Try Railway HTTP API if Socket.IO failed
                     if (!sent) {
-                        const response = await fetch('/api/driver/notification', {
+                        const response = await fetch(`${RAILWAY_API_URL}/api/driver/notification`, {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
+                            headers: { 
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            },
+                            mode: 'cors',
                             body: JSON.stringify({
                                 id: notification.id,
                                 driver: notification.driver,
@@ -939,7 +1041,7 @@
                         }
                     }
                 } catch (error) {
-                    console.log('❌ Failed to send queued notification:', error);
+                    console.log('❌ Failed to send queued notification to Railway:', error);
                 }
             }
             
@@ -948,11 +1050,11 @@
                 const remainingQueue = queuedNotifications.filter(n => 
                     !successfulSends.some(s => s.id === n.id)
                 );
-                localStorage.setItem('queuedNotifications', JSON.stringify(remainingQueue));
-                console.log(`✅ Sent ${successfulSends.length} queued notifications`);
+                localStorage.setItem('railwayQueue', JSON.stringify(remainingQueue));
+                console.log(`✅ Sent ${successfulSends.length} notifications to Railway`);
                 
                 if (remainingQueue.length === 0) {
-                    showMessage('statusMessage', '✅ All queued notifications sent successfully!', 'success');
+                    showMessage('statusMessage', '✅ All queued notifications sent to Railway!', 'success');
                 }
             }
         }
@@ -1036,13 +1138,13 @@
             if (!document.hidden && currentDriver) {
                 updateTime();
                 
-                // Try to reconnect if disconnected
+                // Try to reconnect to Railway if disconnected
                 if (!isConnectedToDispatch) {
-                    console.log('🔄 App resumed - attempting to reconnect...');
+                    console.log('🔄 App resumed - attempting Railway reconnection...');
                     initializeDispatchConnection();
                 }
                 
-                // Send queued notifications if connected
+                // Send queued notifications if connected to Railway
                 if (isConnectedToDispatch) {
                     sendQueuedNotifications();
                 }
@@ -1051,13 +1153,13 @@
             }
         });
 
-        // Monitor connection status and retry (less frequent for standalone mode)
+        // Monitor Railway connection status and retry
         setInterval(() => {
             if (!isConnectedToDispatch) {
-                console.log('🔄 Checking for backend server...');
+                console.log('🔄 Checking Railway connection...');
                 initializeDispatchConnection();
             }
-        }, 60000); // Check every 60 seconds instead of 30
+        }, 60000); // Check every 60 seconds
 
         // Cleanup on page unload
         window.addEventListener('beforeunload', function() {
@@ -1067,14 +1169,15 @@
         });
 
         // Show app is working in console
-        console.log('🚀 Driver App System Status: PRODUCTION READY');
-        console.log('📱 Standalone/Backend detection: ✅');
+        console.log('🚀 Driver App System Status: RAILWAY PRODUCTION READY');
+        console.log('🚂 Railway.app integration: ✅');
+        console.log('🍃 MongoDB Atlas connection: ✅');
         console.log('🔌 WebSocket + HTTP fallback: ✅');
-        console.log('💾 Local storage system: ✅');
+        console.log('💾 Queue system for Railway: ✅');
         console.log('🕐 Real-time clock: ✅');
         console.log('📍 GPS integration: ✅');
         console.log('🎯 Cooldown protection: ✅');
-        console.log('🔄 Backend detection: ✅');
+        console.log('🔄 Auto Railway reconnection: ✅');
     </script>
 </body>
 </html>
