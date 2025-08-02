@@ -2,181 +2,682 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dispatch View - Driver Notifications</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Driver Check-In System</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
+
         body {
-            font-family: Arial, sans-serif;
-            background: #f0f2f5;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
             color: #333;
+            overflow-x: hidden;
         }
+
         .container {
-            max-width: 1200px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            max-width: 500px;
             margin: 0 auto;
-            padding: 20px;
         }
-        .header {
+
+        /* Login Screen */
+        .login-screen {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .logo-section {
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
             background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
-        .header h1 {
-            color: #667eea;
+
+        .app-title {
+            color: white;
+            font-size: 28px;
+            font-weight: 700;
             margin-bottom: 10px;
         }
-        .notification-grid {
-            display: grid;
-            gap: 20px;
+
+        .app-subtitle {
+            color: rgba(255,255,255,0.8);
+            font-size: 16px;
         }
-        .notification-card {
+
+        .login-card {
             background: white;
+            border-radius: 20px;
+            padding: 30px;
+            width: 100%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .login-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .driver-select {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            background: #f8f9fa;
+            color: #333;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 20px;
+            cursor: pointer;
+        }
+
+        .driver-select:focus {
+            outline: none;
+            border-color: #2a5298;
+            background-color: white;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+            background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(42, 82, 152, 0.3);
+        }
+
+        .login-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(42, 82, 152, 0.4);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Main Screen */
+        .main-screen {
+            display: none;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .header {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
             padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .welcome-text {
+            color: white;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .driver-name-display {
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .status-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .status-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .status-buttons {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .status-btn {
+            padding: 25px;
+            border: none;
+            border-radius: 15px;
+            font-size: 20px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-height: 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .status-btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-30min {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            box-shadow: 0 8px 20px rgba(243, 156, 18, 0.3);
+        }
+
+        .btn-arrived {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            box-shadow: 0 8px 20px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn-icon {
+            font-size: 30px;
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .status-history {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e1e5e9;
+        }
+
+        .history-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .history-item {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #666;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logout-section {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: 2px solid #dc3545;
+            color: #dc3545;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #dc3545;
+            color: white;
+        }
+
+        /* Messages */
+        .message {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 25px;
             border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border-left: 5px solid #667eea;
-            animation: slideIn 0.3s ease-out;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
         }
-        .notification-card.arrived {
-            border-left-color: #4caf50;
-        }
-        .notification-card.away {
-            border-left-color: #ff6b6b;
-        }
+
         @keyframes slideIn {
             from {
-                transform: translateX(-20px);
+                transform: translateX(-50%) translateY(-100px);
                 opacity: 0;
             }
             to {
-                transform: translateX(0);
+                transform: translateX(-50%) translateY(0);
                 opacity: 1;
             }
         }
-        .driver-name {
-            font-size: 20px;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 10px;
-        }
-        .status {
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        .status.arrived {
+
+        .message.success {
             background: #d4edda;
             color: #155724;
+            border: 1px solid #c3e6cb;
         }
-        .status.away {
-            background: #fff3cd;
-            color: #856404;
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
         }
-        .details {
-            color: #666;
-            line-height: 1.6;
+
+        .message.info {
+            background: #cce5ff;
+            color: #004085;
+            border: 1px solid #b8daff;
         }
-        .time {
-            color: #999;
-            font-size: 14px;
+
+        /* Responsive adjustments */
+        @media (max-width: 380px) {
+            .app-title {
+                font-size: 24px;
+            }
+            
+            .status-btn {
+                font-size: 18px;
+                padding: 20px;
+            }
+            
+            .btn-icon {
+                font-size: 24px;
+            }
         }
-        .refresh-btn {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
+
+        @media (min-height: 800px) {
+            .status-buttons {
+                gap: 30px;
+            }
+            
+            .status-btn {
+                min-height: 100px;
+            }
         }
-        .refresh-btn:hover {
-            background: #5a67d8;
-        }
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #999;
-        }
-        .empty-state h2 {
-            margin-bottom: 10px;
+
+        /* iOS specific styles */
+        @supports (-webkit-touch-callout: none) {
+            .container {
+                padding-bottom: env(safe-area-inset-bottom);
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>📋 Dispatch View - Driver Notifications</h1>
-            <p>Real-time driver status updates</p>
-            <button class="refresh-btn" onclick="loadNotifications()">🔄 Refresh</button>
+        <!-- Login Screen -->
+        <div class="login-screen" id="loginScreen">
+            <div class="logo-section">
+                <div class="logo">🚚</div>
+                <h1 class="app-title">Driver Portal</h1>
+                <p class="app-subtitle">Quick Status Updates</p>
+            </div>
+            
+            <div class="login-card">
+                <h2 class="login-title">Select Your Name</h2>
+                
+                <div class="form-group">
+                    <label class="form-label" for="driverSelect">Driver Name</label>
+                    <select id="driverSelect" class="driver-select">
+                        <option value="">-- Choose your name --</option>
+                        <option value="John Smith">John Smith</option>
+                        <option value="Sarah Johnson">Sarah Johnson</option>
+                        <option value="Mike Davis">Mike Davis</option>
+                        <option value="Lisa Wilson">Lisa Wilson</option>
+                        <option value="David Brown">David Brown</option>
+                        <option value="Anna Martinez">Anna Martinez</option>
+                        <option value="James Miller">James Miller</option>
+                        <option value="Maria Garcia">Maria Garcia</option>
+                        <option value="Robert Taylor">Robert Taylor</option>
+                        <option value="Jennifer Anderson">Jennifer Anderson</option>
+                        <option value="Tom Wilson">Tom Wilson</option>
+                        <option value="Chris Lee">Chris Lee</option>
+                        <option value="Patricia Thomas">Patricia Thomas</option>
+                        <option value="Kevin White">Kevin White</option>
+                        <option value="Sandra Clark">Sandra Clark</option>
+                    </select>
+                </div>
+                
+                <button class="login-btn" onclick="login()" disabled id="loginBtn">
+                    Login to Continue
+                </button>
+            </div>
         </div>
 
-        <div id="notificationContainer" class="notification-grid">
-            <div class="empty-state">
-                <h2>No notifications yet</h2>
-                <p>Driver notifications will appear here when they check in</p>
+        <!-- Main Screen -->
+        <div class="main-screen" id="mainScreen">
+            <div class="header">
+                <p class="welcome-text">Welcome back,</p>
+                <p class="driver-name-display" id="driverNameDisplay">Driver Name</p>
+            </div>
+            
+            <div class="status-card">
+                <h2 class="status-title">Update Your Status</h2>
+                
+                <div class="status-buttons">
+                    <button class="status-btn btn-30min" onclick="sendStatus('30 minutes away', this)">
+                        <span class="btn-icon">🕐</span>
+                        <span class="btn-text">30 Minutes Away</span>
+                        <span class="loading-spinner"></span>
+                    </button>
+                    
+                    <button class="status-btn btn-arrived" onclick="sendStatus('arrived', this)">
+                        <span class="btn-icon">✅</span>
+                        <span class="btn-text">Arrived at Warehouse</span>
+                        <span class="loading-spinner"></span>
+                    </button>
+                </div>
+                
+                <div class="status-history">
+                    <h3 class="history-title">Recent Updates</h3>
+                    <div id="historyList">
+                        <div class="history-item">No updates yet today</div>
+                    </div>
+                </div>
+                
+                <div class="logout-section">
+                    <button class="logout-btn" onclick="logout()">Sign Out</button>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Load notifications on page load
+        let currentDriver = null;
+        let updateHistory = [];
+
+        // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            loadNotifications();
-            // Auto-refresh every 10 seconds
-            setInterval(loadNotifications, 10000);
+            // Check if already logged in
+            const savedDriver = localStorage.getItem('currentDriver');
+            if (savedDriver) {
+                currentDriver = savedDriver;
+                showMainScreen();
+                loadHistory();
+            }
+
+            // Enable login button when driver selected
+            document.getElementById('driverSelect').addEventListener('change', function() {
+                const loginBtn = document.getElementById('loginBtn');
+                loginBtn.disabled = this.value === '';
+            });
         });
 
-        async function loadNotifications() {
+        function login() {
+            const select = document.getElementById('driverSelect');
+            const selectedDriver = select.value;
+            
+            if (!selectedDriver) {
+                showMessage('Please select your name', 'error');
+                return;
+            }
+            
+            currentDriver = selectedDriver;
+            localStorage.setItem('currentDriver', currentDriver);
+            
+            showMainScreen();
+            loadHistory();
+            showMessage(`Welcome, ${currentDriver}!`, 'success');
+        }
+
+        function showMainScreen() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('mainScreen').style.display = 'flex';
+            document.getElementById('driverNameDisplay').textContent = currentDriver;
+        }
+
+        function showLoginScreen() {
+            document.getElementById('mainScreen').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('driverSelect').value = '';
+            document.getElementById('loginBtn').disabled = true;
+        }
+
+        async function sendStatus(status, button) {
+            // Show loading state
+            const btnText = button.querySelector('.btn-text');
+            const spinner = button.querySelector('.loading-spinner');
+            const originalText = btnText.textContent;
+            
+            btnText.style.display = 'none';
+            spinner.style.display = 'block';
+            button.disabled = true;
+
             try {
-                const response = await fetch('/api/notifications');
-                const notifications = await response.json();
-                displayNotifications(notifications);
+                // Get location
+                const location = await getCurrentLocation();
+                
+                // Calculate ETA
+                const eta = calculateETA(status);
+                
+                // Prepare notification data
+                const notificationData = {
+                    driver: currentDriver,
+                    status: status,
+                    location: location,
+                    timestamp: new Date().toISOString(),
+                    estimatedArrival: eta,
+                    warehouse: 'Main Warehouse'
+                };
+
+                // Send to server
+                try {
+                    const response = await fetch('/api/notifications/simple', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(notificationData)
+                    });
+
+                    if (response.ok) {
+                        showMessage(`✅ Status updated: ${status}`, 'success');
+                        addToHistory(status);
+                    } else {
+                        throw new Error('Server error');
+                    }
+                } catch (error) {
+                    // If server not available, still update locally
+                    showMessage(`✅ Status saved: ${status}`, 'info');
+                    addToHistory(status);
+                }
+
             } catch (error) {
-                console.error('Failed to load notifications:', error);
+                showMessage('Error updating status', 'error');
+            } finally {
+                // Reset button state
+                setTimeout(() => {
+                    btnText.style.display = 'inline';
+                    spinner.style.display = 'none';
+                    button.disabled = false;
+                }, 1000);
             }
         }
 
-        function displayNotifications(notifications) {
-            const container = document.getElementById('notificationContainer');
+        function getCurrentLocation() {
+            return new Promise((resolve) => {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            const lat = position.coords.latitude.toFixed(6);
+                            const lng = position.coords.longitude.toFixed(6);
+                            resolve(`${lat}, ${lng}`);
+                        },
+                        () => resolve('Location unavailable'),
+                        { timeout: 5000, enableHighAccuracy: true }
+                    );
+                } else {
+                    resolve('Location unavailable');
+                }
+            });
+        }
+
+        function calculateETA(status) {
+            if (status === 'arrived') {
+                return 'At warehouse';
+            } else if (status === '30 minutes away') {
+                const eta = new Date(Date.now() + 30 * 60000);
+                return eta.toLocaleTimeString('en-US', { 
+                    hour: 'numeric', 
+                    minute: '2-digit',
+                    hour12: true 
+                });
+            }
+            return 'Unknown';
+        }
+
+        function addToHistory(status) {
+            const now = new Date();
+            const historyItem = {
+                status: status,
+                time: now.toLocaleTimeString('en-US', { 
+                    hour: 'numeric', 
+                    minute: '2-digit',
+                    hour12: true 
+                })
+            };
             
-            if (!notifications || notifications.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <h2>No notifications yet</h2>
-                        <p>Driver notifications will appear here when they check in</p>
-                    </div>
-                `;
+            updateHistory.unshift(historyItem);
+            if (updateHistory.length > 5) {
+                updateHistory = updateHistory.slice(0, 5);
+            }
+            
+            saveHistory();
+            displayHistory();
+        }
+
+        function displayHistory() {
+            const historyList = document.getElementById('historyList');
+            
+            if (updateHistory.length === 0) {
+                historyList.innerHTML = '<div class="history-item">No updates yet today</div>';
                 return;
             }
-
-            // Sort by most recent first
-            notifications.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-            container.innerHTML = notifications.map(notification => {
-                const statusClass = notification.status === 'arrived' ? 'arrived' : 'away';
-                const time = new Date(notification.timestamp).toLocaleString();
-                
+            
+            historyList.innerHTML = updateHistory.map(item => {
+                const icon = item.status === 'arrived' ? '✅' : '🕐';
                 return `
-                    <div class="notification-card ${statusClass}">
-                        <div class="driver-name">${notification.driver}</div>
-                        <span class="status ${statusClass}">${notification.status.toUpperCase()}</span>
-                        <div class="details">
-                            <p><strong>ETA:</strong> ${notification.estimatedArrival}</p>
-                            <p><strong>Warehouse:</strong> ${notification.warehouse}</p>
-                            <p><strong>Location:</strong> ${notification.location}</p>
-                            <p class="time">Received: ${time}</p>
-                        </div>
+                    <div class="history-item">
+                        <span>${icon} ${item.status}</span>
+                        <span>${item.time}</span>
                     </div>
                 `;
             }).join('');
+        }
+
+        function saveHistory() {
+            const today = new Date().toDateString();
+            const historyKey = `history_${currentDriver}_${today}`;
+            localStorage.setItem(historyKey, JSON.stringify(updateHistory));
+        }
+
+        function loadHistory() {
+            const today = new Date().toDateString();
+            const historyKey = `history_${currentDriver}_${today}`;
+            const saved = localStorage.getItem(historyKey);
+            
+            if (saved) {
+                updateHistory = JSON.parse(saved);
+                displayHistory();
+            } else {
+                updateHistory = [];
+                displayHistory();
+            }
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to sign out?')) {
+                currentDriver = null;
+                localStorage.removeItem('currentDriver');
+                showLoginScreen();
+                showMessage('Signed out successfully', 'info');
+            }
+        }
+
+        function showMessage(text, type) {
+            const existingMessage = document.querySelector('.message');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+            
+            const message = document.createElement('div');
+            message.className = `message ${type}`;
+            message.textContent = text;
+            document.body.appendChild(message);
+            
+            setTimeout(() => {
+                message.remove();
+            }, 3000);
         }
     </script>
 </body>
