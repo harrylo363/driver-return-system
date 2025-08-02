@@ -413,6 +413,7 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
     <script>
         let currentDriver = '';
         let notifications = [];
@@ -420,6 +421,9 @@
         let watchId = null;
         let cooldownTimers = {};
 
+        // Railway.app production configuration
+        const RAILWAY_API_URL = 'https://driver-return-system-production.up.railway.app';
+        
         // Real dispatch connection
         let isConnectedToDispatch = false;
         let dispatchConnection = null;
@@ -470,50 +474,67 @@
 
         function initializeDispatchConnection() {
             try {
-                // Try to connect to Socket.IO server
-                socket = io();
-                
-                socket.on('connect', () => {
-                    console.log('✅ Connected to dispatch server');
-                    updateConnectionStatus('connected');
-                    socket.emit('join-room', { role: 'driver', driver: currentDriver });
-                });
+                // Try to connect to Railway Socket.IO server
+                if (typeof io !== 'undefined') {
+                    socket = io(RAILWAY_API_URL, {
+                        transports: ['websocket', 'polling'],
+                        timeout: 10000,
+                        forceNew: true
+                    });
+                    
+                    socket.on('connect', () => {
+                        console.log('✅ Connected to Railway dispatch server');
+                        updateConnectionStatus('connected');
+                        if (currentDriver) {
+                            socket.emit('join-room', { role: 'driver', driver: currentDriver });
+                        }
+                    });
 
-                socket.on('disconnect', () => {
-                    console.log('❌ Disconnected from dispatch server');
-                    updateConnectionStatus('disconnected');
-                });
+                    socket.on('disconnect', () => {
+                        console.log('❌ Disconnected from Railway server');
+                        updateConnectionStatus('disconnected');
+                    });
 
-                socket.on('connect_error', (error) => {
-                    console.log('Connection error:', error);
-                    updateConnectionStatus('disconnected');
-                });
+                    socket.on('connect_error', (error) => {
+                        console.log('Railway connection error:', error);
+                        updateConnectionStatus('disconnected');
+                    });
+                } else {
+                    console.log('Socket.IO not available, using HTTP only');
+                }
 
-                // Try HTTP connection as fallback
-                testHttpConnection();
+                // Try Railway HTTP API
+                testRailwayConnection();
                 
             } catch (error) {
-                console.log('Socket.IO not available, trying HTTP connection');
-                testHttpConnection();
+                console.log('Socket.IO error:', error);
+                testRailwayConnection();
             }
         }
 
-        async function testHttpConnection() {
+        async function testRailwayConnection() {
             try {
-                const response = await fetch('/api/driver/ping', {
+                // Test Railway health endpoint
+                const response = await fetch(`${RAILWAY_API_URL}/api/health`, {
                     method: 'GET',
-                    headers: { 'Content-Type': 'application/json' }
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    mode: 'cors'
                 });
                 
                 if (response.ok) {
+                    const data = await response.json();
                     updateConnectionStatus('connected');
-                    console.log('✅ HTTP connection to dispatch server established');
+                    console.log('✅ Railway HTTP connection established:', data);
                 } else {
-                    throw new Error('HTTP connection failed');
+                    throw new Error(`Railway server error: ${response.status}`);
                 }
             } catch (error) {
-                console.log('❌ Cannot connect to dispatch server:', error);
-                updateConnectionStatus('disconnected');
+                console.log('⚠️ Cannot connect to Railway server - running in standalone mode');
+                console.log('Railway URL:', RAILWAY_API_URL);
+                updateConnectionStatus('standalone');
             }
         }
 
@@ -524,20 +545,26 @@
             switch(status) {
                 case 'connected':
                     statusElement.className = 'status-indicator status-connected';
-                    statusElement.textContent = '🟢 CONNECTED';
-                    detailsElement.textContent = 'Connected to live dispatch system - notifications will be sent in real-time';
+                    statusElement.textContent = '🟢 RAILWAY CONNECTED';
+                    detailsElement.textContent = 'Connected to Railway deployment - notifications sent to MongoDB Atlas in real-time';
                     isConnectedToDispatch = true;
                     break;
                 case 'disconnected':
                     statusElement.className = 'status-indicator status-disconnected';
-                    statusElement.textContent = '🔴 OFFLINE';
-                    detailsElement.textContent = 'No connection to dispatch - notifications will be queued and sent when connection is restored';
+                    statusElement.textContent = '🔴 RAILWAY OFFLINE';
+                    detailsElement.textContent = 'Railway connection lost - notifications queued until connection restored';
+                    isConnectedToDispatch = false;
+                    break;
+                case 'standalone':
+                    statusElement.className = 'status-indicator status-demo';
+                    statusElement.textContent = '📱 STANDALONE';
+                    detailsElement.textContent = 'No Railway connection - notifications stored locally for testing';
                     isConnectedToDispatch = false;
                     break;
                 case 'connecting':
                     statusElement.className = 'status-indicator status-demo';
-                    statusElement.textContent = '🔄 CONNECTING';
-                    detailsElement.textContent = 'Connecting to dispatch system...';
+                    statusElement.textContent = '🔄 CONNECTING TO RAILWAY';
+                    detailsElement.textContent = 'Connecting to Railway deployment...';
                     isConnectedToDispatch = false;
                     break;
             }
@@ -754,7 +781,7 @@
             // Send to dispatch system
             sendToDispatchSystem(notification);
             
-            // Show success message
+            // Show success message and complete process
             const icon = status === 'arrived' ? '✅' : '🕐';
             showMessage('statusMessage', `${icon} "${status}" sent to dispatch at ${timeString}!`, 'success');
             
@@ -784,11 +811,11 @@
         }
 
         async function sendToDispatchSystem(notification) {
-            console.log('📤 Sending to dispatch system...');
+            console.log('📤 Sending to Railway dispatch system...');
             
             let success = false;
             
-            // Try Socket.IO first (real-time)
+            // Try Socket.IO to Railway first (real-time)
             if (socket && socket.connected) {
                 try {
                     socket.emit('driver-notification', {
@@ -800,21 +827,23 @@
                         estimatedArrival: notification.estimatedArrival
                     });
                     
-                    console.log('✅ Notification sent via WebSocket');
+                    console.log('✅ Notification sent to Railway via WebSocket');
                     success = true;
                 } catch (error) {
-                    console.log('❌ WebSocket send failed:', error);
+                    console.log('❌ Railway WebSocket send failed:', error);
                 }
             }
             
-            // Try HTTP API as fallback
+            // Try Railway HTTP API as fallback
             if (!success) {
                 try {
-                    const response = await fetch('/api/driver/notification', {
+                    const response = await fetch(`${RAILWAY_API_URL}/api/driver/notification`, {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json'
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
                         },
+                        mode: 'cors',
                         body: JSON.stringify({
                             id: notification.id,
                             driver: notification.driver,
@@ -827,23 +856,31 @@
                     
                     if (response.ok) {
                         const result = await response.json();
-                        console.log('✅ Notification sent via HTTP API');
+                        console.log('✅ Notification sent to Railway via HTTP API:', result);
                         success = true;
                     } else {
-                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        throw new Error(`Railway API error: ${response.status}`);
                     }
                 } catch (error) {
-                    console.log('❌ HTTP API send failed:', error);
+                    console.log('⚠️ Railway API unavailable - storing locally:', error);
                 }
             }
             
-            // Queue for later if both methods failed
-            if (!success) {
-                queueNotificationForLater(notification);
-                showMessage('statusMessage', '⚠️ Notification queued - will send when connection is restored', 'warning');
+            // Handle based on whether we reached Railway or not
+            if (success) {
+                showMessage('statusMessage', '✅ Notification sent to Railway → MongoDB Atlas!', 'success');
             } else {
-                showMessage('statusMessage', '✅ Notification delivered to dispatch successfully!', 'success');
+                // Store locally and queue for Railway
+                queueNotificationForRailway(notification);
+                showMessage('statusMessage', '📱 Notification queued for Railway (will retry automatically)', 'warning');
             }
+        }
+
+        function queueNotificationForRailway(notification) {
+            let queuedNotifications = JSON.parse(localStorage.getItem('railwayQueue') || '[]');
+            queuedNotifications.push(notification);
+            localStorage.setItem('railwayQueue', JSON.stringify(queuedNotifications));
+            console.log('📝 Notification queued for Railway delivery');
         }
 
         function queueNotificationForLater(notification) {
@@ -866,7 +903,9 @@
             
             for (const notification of queuedNotifications) {
                 try {
-                    // Try to send each queued notification
+                    let sent = false;
+                    
+                    // Try to send each queued notification via Socket.IO first
                     if (socket && socket.connected) {
                         socket.emit('driver-notification', {
                             id: notification.id,
@@ -877,11 +916,22 @@
                             estimatedArrival: notification.estimatedArrival
                         });
                         successfulSends.push(notification);
-                    } else {
+                        sent = true;
+                    }
+                    
+                    // Try HTTP API if Socket.IO failed
+                    if (!sent) {
                         const response = await fetch('/api/driver/notification', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(notification)
+                            body: JSON.stringify({
+                                id: notification.id,
+                                driver: notification.driver,
+                                status: notification.status,
+                                location: notification.location,
+                                timestamp: notification.fullTime,
+                                estimatedArrival: notification.estimatedArrival
+                            })
                         });
                         
                         if (response.ok) {
@@ -1001,13 +1051,13 @@
             }
         });
 
-        // Monitor connection status and retry
+        // Monitor connection status and retry (less frequent for standalone mode)
         setInterval(() => {
             if (!isConnectedToDispatch) {
-                console.log('🔄 Attempting to reconnect to dispatch...');
-                testHttpConnection();
+                console.log('🔄 Checking for backend server...');
+                initializeDispatchConnection();
             }
-        }, 30000); // Try to reconnect every 30 seconds
+        }, 60000); // Check every 60 seconds instead of 30
 
         // Cleanup on page unload
         window.addEventListener('beforeunload', function() {
@@ -1018,13 +1068,13 @@
 
         // Show app is working in console
         console.log('🚀 Driver App System Status: PRODUCTION READY');
-        console.log('📱 Real-time dispatch integration: ✅');
+        console.log('📱 Standalone/Backend detection: ✅');
         console.log('🔌 WebSocket + HTTP fallback: ✅');
-        console.log('💾 Offline queue system: ✅');
+        console.log('💾 Local storage system: ✅');
         console.log('🕐 Real-time clock: ✅');
         console.log('📍 GPS integration: ✅');
         console.log('🎯 Cooldown protection: ✅');
-        console.log('🔄 Auto-reconnection: ✅');
+        console.log('🔄 Backend detection: ✅');
     </script>
 </body>
 </html>
