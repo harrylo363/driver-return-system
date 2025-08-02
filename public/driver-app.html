@@ -3,1199 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Driver App</title>
+    <title>Driver Return System</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         body {
             font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-            color: #333;
-        }
-        
-        .container {
-            max-width: 400px;
+            max-width: 800px;
             margin: 0 auto;
-            background: white;
-            border-radius: 20px;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: white;
             padding: 30px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        
-        .header {
+        h1 {
+            color: #333;
             text-align: center;
-            margin-bottom: 30px;
         }
-        
-        .header h1 {
-            color: #667eea;
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
-        
         .form-group {
             margin-bottom: 20px;
         }
-        
         label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
             font-weight: bold;
-            color: #555;
         }
-        
-        select, input {
+        input, select {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #e1e5e9;
-            border-radius: 8px;
-            font-size: 16px;
-            background: #f8f9fa;
-        }
-        
-        select:focus, input:focus {
-            outline: none;
-            border-color: #667eea;
-            background: white;
-        }
-        
-        .btn {
-            width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-bottom: 15px;
-            transition: all 0.3s;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-        }
-        
-        .btn-primary {
-            background: #667eea;
-            color: white;
-        }
-        
-        .btn-success {
-            background: #28a745;
-            color: white;
-        }
-        
-        .btn-warning {
-            background: #ffc107;
-            color: #212529;
-        }
-        
-        .btn-danger {
-            background: #dc3545;
-            color: white;
-        }
-        
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .hidden {
-            display: none;
-        }
-        
-        .message {
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            text-align: center;
-            font-weight: bold;
-        }
-        
-        .success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .warning {
-            background: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
-        }
-        
-        .info {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
-        }
-        
-        .driver-info {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            text-align: center;
-            margin-bottom: 20px;
-            border-left: 4px solid #667eea;
-        }
-        
-        .driver-name {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        
-        .current-time {
-            color: #666;
-            font-size: 16px;
-            margin-bottom: 10px;
-        }
-        
-        .logout-btn {
-            background: transparent;
-            color: #dc3545;
-            border: 1px solid #dc3545;
-            padding: 8px 16px;
-            font-size: 14px;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-        
-        .logout-btn:hover {
-            background: #dc3545;
-            color: white;
-        }
-        
-        .notification-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin: 20px 0;
-        }
-        
-        .notification-btn {
-            padding: 20px;
-            font-size: 18px;
-            border-radius: 12px;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-            position: relative;
-        }
-        
-        .notification-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        
-        .btn-30min {
-            background: #ffc107;
-            color: #212529;
-        }
-        
-        .btn-arrived {
-            background: #28a745;
-            color: white;
-        }
-        
-        .cooldown-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.7);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 12px;
-            font-size: 16px;
-        }
-        
-        .history {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
-        }
-        
-        .history h3 {
-            margin-bottom: 10px;
-            color: #555;
-        }
-        
-        .history-item {
-            background: white;
             padding: 10px;
-            border-radius: 6px;
-            margin-bottom: 8px;
-            font-size: 14px;
-            border-left: 3px solid #667eea;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
         }
-        
-        .status-indicator {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 12px;
-            font-weight: bold;
-            z-index: 1000;
-        }
-        
-        .status-connected {
-            background: #28a745;
+        button {
+            background-color: #4CAF50;
             color: white;
-        }
-        
-        .status-disconnected {
-            background: #dc3545;
-            color: white;
-        }
-        
-        .status-demo {
-            background: #ffc107;
-            color: #212529;
-        }
-        
-        .connection-info {
-            background: #e3f2fd;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border: 1px solid #2196f3;
-        }
-        
-        .connection-info h4 {
-            color: #1976d2;
-            margin-bottom: 10px;
-        }
-        
-        .location-section {
-            background: #f0f8ff;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            border: 1px solid #87ceeb;
-        }
-        
-        .location-info {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 10px;
-        }
-        
-        .location-btn {
-            background: #17a2b8;
-            color: white;
-            padding: 8px 16px;
+            padding: 12px 30px;
             border: none;
-            border-radius: 6px;
-            font-size: 14px;
+            border-radius: 5px;
             cursor: pointer;
+            font-size: 16px;
+            width: 100%;
         }
-        
-        .gps-status {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            margin-right: 5px;
+        button:hover {
+            background-color: #45a049;
         }
-        
-        .gps-active {
-            background: #28a745;
+        .driver-list {
+            margin-top: 30px;
         }
-        
-        .gps-inactive {
-            background: #dc3545;
+        .driver-item {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .status-out {
+            color: #d9534f;
+            font-weight: bold;
+        }
+        .status-returned {
+            color: #5cb85c;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <div class="status-indicator" id="connectionStatus">🔄 CONNECTING</div>
-    
     <div class="container">
-        <div class="header">
-            <h1>🚚 Driver App</h1>
-            <p>Real-Time Dispatch Integration</p>
-        </div>
-
-        <!-- Login Screen -->
-        <div id="loginScreen">
-            <div class="connection-info">
-                <h4>🚂 Railway Connection</h4>
-                <p id="connectionDetails">Testing Railway endpoints...</p>
-                <small>URL: https://driver-return-system-production.up.railway.app</small>
-            </div>
-            
+        <h1>Driver Return System</h1>
+        
+        <div id="checkin-form">
+            <h2>Check In Driver</h2>
             <div class="form-group">
-                <label for="driverName">Your Name:</label>
-                <select id="driverName">
-                    <option value="">-- Select Your Name --</option>
-                    <option value="John Smith">John Smith</option>
-                    <option value="Sarah Johnson">Sarah Johnson</option>
-                    <option value="Mike Davis">Mike Davis</option>
-                    <option value="Lisa Wilson">Lisa Wilson</option>
-                    <option value="Tom Anderson">Tom Anderson</option>
-                    <option value="Emily Brown">Emily Brown</option>
-                    <option value="Other">Other Driver</option>
-                </select>
+                <label for="driverId">Driver ID:</label>
+                <input type="text" id="driverId" placeholder="D001" required>
             </div>
-            
-            <div class="form-group" id="customNameGroup" style="display: none;">
-                <label for="customName">Enter Your Name:</label>
-                <input type="text" id="customName" placeholder="Type your name here">
+            <div class="form-group">
+                <label for="driverName">Driver Name:</label>
+                <input type="text" id="driverName" placeholder="John Doe" required>
             </div>
-
-            <button class="btn btn-primary" onclick="startApp()" id="startBtn" disabled>
-                🚀 Start App
-            </button>
-
-            <div id="loginMessage"></div>
+            <div class="form-group">
+                <label for="vehicle">Vehicle:</label>
+                <input type="text" id="vehicle" placeholder="Truck #123" required>
+            </div>
+            <button onclick="checkIn()">Check In Driver</button>
         </div>
-
-        <!-- Main App Screen -->
-        <div id="mainScreen" class="hidden">
-            <div class="driver-info">
-                <div class="driver-name" id="selectedDriver">Driver Name</div>
-                <div class="current-time" id="currentTime"></div>
-                <button class="logout-btn" onclick="logout()">🚪 Logout</button>
-            </div>
-            
-            <div class="location-section">
-                <div class="location-info">
-                    <span class="gps-status" id="gpsStatus"></span>
-                    <span id="locationText">Getting location...</span>
-                </div>
-                <button class="location-btn" onclick="updateLocation()">📍 Update Location</button>
-            </div>
-
-            <div class="notification-buttons">
-                <button class="notification-btn btn-30min" onclick="sendUpdate('30 minutes away')" id="btn30min">
-                    🕐 30 MINUTES AWAY
-                    <div class="cooldown-overlay hidden" id="cooldown30min">
-                        <span id="cooldownText30min">Wait 3s</span>
-                    </div>
-                </button>
-                
-                <button class="notification-btn btn-arrived" onclick="sendUpdate('arrived')" id="btnArrived">
-                    ✅ ARRIVED AT WAREHOUSE
-                    <div class="cooldown-overlay hidden" id="cooldownArrived">
-                        <span id="cooldownTextArrived">Wait 3s</span>
-                    </div>
-                </button>
-            </div>
-
-            <div id="statusMessage"></div>
-
-            <div class="history">
-                <h3>📋 Your Notifications Today</h3>
-                <div id="notificationHistory">
-                    <div class="history-item">No notifications sent yet</div>
-                </div>
+        
+        <div class="driver-list">
+            <h2>Active Drivers</h2>
+            <div id="driversList">
+                <p>No drivers checked in yet.</p>
             </div>
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
     <script>
-        let currentDriver = '';
-        let notifications = [];
-        let currentLocation = null;
-        let watchId = null;
-        let cooldownTimers = {};
-
-        // Railway.app production configuration
-        const RAILWAY_API_URL = 'https://driver-return-system-production.up.railway.app';
+        let drivers = [];
         
-        // Connection monitoring
-        let debugMode = true;
-        let connectionCheckInterval = null;
-        let lastSuccessfulConnection = null;
-        let connectionAttempts = 0;
-        
-        // Real dispatch connection
-        let isConnectedToDispatch = false;
-        let dispatchConnection = null;
-        let socket = null;
-
-        // Initialize app
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Driver App Started');
+        function checkIn() {
+            const driverId = document.getElementById('driverId').value;
+            const driverName = document.getElementById('driverName').value;
+            const vehicle = document.getElementById('vehicle').value;
             
-            updateConnectionStatus('connecting');
-            initializeDispatchConnection();
-            
-            // Update time every second
-            updateTime();
-            setInterval(updateTime, 1000);
-            
-            // Initialize location services
-            initializeLocation();
-            
-            // Handle driver selection
-            document.getElementById('driverName').addEventListener('change', function() {
-                const selected = this.value;
-                const startBtn = document.getElementById('startBtn');
-                const customGroup = document.getElementById('customNameGroup');
-                
-                if (selected === 'Other') {
-                    customGroup.style.display = 'block';
-                    startBtn.disabled = true;
-                    
-                    // Enable start button when custom name is entered
-                    document.getElementById('customName').addEventListener('input', function() {
-                        startBtn.disabled = this.value.trim() === '';
-                    });
-                } else {
-                    customGroup.style.display = 'none';
-                    startBtn.disabled = selected === '';
-                }
-            });
-            
-            // Check if driver was already selected
-            const savedDriver = localStorage.getItem('currentDriver');
-            if (savedDriver) {
-                currentDriver = savedDriver;
-                showMainScreen();
-                loadHistory();
-            }
-        });
-
-        function initializeDispatchConnection() {
-            try {
-                // Try to connect to Railway Socket.IO server
-                if (typeof io !== 'undefined') {
-                    socket = io(RAILWAY_API_URL, {
-                        transports: ['websocket', 'polling'],
-                        timeout: 10000,
-                        forceNew: true
-                    });
-                    
-                    socket.on('connect', () => {
-                        console.log('✅ Connected to Railway dispatch server');
-                        updateConnectionStatus('connected');
-                        if (currentDriver) {
-                            socket.emit('join-room', { role: 'driver', driver: currentDriver });
-                        }
-                    });
-
-                    socket.on('disconnect', () => {
-                        console.log('❌ Disconnected from Railway server');
-                        updateConnectionStatus('disconnected');
-                    });
-
-                    socket.on('connect_error', (error) => {
-                        console.log('Railway connection error:', error);
-                        updateConnectionStatus('disconnected');
-                    });
-                } else {
-                    console.log('Socket.IO not available, using HTTP only');
-                }
-
-                // Try Railway HTTP API
-                testRailwayConnection();
-                
-            } catch (error) {
-                console.log('Socket.IO error:', error);
-                testRailwayConnection();
-            }
-        }
-
-        async function testRailwayConnection() {
-            console.log(`🔍 Testing Railway connection (attempt ${connectionAttempts})...`);
-            console.log('Railway URL:', RAILWAY_API_URL);
-            console.log('Time:', new Date().toLocaleTimeString());
-            
-            try {
-                console.log(`Testing: ${RAILWAY_API_URL}/api/health`);
-                
-                const response = await fetch(`${RAILWAY_API_URL}/api/health`, {
-                    method: 'GET',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    }
-                });
-                
-                console.log(`Health check response: ${response.status} ${response.statusText}`);
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('✅ Railway health check SUCCESS:', data);
-                    
-                    lastSuccessfulConnection = new Date();
-                    connectionAttempts = 0; // Reset counter on success
-                    
-                    // Test the notifications endpoint
-                    await testNotificationsEndpoint();
-                    
-                } else {
-                    throw new Error(`Health check failed: ${response.status}`);
-                }
-                
-            } catch (error) {
-                console.log('❌ Railway health check failed:', error.message);
-                
-                if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-                    console.log('🌐 Network error - Railway may be sleeping or unreachable');
-                    updateConnectionStatus('railway_sleeping');
-                } else {
-                    console.log('🔴 Railway server error');
-                    updateConnectionStatus('railway_down');
-                }
-            }
-        }
-
-        async function testNotificationsEndpoint() {
-            try {
-                console.log('🔍 Testing notifications endpoint...');
-                
-                const response = await fetch(`${RAILWAY_API_URL}/api/notifications`, {
-                    method: 'GET',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    }
-                });
-                
-                console.log(`Notifications endpoint: ${response.status} ${response.statusText}`);
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('✅ Notifications endpoint working:', data);
-                    updateConnectionStatus('connected');
-                } else {
-                    console.log('❌ Notifications endpoint failed:', response.status);
-                    updateConnectionStatus('no_endpoints');
-                }
-                
-            } catch (error) {
-                console.log('❌ Notifications endpoint error:', error.message);
-                updateConnectionStatus('no_endpoints');
-            }
-        }
-
-        function updateConnectionStatus(status) {
-            const statusElement = document.getElementById('connectionStatus');
-            const detailsElement = document.getElementById('connectionDetails');
-            
-            switch(status) {
-                case 'connected':
-                    statusElement.className = 'status-indicator status-connected';
-                    statusElement.textContent = '🟢 RAILWAY CONNECTED';
-                    detailsElement.textContent = `Connected to Railway deployment - Last check: ${new Date().toLocaleTimeString()}`;
-                    isConnectedToDispatch = true;
-                    break;
-                case 'disconnected':
-                    statusElement.className = 'status-indicator status-disconnected';
-                    statusElement.textContent = '🔴 RAILWAY OFFLINE';
-                    detailsElement.textContent = 'Railway connection lost - attempting reconnection every 30 seconds';
-                    isConnectedToDispatch = false;
-                    break;
-                case 'railway_sleeping':
-                    statusElement.className = 'status-indicator status-demo';
-                    statusElement.textContent = '😴 RAILWAY SLEEPING';
-                    detailsElement.textContent = 'Railway app is sleeping (free tier) - will wake up and reconnect automatically';
-                    isConnectedToDispatch = false;
-                    break;
-                case 'railway_down':
-                    statusElement.className = 'status-indicator status-disconnected';
-                    statusElement.textContent = '🔴 RAILWAY DOWN';
-                    detailsElement.textContent = 'Railway app not responding - check deployment status';
-                    isConnectedToDispatch = false;
-                    break;
-                case 'no_endpoints':
-                    statusElement.className = 'status-indicator status-demo';
-                    statusElement.textContent = '⚠️ ENDPOINTS MISSING';
-                    detailsElement.textContent = 'Railway app found but missing driver API endpoints - check console for details';
-                    isConnectedToDispatch = false;
-                    break;
-                case 'standalone':
-                    statusElement.className = 'status-indicator status-demo';
-                    statusElement.textContent = '📱 STANDALONE';
-                    detailsElement.textContent = 'No Railway connection - notifications stored locally for testing';
-                    isConnectedToDispatch = false;
-                    break;
-                case 'connecting':
-                    statusElement.className = 'status-indicator status-demo';
-                    statusElement.textContent = '🔄 TESTING RAILWAY';
-                    detailsElement.textContent = `Testing Railway endpoints... (attempt ${connectionAttempts})`;
-                    isConnectedToDispatch = false;
-                    break;
-            }
-        }
-
-        function initializeLocation() {
-            if ('geolocation' in navigator) {
-                console.log('📍 Initializing GPS location services...');
-                
-                // Get current position first
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        currentLocation = {
-                            lat: position.coords.latitude,
-                            lng: position.coords.longitude,
-                            accuracy: position.coords.accuracy
-                        };
-                        updateLocationDisplay(true);
-                        console.log('✅ Initial GPS location obtained');
-                    },
-                    (error) => {
-                        console.log('⚠️ GPS location unavailable:', error.code, error.message);
-                        updateLocationDisplay(false);
-                    },
-                    {
-                        enableHighAccuracy: false, // Less battery intensive
-                        timeout: 10000,
-                        maximumAge: 300000 // 5 minutes
-                    }
-                );
-                
-                // Watch position for updates (less frequent)
-                if (navigator.geolocation.watchPosition) {
-                    watchId = navigator.geolocation.watchPosition(
-                        (position) => {
-                            currentLocation = {
-                                lat: position.coords.latitude,
-                                lng: position.coords.longitude,
-                                accuracy: position.coords.accuracy
-                            };
-                            updateLocationDisplay(true);
-                        },
-                        (error) => {
-                            console.log('GPS watch error:', error.code, error.message);
-                            updateLocationDisplay(false);
-                        },
-                        {
-                            enableHighAccuracy: false,
-                            timeout: 15000,
-                            maximumAge: 600000 // 10 minutes
-                        }
-                    );
-                }
-            } else {
-                console.log('⚠️ Geolocation not supported by this browser');
-                updateLocationDisplay(false);
-            }
-        }
-
-        function updateLocationDisplay(hasLocation) {
-            const gpsStatus = document.getElementById('gpsStatus');
-            const locationText = document.getElementById('locationText');
-            
-            if (hasLocation && currentLocation) {
-                gpsStatus.className = 'gps-status gps-active';
-                locationText.textContent = `GPS Active (±${Math.round(currentLocation.accuracy)}m)`;
-            } else {
-                gpsStatus.className = 'gps-status gps-inactive';
-                locationText.textContent = 'GPS unavailable - location services disabled';
-                currentLocation = null;
-            }
-        }
-
-        function updateLocation() {
-            const locationText = document.getElementById('locationText');
-            locationText.textContent = 'Updating location...';
-            
-            if ('geolocation' in navigator) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        currentLocation = {
-                            lat: position.coords.latitude,
-                            lng: position.coords.longitude,
-                            accuracy: position.coords.accuracy
-                        };
-                        updateLocationDisplay(true);
-                        showMessage('statusMessage', '📍 Location updated successfully', 'success');
-                    },
-                    (error) => {
-                        updateLocationDisplay(false);
-                        showMessage('statusMessage', '⚠️ Could not get precise location, using fallback', 'warning');
-                    }
-                );
-            }
-        }
-
-        function updateTime() {
-            const now = new Date();
-            const timeString = now.toLocaleString('en-US', {
-                weekday: 'short',
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            });
-            
-            const timeElement = document.getElementById('currentTime');
-            if (timeElement) {
-                timeElement.textContent = timeString;
-            }
-        }
-
-        function startApp() {
-            const driverSelect = document.getElementById('driverName');
-            const customName = document.getElementById('customName');
-            
-            if (driverSelect.value === 'Other') {
-                currentDriver = customName.value.trim();
-            } else {
-                currentDriver = driverSelect.value;
-            }
-            
-            if (!currentDriver) {
-                showMessage('loginMessage', '❌ Please select or enter your name', 'error');
+            if (!driverId || !driverName || !vehicle) {
+                alert('Please fill in all fields');
                 return;
             }
             
-            // Save driver selection
-            localStorage.setItem('currentDriver', currentDriver);
-            
-            // Join driver room in socket if connected
-            if (socket && socket.connected) {
-                socket.emit('join-room', { role: 'driver', driver: currentDriver });
-            }
-            
-            showMainScreen();
-            showMessage('statusMessage', `🎉 Welcome, ${currentDriver}! You're now connected to dispatch.`, 'success');
-            
-            console.log('✅ Driver logged in:', currentDriver);
-        }
-
-        function showMainScreen() {
-            document.getElementById('loginScreen').classList.add('hidden');
-            document.getElementById('mainScreen').classList.remove('hidden');
-            document.getElementById('selectedDriver').textContent = currentDriver;
-            displayHistory();
-        }
-
-        function logout() {
-            if (confirm('Are you sure you want to logout?')) {
-                // Stop location tracking
-                if (watchId) {
-                    navigator.geolocation.clearWatch(watchId);
-                    watchId = null;
-                }
-                
-                localStorage.removeItem('currentDriver');
-                localStorage.removeItem('notifications_' + currentDriver);
-                
-                currentDriver = '';
-                notifications = [];
-                
-                document.getElementById('loginScreen').classList.remove('hidden');
-                document.getElementById('mainScreen').classList.add('hidden');
-                
-                // Reset form
-                document.getElementById('driverName').value = '';
-                document.getElementById('customName').value = '';
-                document.getElementById('customNameGroup').style.display = 'none';
-                document.getElementById('startBtn').disabled = true;
-                
-                showMessage('loginMessage', '👋 Logged out successfully', 'success');
-                console.log('✅ Driver logged out');
-            }
-        }
-
-        function sendUpdate(status) {
-            if (!currentDriver) {
-                showMessage('statusMessage', '❌ Error: No driver selected', 'error');
-                return;
-            }
-            
-            // Prevent spam clicking with cooldown
-            const buttonId = status.includes('30') ? 'btn30min' : 'btnArrived';
-            if (cooldownTimers[buttonId]) {
-                return;
-            }
-            
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-            
-            // Generate location string
-            let locationString = 'Location unavailable';
-            if (currentLocation) {
-                if (currentLocation.fallback) {
-                    locationString = 'Location unavailable (GPS disabled)';
-                } else {
-                    locationString = `${currentLocation.lat.toFixed(4)}, ${currentLocation.lng.toFixed(4)}`;
-                }
-            }
-            
-            // Calculate ETA for 30 min notifications
-            let estimatedArrival = status === 'arrived' ? 'At warehouse' : 
-                new Date(now.getTime() + 30 * 60000).toLocaleTimeString('en-US', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-            
-            const notification = {
-                id: Date.now(),
-                driver: currentDriver,
-                status: status,
-                location: locationString,
-                time: timeString,
-                fullTime: now.toISOString(),
-                date: now.toLocaleDateString(),
-                estimatedArrival: estimatedArrival
+            const driver = {
+                driverId,
+                name: driverName,
+                vehicle,
+                checkInTime: new Date(),
+                status: 'out'
             };
             
-            // Add to notifications array
-            notifications.unshift(notification);
+            drivers.push(driver);
             
-            // Keep only last 10 notifications
-            if (notifications.length > 10) {
-                notifications = notifications.slice(0, 10);
-            }
+            // Clear form
+            document.getElementById('driverId').value = '';
+            document.getElementById('driverName').value = '';
+            document.getElementById('vehicle').value = '';
             
-            // Save to localStorage
-            saveHistory();
-            
-            // Update display
-            displayHistory();
-            
-            // Apply cooldown
-            applyCooldown(buttonId);
-            
-            // Send to dispatch system
-            sendToDispatchSystem(notification);
-            
-            // Show success message and complete process
-            const icon = status === 'arrived' ? '✅' : '🕐';
-            showMessage('statusMessage', `${icon} "${status}" sent to dispatch at ${timeString}!`, 'success');
-            
-            console.log('📤 Notification sent:', notification);
+            updateDriversList();
+            alert('Driver checked in successfully!');
         }
-
-        function applyCooldown(buttonId) {
-            const button = document.getElementById(buttonId);
-            const cooldownElement = document.getElementById(`cooldown${buttonId === 'btn30min' ? '30min' : 'Arrived'}`);
-            const textElement = document.getElementById(`cooldownText${buttonId === 'btn30min' ? '30min' : 'Arrived'}`);
-            
-            button.disabled = true;
-            cooldownElement.classList.remove('hidden');
-            
-            let timeLeft = 3;
-            cooldownTimers[buttonId] = setInterval(() => {
-                timeLeft--;
-                textElement.textContent = `Wait ${timeLeft}s`;
-                
-                if (timeLeft <= 0) {
-                    clearInterval(cooldownTimers[buttonId]);
-                    delete cooldownTimers[buttonId];
-                    button.disabled = false;
-                    cooldownElement.classList.add('hidden');
-                }
-            }, 1000);
-        }
-
-        async function sendToDispatchSystem(notification) {
-            console.log('📤 Sending notification to Railway...');
-            console.log('📋 Notification data:', {
-                driver: notification.driver,
-                status: notification.status,
-                location: notification.location,
-                timestamp: notification.fullTime
-            });
-            
-            // If not connected, try to reconnect first
-            if (!isConnectedToDispatch) {
-                console.log('⚠️ Not connected - attempting immediate reconnection...');
-                await testRailwayConnection();
-                
-                // If still not connected after immediate test
-                if (!isConnectedToDispatch) {
-                    console.log('❌ Immediate reconnection failed - queuing notification');
-                    queueNotificationForRailway(notification);
-                    showMessage('statusMessage', '📱 Railway offline - notification queued for retry', 'warning');
-                    return;
-                }
-            }
-            
-            let success = false;
-            
-            // Try /api/notifications endpoint first
-            try {
-                console.log(`📡 Sending to: ${RAILWAY_API_URL}/api/notifications`);
-                
-                const requestBody = {
-                    id: notification.id,
-                    driver: notification.driver,
-                    status: notification.status,
-                    location: notification.location,
-                    timestamp: notification.fullTime,
-                    estimatedArrival: notification.estimatedArrival
-                };
-                
-                console.log('📤 Request body:', requestBody);
-                
-                const response = await fetch(`${RAILWAY_API_URL}/api/notifications`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(requestBody)
-                });
-                
-                console.log(`📨 Railway response: ${response.status} ${response.statusText}`);
-                
-                if (response.ok) {
-                    const result = await response.json();
-                    console.log('✅ Railway API SUCCESS:', result);
-                    success = true;
-                    
-                    // Update last successful connection time
-                    lastSuccessfulConnection = new Date();
-                    
-                    showMessage('statusMessage', '✅ Notification sent to Railway successfully!', 'success');
-                } else {
-                    const errorText = await response.text();
-                    console.log(`❌ Railway API error: ${response.status} - ${errorText}`);
-                    throw new Error(`API error: ${response.status}`);
-                }
-                
-            } catch (error) {
-                console.log(`❌ /api/notifications failed:`, error.message);
-                
-                // If network error, Railway might have gone to sleep
-                if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-                    console.log('🌐 Network error detected - Railway may be sleeping');
-                    updateConnectionStatus('railway_sleeping');
-                    isConnectedToDispatch = false;
-                }
-                
-                // Queue the notification for retry
-                queueNotificationForRailway(notification);
-                showMessage('statusMessage', '⚠️ Railway connection failed - notification queued for retry', 'warning');
+        
+        function returnDriver(driverId) {
+            const driver = drivers.find(d => d.driverId === driverId && d.status === 'out');
+            if (driver) {
+                driver.status = 'returned';
+                driver.returnTime = new Date();
+                updateDriversList();
+                alert('Driver marked as returned!');
             }
         }
-
-        function queueNotificationForRailway(notification) {
-            let queuedNotifications = JSON.parse(localStorage.getItem('railwayQueue') || '[]');
-            queuedNotifications.push(notification);
-            localStorage.setItem('railwayQueue', JSON.stringify(queuedNotifications));
-            console.log('📝 Notification queued for Railway delivery');
-        }
-
-        function queueNotificationForLater(notification) {
-            let queuedNotifications = JSON.parse(localStorage.getItem('queuedNotifications') || '[]');
-            queuedNotifications.push(notification);
-            localStorage.setItem('queuedNotifications', JSON.stringify(queuedNotifications));
-            console.log('📝 Notification queued for later delivery');
-        }
-
-        async function sendQueuedNotifications() {
-            const queuedNotifications = JSON.parse(localStorage.getItem('railwayQueue') || '[]');
+        
+        function updateDriversList() {
+            const driversList = document.getElementById('driversList');
             
-            if (queuedNotifications.length === 0) {
+            if (drivers.length === 0) {
+                driversList.innerHTML = '<p>No drivers checked in yet.</p>';
                 return;
             }
             
-            console.log(`📤 Sending ${queuedNotifications.length} queued notifications to Railway...`);
-            
-            const successfulSends = [];
-            
-            for (const notification of queuedNotifications) {
-                try {
-                    let sent = false;
-                    
-                    // Try Railway Socket.IO first
-                    if (socket && socket.connected) {
-                        socket.emit('driver-notification', {
-                            id: notification.id,
-                            driver: notification.driver,
-                            status: notification.status,
-                            location: notification.location,
-                            timestamp: notification.fullTime,
-                            estimatedArrival: notification.estimatedArrival
-                        });
-                        successfulSends.push(notification);
-                        sent = true;
+            driversList.innerHTML = drivers.map(driver => `
+                <div class="driver-item">
+                    <strong>${driver.name}</strong> (ID: ${driver.driverId})<br>
+                    Vehicle: ${driver.vehicle}<br>
+                    Checked in: ${driver.checkInTime.toLocaleString()}<br>
+                    Status: <span class="status-${driver.status}">${driver.status.toUpperCase()}</span><br>
+                    ${driver.status === 'out' ? 
+                        `<button onclick="returnDriver('${driver.driverId}')">Mark as Returned</button>` : 
+                        `Returned: ${driver.returnTime.toLocaleString()}`
                     }
-                    
-                    // Try Railway HTTP API if Socket.IO failed
-                    if (!sent) {
-                        const response = await fetch(`${RAILWAY_API_URL}/api/driver/notification`, {
-                            method: 'POST',
-                            headers: { 
-                                'Content-Type': 'application/json',
-                                'Accept': 'application/json'
-                            },
-                            mode: 'cors',
-                            body: JSON.stringify({
-                                id: notification.id,
-                                driver: notification.driver,
-                                status: notification.status,
-                                location: notification.location,
-                                timestamp: notification.fullTime,
-                                estimatedArrival: notification.estimatedArrival
-                            })
-                        });
-                        
-                        if (response.ok) {
-                            successfulSends.push(notification);
-                        }
-                    }
-                } catch (error) {
-                    console.log('❌ Failed to send queued notification to Railway:', error);
-                }
-            }
-            
-            // Remove successfully sent notifications from queue
-            if (successfulSends.length > 0) {
-                const remainingQueue = queuedNotifications.filter(n => 
-                    !successfulSends.some(s => s.id === n.id)
-                );
-                localStorage.setItem('railwayQueue', JSON.stringify(remainingQueue));
-                console.log(`✅ Sent ${successfulSends.length} notifications to Railway`);
-                
-                if (remainingQueue.length === 0) {
-                    showMessage('statusMessage', '✅ All queued notifications sent to Railway!', 'success');
-                }
-            }
+                </div>
+            `).join('');
         }
-
-        function saveHistory() {
-            if (currentDriver) {
-                localStorage.setItem('notifications_' + currentDriver, JSON.stringify(notifications));
-            }
-        }
-
-        function loadHistory() {
-            if (currentDriver) {
-                const saved = localStorage.getItem('notifications_' + currentDriver);
-                if (saved) {
-                    try {
-                        const savedNotifications = JSON.parse(saved);
-                        // Only keep today's notifications
-                        const today = new Date().toDateString();
-                        notifications = savedNotifications.filter(n => 
-                            new Date(n.fullTime).toDateString() === today
-                        );
-                        console.log('✅ Loaded', notifications.length, 'notifications from today');
-                    } catch (error) {
-                        console.error('Error loading history:', error);
-                        notifications = [];
-                    }
-                } else {
-                    notifications = [];
-                }
-            }
-        }
-
-        function displayHistory() {
-            const historyContainer = document.getElementById('notificationHistory');
-            
-            if (notifications.length === 0) {
-                historyContainer.innerHTML = '<div class="history-item">No notifications sent yet</div>';
-                return;
-            }
-            
-            const historyHTML = notifications.map(notification => {
-                const icon = notification.status === 'arrived' ? '✅' : '🕐';
-                const statusText = notification.status === 'arrived' ? 'Arrived at warehouse' : '30 minutes away';
-                return `
-                    <div class="history-item">
-                        ${icon} ${notification.time} - ${statusText}
-                        <br><small style="color: #666;">${notification.date} • Dispatch notified</small>
-                    </div>
-                `;
-            }).join('');
-            
-            historyContainer.innerHTML = historyHTML;
-        }
-
-        function showMessage(elementId, message, type) {
-            const element = document.getElementById(elementId);
-            if (element) {
-                element.innerHTML = `<div class="message ${type}">${message}</div>`;
-                
-                // Auto-hide success messages after 4 seconds
-                if (type === 'success') {
-                    setTimeout(() => {
-                        element.innerHTML = '';
-                    }, 4000);
-                }
-            }
-        }
-
-        // Handle Enter key for quick login
-        document.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                const loginScreen = document.getElementById('loginScreen');
-                if (!loginScreen.classList.contains('hidden')) {
-                    startApp();
-                }
-            }
-        });
-
-        // Handle page visibility (when user comes back to app)
-        document.addEventListener('visibilitychange', function() {
-            if (!document.hidden && currentDriver) {
-                updateTime();
-                
-                // Try to reconnect to Railway if disconnected
-                if (!isConnectedToDispatch) {
-                    console.log('🔄 App resumed - attempting Railway reconnection...');
-                    initializeDispatchConnection();
-                }
-                
-                // Send queued notifications if connected to Railway
-                if (isConnectedToDispatch) {
-                    sendQueuedNotifications();
-                }
-                
-                console.log('✅ App resumed for driver:', currentDriver);
-            }
-        });
-
-        // Monitor Railway connection status and retry
-        setInterval(() => {
-            if (!isConnectedToDispatch) {
-                console.log('🔄 Checking Railway connection...');
-                initializeDispatchConnection();
-            }
-        }, 60000); // Check every 60 seconds
-
-        // Cleanup on page unload
-        window.addEventListener('beforeunload', function() {
-            if (watchId) {
-                navigator.geolocation.clearWatch(watchId);
-            }
-        });
-
-        // Show app is working in console
-        console.log('🚀 Driver App System Status: RAILWAY PRODUCTION READY');
-        console.log('🚂 Railway.app integration: ✅');
-        console.log('🍃 MongoDB Atlas connection: ✅');
-        console.log('🔌 WebSocket + HTTP fallback: ✅');
-        console.log('💾 Queue system for Railway: ✅');
-        console.log('🕐 Real-time clock: ✅');
-        console.log('📍 GPS integration: ✅');
-        console.log('🎯 Cooldown protection: ✅');
-        console.log('🔄 Auto Railway reconnection: ✅');
     </script>
 </body>
 </html>
