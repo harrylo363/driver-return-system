@@ -1566,7 +1566,7 @@
                 const actionButton = getActionButton(item);
                 
                 return `
-                    <div class="activity-item" data-id="${item._id}" onclick="focusOnDriver('${item._id}')">
+                    <div class="activity-item" data-id="${item._id}" onclick="window.focusOnDriver('${item._id}')">
                         <div class="activity-icon ${iconClass}">${icon}</div>
                         <div class="activity-content">
                             <div class="activity-title">${item.driver} - ${getStatusText(item.status)}</div>
@@ -1630,7 +1630,7 @@
         // Get action button for activity item
         function getActionButton(item) {
             if (item.status === 'arrived' && !item.isRead) {
-                return `<button class="btn check-in-btn" onclick="checkInDriver(event, '${item._id}', '${item.driver}')">Check In</button>`;
+                return `<button class="btn check-in-btn" onclick="event.stopPropagation(); window.checkInDriver(event, '${item._id}', '${item.driver.replace(/'/g, "\\'")}')">Check In</button>`;
             } else if (item.estimatedArrival && item.status === 'en-route') {
                 return `<span class="badge badge-warning">ETA: ${item.estimatedArrival}</span>`;
             } else if (item.status === 'completed') {
@@ -1643,10 +1643,32 @@
         
         // Check in driver
         async function checkInDriver(event, notificationId, driverName) {
-            event.stopPropagation(); // Prevent triggering the parent onclick
+            if (event) {
+                event.stopPropagation(); // Prevent triggering the parent onclick
+            }
             
             if (confirm(`Check in ${driverName}?`)) {
                 try {
+                    // For demo data, just update locally
+                    if (notificationId.startsWith('demo-')) {
+                        const driver = activityData.find(d => d._id === notificationId);
+                        if (driver) {
+                            driver.status = 'completed';
+                            driver.isRead = true;
+                            
+                            // Remove marker from map
+                            if (markers[notificationId]) {
+                                map.removeLayer(markers[notificationId]);
+                                delete markers[notificationId];
+                            }
+                            
+                            applyFilters();
+                            showToast(`${driverName} has been checked in`, 'success');
+                        }
+                        return;
+                    }
+                    
+                    // For real data, call API
                     const response = await fetch(`${API_URL}/notifications/${notificationId}/read`, {
                         method: 'PATCH'
                     });
@@ -1668,6 +1690,9 @@
                 }
             }
         }
+        
+        // Make functions globally accessible
+        window.checkInDriver = checkInDriver;
         
         // Filter activity
         function filterActivity(filter, button) {
@@ -1871,6 +1896,19 @@
             if (connectionCheckInterval) clearInterval(connectionCheckInterval);
             if (simulationInterval) clearInterval(simulationInterval);
         });
+        // Make all functions globally accessible for onclick handlers
+        window.filterActivity = filterActivity;
+        window.filterByWarehouse = filterByWarehouse;
+        window.refreshDashboard = refreshDashboard;
+        window.centerMap = centerMap;
+        window.toggleGeofences = toggleGeofences;
+        window.loadDemoData = loadDemoData;
+        window.showNewNotification = showNewNotification;
+        window.showInspectionForm = showInspectionForm;
+        window.viewReports = viewReports;
+        window.manageDrivers = manageDrivers;
+        window.exportActivity = exportActivity;
+        window.focusOnDriver = focusOnDriver;
     </script>
 </body>
 </html>
