@@ -1141,6 +1141,22 @@
             showToast(geofencesVisible ? 'Geofences visible' : 'Geofences hidden', 'info');
         }
         
+        // Center map view
+        function centerMap() {
+            if (currentWarehouse !== 'all' && WAREHOUSES[currentWarehouse]) {
+                map.setView(WAREHOUSES[currentWarehouse], 11);
+            } else {
+                // Center on Miami or fit all markers
+                if (Object.keys(markers).length > 0) {
+                    const group = new L.featureGroup(Object.values(markers));
+                    map.fitBounds(group.getBounds().pad(0.1));
+                } else {
+                    map.setView(MIAMI_CENTER, 10);
+                }
+            }
+            showToast('Map view centered', 'info');
+        }
+        
         // Load demo data
         async function loadDemoData() {
             showToast('Generating demo drivers...', 'info');
@@ -1881,6 +1897,7 @@
             if (connectionCheckInterval) clearInterval(connectionCheckInterval);
             if (simulationInterval) clearInterval(simulationInterval);
         });
+        
         // Make all functions globally accessible for onclick handlers
         window.filterActivity = filterActivity;
         window.filterByWarehouse = filterByWarehouse;
@@ -1893,10 +1910,12 @@
         window.viewReports = viewReports;
         window.manageDrivers = manageDrivers;
         window.exportActivity = exportActivity;
-        window.focusOnDriver = focusOnDriver;ports = viewReports;
-        window.manageDrivers = manageDrivers;
-        window.exportActivity = exportActivity;
         window.focusOnDriver = focusOnDriver;
-    </script>
-</body>
-</html>
+        
+        // Initialize everything when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeMap();
+            initializeDashboard();
+            startLiveUpdates();
+            updateClock();
+        });
