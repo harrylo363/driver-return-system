@@ -1085,21 +1085,6 @@
             'David Martinez', 'Emily Anderson', 'Chris Thompson', 'Amanda White'
         ];
         
-        // Initialize Dashboard
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeMap();
-            initializeDashboard();
-            startLiveUpdates();
-            updateClock();
-            
-            // Show demo data prompt
-            setTimeout(() => {
-                if (activityData.length === 0) {
-                    showToast('Click "Demo Data" to load sample drivers', 'info');
-                }
-            }, 2000);
-        });
-        
         // Initialize Map
         function initializeMap() {
             // Create map centered on Miami
@@ -1906,6 +1891,9 @@
         window.showNewNotification = showNewNotification;
         window.showInspectionForm = showInspectionForm;
         window.viewReports = viewReports;
+        window.manageDrivers = manageDrivers;
+        window.exportActivity = exportActivity;
+        window.focusOnDriver = focusOnDriver;ports = viewReports;
         window.manageDrivers = manageDrivers;
         window.exportActivity = exportActivity;
         window.focusOnDriver = focusOnDriver;
