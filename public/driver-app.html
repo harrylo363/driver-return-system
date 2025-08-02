@@ -593,8 +593,8 @@
                 try {
                     const notification = new Notification('Driver Portal', {
                         body: 'You will now receive dispatch updates',
-                        icon: '/icon-192x192.png',
-                        badge: '/icon-72x72.png',
+                        icon: 'https://img.icons8.com/color/192/truck.png',
+                        badge: 'https://img.icons8.com/color/72/truck.png',
                         requireInteraction: false,
                         tag: 'test-notification',
                         vibrate: [200, 100, 200]
@@ -614,8 +614,8 @@
                         navigator.serviceWorker.ready.then(registration => {
                             registration.showNotification('Driver Portal', {
                                 body: 'You will now receive dispatch updates',
-                                icon: '/icon-192x192.png',
-                                badge: '/icon-72x72.png'
+                                icon: 'https://img.icons8.com/color/192/truck.png',
+                                badge: 'https://img.icons8.com/color/72/truck.png'
                             });
                         });
                     }
@@ -886,8 +886,8 @@
                 // Try standard notification first
                 const notification = new Notification('Status Updated', {
                     body: `Your status "${status}" has been sent to dispatch`,
-                    icon: '/icon-192x192.png',
-                    badge: '/icon-72x72.png',
+                    icon: 'https://img.icons8.com/color/192/truck.png',
+                    badge: 'https://img.icons8.com/color/72/truck.png',
                     requireInteraction: false,
                     tag: 'status-update',
                     vibrate: [200, 100, 200]
@@ -907,8 +907,8 @@
                     navigator.serviceWorker.ready.then(registration => {
                         registration.showNotification('Status Updated', {
                             body: `Your status "${status}" has been sent to dispatch`,
-                            icon: '/icon-192x192.png',
-                            badge: '/icon-72x72.png',
+                            icon: 'https://img.icons8.com/color/192/truck.png',
+                            badge: 'https://img.icons8.com/color/72/truck.png',
                             vibrate: [200, 100, 200],
                             tag: 'status-update'
                         });
