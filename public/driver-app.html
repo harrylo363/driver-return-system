@@ -425,8 +425,11 @@
         // Railway.app production configuration
         const RAILWAY_API_URL = 'https://driver-return-system-production.up.railway.app';
         
-        // Simple test mode for debugging
+        // Connection monitoring
         let debugMode = true;
+        let connectionCheckInterval = null;
+        let lastSuccessfulConnection = null;
+        let connectionAttempts = 0;
         
         // Real dispatch connection
         let isConnectedToDispatch = false;
@@ -517,8 +520,9 @@
         }
 
         async function testRailwayConnection() {
-            console.log('🔍 Testing Railway connection...');
+            console.log(`🔍 Testing Railway connection (attempt ${connectionAttempts})...`);
             console.log('Railway URL:', RAILWAY_API_URL);
+            console.log('Time:', new Date().toLocaleTimeString());
             
             try {
                 console.log(`Testing: ${RAILWAY_API_URL}/api/health`);
@@ -537,6 +541,9 @@
                     const data = await response.json();
                     console.log('✅ Railway health check SUCCESS:', data);
                     
+                    lastSuccessfulConnection = new Date();
+                    connectionAttempts = 0; // Reset counter on success
+                    
                     // Test the notifications endpoint
                     await testNotificationsEndpoint();
                     
@@ -546,7 +553,14 @@
                 
             } catch (error) {
                 console.log('❌ Railway health check failed:', error.message);
-                updateConnectionStatus('railway_down');
+                
+                if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                    console.log('🌐 Network error - Railway may be sleeping or unreachable');
+                    updateConnectionStatus('railway_sleeping');
+                } else {
+                    console.log('🔴 Railway server error');
+                    updateConnectionStatus('railway_down');
+                }
             }
         }
 
@@ -587,13 +601,19 @@
                 case 'connected':
                     statusElement.className = 'status-indicator status-connected';
                     statusElement.textContent = '🟢 RAILWAY CONNECTED';
-                    detailsElement.textContent = 'Connected to Railway deployment - notifications sent to MongoDB Atlas in real-time';
+                    detailsElement.textContent = `Connected to Railway deployment - Last check: ${new Date().toLocaleTimeString()}`;
                     isConnectedToDispatch = true;
                     break;
                 case 'disconnected':
                     statusElement.className = 'status-indicator status-disconnected';
                     statusElement.textContent = '🔴 RAILWAY OFFLINE';
-                    detailsElement.textContent = 'Railway connection lost - notifications queued until connection restored';
+                    detailsElement.textContent = 'Railway connection lost - attempting reconnection every 30 seconds';
+                    isConnectedToDispatch = false;
+                    break;
+                case 'railway_sleeping':
+                    statusElement.className = 'status-indicator status-demo';
+                    statusElement.textContent = '😴 RAILWAY SLEEPING';
+                    detailsElement.textContent = 'Railway app is sleeping (free tier) - will wake up and reconnect automatically';
                     isConnectedToDispatch = false;
                     break;
                 case 'railway_down':
@@ -617,7 +637,7 @@
                 case 'connecting':
                     statusElement.className = 'status-indicator status-demo';
                     statusElement.textContent = '🔄 TESTING RAILWAY';
-                    detailsElement.textContent = 'Testing Railway endpoints and connectivity...';
+                    detailsElement.textContent = `Testing Railway endpoints... (attempt ${connectionAttempts})`;
                     isConnectedToDispatch = false;
                     break;
             }
@@ -899,11 +919,18 @@
                 timestamp: notification.fullTime
             });
             
+            // If not connected, try to reconnect first
             if (!isConnectedToDispatch) {
-                console.log('⚠️ Not connected to Railway - storing locally');
-                queueNotificationForRailway(notification);
-                showMessage('statusMessage', '📱 Notification saved locally (Railway not connected)', 'warning');
-                return;
+                console.log('⚠️ Not connected - attempting immediate reconnection...');
+                await testRailwayConnection();
+                
+                // If still not connected after immediate test
+                if (!isConnectedToDispatch) {
+                    console.log('❌ Immediate reconnection failed - queuing notification');
+                    queueNotificationForRailway(notification);
+                    showMessage('statusMessage', '📱 Railway offline - notification queued for retry', 'warning');
+                    return;
+                }
             }
             
             let success = false;
@@ -939,6 +966,9 @@
                     console.log('✅ Railway API SUCCESS:', result);
                     success = true;
                     
+                    // Update last successful connection time
+                    lastSuccessfulConnection = new Date();
+                    
                     showMessage('statusMessage', '✅ Notification sent to Railway successfully!', 'success');
                 } else {
                     const errorText = await response.text();
@@ -949,42 +979,16 @@
             } catch (error) {
                 console.log(`❌ /api/notifications failed:`, error.message);
                 
-                // Try alternative endpoint
-                try {
-                    console.log(`📡 Trying alternative: ${RAILWAY_API_URL}/api/driver/notification`);
-                    
-                    const response = await fetch(`${RAILWAY_API_URL}/api/driver/notification`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            id: notification.id,
-                            driver: notification.driver,
-                            status: notification.status,
-                            location: notification.location,
-                            timestamp: notification.fullTime,
-                            estimatedArrival: notification.estimatedArrival
-                        })
-                    });
-                    
-                    if (response.ok) {
-                        const result = await response.json();
-                        console.log('✅ Alternative endpoint SUCCESS:', result);
-                        success = true;
-                        showMessage('statusMessage', '✅ Notification sent via alternative endpoint!', 'success');
-                    }
-                    
-                } catch (altError) {
-                    console.log('❌ Alternative endpoint also failed:', altError.message);
+                // If network error, Railway might have gone to sleep
+                if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                    console.log('🌐 Network error detected - Railway may be sleeping');
+                    updateConnectionStatus('railway_sleeping');
+                    isConnectedToDispatch = false;
                 }
-            }
-            
-            if (!success) {
-                console.log('❌ All Railway endpoints failed - storing locally');
+                
+                // Queue the notification for retry
                 queueNotificationForRailway(notification);
-                showMessage('statusMessage', '⚠️ Railway API failed - notification queued for retry', 'warning');
+                showMessage('statusMessage', '⚠️ Railway connection failed - notification queued for retry', 'warning');
             }
         }
 
