@@ -432,20 +432,8 @@
             border-radius: 8px;
             border: 1px solid #ffeaa7;
         }
-        
-        .status-indicator {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            margin-right: 8px;
-        }
-        
-        .status-good { background: #28a745; }
-        .status-issue { background: #dc3545; }
-        .status-na { background: #6c757d; }
 
-        /* iPhone Notification Styles */
+        /* iOS Notification Styles */
         .ios-notification-overlay {
             position: fixed;
             top: 0;
@@ -709,6 +697,7 @@
             <div class="filter-controls">
                 <button class="refresh-btn" onclick="loadNotifications()">🔄 Refresh</button>
                 <button class="refresh-btn" onclick="clearAllCheckIns()" style="background: #dc3545;">🗑️ Clear Check-ins</button>
+                <button class="refresh-btn" onclick="simulateArrival()">🚚 Simulate Arrival</button>
                 <button class="filter-btn active" onclick="filterNotifications('all', this)">All</button>
                 <button class="filter-btn" onclick="filterNotifications('en-route', this)">En Route</button>
                 <button class="filter-btn" onclick="filterNotifications('arrived', this)">Arrived</button>
@@ -872,14 +861,14 @@
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script>
-        let socket = null;
         let notifications = [];
         let checkedInDrivers = new Set();
         let currentFilter = 'all';
         let currentInspectionDriver = null;
+
+        // Demo driver names for simulation
+        const demoDrivers = ['John Smith', 'Sarah Johnson', 'Mike Davis', 'Lisa Brown', 'Tom Wilson', 'Maria Garcia'];
 
         // iPhone-Compatible Notification Manager
         class NotificationManager {
@@ -1089,41 +1078,15 @@
 
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', function() {
-            initializeSocket();
             loadNotifications();
             loadCheckedInStatus();
             checkDateChange();
             setInterval(updateTime, 1000);
             setInterval(checkDateChange, 60000);
+
+            // Request notification permission
+            NotificationManager.requestPermission();
         });
-
-        function initializeSocket() {
-            socket = io();
-            
-            socket.on('connect', () => {
-                console.log('Connected to server');
-                socket.emit('join-room', { role: 'dispatcher' });
-                showMessage('Connected to real-time updates', 'success');
-            });
-
-            socket.on('driver-notification', (data) => {
-                console.log('New notification received:', data);
-                addNotification(data);
-                showMessage(`New update from ${data.driver}: ${data.status}`, 'success');
-                
-                // Send push notification
-                NotificationManager.sendDriverNotification(
-                    data.driver,
-                    data.status,
-                    data.location,
-                    data.estimatedArrival
-                );
-            });
-
-            socket.on('disconnect', () => {
-                console.log('Disconnected from server');
-            });
-        }
 
         function checkDateChange() {
             const today = new Date().toDateString();
@@ -1143,27 +1106,10 @@
             }
         }
 
-        async function loadNotifications() {
-            try {
-                showMessage('Loading notifications...', 'info');
-                
-                const response = await fetch('/api/notifications/simple-list');
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    notifications = data.notifications || [];
-                    displayNotifications();
-                    updateStatistics();
-                    showMessage(`✅ Loaded ${notifications.length} notifications`, 'success');
-                } else {
-                    console.log('API endpoint not found, showing demo data');
-                    showDemoNotifications();
-                }
-            } catch (error) {
-                console.error('Error loading notifications:', error);
-                showMessage('⚠️ Connection error - showing demo data', 'error');
-                showDemoNotifications();
-            }
+        function loadNotifications() {
+            // Start with demo data
+            showDemoNotifications();
+            showMessage('📝 Showing demo notifications - Use "Simulate Arrival" to test features', 'info');
         }
 
         function showDemoNotifications() {
@@ -1173,7 +1119,7 @@
                     _id: 'demo1',
                     driver: 'John Smith',
                     status: 'arrived',
-                    location: '40.7128, -74.0060',
+                    location: '40.7128, -74.0060 (Warehouse District)',
                     timestamp: new Date(now.getTime() - 300000).toISOString(),
                     estimatedArrival: 'At warehouse'
                 },
@@ -1181,7 +1127,7 @@
                     _id: 'demo2',
                     driver: 'Sarah Johnson',
                     status: '30 minutes away',
-                    location: '40.7580, -73.9855',
+                    location: '40.7580, -73.9855 (Highway 95)',
                     timestamp: new Date(now.getTime() - 180000).toISOString(),
                     estimatedArrival: new Date(now.getTime() + 1800000).toLocaleTimeString()
                 },
@@ -1189,19 +1135,44 @@
                     _id: 'demo3',
                     driver: 'Mike Davis',
                     status: 'arrived',
-                    location: '40.7589, -73.9851',
+                    location: '40.7589, -73.9851 (Loading Dock)',
                     timestamp: new Date(now.getTime() - 600000).toISOString(),
                     estimatedArrival: 'At warehouse'
                 }
             ];
             displayNotifications();
             updateStatistics();
-            showMessage('📝 Showing demo notifications - connect to server for real data', 'info');
+        }
+
+        function simulateArrival() {
+            const randomDriver = demoDrivers[Math.floor(Math.random() * demoDrivers.length)];
+            const isArrival = Math.random() > 0.5;
+            
+            const newNotification = {
+                _id: Date.now().toString(),
+                driver: randomDriver,
+                status: isArrival ? 'arrived' : '30 minutes away',
+                location: isArrival ? 'Warehouse Loading Dock' : 'Highway 101, Mile 23',
+                timestamp: new Date().toISOString(),
+                estimatedArrival: isArrival ? 'At warehouse' : new Date(Date.now() + 1800000).toLocaleTimeString()
+            };
+
+            addNotification(newNotification);
+            
+            // Send notification
+            NotificationManager.sendDriverNotification(
+                newNotification.driver,
+                newNotification.status,
+                newNotification.location,
+                newNotification.estimatedArrival
+            );
+
+            showMessage(`✅ Simulated ${newNotification.status} notification for ${randomDriver}`, 'success');
         }
 
         function addNotification(data) {
             notifications.unshift({
-                _id: data.id || Date.now().toString(),
+                _id: data.id || data._id || Date.now().toString(),
                 driver: data.driver,
                 status: data.status,
                 location: data.location,
@@ -1299,7 +1270,7 @@
             showMessage(`Filtered to show: ${type === 'all' ? 'all notifications' : type + ' notifications'}`, 'info');
         }
 
-        // NEW INSPECTION FUNCTIONALITY
+        // Inspection functionality
         function startInspection(notificationId, driverName) {
             const checkbox = document.getElementById(`checkin-${notificationId}`);
             
@@ -1343,7 +1314,7 @@
             currentInspectionDriver = null;
         }
 
-        async function completeInspection() {
+        function completeInspection() {
             if (!currentInspectionDriver) {
                 showMessage('Error: No driver selected for inspection', 'error');
                 return;
@@ -1359,18 +1330,9 @@
             }
 
             try {
-                // Generate PDF report
-                const pdfBlob = await generateInspectionPDF(formData);
-                
-                // Save inspection data
-                await saveInspectionReport(formData, pdfBlob);
-                
                 // Complete the check-in
                 checkedInDrivers.add(currentInspectionDriver.id);
                 saveCheckedInStatus();
-                
-                // Send check-in status
-                sendCheckInStatus(currentInspectionDriver.id, currentInspectionDriver.name, true);
                 
                 // Update UI
                 displayNotifications();
@@ -1420,156 +1382,6 @@
             return data;
         }
 
-        async function generateInspectionPDF(data) {
-            return new Promise((resolve) => {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-
-                // Header
-                doc.setFontSize(20);
-                doc.setFont(undefined, 'bold');
-                doc.text('VEHICLE INSPECTION REPORT', 105, 20, { align: 'center' });
-
-                // Driver info
-                doc.setFontSize(12);
-                doc.setFont(undefined, 'normal');
-                doc.text(`Driver: ${data.driver}`, 20, 35);
-                doc.text(`Check-in Time: ${data.checkInTime}`, 20, 45);
-                doc.text(`Report Generated: ${new Date().toLocaleString()}`, 20, 55);
-
-                // Vehicle Information
-                doc.setFont(undefined, 'bold');
-                doc.text('VEHICLE INFORMATION', 20, 75);
-                doc.setFont(undefined, 'normal');
-                doc.text(`Tractor Number: ${data.tractorNumber || 'N/A'}`, 20, 85);
-                doc.text(`Trailer Number: ${data.trailerNumber || 'N/A'}`, 20, 95);
-                doc.text(`Moffett Number: ${data.moffettNumber || 'N/A'}`, 20, 105);
-                doc.text(`Odometer: ${data.odometerReading || 'N/A'}`, 120, 85);
-                doc.text(`Fuel Level: ${data.fuelLevel || 'N/A'}`, 120, 95);
-
-                // Safety Inspection
-                doc.setFont(undefined, 'bold');
-                doc.text('SAFETY INSPECTION', 20, 125);
-                doc.setFont(undefined, 'normal');
-                let yPos = 135;
-                const safetyItems = ['tires', 'lights', 'brakes', 'mirrors', 'horn'];
-                safetyItems.forEach(item => {
-                    const checked = data.safetyChecks.includes(item) ? '✓' : '✗';
-                    const status = data.safetyChecks.includes(item) ? 'PASS' : 'FAIL';
-                    doc.text(`${checked} ${item.toUpperCase()}: ${status}`, 20, yPos);
-                    yPos += 10;
-                });
-
-                // Equipment Inspection
-                doc.setFont(undefined, 'bold');
-                doc.text('EQUIPMENT INSPECTION', 20, yPos + 10);
-                doc.setFont(undefined, 'normal');
-                yPos += 20;
-                const equipmentItems = ['moffett', 'hydraulics', 'chains', 'tarps', 'landingGear', 'fifthWheel'];
-                equipmentItems.forEach(item => {
-                    const checked = data.equipmentChecks.includes(item) ? '✓' : '✗';
-                    const status = data.equipmentChecks.includes(item) ? 'PASS' : 'FAIL';
-                    doc.text(`${checked} ${item.toUpperCase()}: ${status}`, 20, yPos);
-                    yPos += 10;
-                });
-
-                // Issues and Notes
-                if (data.damageFound || data.repairsNeeded !== '' || data.deliveryNotes || data.additionalComments) {
-                    doc.addPage();
-                    doc.setFont(undefined, 'bold');
-                    doc.text('ISSUES & NOTES', 20, 20);
-                    doc.setFont(undefined, 'normal');
-                    
-                    let notesY = 35;
-                    
-                    if (data.repairsNeeded && data.repairsNeeded !== '') {
-                        doc.text(`Repairs Needed: ${data.repairsNeeded}`, 20, notesY);
-                        notesY += 15;
-                    }
-                    
-                    if (data.damageFound) {
-                        doc.text('Damage/Issues Found:', 20, notesY);
-                        const damageLines = doc.splitTextToSize(data.damageFound, 170);
-                        doc.text(damageLines, 20, notesY + 10);
-                        notesY += (damageLines.length * 5) + 20;
-                    }
-                    
-                    if (data.deliveryNotes) {
-                        doc.text('Delivery Notes:', 20, notesY);
-                        const deliveryLines = doc.splitTextToSize(data.deliveryNotes, 170);
-                        doc.text(deliveryLines, 20, notesY + 10);
-                        notesY += (deliveryLines.length * 5) + 20;
-                    }
-                    
-                    if (data.additionalComments) {
-                        doc.text('Additional Comments:', 20, notesY);
-                        const commentLines = doc.splitTextToSize(data.additionalComments, 170);
-                        doc.text(commentLines, 20, notesY + 10);
-                    }
-                }
-
-                // Generate blob
-                const pdfBlob = doc.output('blob');
-                resolve(pdfBlob);
-            });
-        }
-
-        async function saveInspectionReport(data, pdfBlob) {
-            try {
-                // Create filename
-                const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-                const filename = `inspection_${data.driver.replace(/\s+/g, '_')}_${timestamp}.pdf`;
-                
-                // Try to save to server
-                const formData = new FormData();
-                formData.append('inspectionData', JSON.stringify(data));
-                formData.append('pdfFile', pdfBlob, filename);
-                
-                const response = await fetch('/api/inspections/save', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                if (!response.ok) {
-                    throw new Error('Server save failed');
-                }
-                
-                console.log('Inspection report saved to server');
-                
-            } catch (error) {
-                console.log('Server save failed, saving locally:', error);
-                
-                // Fallback: save locally
-                const url = URL.createObjectURL(pdfBlob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `inspection_${data.driver.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.pdf`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                
-                showMessage('Inspection report downloaded locally (server not available)', 'info');
-            }
-        }
-
-        async function sendCheckInStatus(notificationId, driverName, isCheckedIn) {
-            try {
-                await fetch('/api/notifications/checkin', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        notificationId,
-                        driverName,
-                        isCheckedIn,
-                        timestamp: new Date().toISOString()
-                    })
-                });
-            } catch (error) {
-                console.log('Check-in status saved locally (server not available)');
-            }
-        }
-
         function updateStatistics() {
             const total = notifications.length;
             const enRoute = notifications.filter(n => n.status !== 'arrived').length;
@@ -1606,9 +1418,15 @@
         }
 
         function loadCheckedInStatus() {
-            console.log('Clearing check-ins to sync with clean database');
-            checkedInDrivers.clear();
-            localStorage.removeItem('checkedInDrivers');
+            try {
+                const saved = localStorage.getItem('checkedInDrivers');
+                if (saved) {
+                    checkedInDrivers = new Set(JSON.parse(saved));
+                }
+            } catch (error) {
+                console.log('Error loading checked-in status:', error);
+                checkedInDrivers = new Set();
+            }
             
             const today = new Date().toDateString();
             localStorage.setItem('lastCheckInDate', today);
