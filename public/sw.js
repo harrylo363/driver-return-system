@@ -1,44 +1,35 @@
-// Service Worker for Push Notifications
-self.addEventListener('install', (event) => {
-  console.log('Service Worker installed');
-  self.skipWaiting();
+// sw.js - Service Worker for Driver Portal notifications
+
+self.addEventListener('install', event => {
+    console.log('Service Worker installed');
+    self.skipWaiting();
 });
 
-self.addEventListener('activate', (event) => {
-  console.log('Service Worker activated');
-  event.waitUntil(clients.claim());
+self.addEventListener('activate', event => {
+    console.log('Service Worker activated');
+    event.waitUntil(clients.claim());
 });
 
-// Handle push notifications
-self.addEventListener('push', (event) => {
-  const options = {
-    body: event.data ? event.data.text() : 'New notification from Driver Portal',
-    icon: '/icon-192x192.png',
-    badge: '/icon-72x72.png',
-    vibrate: [200, 100, 200],
-    data: {
-      dateOfArrival: Date.now(),
-      primaryKey: 1
-    },
-    actions: [
-      {
-        action: 'view',
-        title: 'View',
-        icon: '/icon-72x72.png'
-      }
-    ]
-  };
+self.addEventListener('push', event => {
+    const options = {
+        body: event.data ? event.data.text() : 'New notification from dispatch',
+        icon: 'https://img.icons8.com/color/192/truck.png',
+        badge: 'https://img.icons8.com/color/72/truck.png',
+        vibrate: [200, 100, 200],
+        data: {
+            dateOfArrival: Date.now(),
+            primaryKey: 1
+        }
+    };
 
-  event.waitUntil(
-    self.registration.showNotification('Driver Portal Update', options)
-  );
+    event.waitUntil(
+        self.registration.showNotification('Driver Portal', options)
+    );
 });
 
-// Handle notification clicks
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-  
-  event.waitUntil(
-    clients.openWindow('/')
-  );
+self.addEventListener('notificationclick', event => {
+    event.notification.close();
+    event.waitUntil(
+        clients.openWindow('/')
+    );
 });
