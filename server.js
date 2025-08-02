@@ -26,9 +26,9 @@ const notificationSchema = new mongoose.Schema({
 
 const Notification = mongoose.model('Notification', notificationSchema);
 
-// Root route - serve index.html from public folder
+// Root route - serve driver.html from public folder
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, 'public', 'driver.html'));
 });
 
 // API Routes
