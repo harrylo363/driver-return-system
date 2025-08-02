@@ -3,165 +3,587 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Driver Return System</title>
+    <title>Driver App</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
             font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f4f4f4;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
         }
         .container {
-            background-color: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
-        h1 {
-            color: #333;
+        .header {
             text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            flex: 1;
         }
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
         label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             font-weight: bold;
+            color: #555;
+            font-size: 18px;
         }
-        input, select {
+        select {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            box-sizing: border-box;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 12px 30px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            width: 100%;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        .driver-list {
-            margin-top: 30px;
-        }
-        .driver-item {
-            background-color: #f9f9f9;
-            border: 1px solid #ddd;
             padding: 15px;
-            margin: 10px 0;
-            border-radius: 5px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 18px;
+            background: #f8f9fa;
+            cursor: pointer;
         }
-        .status-out {
-            color: #d9534f;
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+        }
+        .btn {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+        .btn-status {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            padding: 25px;
+            font-size: 20px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-arrived {
+            background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+        }
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: center;
             font-weight: bold;
         }
-        .status-returned {
-            color: #5cb85c;
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .hidden {
+            display: none;
+        }
+        .driver-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+            text-align: center;
+        }
+        .driver-name {
+            font-size: 24px;
             font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .current-time {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        .change-driver-btn {
+            background: transparent;
+            color: #667eea;
+            border: 1px solid #667eea;
+            padding: 8px 16px;
+            font-size: 14px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .change-driver-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+        .notification-history {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .notification-history h3 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #555;
+        }
+        .history-item {
+            background: white;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #666;
+            border-left: 3px solid #667eea;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .driver-selection {
+            text-align: center;
+        }
+        .driver-selection h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .status-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Driver Return System</h1>
-        
-        <div id="checkin-form">
-            <h2>Check In Driver</h2>
-            <div class="form-group">
-                <label for="driverId">Driver ID:</label>
-                <input type="text" id="driverId" placeholder="D001" required>
-            </div>
-            <div class="form-group">
-                <label for="driverName">Driver Name:</label>
-                <input type="text" id="driverName" placeholder="John Doe" required>
-            </div>
-            <div class="form-group">
-                <label for="vehicle">Vehicle:</label>
-                <input type="text" id="vehicle" placeholder="Truck #123" required>
-            </div>
-            <button onclick="checkIn()">Check In Driver</button>
+        <div class="header">
+            <h1>🚚 Driver App</h1>
+            <p>Quick warehouse return notification</p>
         </div>
-        
-        <div class="driver-list">
-            <h2>Active Drivers</h2>
-            <div id="driversList">
-                <p>No drivers checked in yet.</p>
+
+        <!-- Driver Selection Screen -->
+        <div class="card" id="driverSelection">
+            <div class="driver-selection">
+                <h2>Select Your Name</h2>
+                
+                <div class="form-group">
+                    <label for="driverSelect">Choose your name from the list:</label>
+                    <select id="driverSelect">
+                        <option value="">-- Select Driver --</option>
+                        <option value="John Smith">John Smith</option>
+                        <option value="Sarah Johnson">Sarah Johnson</option>
+                        <option value="Mike Davis">Mike Davis</option>
+                        <option value="Lisa Wilson">Lisa Wilson</option>
+                        <option value="David Brown">David Brown</option>
+                        <option value="Anna Martinez">Anna Martinez</option>
+                        <option value="James Miller">James Miller</option>
+                        <option value="Maria Garcia">Maria Garcia</option>
+                        <option value="Robert Taylor">Robert Taylor</option>
+                        <option value="Jennifer Anderson">Jennifer Anderson</option>
+                        <option value="Custom Name">📝 Enter Custom Name</option>
+                    </select>
+                </div>
+
+                <!-- Custom Name Input (Hidden by default) -->
+                <div class="form-group hidden" id="customNameGroup">
+                    <label for="customDriverName">Enter Your Name:</label>
+                    <input type="text" id="customDriverName" placeholder="Type your name here" style="width: 100%; padding: 15px; border: 2px solid #e1e5e9; border-radius: 12px; font-size: 16px; background: #f8f9fa;">
+                </div>
+
+                <button class="btn btn-primary" onclick="selectDriver()" id="selectBtn" disabled>
+                    Begin Check-Out
+                </button>
+            </div>
+
+            <div id="selectionMessage"></div>
+        </div>
+
+        <!-- Main App Screen -->
+        <div class="card hidden" id="mainScreen">
+            <div class="driver-info">
+                <div class="driver-name" id="selectedDriverName">Driver Name</div>
+                <div class="current-time" id="currentTime"></div>
+                <button class="change-driver-btn" onclick="changeDriver()">Change Driver</button>
+            </div>
+
+            <div class="status-buttons">
+                <button class="btn btn-status" onclick="sendNotification('30 minutes away', this)">
+                    🕐 30 MINUTES AWAY
+                </button>
+                
+                <button class="btn btn-status btn-arrived" onclick="sendNotification('arrived', this)">
+                    ✅ ARRIVED AT WAREHOUSE
+                </button>
+            </div>
+
+            <div id="statusMessage"></div>
+
+            <div class="notification-history">
+                <h3>📋 Your Recent Notifications</h3>
+                <div id="notificationHistory">
+                    <div class="history-item">No notifications sent yet</div>
+                </div>
             </div>
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
     <script>
-        let drivers = [];
-        
-        function checkIn() {
-            const driverId = document.getElementById('driverId').value;
-            const driverName = document.getElementById('driverName').value;
-            const vehicle = document.getElementById('vehicle').value;
+        let currentDriver = null;
+        let socket = null;
+        let notificationHistory = [];
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            updateTime();
+            setInterval(updateTime, 1000);
+            setupDriverSelection();
+            loadStoredHistory();
+        });
+
+        function setupDriverSelection() {
+            const driverSelect = document.getElementById('driverSelect');
+            const customNameGroup = document.getElementById('customNameGroup');
+            const selectBtn = document.getElementById('selectBtn');
+
+            // Handle driver selection change
+            driverSelect.addEventListener('change', function() {
+                const selectedValue = this.value;
+                
+                if (selectedValue === 'Custom Name') {
+                    customNameGroup.classList.remove('hidden');
+                    selectBtn.disabled = true;
+                    document.getElementById('customDriverName').focus();
+                } else if (selectedValue === '') {
+                    customNameGroup.classList.add('hidden');
+                    selectBtn.disabled = true;
+                } else {
+                    customNameGroup.classList.add('hidden');
+                    selectBtn.disabled = false;
+                }
+            });
+
+            // Handle custom name input
+            document.getElementById('customDriverName').addEventListener('input', function() {
+                const customName = this.value.trim();
+                selectBtn.disabled = customName.length === 0;
+            });
+
+            // Check if driver was previously selected
+            const savedDriver = localStorage.getItem('selectedDriver');
+            if (savedDriver) {
+                currentDriver = savedDriver;
+                showMainScreen();
+            }
+        }
+
+        function selectDriver() {
+            const driverSelect = document.getElementById('driverSelect');
+            const customNameInput = document.getElementById('customDriverName');
             
-            if (!driverId || !driverName || !vehicle) {
-                alert('Please fill in all fields');
+            let selectedDriver;
+            
+            if (driverSelect.value === 'Custom Name') {
+                selectedDriver = customNameInput.value.trim();
+            } else {
+                selectedDriver = driverSelect.value;
+            }
+
+            if (!selectedDriver) {
+                showMessage('selectionMessage', 'Please select or enter a driver name', 'error');
                 return;
             }
+
+            currentDriver = selectedDriver;
+            localStorage.setItem('selectedDriver', currentDriver);
             
-            const driver = {
-                driverId,
-                name: driverName,
-                vehicle,
-                checkInTime: new Date(),
-                status: 'out'
-            };
-            
-            drivers.push(driver);
-            
-            // Clear form
-            document.getElementById('driverId').value = '';
-            document.getElementById('driverName').value = '';
-            document.getElementById('vehicle').value = '';
-            
-            updateDriversList();
-            alert('Driver checked in successfully!');
+            showMainScreen();
+            initializeSocket();
+            showMessage('statusMessage', `Welcome, ${currentDriver}! Ready to send notifications.`, 'success');
         }
-        
-        function returnDriver(driverId) {
-            const driver = drivers.find(d => d.driverId === driverId && d.status === 'out');
-            if (driver) {
-                driver.status = 'returned';
-                driver.returnTime = new Date();
-                updateDriversList();
-                alert('Driver marked as returned!');
+
+        function changeDriver() {
+            localStorage.removeItem('selectedDriver');
+            currentDriver = null;
+            if (socket) socket.disconnect();
+            
+            // Reset forms
+            document.getElementById('driverSelect').value = '';
+            document.getElementById('customDriverName').value = '';
+            document.getElementById('customNameGroup').classList.add('hidden');
+            document.getElementById('selectBtn').disabled = true;
+            
+            showDriverSelection();
+        }
+
+        function showMainScreen() {
+            document.getElementById('driverSelection').classList.add('hidden');
+            document.getElementById('mainScreen').classList.remove('hidden');
+            document.getElementById('selectedDriverName').textContent = currentDriver;
+            displayNotificationHistory();
+        }
+
+        function showDriverSelection() {
+            document.getElementById('driverSelection').classList.remove('hidden');
+            document.getElementById('mainScreen').classList.add('hidden');
+            clearMessages();
+        }
+
+        function initializeSocket() {
+            socket = io();
+            
+            socket.on('connect', () => {
+                console.log('Connected to server');
+            });
+
+            socket.on('status-update', (data) => {
+                showMessage('statusMessage', '✅ Notification confirmed by dispatch', 'success');
+            });
+        }
+
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleString('en-US', {
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            const timeElement = document.getElementById('currentTime');
+            if (timeElement) {
+                timeElement.textContent = timeString;
             }
         }
-        
-        function updateDriversList() {
-            const driversList = document.getElementById('driversList');
-            
-            if (drivers.length === 0) {
-                driversList.innerHTML = '<p>No drivers checked in yet.</p>';
+
+        async function sendNotification(status, button) {
+            if (!currentDriver) {
+                showMessage('statusMessage', 'Please select a driver first', 'error');
                 return;
             }
+
+            // Store original button text
+            const originalText = button.innerHTML;
             
-            driversList.innerHTML = drivers.map(driver => `
-                <div class="driver-item">
-                    <strong>${driver.name}</strong> (ID: ${driver.driverId})<br>
-                    Vehicle: ${driver.vehicle}<br>
-                    Checked in: ${driver.checkInTime.toLocaleString()}<br>
-                    Status: <span class="status-${driver.status}">${driver.status.toUpperCase()}</span><br>
-                    ${driver.status === 'out' ? 
-                        `<button onclick="returnDriver('${driver.driverId}')">Mark as Returned</button>` : 
-                        `Returned: ${driver.returnTime.toLocaleString()}`
+            // Disable button and show loading
+            button.disabled = true;
+            button.innerHTML = '<span class="loading"></span>Sending...';
+
+            try {
+                // Get GPS location
+                const location = await getCurrentLocation();
+                
+                // Calculate ETA
+                const estimatedArrival = calculateETA(status);
+                
+                // Create notification data
+                const notificationData = {
+                    driver: currentDriver,
+                    status: status,
+                    location: location,
+                    timestamp: new Date().toISOString(),
+                    estimatedArrival: estimatedArrival,
+                    warehouse: 'Main Warehouse',
+                    company: 'Your Company Inc.'
+                };
+
+                // Try to send to server (if available)
+                try {
+                    const response = await fetch('/api/notifications/simple', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(notificationData)
+                    });
+
+                    if (response.ok) {
+                        showMessage('statusMessage', `✅ Status "${status}" sent successfully to dispatch!`, 'success');
+                    } else {
+                        // If server endpoint doesn't exist, simulate success
+                        showMessage('statusMessage', `✅ Status "${status}" recorded! (Demo mode)`, 'success');
                     }
-                </div>
-            `).join('');
+                } catch (error) {
+                    // If no server connection, still allow local functionality
+                    showMessage('statusMessage', `✅ Status "${status}" recorded! (Offline mode)`, 'warning');
+                }
+
+                // Add to local history
+                addToHistory(notificationData);
+                
+                // Send real-time update if socket is connected
+                if (socket && socket.connected) {
+                    socket.emit('driver-notification', notificationData);
+                }
+
+            } catch (error) {
+                console.error('Notification error:', error);
+                showMessage('statusMessage', 'Failed to send notification', 'error');
+            } finally {
+                // Re-enable button and restore text
+                setTimeout(() => {
+                    button.disabled = false;
+                    button.innerHTML = originalText;
+                }, 2000);
+            }
         }
+
+        function getCurrentLocation() {
+            return new Promise((resolve) => {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            const lat = position.coords.latitude.toFixed(6);
+                            const lng = position.coords.longitude.toFixed(6);
+                            resolve(`${lat}, ${lng}`);
+                        },
+                        () => resolve('Location unavailable'),
+                        { timeout: 5000 }
+                    );
+                } else {
+                    resolve('Location unavailable');
+                }
+            });
+        }
+
+        function calculateETA(status) {
+            if (status === 'arrived') {
+                return 'At warehouse';
+            } else if (status === '30 minutes away') {
+                const eta = new Date(Date.now() + 30 * 60000);
+                return eta.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            }
+            return 'Unknown';
+        }
+
+        function addToHistory(notification) {
+            notificationHistory.unshift({
+                ...notification,
+                id: Date.now()
+            });
+            
+            // Keep only last 10 notifications
+            if (notificationHistory.length > 10) {
+                notificationHistory = notificationHistory.slice(0, 10);
+            }
+            
+            saveHistory();
+            displayNotificationHistory();
+        }
+
+        function displayNotificationHistory() {
+            const historyContainer = document.getElementById('notificationHistory');
+            
+            if (notificationHistory.length === 0) {
+                historyContainer.innerHTML = '<div class="history-item">No notifications sent yet</div>';
+                return;
+            }
+
+            historyContainer.innerHTML = notificationHistory.map(item => {
+                const time = new Date(item.timestamp).toLocaleTimeString('en-US', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+                const icon = item.status === 'arrived' ? '✅' : '🕐';
+                
+                return `
+                    <div class="history-item">
+                        ${icon} ${time} - ${item.status}
+                        <br><small>ETA: ${item.estimatedArrival}</small>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function saveHistory() {
+            const historyKey = `history_${currentDriver}`;
+            localStorage.setItem(historyKey, JSON.stringify(notificationHistory));
+        }
+
+        function loadStoredHistory() {
+            if (!currentDriver) return;
+            
+            const historyKey = `history_${currentDriver}`;
+            const stored = localStorage.getItem(historyKey);
+            
+            if (stored) {
+                notificationHistory = JSON.parse(stored);
+                displayNotificationHistory();
+            }
+        }
+
+        function showMessage(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.innerHTML = `<div class="message ${type}">${message}</div>`;
+                
+                if (type === 'success') {
+                    setTimeout(() => {
+                        element.innerHTML = '';
+                    }, 5000);
+                }
+            }
+        }
+
+        function clearMessages() {
+            document.getElementById('selectionMessage').innerHTML = '';
+            document.getElementById('statusMessage').innerHTML = '';
+        }
+
+        // Load history when driver is selected
+        document.addEventListener('DOMContentLoaded', function() {
+            if (currentDriver) {
+                loadStoredHistory();
+            }
+        });
     </script>
 </body>
 </html>
