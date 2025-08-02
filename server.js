@@ -1,14 +1,53 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// MongoDB connection
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://your-username:your-password@cluster.mongodb.net/driver-system?retryWrites=true&w=majority';
+
+mongoose.connect(MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+}).then(() => {
+  console.log('Connected to MongoDB Atlas');
+}).catch(err => {
+  console.error('MongoDB connection error:', err);
+});
+
+// MongoDB Schemas
+const notificationSchema = new mongoose.Schema({
+  driver: String,
+  status: String,
+  location: String,
+  timestamp: { type: Date, default: Date.now },
+  estimatedArrival: String,
+  warehouse: String
+});
+
+const inspectionSchema = new mongoose.Schema({
+  driver: String,
+  checkInTime: Date,
+  tractorNumber: String,
+  trailerNumber: String,
+  moffettNumber: String,
+  odometerReading: Number,
+  fuelLevel: String,
+  safetyChecks: [String],
+  equipmentChecks: [String],
+  damageFound: String,
+  repairsNeeded: String,
+  deliveryNotes: String,
+  additionalComments: String,
+  submittedAt: { type: Date, default: Date.now }
+});
+
+const Notification = mongoose.model('Notification', notificationSchema);
+const Inspection = mongoose.model('Inspection', inspectionSchema);
 
 // Middleware
 app.use(express.json());
 app.use(express.static('public'));
-
-// In-memory storage
-let notifications = [];
-let inspectionReports = [];
 
 // Root route
 app.get('/', (req, res) => {
@@ -20,73 +59,107 @@ app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'OK', 
     message: 'Driver Return System is running',
+    database: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected',
     timestamp: new Date().toISOString()
   });
 });
 
-// Driver notifications endpoint
-app.post('/api/notifications/simple', (req, res) => {
-  const notification = {
-    _id: Date.now().toString(),
-    ...req.body,
-    receivedAt: new Date().toISOString()
-  };
-  
-  notifications.unshift(notification);
-  
-  // Keep only last 100 notifications
-  if (notifications.length > 100) {
-    notifications = notifications.slice(0, 100);
+// Save driver notification to MongoDB
+app.post('/api/notifications/simple', async (req, res) => {
+  try {
+    const notification = new Notification(req.body);
+    await notification.save();
+    
+    res.json({ 
+      success: true, 
+      message: 'Notification saved to database',
+      notification: notification 
+    });
+  } catch (error) {
+    console.error('Error saving notification:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error saving notification',
+      error: error.message 
+    });
   }
-  
-  res.json({ 
-    success: true, 
-    message: 'Notification received',
-    notification: notification 
-  });
 });
 
-// Get notifications list for dispatcher
-app.get('/api/notifications/list', (req, res) => {
-  res.json({ 
-    success: true,
-    notifications: notifications.slice(0, 50) // Return last 50
-  });
+// Get notifications from MongoDB
+app.get('/api/notifications/list', async (req, res) => {
+  try {
+    const notifications = await Notification.find()
+      .sort({ timestamp: -1 })
+      .limit(50);
+    
+    res.json({ 
+      success: true,
+      notifications: notifications
+    });
+  } catch (error) {
+    console.error('Error fetching notifications:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error fetching notifications',
+      error: error.message 
+    });
+  }
 });
 
 // Get all notifications
-app.get('/api/notifications', (req, res) => {
-  res.json(notifications.slice(0, 20));
+app.get('/api/notifications', async (req, res) => {
+  try {
+    const notifications = await Notification.find()
+      .sort({ timestamp: -1 })
+      .limit(20);
+    
+    res.json(notifications);
+  } catch (error) {
+    console.error('Error fetching notifications:', error);
+    res.json([]);
+  }
 });
 
-// Inspection reports endpoint
-app.post('/api/inspections', (req, res) => {
-  const inspection = {
-    id: Date.now().toString(),
-    ...req.body,
-    submittedAt: new Date().toISOString()
-  };
-  
-  inspectionReports.push(inspection);
-  
-  res.json({ 
-    success: true, 
-    message: 'Inspection report saved',
-    inspection: inspection 
-  });
+// Save inspection to MongoDB
+app.post('/api/inspections', async (req, res) => {
+  try {
+    const inspection = new Inspection(req.body);
+    await inspection.save();
+    
+    res.json({ 
+      success: true, 
+      message: 'Inspection saved to database',
+      inspection: inspection 
+    });
+  } catch (error) {
+    console.error('Error saving inspection:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error saving inspection',
+      error: error.message 
+    });
+  }
 });
 
-// Get inspection reports
-app.get('/api/inspections', (req, res) => {
-  res.json({
-    success: true,
-    reports: inspectionReports
-  });
-});
-
-// Serve HTML files
-app.get('/*.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', req.params[0] + '.html'));
+// Get inspections from MongoDB
+app.get('/api/inspections', async (req, res) => {
+  try {
+    const inspections = await Inspection.find()
+      .sort({ submittedAt: -1 })
+      .limit(50);
+    
+    res.json({
+      success: true,
+      reports: inspections
+    });
+  } catch (error) {
+    console.error('Error fetching inspections:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching inspections',
+      error: error.message
+    });
+  }
 });
 
 app.listen(PORT, '0.0.0.0', () => {
