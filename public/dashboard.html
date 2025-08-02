@@ -697,7 +697,6 @@
             <div class="filter-controls">
                 <button class="refresh-btn" onclick="loadNotifications()">🔄 Refresh</button>
                 <button class="refresh-btn" onclick="clearAllCheckIns()" style="background: #dc3545;">🗑️ Clear Check-ins</button>
-                <button class="refresh-btn" onclick="simulateArrival()">🚚 Simulate Arrival</button>
                 <button class="filter-btn active" onclick="filterNotifications('all', this)">All</button>
                 <button class="filter-btn" onclick="filterNotifications('en-route', this)">En Route</button>
                 <button class="filter-btn" onclick="filterNotifications('arrived', this)">Arrived</button>
@@ -867,10 +866,60 @@
         let currentFilter = 'all';
         let currentInspectionDriver = null;
 
-        // Demo driver names for simulation
-        const demoDrivers = ['John Smith', 'Sarah Johnson', 'Mike Davis', 'Lisa Brown', 'Tom Wilson', 'Maria Garcia'];
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeSocket();
+            loadNotifications();
+            loadCheckedInStatus();
+            checkDateChange();
+            setInterval(updateTime, 1000);
+            setInterval(checkDateChange, 60000);
 
-        // iPhone-Compatible Notification Manager
+            // Request notification permission
+            NotificationManager.requestPermission();
+        });
+
+        function initializeSocket() {
+            try {
+                socket = io();
+                
+                socket.on('connect', () => {
+                    console.log('Connected to server');
+                    socket.emit('join-room', { role: 'dispatcher' });
+                    showMessage('✅ Connected to real-time updates', 'success');
+                });
+
+                socket.on('driver-notification', (data) => {
+                    console.log('New notification received:', data);
+                    addNotification(data);
+                    showMessage(`📢 New update from ${data.driver}: ${data.status}`, 'success');
+                    
+                    // Send push notification
+                    NotificationManager.sendDriverNotification(
+                        data.driver,
+                        data.status,
+                        data.location,
+                        data.estimatedArrival
+                    );
+                });
+
+                socket.on('disconnect', () => {
+                    console.log('Disconnected from server');
+                    showMessage('⚠️ Connection lost - attempting to reconnect', 'warning');
+                });
+
+                socket.on('connect_error', (error) => {
+                    console.log('Connection error:', error);
+                    showMessage('❌ Cannot connect to server - check your connection', 'error');
+                });
+                
+            } catch (error) {
+                console.log('Socket.IO not available:', error);
+                showMessage('⚠️ Real-time updates unavailable - using polling mode', 'warning');
+                // Fallback to polling
+                setInterval(loadNotifications, 30000); // Poll every 30 seconds
+            }
+        }
         class NotificationManager {
             static isIOS() {
                 return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
@@ -1106,68 +1155,32 @@
             }
         }
 
-        function loadNotifications() {
-            // Start with demo data
-            showDemoNotifications();
-            showMessage('📝 Showing demo notifications - Use "Simulate Arrival" to test features', 'info');
-        }
-
-        function showDemoNotifications() {
-            const now = new Date();
-            notifications = [
-                {
-                    _id: 'demo1',
-                    driver: 'John Smith',
-                    status: 'arrived',
-                    location: '40.7128, -74.0060 (Warehouse District)',
-                    timestamp: new Date(now.getTime() - 300000).toISOString(),
-                    estimatedArrival: 'At warehouse'
-                },
-                {
-                    _id: 'demo2',
-                    driver: 'Sarah Johnson',
-                    status: '30 minutes away',
-                    location: '40.7580, -73.9855 (Highway 95)',
-                    timestamp: new Date(now.getTime() - 180000).toISOString(),
-                    estimatedArrival: new Date(now.getTime() + 1800000).toLocaleTimeString()
-                },
-                {
-                    _id: 'demo3',
-                    driver: 'Mike Davis',
-                    status: 'arrived',
-                    location: '40.7589, -73.9851 (Loading Dock)',
-                    timestamp: new Date(now.getTime() - 600000).toISOString(),
-                    estimatedArrival: 'At warehouse'
+        async function loadNotifications() {
+            try {
+                showMessage('Loading notifications...', 'info');
+                
+                const response = await fetch('/api/notifications/list');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    notifications = data.notifications || [];
+                    displayNotifications();
+                    updateStatistics();
+                    showMessage(`✅ Loaded ${notifications.length} notifications`, 'success');
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
-            ];
-            displayNotifications();
-            updateStatistics();
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+                notifications = [];
+                displayNotifications();
+                updateStatistics();
+                showMessage('⚠️ No connection to server - waiting for notifications', 'warning');
+            }
         }
 
         function simulateArrival() {
-            const randomDriver = demoDrivers[Math.floor(Math.random() * demoDrivers.length)];
-            const isArrival = Math.random() > 0.5;
-            
-            const newNotification = {
-                _id: Date.now().toString(),
-                driver: randomDriver,
-                status: isArrival ? 'arrived' : '30 minutes away',
-                location: isArrival ? 'Warehouse Loading Dock' : 'Highway 101, Mile 23',
-                timestamp: new Date().toISOString(),
-                estimatedArrival: isArrival ? 'At warehouse' : new Date(Date.now() + 1800000).toLocaleTimeString()
-            };
-
-            addNotification(newNotification);
-            
-            // Send notification
-            NotificationManager.sendDriverNotification(
-                newNotification.driver,
-                newNotification.status,
-                newNotification.location,
-                newNotification.estimatedArrival
-            );
-
-            showMessage(`✅ Simulated ${newNotification.status} notification for ${randomDriver}`, 'success');
+            showMessage('⚠️ Simulation disabled - waiting for real driver notifications', 'warning');
         }
 
         function addNotification(data) {
@@ -1392,6 +1405,12 @@
             document.getElementById('enRouteCount').textContent = enRoute;
             document.getElementById('arrivedCount').textContent = arrived;
             document.getElementById('checkedInCount').textContent = checkedIn;
+            
+            // Update dashboard stats
+            document.getElementById('activeVehicles').textContent = total;
+            document.getElementById('onlineDrivers').textContent = total;
+            document.getElementById('activeRoutes').textContent = enRoute;
+            document.getElementById('alerts').textContent = arrived;
         }
 
         function clearAllCheckIns() {
