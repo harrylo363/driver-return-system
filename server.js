@@ -1,33 +1,63 @@
 const express = require('express');
+const cors = require('cors');
 const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Serve static files from public directory
+// Middleware
+app.use(cors());
+app.use(express.json());
 app.use(express.static('public'));
 
-// API routes
+// Store notifications in memory (in production, use a database)
+let notifications = [];
+
+// API Routes
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Driver Return System is running' });
 });
 
-// Root route
+// Handle driver notifications
+app.post('/api/notifications/simple', (req, res) => {
+  const notification = {
+    id: Date.now(),
+    ...req.body,
+    receivedAt: new Date().toISOString()
+  };
+  
+  notifications.push(notification);
+  
+  // Keep only last 100 notifications
+  if (notifications.length > 100) {
+    notifications = notifications.slice(-100);
+  }
+  
+  res.json({ 
+    success: true, 
+    message: 'Notification received',
+    notification: notification 
+  });
+});
+
+// Get recent notifications
+app.get('/api/notifications', (req, res) => {
+  res.json(notifications.slice(-20)); // Return last 20 notifications
+});
+
+// Serve HTML files
 app.get('/', (req, res) => {
-  // Check if driver-app.html exists, otherwise send index.html
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Catch all route for any HTML file requests
 app.get('/*.html', (req, res) => {
   const filename = req.params[0] + '.html';
   res.sendFile(path.join(__dirname, 'public', filename), (err) => {
     if (err) {
-      // If file doesn't exist, redirect to index.html
       res.redirect('/');
     }
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT}`);
 });
