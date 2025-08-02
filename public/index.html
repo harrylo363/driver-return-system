@@ -29,6 +29,35 @@
             line-height: 1.6;
         }
         
+        /* Navigation Bar */
+        .nav-bar {
+            background: #1f2937;
+            padding: 10px 20px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .nav-bar a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .nav-bar a:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .nav-bar a.active {
+            background: var(--primary-color);
+        }
+        
         .container {
             max-width: 1400px;
             margin: 0 auto;
@@ -421,10 +450,22 @@
             .form-grid {
                 grid-template-columns: 1fr;
             }
+            
+            .nav-bar {
+                overflow-x: auto;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Navigation Bar -->
+    <nav class="nav-bar">
+        <a href="index.html" class="active">📊 Main Dashboard</a>
+        <a href="dashboard.html">🗺️ Dispatch Map</a>
+        <a href="driver.html">🚚 Driver Portal</a>
+        <a href="admin.html">🔧 Admin Panel</a>
+    </nav>
+
     <header>
         <div class="container">
             <div class="header-content">
@@ -700,6 +741,29 @@
         
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', function() {
+            // Check if we need to switch to a specific tab
+            const activeTab = sessionStorage.getItem('activeTab');
+            if (activeTab) {
+                // Switch to the requested tab
+                setTimeout(() => {
+                    // Find the tab button and click it
+                    const tabButtons = document.querySelectorAll('.tab');
+                    const tabMap = {
+                        'notifications': 0,
+                        'inspections': 1,
+                        'new-notification': 2,
+                        'new-inspection': 3
+                    };
+                    
+                    if (tabMap[activeTab] !== undefined && tabButtons[tabMap[activeTab]]) {
+                        tabButtons[tabMap[activeTab]].click();
+                    }
+                    
+                    sessionStorage.removeItem('activeTab');
+                }, 100);
+            }
+            
+            // Initialize data
             loadStats();
             loadNotifications();
             loadInspections();
@@ -915,7 +979,9 @@
                     event.target.reset();
                     loadNotifications();
                     loadStats();
-                    switchTab('notifications');
+                    
+                    // Switch to notifications tab
+                    document.querySelectorAll('.tab')[0].click();
                 } else {
                     showToast(result.error || 'Error creating notification', 'error');
                 }
@@ -957,7 +1023,9 @@
                     event.target.reset();
                     loadInspections();
                     loadStats();
-                    switchTab('inspections');
+                    
+                    // Switch to inspections tab
+                    document.querySelectorAll('.tab')[1].click();
                 } else {
                     showToast(result.error || 'Error submitting inspection', 'error');
                 }
