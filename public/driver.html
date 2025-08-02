@@ -1,4 +1,111 @@
-<!DOCTYPE html>
+// Add this at the very beginning of your script section in driver.html
+// This ensures all API calls use the correct path
+
+// Check database connection with correct path
+async function checkDatabaseConnection() {
+    try {
+        const response = await fetch('/api/health');
+        const data = await response.json();
+        
+        const statusEl = document.getElementById('connectionStatus');
+        if (data.status === 'OK') {
+            statusEl.innerHTML = '<span class="status-connected">🟢 Connected to Database</span>';
+        } else {
+            statusEl.innerHTML = '<span class="status-disconnected">🔴 Database Offline</span>';
+        }
+    } catch (error) {
+        console.error('Connection check failed:', error);
+        const statusEl = document.getElementById('connectionStatus');
+        if (statusEl) {
+            statusEl.innerHTML = '<span class="status-disconnected">🔴 No Connection</span>';
+        }
+    }
+}
+
+// Updated sendStatus function
+async function sendStatus(status, button) {
+    // Show loading state
+    const btnText = button.querySelector('.btn-text');
+    const spinner = button.querySelector('.loading-spinner');
+    
+    btnText.style.display = 'none';
+    spinner.style.display = 'block';
+    button.disabled = true;
+
+    try {
+        // Get location
+        const location = await getCurrentLocation();
+        
+        // Prepare notification data
+        const notificationData = {
+            driver: currentDriver,
+            status: status === '30 minutes away' ? 'en-route' : 'arrived',
+            location: location,
+            warehouse: 'Main Warehouse',
+            estimatedArrival: status === '30 minutes away' ? '30 minutes' : 'At warehouse',
+            priority: 'normal'
+        };
+
+        // Send to server using the main notifications endpoint
+        const response = await fetch('/api/notifications', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(notificationData)
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+            showMessage(`✅ Status updated: ${status}`, 'success');
+            addToHistory(status);
+            
+            // Send local notification
+            if (notificationPermission) {
+                sendStatusNotification(status);
+            }
+        } else {
+            throw new Error(result.error || 'Failed to update status');
+        }
+
+    } catch (error) {
+        console.error('Server error:', error);
+        showMessage(`⚠️ Error: ${error.message}`, 'error');
+        
+        // Still add to history locally
+        addToHistory(status);
+    } finally {
+        // Reset button state
+        setTimeout(() => {
+            btnText.style.display = 'inline';
+            spinner.style.display = 'none';
+            button.disabled = false;
+        }, 1000);
+        
+        // Check connection status
+        checkDatabaseConnection();
+    }
+}
+
+// Updated getCurrentLocation to handle errors better
+function getCurrentLocation() {
+    return new Promise((resolve) => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude.toFixed(6);
+                    const lng = position.coords.longitude.toFixed(6);
+                    resolve(`${lat}, ${lng}`);
+                },
+                () => resolve('Location unavailable'),
+                { timeout: 5000, enableHighAccuracy: false }
+            );
+        } else {
+            resolve('Location unavailable');
+        }
+    });
+}<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
