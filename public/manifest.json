@@ -1,8 +1,8 @@
 {
-  "name": "Driver Portal",
-  "short_name": "Driver App",
-  "description": "Driver status update system",
-  "start_url": "/driver-app.html",
+  "name": "Driver Return System",
+  "short_name": "Driver Portal",
+  "description": "Fleet management and driver tracking system",
+  "start_url": "/driver.html",
   "display": "standalone",
   "background_color": "#1e3c72",
   "theme_color": "#2a5298",
@@ -18,5 +18,5 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-]
+  ]
 }
