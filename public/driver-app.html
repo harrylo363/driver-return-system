@@ -6,6 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Driver Check-In System</title>
+    <link rel="manifest" href="/manifest.json">
     <style>
         * {
             margin: 0;
@@ -29,6 +30,37 @@
             padding: 20px;
             max-width: 500px;
             margin: 0 auto;
+        }
+
+        /* Notification Permission Banner */
+        .notification-banner {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: none;
+            text-align: center;
+        }
+
+        .notification-banner.show {
+            display: block;
+        }
+
+        .notification-banner p {
+            color: #856404;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .enable-notifications-btn {
+            background: #f39c12;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
         }
 
         /* Login Screen */
@@ -173,6 +205,23 @@
             color: white;
             font-size: 24px;
             font-weight: 700;
+        }
+
+        .connection-status {
+            margin-top: 10px;
+            padding: 8px 15px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            font-size: 14px;
+            display: inline-block;
+        }
+
+        .status-connected {
+            color: #2ecc71;
+        }
+
+        .status-disconnected {
+            color: #e74c3c;
         }
 
         .status-card {
@@ -377,6 +426,14 @@
 </head>
 <body>
     <div class="container">
+        <!-- Notification Permission Banner -->
+        <div class="notification-banner" id="notificationBanner">
+            <p>🔔 Enable notifications to receive updates from dispatch</p>
+            <button class="enable-notifications-btn" onclick="requestNotificationPermission()">
+                Enable Notifications
+            </button>
+        </div>
+
         <!-- Login Screen -->
         <div class="login-screen" id="loginScreen">
             <div class="logo-section">
@@ -421,6 +478,9 @@
             <div class="header">
                 <p class="welcome-text">Welcome back,</p>
                 <p class="driver-name-display" id="driverNameDisplay">Driver Name</p>
+                <div class="connection-status" id="connectionStatus">
+                    <span class="status-connected">🟢 Connected to Database</span>
+                </div>
             </div>
             
             <div class="status-card">
@@ -457,9 +517,13 @@
     <script>
         let currentDriver = null;
         let updateHistory = [];
+        let notificationPermission = false;
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
+            // Check notification permission
+            checkNotificationPermission();
+            
             // Check if already logged in
             const savedDriver = localStorage.getItem('currentDriver');
             if (savedDriver) {
@@ -473,7 +537,61 @@
                 const loginBtn = document.getElementById('loginBtn');
                 loginBtn.disabled = this.value === '';
             });
+
+            // Check database connection
+            checkDatabaseConnection();
         });
+
+        function checkNotificationPermission() {
+            if ('Notification' in window) {
+                if (Notification.permission === 'default') {
+                    document.getElementById('notificationBanner').classList.add('show');
+                } else if (Notification.permission === 'granted') {
+                    notificationPermission = true;
+                }
+            }
+        }
+
+        async function requestNotificationPermission() {
+            if ('Notification' in window) {
+                try {
+                    const permission = await Notification.requestPermission();
+                    if (permission === 'granted') {
+                        notificationPermission = true;
+                        document.getElementById('notificationBanner').classList.remove('show');
+                        showMessage('Notifications enabled!', 'success');
+                        
+                        // Test notification
+                        new Notification('Driver Portal', {
+                            body: 'You will now receive dispatch updates',
+                            icon: '/icon-192x192.png',
+                            badge: '/icon-72x72.png'
+                        });
+                    }
+                } catch (error) {
+                    console.error('Notification permission error:', error);
+                }
+            }
+        }
+
+        async function checkDatabaseConnection() {
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                
+                const statusEl = document.getElementById('connectionStatus');
+                if (data.database === 'Connected') {
+                    statusEl.innerHTML = '<span class="status-connected">🟢 Connected to Database</span>';
+                } else {
+                    statusEl.innerHTML = '<span class="status-disconnected">🔴 Database Offline</span>';
+                }
+            } catch (error) {
+                const statusEl = document.getElementById('connectionStatus');
+                if (statusEl) {
+                    statusEl.innerHTML = '<span class="status-disconnected">🔴 No Connection</span>';
+                }
+            }
+        }
 
         function login() {
             const select = document.getElementById('driverSelect');
@@ -496,6 +614,9 @@
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('mainScreen').style.display = 'flex';
             document.getElementById('driverNameDisplay').textContent = currentDriver;
+            
+            // Hide notification banner on main screen
+            document.getElementById('notificationBanner').classList.remove('show');
         }
 
         function showLoginScreen() {
@@ -503,6 +624,9 @@
             document.getElementById('loginScreen').style.display = 'flex';
             document.getElementById('driverSelect').value = '';
             document.getElementById('loginBtn').disabled = true;
+            
+            // Check notification permission again
+            checkNotificationPermission();
         }
 
         async function sendStatus(status, button) {
@@ -540,16 +664,30 @@
                         body: JSON.stringify(notificationData)
                     });
 
-                    if (response.ok) {
+                    const result = await response.json();
+
+                    if (response.ok && result.success) {
                         showMessage(`✅ Status updated: ${status}`, 'success');
                         addToHistory(status);
+                        
+                        // Send local notification
+                        if (notificationPermission) {
+                            new Notification('Status Updated', {
+                                body: `Your status "${status}" has been sent to dispatch`,
+                                icon: '/icon-192x192.png',
+                                badge: '/icon-72x72.png'
+                            });
+                        }
                     } else {
-                        throw new Error('Server error');
+                        throw new Error(result.message || 'Server error');
                     }
                 } catch (error) {
-                    // If server not available, still update locally
-                    showMessage(`✅ Status saved: ${status}`, 'info');
+                    console.error('Server error:', error);
+                    showMessage(`⚠️ Saved locally - will sync when connected`, 'info');
                     addToHistory(status);
+                    
+                    // Save to local storage for later sync
+                    saveOfflineNotification(notificationData);
                 }
 
             } catch (error) {
@@ -561,7 +699,38 @@
                     spinner.style.display = 'none';
                     button.disabled = false;
                 }, 1000);
+                
+                // Check connection status
+                checkDatabaseConnection();
             }
+        }
+
+        function saveOfflineNotification(data) {
+            const offline = JSON.parse(localStorage.getItem('offlineNotifications') || '[]');
+            offline.push(data);
+            localStorage.setItem('offlineNotifications', JSON.stringify(offline));
+        }
+
+        async function syncOfflineNotifications() {
+            const offline = JSON.parse(localStorage.getItem('offlineNotifications') || '[]');
+            if (offline.length === 0) return;
+            
+            for (const notification of offline) {
+                try {
+                    await fetch('/api/notifications/simple', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(notification)
+                    });
+                } catch (error) {
+                    console.error('Sync failed:', error);
+                    return;
+                }
+            }
+            
+            // Clear offline storage after successful sync
+            localStorage.removeItem('offlineNotifications');
+            showMessage('Offline updates synced', 'success');
         }
 
         function getCurrentLocation() {
@@ -653,6 +822,9 @@
                 updateHistory = [];
                 displayHistory();
             }
+            
+            // Try to sync offline notifications
+            syncOfflineNotifications();
         }
 
         function logout() {
@@ -679,6 +851,9 @@
                 message.remove();
             }, 3000);
         }
+
+        // Check connection status periodically
+        setInterval(checkDatabaseConnection, 30000);
     </script>
 </body>
 </html>
