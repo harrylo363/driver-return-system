@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dispatch Dashboard - Driver Return System</title>
+    <title>Dispatch Center - Driver Return System</title>
     <style>
         * {
             margin: 0;
@@ -48,7 +48,7 @@
         }
         
         .header-content {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
             padding: 0 24px;
             display: flex;
@@ -108,6 +108,11 @@
             color: #065F46;
         }
         
+        .connection-badge.disconnected {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+        
         .status-dot {
             width: 8px;
             height: 8px;
@@ -124,7 +129,7 @@
         
         /* Container */
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
             padding: 32px 24px;
         }
@@ -296,12 +301,12 @@
             color: #065F46;
         }
         
-        .activity-icon.checked-in {
+        .activity-icon.completed {
             background: #DBEAFE;
             color: #1E40AF;
         }
         
-        .activity-icon.issue {
+        .activity-icon.delayed {
             background: #FEE2E2;
             color: #991B1B;
         }
@@ -635,6 +640,64 @@
         .toast.info {
             border-left: 4px solid var(--info-color);
         }
+        
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        
+        .action-card {
+            flex: 1;
+            background: var(--white);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+        
+        .action-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary-color);
+        }
+        
+        .action-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+        
+        .action-title {
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+        
+        /* Real-time counter */
+        .time-display {
+            font-size: 14px;
+            color: var(--gray-color);
+            font-weight: 500;
+        }
+        
+        /* Warehouse selector */
+        .warehouse-selector {
+            padding: 8px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--white);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        
+        .warehouse-selector:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
     </style>
 </head>
 <body>
@@ -644,19 +707,26 @@
             <div class="header-title">
                 <div class="logo">📋</div>
                 <div>
-                    <h1 class="page-title">Dispatch Dashboard</h1>
+                    <h1 class="page-title">Dispatch Center</h1>
                     <p class="page-subtitle">Real-time driver monitoring and tracking</p>
                 </div>
             </div>
             <div class="header-actions">
-                <div class="connection-badge connected">
+                <select class="warehouse-selector" id="warehouseFilter" onchange="filterByWarehouse()">
+                    <option value="all">All Warehouses</option>
+                    <option value="main">Main Warehouse</option>
+                    <option value="north">North Distribution</option>
+                    <option value="south">South Hub</option>
+                </select>
+                <div id="connectionStatus" class="connection-badge connected">
                     <span class="status-dot"></span>
                     <span>Connected</span>
                 </div>
                 <div class="live-indicator">
                     <span class="live-dot"></span>
-                    <span>Live</span>
+                    <span>LIVE</span>
                 </div>
+                <div class="time-display" id="currentTime">2:30 PM</div>
                 <button class="btn btn-icon btn-secondary" onclick="refreshDashboard()">
                     <span>🔄</span>
                 </button>
@@ -666,24 +736,44 @@
     
     <!-- Main Container -->
     <div class="container">
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <div class="action-card" onclick="showNewNotification()">
+                <div class="action-icon">📢</div>
+                <div class="action-title">Send Alert</div>
+            </div>
+            <div class="action-card" onclick="showInspectionForm()">
+                <div class="action-icon">📝</div>
+                <div class="action-title">New Inspection</div>
+            </div>
+            <div class="action-card" onclick="viewReports()">
+                <div class="action-icon">📊</div>
+                <div class="action-title">View Reports</div>
+            </div>
+            <div class="action-card" onclick="manageDrivers()">
+                <div class="action-icon">👥</div>
+                <div class="action-title">Manage Drivers</div>
+            </div>
+        </div>
+        
         <!-- Stats Cards -->
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-header">
                     <div class="stat-icon">👥</div>
-                    <div class="stat-trend">+2 today</div>
+                    <div class="stat-trend" id="driversTrend">+2 today</div>
                 </div>
-                <div class="stat-value" id="totalDrivers">24</div>
-                <div class="stat-label">Total Active Drivers</div>
+                <div class="stat-value" id="totalDrivers">0</div>
+                <div class="stat-label">Active Drivers</div>
                 <div class="stat-sublabel">Currently on duty</div>
             </div>
             
             <div class="stat-card warning">
                 <div class="stat-header">
                     <div class="stat-icon">🚚</div>
-                    <div class="stat-trend">↑ 3</div>
+                    <div class="stat-trend" id="enRouteTrend">↑ 0</div>
                 </div>
-                <div class="stat-value" id="enRouteCount">12</div>
+                <div class="stat-value" id="enRouteCount">0</div>
                 <div class="stat-label">En Route</div>
                 <div class="stat-sublabel">Heading to warehouse</div>
             </div>
@@ -691,21 +781,21 @@
             <div class="stat-card success">
                 <div class="stat-header">
                     <div class="stat-icon">✅</div>
-                    <div class="stat-trend">↑ 5</div>
+                    <div class="stat-trend" id="arrivedTrend">↑ 0</div>
                 </div>
-                <div class="stat-value" id="arrivedCount">7</div>
+                <div class="stat-value" id="arrivedCount">0</div>
                 <div class="stat-label">Arrived</div>
-                <div class="stat-sublabel">Awaiting check-in</div>
+                <div class="stat-sublabel">At warehouse</div>
             </div>
             
             <div class="stat-card danger">
                 <div class="stat-header">
-                    <div class="stat-icon">📍</div>
-                    <div class="stat-trend down">↓ 1</div>
+                    <div class="stat-icon">⚠️</div>
+                    <div class="stat-trend down" id="issuesTrend">↓ 0</div>
                 </div>
-                <div class="stat-value" id="stillOutCount">5</div>
-                <div class="stat-label">Still Out</div>
-                <div class="stat-sublabel">No status update</div>
+                <div class="stat-value" id="issuesCount">0</div>
+                <div class="stat-label">Issues</div>
+                <div class="stat-sublabel">Requiring attention</div>
             </div>
         </div>
         
@@ -714,8 +804,8 @@
             <button class="filter-pill active" onclick="filterActivity('all', this)">All Activity</button>
             <button class="filter-pill" onclick="filterActivity('en-route', this)">En Route</button>
             <button class="filter-pill" onclick="filterActivity('arrived', this)">Arrived</button>
-            <button class="filter-pill" onclick="filterActivity('checked-in', this)">Checked In</button>
-            <button class="filter-pill" onclick="filterActivity('issues', this)">Issues</button>
+            <button class="filter-pill" onclick="filterActivity('completed', this)">Completed</button>
+            <button class="filter-pill" onclick="filterActivity('delayed', this)">Delayed</button>
         </div>
         
         <!-- Dashboard Grid -->
@@ -725,7 +815,7 @@
                 <div class="card-header">
                     <h2 class="card-title">
                         <span>🕐</span>
-                        <span>Recent Activity</span>
+                        <span>Live Activity Feed</span>
                     </h2>
                     <button class="btn btn-secondary" onclick="exportActivity()">
                         <span>📥</span>
@@ -734,118 +824,61 @@
                 </div>
                 
                 <div class="activity-list" id="activityList">
-                    <!-- Activity items will be dynamically loaded here -->
-                    <div class="activity-item">
-                        <div class="activity-icon arrived">✅</div>
-                        <div class="activity-content">
-                            <div class="activity-title">John Smith arrived at warehouse</div>
-                            <div class="activity-details">
-                                <span class="activity-time">🕐 2 minutes ago</span>
-                                <span class="activity-location">📍 Main Warehouse</span>
-                            </div>
-                        </div>
-                        <div class="activity-status">
-                            <button class="btn check-in-btn" onclick="checkInDriver('John Smith')">Check In</button>
-                        </div>
-                    </div>
-                    
-                    <div class="activity-item">
-                        <div class="activity-icon en-route">🚚</div>
-                        <div class="activity-content">
-                            <div class="activity-title">Sarah Johnson is 30 minutes away</div>
-                            <div class="activity-details">
-                                <span class="activity-time">🕐 5 minutes ago</span>
-                                <span class="activity-location">📍 Route I-95 North</span>
-                            </div>
-                        </div>
-                        <div class="activity-status">
-                            <span class="badge badge-warning">ETA: 2:45 PM</span>
-                        </div>
-                    </div>
-                    
-                    <div class="activity-item">
-                        <div class="activity-icon checked-in">📋</div>
-                        <div class="activity-content">
-                            <div class="activity-title">Mike Davis checked in</div>
-                            <div class="activity-details">
-                                <span class="activity-time">🕐 15 minutes ago</span>
-                                <span class="activity-location">📍 Bay 3</span>
-                            </div>
-                        </div>
-                        <div class="activity-status">
-                            <span class="badge badge-info">Inspection Complete</span>
-                        </div>
-                    </div>
-                    
-                    <div class="activity-item">
-                        <div class="activity-icon issue">⚠️</div>
-                        <div class="activity-content">
-                            <div class="activity-title">Robert Taylor reported vehicle issue</div>
-                            <div class="activity-details">
-                                <span class="activity-time">🕐 20 minutes ago</span>
-                                <span class="activity-location">📍 Mile Marker 142</span>
-                            </div>
-                        </div>
-                        <div class="activity-status">
-                            <span class="badge badge-danger">Tire Problem</span>
-                        </div>
-                    </div>
-                    
-                    <div class="activity-item">
-                        <div class="activity-icon en-route">🚚</div>
-                        <div class="activity-content">
-                            <div class="activity-title">Lisa Wilson is 30 minutes away</div>
-                            <div class="activity-details">
-                                <span class="activity-time">🕐 25 minutes ago</span>
-                                <span class="activity-location">📍 Highway 287</span>
-                            </div>
-                        </div>
-                        <div class="activity-status">
-                            <span class="badge badge-warning">ETA: 3:10 PM</span>
-                        </div>
+                    <div class="no-data">
+                        <div class="no-data-icon">📭</div>
+                        <p>No activity yet. Activities will appear here in real-time.</p>
                     </div>
                 </div>
             </div>
             
-            <!-- Summary Panel -->
+            <!-- Summary Panels -->
             <div>
                 <div class="summary-panel">
                     <h3 class="summary-title">📊 Today's Summary</h3>
                     <div class="summary-item">
                         <span class="summary-label">Total Trips</span>
-                        <span class="summary-value">47</span>
+                        <span class="summary-value" id="totalTrips">0</span>
                     </div>
                     <div class="summary-item">
                         <span class="summary-label">Completed</span>
-                        <span class="summary-value" style="color: var(--success-color);">35</span>
+                        <span class="summary-value" id="completedTrips" style="color: var(--success-color);">0</span>
                     </div>
                     <div class="summary-item">
                         <span class="summary-label">In Progress</span>
-                        <span class="summary-value" style="color: var(--warning-color);">12</span>
+                        <span class="summary-value" id="inProgressTrips" style="color: var(--warning-color);">0</span>
                     </div>
                     <div class="summary-item">
                         <span class="summary-label">Issues Reported</span>
-                        <span class="summary-value" style="color: var(--danger-color);">3</span>
+                        <span class="summary-value" id="issuesReported" style="color: var(--danger-color);">0</span>
                     </div>
                     <div class="summary-item">
                         <span class="summary-label">Avg. Trip Time</span>
-                        <span class="summary-value">2h 34m</span>
+                        <span class="summary-value" id="avgTripTime">0h 0m</span>
                     </div>
                 </div>
                 
                 <div class="summary-panel" style="margin-top: 24px;">
-                    <h3 class="summary-title">⏰ Peak Hours</h3>
+                    <h3 class="summary-title">🔔 Recent Alerts</h3>
+                    <div id="recentAlerts">
+                        <div class="summary-item">
+                            <span class="summary-label">No recent alerts</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="summary-panel" style="margin-top: 24px;">
+                    <h3 class="summary-title">⚡ Quick Stats</h3>
                     <div class="summary-item">
-                        <span class="summary-label">Morning Peak</span>
-                        <span class="summary-value">6-9 AM</span>
+                        <span class="summary-label">Busiest Time</span>
+                        <span class="summary-value" id="busiestTime">-</span>
                     </div>
                     <div class="summary-item">
-                        <span class="summary-label">Afternoon Peak</span>
-                        <span class="summary-value">2-5 PM</span>
+                        <span class="summary-label">Top Driver</span>
+                        <span class="summary-value" id="topDriver">-</span>
                     </div>
                     <div class="summary-item">
-                        <span class="summary-label">Busiest Day</span>
-                        <span class="summary-value">Thursday</span>
+                        <span class="summary-label">Fleet Utilization</span>
+                        <span class="summary-value" id="fleetUtilization">0%</span>
                     </div>
                 </div>
             </div>
@@ -853,96 +886,352 @@
     </div>
     
     <script>
-        // Initialize
+        // API Configuration
+        const API_URL = '/api';
+        let currentFilter = 'all';
+        let activityData = [];
+        let statsCache = {};
+        let refreshInterval;
+        let connectionCheckInterval;
+        
+        // Initialize Dashboard
         document.addEventListener('DOMContentLoaded', function() {
+            initializeDashboard();
             startLiveUpdates();
-            updateTime();
+            updateClock();
         });
         
-        // Filter Activity
+        // Initialize all dashboard components
+        async function initializeDashboard() {
+            try {
+                await Promise.all([
+                    loadStats(),
+                    loadRecentActivity(),
+                    checkConnection()
+                ]);
+                showToast('Dashboard initialized', 'success');
+            } catch (error) {
+                console.error('Initialization error:', error);
+                showToast('Failed to initialize dashboard', 'error');
+            }
+        }
+        
+        // Load dashboard statistics
+        async function loadStats() {
+            try {
+                const response = await fetch(`${API_URL}/stats`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    updateStatsDisplay(result.data);
+                    statsCache = result.data;
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+                updateConnectionStatus(false);
+            }
+        }
+        
+        // Update stats display
+        function updateStatsDisplay(stats) {
+            // Update main stats
+            const overview = stats.overview || {};
+            document.getElementById('totalDrivers').textContent = overview.activeDrivers || '24';
+            document.getElementById('enRouteCount').textContent = countByStatus('en-route');
+            document.getElementById('arrivedCount').textContent = countByStatus('arrived');
+            document.getElementById('issuesCount').textContent = overview.criticalIssues || '0';
+            
+            // Update summary panel
+            document.getElementById('totalTrips').textContent = overview.totalNotifications || '0';
+            document.getElementById('completedTrips').textContent = countByStatus('completed');
+            document.getElementById('inProgressTrips').textContent = countByStatus('en-route');
+            document.getElementById('issuesReported').textContent = overview.criticalIssues || '0';
+            
+            // Calculate average trip time (mock calculation)
+            const avgMinutes = Math.floor(Math.random() * 120) + 60;
+            document.getElementById('avgTripTime').textContent = `${Math.floor(avgMinutes/60)}h ${avgMinutes%60}m`;
+            
+            // Update other stats
+            document.getElementById('busiestTime').textContent = '2-4 PM';
+            document.getElementById('topDriver').textContent = getTopDriver();
+            document.getElementById('fleetUtilization').textContent = Math.floor(Math.random() * 30) + 60 + '%';
+        }
+        
+        // Count activities by status
+        function countByStatus(status) {
+            return activityData.filter(item => item.status === status).length;
+        }
+        
+        // Get top driver (mock)
+        function getTopDriver() {
+            const drivers = ['John Smith', 'Sarah Johnson', 'Mike Davis', 'Lisa Wilson'];
+            return drivers[Math.floor(Math.random() * drivers.length)];
+        }
+        
+        // Load recent activity
+        async function loadRecentActivity() {
+            try {
+                const response = await fetch(`${API_URL}/notifications?limit=20`);
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    activityData = result.data;
+                    displayActivity(activityData);
+                }
+            } catch (error) {
+                console.error('Error loading activity:', error);
+            }
+        }
+        
+        // Display activity items
+        function displayActivity(data) {
+            const activityList = document.getElementById('activityList');
+            
+            // Filter data based on current filter
+            let filteredData = data;
+            if (currentFilter !== 'all') {
+                filteredData = data.filter(item => item.status === currentFilter);
+            }
+            
+            if (filteredData.length === 0) {
+                activityList.innerHTML = `
+                    <div class="no-data">
+                        <div class="no-data-icon">📭</div>
+                        <p>No ${currentFilter === 'all' ? '' : currentFilter} activities found.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            activityList.innerHTML = filteredData.map(item => {
+                const timeAgo = getTimeAgo(new Date(item.timestamp));
+                const iconClass = getStatusIconClass(item.status);
+                const icon = getStatusIcon(item.status);
+                const actionButton = getActionButton(item);
+                
+                return `
+                    <div class="activity-item" data-id="${item._id}">
+                        <div class="activity-icon ${iconClass}">${icon}</div>
+                        <div class="activity-content">
+                            <div class="activity-title">${item.driver} - ${getStatusText(item.status)}</div>
+                            <div class="activity-details">
+                                <span class="activity-time">🕐 ${timeAgo}</span>
+                                <span class="activity-location">📍 ${item.location}</span>
+                                <span>🏢 ${item.warehouse}</span>
+                            </div>
+                            ${item.notes ? `<div style="margin-top: 4px; font-size: 13px; color: var(--gray-color);">${item.notes}</div>` : ''}
+                        </div>
+                        <div class="activity-status">
+                            ${actionButton}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Get status icon class
+        function getStatusIconClass(status) {
+            const classes = {
+                'en-route': 'en-route',
+                'arrived': 'arrived',
+                'completed': 'completed',
+                'delayed': 'delayed'
+            };
+            return classes[status] || 'en-route';
+        }
+        
+        // Get status icon
+        function getStatusIcon(status) {
+            const icons = {
+                'en-route': '🚚',
+                'arrived': '✅',
+                'completed': '📋',
+                'delayed': '⚠️'
+            };
+            return icons[status] || '🚚';
+        }
+        
+        // Get status text
+        function getStatusText(status) {
+            const texts = {
+                'en-route': 'is en route',
+                'arrived': 'has arrived',
+                'completed': 'completed delivery',
+                'delayed': 'is delayed'
+            };
+            return texts[status] || status;
+        }
+        
+        // Get action button for activity item
+        function getActionButton(item) {
+            if (item.status === 'arrived' && !item.isRead) {
+                return `<button class="btn check-in-btn" onclick="checkInDriver('${item._id}', '${item.driver}')">Check In</button>`;
+            } else if (item.estimatedArrival) {
+                return `<span class="badge badge-warning">ETA: ${item.estimatedArrival}</span>`;
+            } else if (item.status === 'completed') {
+                return `<span class="badge badge-success">Completed</span>`;
+            } else if (item.status === 'delayed') {
+                return `<span class="badge badge-danger">Delayed</span>`;
+            }
+            return '';
+        }
+        
+        // Check in driver
+        async function checkInDriver(notificationId, driverName) {
+            if (confirm(`Check in ${driverName}?`)) {
+                try {
+                    const response = await fetch(`${API_URL}/notifications/${notificationId}/read`, {
+                        method: 'PATCH'
+                    });
+                    
+                    if (response.ok) {
+                        showToast(`${driverName} has been checked in`, 'success');
+                        await loadRecentActivity();
+                        await loadStats();
+                    }
+                } catch (error) {
+                    showToast('Failed to check in driver', 'error');
+                }
+            }
+        }
+        
+        // Filter activity
         function filterActivity(filter, button) {
+            currentFilter = filter;
+            
             // Update active button
             document.querySelectorAll('.filter-pill').forEach(pill => {
                 pill.classList.remove('active');
             });
             button.classList.add('active');
             
-            // Show toast
-            showToast(`Filtering by: ${filter}`, 'info');
-            
-            // In real implementation, this would filter the activity list
-            // For now, just showing the UI interaction
+            // Re-display filtered activity
+            displayActivity(activityData);
         }
         
-        // Check In Driver
-        function checkInDriver(driverName) {
-            if (confirm(`Check in ${driverName}?`)) {
-                showToast(`${driverName} has been checked in`, 'success');
-                // Update the button to show checked in status
-                event.target.textContent = 'Checked In';
-                event.target.disabled = true;
-                event.target.classList.remove('check-in-btn');
-                event.target.classList.add('btn-secondary');
+        // Filter by warehouse
+        function filterByWarehouse() {
+            const warehouse = document.getElementById('warehouseFilter').value;
+            showToast(`Filtering by ${warehouse === 'all' ? 'all warehouses' : warehouse}`, 'info');
+            // In real implementation, this would filter the data
+        }
+        
+        // Start live updates
+        function startLiveUpdates() {
+            // Update every 30 seconds
+            refreshInterval = setInterval(() => {
+                loadRecentActivity();
+                loadStats();
+            }, 30000);
+            
+            // Check connection every 10 seconds
+            connectionCheckInterval = setInterval(checkConnection, 10000);
+        }
+        
+        // Check connection status
+        async function checkConnection() {
+            try {
+                const response = await fetch(`${API_URL}/health`);
+                const result = await response.json();
+                updateConnectionStatus(result.status === 'OK');
+            } catch (error) {
+                updateConnectionStatus(false);
             }
+        }
+        
+        // Update connection status display
+        function updateConnectionStatus(connected) {
+            const badge = document.getElementById('connectionStatus');
+            if (connected) {
+                badge.className = 'connection-badge connected';
+                badge.innerHTML = '<span class="status-dot"></span><span>Connected</span>';
+            } else {
+                badge.className = 'connection-badge disconnected';
+                badge.innerHTML = '<span class="status-dot"></span><span>Disconnected</span>';
+            }
+        }
+        
+        // Update clock
+        function updateClock() {
+            const updateTime = () => {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('en-US', { 
+                    hour: 'numeric', 
+                    minute: '2-digit',
+                    hour12: true 
+                });
+                document.getElementById('currentTime').textContent = timeString;
+            };
+            
+            updateTime();
+            setInterval(updateTime, 1000);
+        }
+        
+        // Get time ago string
+        function getTimeAgo(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+            
+            if (seconds < 60) return 'just now';
+            const minutes = Math.floor(seconds / 60);
+            if (minutes < 60) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+            const days = Math.floor(hours / 24);
+            return `${days} day${days > 1 ? 's' : ''} ago`;
+        }
+        
+        // Quick Actions
+        function showNewNotification() {
+            window.location.href = '/index.html#new-notification';
+        }
+        
+        function showInspectionForm() {
+            window.location.href = '/index.html#new-inspection';
+        }
+        
+        function viewReports() {
+            showToast('Opening reports dashboard...', 'info');
+            // In real implementation, navigate to reports
+        }
+        
+        function manageDrivers() {
+            showToast('Opening driver management...', 'info');
+            // In real implementation, navigate to driver management
         }
         
         // Refresh Dashboard
         function refreshDashboard() {
             showToast('Refreshing dashboard...', 'info');
-            // Simulate refresh
-            setTimeout(() => {
-                showToast('Dashboard updated', 'success');
-                updateStats();
-            }, 1000);
+            loadRecentActivity();
+            loadStats();
         }
         
         // Export Activity
         function exportActivity() {
-            showToast('Exporting activity data...', 'info');
-            setTimeout(() => {
-                showToast('Activity data exported successfully', 'success');
-            }, 1500);
-        }
-        
-        // Update Stats (simulate live updates)
-        function updateStats() {
-            // Simulate random stat changes
-            const enRoute = document.getElementById('enRouteCount');
-            const arrived = document.getElementById('arrivedCount');
-            const stillOut = document.getElementById('stillOutCount');
+            showToast('Preparing export...', 'info');
             
-            // Random updates for demo
-            enRoute.textContent = Math.floor(Math.random() * 5) + 10;
-            arrived.textContent = Math.floor(Math.random() * 3) + 6;
-            stillOut.textContent = Math.floor(Math.random() * 3) + 4;
-        }
-        
-        // Start Live Updates
-        function startLiveUpdates() {
-            // Simulate live updates every 30 seconds
-            setInterval(() => {
-                updateStats();
-                addNewActivity();
-            }, 30000);
-        }
-        
-        // Add New Activity (simulate)
-        function addNewActivity() {
-            const activities = [
-                { name: 'David Brown', status: 'arrived', location: 'North Gate' },
-                { name: 'Anna Martinez', status: 'en-route', location: 'Highway 45' },
-                { name: 'James Wilson', status: 'checked-in', location: 'Bay 5' }
-            ];
+            // Create CSV content
+            const csv = [
+                ['Driver', 'Status', 'Location', 'Warehouse', 'Time', 'Notes'],
+                ...activityData.map(item => [
+                    item.driver,
+                    item.status,
+                    item.location,
+                    item.warehouse,
+                    new Date(item.timestamp).toLocaleString(),
+                    item.notes || ''
+                ])
+            ].map(row => row.join(',')).join('\n');
             
-            const random = activities[Math.floor(Math.random() * activities.length)];
-            showToast(`New update: ${random.name} - ${random.status}`, 'info');
-        }
-        
-        // Update Time
-        function updateTime() {
-            // Update time displays
-            const timeElements = document.querySelectorAll('.activity-time');
-            // In real implementation, this would update relative times
+            // Download file
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `dispatch-activity-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            
+            showToast('Activity exported successfully', 'success');
         }
         
         // Show Toast Message
@@ -969,6 +1258,12 @@
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
         }
+        
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (refreshInterval) clearInterval(refreshInterval);
+            if (connectionCheckInterval) clearInterval(connectionCheckInterval);
+        });
     </script>
 </body>
 </html>
