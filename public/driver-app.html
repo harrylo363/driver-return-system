@@ -520,80 +520,61 @@
             console.log('🔍 Testing Railway connection...');
             console.log('Railway URL:', RAILWAY_API_URL);
             
-            // First, test if Railway app is even reachable
             try {
-                console.log('📡 Testing basic Railway connectivity...');
+                console.log(`Testing: ${RAILWAY_API_URL}/api/health`);
                 
                 const response = await fetch(`${RAILWAY_API_URL}/api/health`, {
                     method: 'GET',
                     headers: { 
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
                     }
                 });
                 
-                console.log(`Health response: ${response.status} ${response.statusText}`);
+                console.log(`Health check response: ${response.status} ${response.statusText}`);
                 
                 if (response.ok) {
-                    const data = await response.text();
-                    console.log('✅ Railway app is responding:', data);
+                    const data = await response.json();
+                    console.log('✅ Railway health check SUCCESS:', data);
                     
-                    // Now test if our driver endpoints exist
-                    await testDriverEndpoints();
+                    // Test the notifications endpoint
+                    await testNotificationsEndpoint();
                     
                 } else {
-                    console.log('❌ Railway health check failed:', response.status);
-                    updateConnectionStatus('railway_down');
+                    throw new Error(`Health check failed: ${response.status}`);
                 }
                 
             } catch (error) {
-                console.log('❌ Cannot reach Railway app:', error.message);
+                console.log('❌ Railway health check failed:', error.message);
                 updateConnectionStatus('railway_down');
             }
         }
 
-        async function testDriverEndpoints() {
-            console.log('🔍 Testing driver notification endpoints...');
-            
-            const endpointsToTest = [
-                '/api/notifications',
-                '/api/driver/notification', 
-                '/api/driver/ping',
-                '/api/ping'
-            ];
-            
-            let workingEndpoint = null;
-            
-            for (const endpoint of endpointsToTest) {
-                try {
-                    console.log(`Testing: ${RAILWAY_API_URL}${endpoint}`);
-                    
-                    const response = await fetch(`${RAILWAY_API_URL}${endpoint}`, {
-                        method: 'GET',
-                        headers: { 'Content-Type': 'application/json' }
-                    });
-                    
-                    console.log(`${endpoint}: ${response.status} ${response.statusText}`);
-                    
-                    if (response.ok) {
-                        workingEndpoint = endpoint;
-                        console.log(`✅ Found working endpoint: ${endpoint}`);
-                        break;
+        async function testNotificationsEndpoint() {
+            try {
+                console.log('🔍 Testing notifications endpoint...');
+                
+                const response = await fetch(`${RAILWAY_API_URL}/api/notifications`, {
+                    method: 'GET',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
                     }
-                    
-                } catch (error) {
-                    console.log(`${endpoint}: ${error.message}`);
+                });
+                
+                console.log(`Notifications endpoint: ${response.status} ${response.statusText}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('✅ Notifications endpoint working:', data);
+                    updateConnectionStatus('connected');
+                } else {
+                    console.log('❌ Notifications endpoint failed:', response.status);
+                    updateConnectionStatus('no_endpoints');
                 }
-            }
-            
-            if (workingEndpoint) {
-                updateConnectionStatus('connected');
-                console.log('✅ Railway connection established with endpoint:', workingEndpoint);
-            } else {
-                console.log('⚠️ Railway app found but no driver endpoints available');
-                console.log('📋 Your Railway app needs these endpoints:');
-                console.log('   POST /api/notifications - for driver updates');
-                console.log('   GET  /api/notifications - for dispatcher dashboard');
-                console.log('   GET  /api/health - health check (✅ working)');
+                
+            } catch (error) {
+                console.log('❌ Notifications endpoint error:', error.message);
                 updateConnectionStatus('no_endpoints');
             }
         }
@@ -911,7 +892,12 @@
 
         async function sendToDispatchSystem(notification) {
             console.log('📤 Sending notification to Railway...');
-            console.log('Notification data:', notification);
+            console.log('📋 Notification data:', {
+                driver: notification.driver,
+                status: notification.status,
+                location: notification.location,
+                timestamp: notification.fullTime
+            });
             
             if (!isConnectedToDispatch) {
                 console.log('⚠️ Not connected to Railway - storing locally');
@@ -922,18 +908,52 @@
             
             let success = false;
             
-            // Try different Railway endpoints for posting notifications
-            const endpoints = [
-                '/api/notifications',
-                '/api/driver/notification',
-                '/api/driver/update'
-            ];
-            
-            for (const endpoint of endpoints) {
-                try {
-                    console.log(`📡 Trying: ${RAILWAY_API_URL}${endpoint}`);
+            // Try /api/notifications endpoint first
+            try {
+                console.log(`📡 Sending to: ${RAILWAY_API_URL}/api/notifications`);
+                
+                const requestBody = {
+                    id: notification.id,
+                    driver: notification.driver,
+                    status: notification.status,
+                    location: notification.location,
+                    timestamp: notification.fullTime,
+                    estimatedArrival: notification.estimatedArrival
+                };
+                
+                console.log('📤 Request body:', requestBody);
+                
+                const response = await fetch(`${RAILWAY_API_URL}/api/notifications`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+                
+                console.log(`📨 Railway response: ${response.status} ${response.statusText}`);
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('✅ Railway API SUCCESS:', result);
+                    success = true;
                     
-                    const response = await fetch(`${RAILWAY_API_URL}${endpoint}`, {
+                    showMessage('statusMessage', '✅ Notification sent to Railway successfully!', 'success');
+                } else {
+                    const errorText = await response.text();
+                    console.log(`❌ Railway API error: ${response.status} - ${errorText}`);
+                    throw new Error(`API error: ${response.status}`);
+                }
+                
+            } catch (error) {
+                console.log(`❌ /api/notifications failed:`, error.message);
+                
+                // Try alternative endpoint
+                try {
+                    console.log(`📡 Trying alternative: ${RAILWAY_API_URL}/api/driver/notification`);
+                    
+                    const response = await fetch(`${RAILWAY_API_URL}/api/driver/notification`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -949,34 +969,19 @@
                         })
                     });
                     
-                    console.log(`${endpoint} response: ${response.status} ${response.statusText}`);
-                    
                     if (response.ok) {
-                        try {
-                            const result = await response.json();
-                            console.log('✅ Railway API success:', result);
-                            success = true;
-                            break;
-                        } catch (jsonError) {
-                            // Some APIs return text, not JSON
-                            const text = await response.text();
-                            console.log('✅ Railway API success (text response):', text);
-                            success = true;
-                            break;
-                        }
-                    } else {
-                        const errorText = await response.text();
-                        console.log(`❌ ${endpoint} failed: ${response.status} - ${errorText}`);
+                        const result = await response.json();
+                        console.log('✅ Alternative endpoint SUCCESS:', result);
+                        success = true;
+                        showMessage('statusMessage', '✅ Notification sent via alternative endpoint!', 'success');
                     }
                     
-                } catch (error) {
-                    console.log(`❌ ${endpoint} error:`, error.message);
+                } catch (altError) {
+                    console.log('❌ Alternative endpoint also failed:', altError.message);
                 }
             }
             
-            if (success) {
-                showMessage('statusMessage', '✅ Notification sent to Railway → MongoDB Atlas!', 'success');
-            } else {
+            if (!success) {
                 console.log('❌ All Railway endpoints failed - storing locally');
                 queueNotificationForRailway(notification);
                 showMessage('statusMessage', '⚠️ Railway API failed - notification queued for retry', 'warning');
