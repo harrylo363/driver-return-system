@@ -11,7 +11,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// MongoDB connection (updated to remove deprecated options)
+// IMPORTANT: Serve static files from the 'public' directory
+app.use(express.static(path.join(__dirname, 'public')));
+
+// MongoDB connection
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/driver-returns');
 
 // Notification Schema
@@ -23,141 +26,209 @@ const notificationSchema = new mongoose.Schema({
 
 const Notification = mongoose.model('Notification', notificationSchema);
 
-// Debug route to check file structure
-app.get('/debug/files', (req, res) => {
-    const files = fs.readdirSync(__dirname);
-    res.json({
-        currentDirectory: __dirname,
-        files: files,
-        hasIndexHtml: files.includes('index.html')
-    });
-});
-
-// Serve a simple HTML page if index.html doesn't exist
+// Serve index.html from public folder or a default page
 app.get('/', (req, res) => {
-    const indexPath = path.join(__dirname, 'index.html');
+    const publicIndexPath = path.join(__dirname, 'public', 'index.html');
     
-    if (fs.existsSync(indexPath)) {
-        res.sendFile(indexPath);
+    if (fs.existsSync(publicIndexPath)) {
+        res.sendFile(publicIndexPath);
     } else {
-        // Serve a basic HTML page that shows the API is working
+        // Fallback HTML if no index.html exists
         res.send(`
             <!DOCTYPE html>
             <html>
             <head>
-                <title>Driver Return System API</title>
+                <title>Driver Return System</title>
                 <style>
                     body {
-                        font-family: Arial, sans-serif;
-                        max-width: 800px;
+                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                        max-width: 1200px;
                         margin: 0 auto;
                         padding: 20px;
-                        background-color: #f5f5f5;
+                        background-color: #f0f2f5;
+                    }
+                    .header {
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        color: white;
+                        padding: 30px;
+                        border-radius: 15px;
+                        margin-bottom: 30px;
+                        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+                    }
+                    h1 { margin: 0; font-size: 2.5em; }
+                    .status-badge {
+                        display: inline-block;
+                        background: #4CAF50;
+                        padding: 8px 16px;
+                        border-radius: 20px;
+                        margin-top: 10px;
+                        font-size: 0.9em;
                     }
                     .container {
-                        background: white;
-                        padding: 30px;
-                        border-radius: 10px;
-                        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                        display: grid;
+                        grid-template-columns: 1fr 1fr;
+                        gap: 20px;
+                        margin-bottom: 30px;
                     }
-                    h1 { color: #333; }
-                    .status { 
-                        background: #4CAF50; 
-                        color: white; 
-                        padding: 10px 20px; 
-                        border-radius: 5px; 
-                        display: inline-block;
-                        margin: 20px 0;
+                    .card {
+                        background: white;
+                        padding: 25px;
+                        border-radius: 10px;
+                        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
                     }
                     .endpoint {
-                        background: #f0f0f0;
-                        padding: 10px;
-                        margin: 10px 0;
-                        border-radius: 5px;
-                        font-family: monospace;
+                        background: #f8f9fa;
+                        padding: 12px;
+                        margin: 8px 0;
+                        border-radius: 8px;
+                        font-family: 'Courier New', monospace;
+                        border-left: 4px solid #667eea;
                     }
-                    a { color: #2196F3; text-decoration: none; }
-                    a:hover { text-decoration: underline; }
-                    .data-section {
-                        margin-top: 30px;
-                        padding: 20px;
-                        background: #f9f9f9;
-                        border-radius: 5px;
+                    .notifications-container {
+                        background: white;
+                        padding: 25px;
+                        border-radius: 10px;
+                        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+                        max-height: 500px;
+                        overflow-y: auto;
+                    }
+                    .notification-item {
+                        background: #f8f9fa;
+                        padding: 15px;
+                        margin: 10px 0;
+                        border-radius: 8px;
+                        border-left: 4px solid #764ba2;
+                    }
+                    .notification-item.read {
+                        opacity: 0.6;
+                        border-left-color: #ccc;
+                    }
+                    button {
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        color: white;
+                        border: none;
+                        padding: 12px 24px;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-size: 16px;
+                        transition: transform 0.2s;
+                    }
+                    button:hover {
+                        transform: translateY(-2px);
                     }
                     pre {
-                        background: #333;
+                        background: #1e1e1e;
                         color: #fff;
                         padding: 15px;
-                        border-radius: 5px;
+                        border-radius: 8px;
                         overflow-x: auto;
+                        font-size: 14px;
+                    }
+                    .loading {
+                        text-align: center;
+                        color: #666;
+                        padding: 20px;
                     }
                 </style>
             </head>
             <body>
+                <div class="header">
+                    <h1>🚗 Driver Return System</h1>
+                    <div class="status-badge">✅ API Status: Online</div>
+                </div>
+                
                 <div class="container">
-                    <h1>🚗 Driver Return System API</h1>
-                    <div class="status">✅ API is Running!</div>
-                    
-                    <h2>Available Endpoints:</h2>
-                    <div class="endpoint">GET <a href="/api/notifications">/api/notifications</a> - View all notifications</div>
-                    <div class="endpoint">POST /api/notifications - Create new notification</div>
-                    <div class="endpoint">PUT /api/notifications/:id/read - Mark as read</div>
-                    <div class="endpoint">DELETE /api/notifications/:id - Delete notification</div>
-                    <div class="endpoint">GET <a href="/health">/health</a> - Health check</div>
-                    
-                    <div class="data-section">
-                        <h2>Current Notifications:</h2>
-                        <div id="notifications">Loading...</div>
+                    <div class="card">
+                        <h2>📡 API Endpoints</h2>
+                        <div class="endpoint">GET <a href="/api/notifications">/api/notifications</a></div>
+                        <div class="endpoint">POST /api/notifications</div>
+                        <div class="endpoint">PUT /api/notifications/:id/read</div>
+                        <div class="endpoint">DELETE /api/notifications/:id</div>
+                        <div class="endpoint">GET <a href="/health">/health</a></div>
                     </div>
                     
-                    <h2>Test the API:</h2>
-                    <button onclick="createTestNotification()">Create Test Notification</button>
+                    <div class="card">
+                        <h2>🧪 Test Controls</h2>
+                        <button onclick="createTestNotification()">Create Test Notification</button>
+                        <br><br>
+                        <button onclick="clearAllNotifications()" style="background: #f44336;">Clear All Notifications</button>
+                    </div>
+                </div>
+                
+                <div class="notifications-container">
+                    <h2>📬 Live Notifications</h2>
+                    <div id="notifications" class="loading">Loading notifications...</div>
+                </div>
+                
+                <script>
+                    let notifications = [];
                     
-                    <script>
-                        // Load notifications
-                        async function loadNotifications() {
-                            try {
-                                const response = await fetch('/api/notifications');
-                                const data = await response.json();
-                                document.getElementById('notifications').innerHTML = 
-                                    '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
-                            } catch (error) {
-                                document.getElementById('notifications').innerHTML = 
-                                    '<p style="color: red;">Error loading notifications: ' + error.message + '</p>';
-                            }
+                    async function loadNotifications() {
+                        try {
+                            const response = await fetch('/api/notifications');
+                            notifications = await response.json();
+                            displayNotifications();
+                        } catch (error) {
+                            document.getElementById('notifications').innerHTML = 
+                                '<p style="color: red;">Error: ' + error.message + '</p>';
+                        }
+                    }
+                    
+                    function displayNotifications() {
+                        const container = document.getElementById('notifications');
+                        
+                        if (notifications.length === 0) {
+                            container.innerHTML = '<p style="text-align: center; color: #666;">No notifications yet</p>';
+                            return;
                         }
                         
-                        // Create test notification
-                        async function createTestNotification() {
+                        container.innerHTML = notifications.map(notif => \`
+                            <div class="notification-item \${notif.read ? 'read' : ''}">
+                                <strong>\${notif.message}</strong><br>
+                                <small>🕐 \${new Date(notif.timestamp).toLocaleString()}</small><br>
+                                <small>Status: \${notif.read ? '✓ Read' : '● Unread'}</small>
+                            </div>
+                        \`).join('');
+                    }
+                    
+                    async function createTestNotification() {
+                        try {
+                            const response = await fetch('/api/notifications', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    message: 'Test notification - ' + new Date().toLocaleString()
+                                })
+                            });
+                            
+                            if (response.ok) {
+                                loadNotifications();
+                            }
+                        } catch (error) {
+                            alert('Error: ' + error.message);
+                        }
+                    }
+                    
+                    async function clearAllNotifications() {
+                        if (confirm('Are you sure you want to delete all notifications?')) {
                             try {
                                 const response = await fetch('/api/notifications', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                    },
-                                    body: JSON.stringify({
-                                        message: 'Test notification created at ' + new Date().toLocaleString()
-                                    })
+                                    method: 'DELETE'
                                 });
                                 
                                 if (response.ok) {
-                                    alert('Test notification created!');
                                     loadNotifications();
-                                } else {
-                                    alert('Error creating notification');
                                 }
                             } catch (error) {
                                 alert('Error: ' + error.message);
                             }
                         }
-                        
-                        // Load notifications on page load
-                        loadNotifications();
-                        
-                        // Refresh every 5 seconds
-                        setInterval(loadNotifications, 5000);
-                    </script>
-                </div>
+                    }
+                    
+                    // Load on start and refresh every 3 seconds
+                    loadNotifications();
+                    setInterval(loadNotifications, 3000);
+                </script>
             </body>
             </html>
         `);
@@ -165,8 +236,6 @@ app.get('/', (req, res) => {
 });
 
 // API Routes
-
-// Get all notifications
 app.get('/api/notifications', async (req, res) => {
     try {
         const notifications = await Notification.find().sort({ timestamp: -1 });
@@ -176,7 +245,6 @@ app.get('/api/notifications', async (req, res) => {
     }
 });
 
-// Create new notification
 app.post('/api/notifications', async (req, res) => {
     try {
         const notification = new Notification({
@@ -189,7 +257,6 @@ app.post('/api/notifications', async (req, res) => {
     }
 });
 
-// Mark notification as read
 app.put('/api/notifications/:id/read', async (req, res) => {
     try {
         const notification = await Notification.findByIdAndUpdate(
@@ -203,7 +270,6 @@ app.put('/api/notifications/:id/read', async (req, res) => {
     }
 });
 
-// Delete notification
 app.delete('/api/notifications/:id', async (req, res) => {
     try {
         await Notification.findByIdAndDelete(req.params.id);
@@ -213,7 +279,6 @@ app.delete('/api/notifications/:id', async (req, res) => {
     }
 });
 
-// Delete all notifications
 app.delete('/api/notifications', async (req, res) => {
     try {
         await Notification.deleteMany({});
@@ -223,36 +288,17 @@ app.delete('/api/notifications', async (req, res) => {
     }
 });
 
-// Health check endpoint
 app.get('/health', (req, res) => {
     res.json({ 
         status: 'OK', 
         message: 'Server is running',
-        timestamp: new Date().toISOString(),
-        environment: process.env.NODE_ENV || 'development'
-    });
-});
-
-// Error handling for undefined routes
-app.use((req, res) => {
-    res.status(404).json({ 
-        error: 'Route not found',
-        availableRoutes: [
-            'GET /',
-            'GET /api/notifications',
-            'POST /api/notifications',
-            'PUT /api/notifications/:id/read',
-            'DELETE /api/notifications/:id',
-            'GET /health',
-            'GET /debug/files'
-        ]
+        timestamp: new Date().toISOString()
     });
 });
 
 // Start server
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
-    console.log(`Current directory: ${__dirname}`);
-    console.log(`Files in directory: ${fs.readdirSync(__dirname).join(', ')}`);
+    console.log(`Serving static files from: ${path.join(__dirname, 'public')}`);
 });
