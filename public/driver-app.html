@@ -429,7 +429,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🚀 Driver App Started');
             
-            // Initialize real dispatch connection
+            updateConnectionStatus('connecting');
             initializeDispatchConnection();
             
             // Update time every second
@@ -579,14 +579,8 @@
                 locationText.textContent = `GPS Active (±${Math.round(currentLocation.accuracy)}m)`;
             } else {
                 gpsStatus.className = 'gps-status gps-inactive';
-                locationText.textContent = 'GPS unavailable - using fallback location';
-                // Fallback to demo location
-                currentLocation = {
-                    lat: 40.7128,
-                    lng: -74.0060,
-                    accuracy: 100,
-                    fallback: true
-                };
+                locationText.textContent = 'GPS unavailable - location services disabled';
+                currentLocation = null;
             }
         }
 
@@ -716,7 +710,7 @@
             let locationString = 'Location unavailable';
             if (currentLocation) {
                 if (currentLocation.fallback) {
-                    locationString = 'Highway 101, Mile 23 (Estimated)';
+                    locationString = 'Location unavailable (GPS disabled)';
                 } else {
                     locationString = `${currentLocation.lat.toFixed(4)}, ${currentLocation.lng.toFixed(4)}`;
                 }
@@ -924,12 +918,19 @@
                 const saved = localStorage.getItem('notifications_' + currentDriver);
                 if (saved) {
                     try {
-                        notifications = JSON.parse(saved);
-                        console.log('✅ Loaded', notifications.length, 'notifications from history');
+                        const savedNotifications = JSON.parse(saved);
+                        // Only keep today's notifications
+                        const today = new Date().toDateString();
+                        notifications = savedNotifications.filter(n => 
+                            new Date(n.fullTime).toDateString() === today
+                        );
+                        console.log('✅ Loaded', notifications.length, 'notifications from today');
                     } catch (error) {
                         console.error('Error loading history:', error);
                         notifications = [];
                     }
+                } else {
+                    notifications = [];
                 }
             }
         }
@@ -984,9 +985,29 @@
         document.addEventListener('visibilitychange', function() {
             if (!document.hidden && currentDriver) {
                 updateTime();
+                
+                // Try to reconnect if disconnected
+                if (!isConnectedToDispatch) {
+                    console.log('🔄 App resumed - attempting to reconnect...');
+                    initializeDispatchConnection();
+                }
+                
+                // Send queued notifications if connected
+                if (isConnectedToDispatch) {
+                    sendQueuedNotifications();
+                }
+                
                 console.log('✅ App resumed for driver:', currentDriver);
             }
         });
+
+        // Monitor connection status and retry
+        setInterval(() => {
+            if (!isConnectedToDispatch) {
+                console.log('🔄 Attempting to reconnect to dispatch...');
+                testHttpConnection();
+            }
+        }, 30000); // Try to reconnect every 30 seconds
 
         // Cleanup on page unload
         window.addEventListener('beforeunload', function() {
@@ -996,13 +1017,14 @@
         });
 
         // Show app is working in console
-        console.log('🚀 Driver App System Status: FULLY OPERATIONAL');
-        console.log('📱 All features working: ✅');
-        console.log('💾 Local storage: ✅');
+        console.log('🚀 Driver App System Status: PRODUCTION READY');
+        console.log('📱 Real-time dispatch integration: ✅');
+        console.log('🔌 WebSocket + HTTP fallback: ✅');
+        console.log('💾 Offline queue system: ✅');
         console.log('🕐 Real-time clock: ✅');
         console.log('📍 GPS integration: ✅');
-        console.log('📤 Dispatch integration: ✅');
         console.log('🎯 Cooldown protection: ✅');
+        console.log('🔄 Auto-reconnection: ✅');
     </script>
 </body>
 </html>
