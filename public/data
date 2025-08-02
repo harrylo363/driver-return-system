@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Viewer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .nav {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .nav a {
+            margin: 0 15px;
+            text-decoration: none;
+            color: #2563eb;
+            font-weight: bold;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: #f0f9ff;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #2563eb;
+        }
+        .stat-number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #2563eb;
+        }
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #333;
+        }
+        tr:hover {
+            background: #f8f9fa;
+        }
+        .status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status-arrived { background: #d1fae5; color: #065f46; }
+        .status-en-route { background: #dbeafe; color: #1e40af; }
+        .status-delayed { background: #fee2e2; color: #991b1b; }
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #1d4ed8;
+        }
+        .danger {
+            background: #dc2626;
+        }
+        .danger:hover {
+            background: #b91c1c;
+        }
+        .json-view {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="index.html">📊 Dashboard</a>
+        <a href="dashboard.html">🗺️ Map</a>
+        <a href="driver.html">🚚 Driver</a>
+        <a href="admin.html">🔧 Admin</a>
+    </div>
+
+    <h1>📊 Database Viewer</h1>
+    
+    <div class="section">
+        <h2>Statistics</h2>
+        <div class="stats" id="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalNotifications">0</div>
+                <div class="stat-label">Total Notifications</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalInspections">0</div>
+                <div class="stat-label">Total Inspections</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="uniqueDrivers">0</div>
+                <div class="stat-label">Unique Drivers</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="todayActivity">0</div>
+                <div class="stat-label">Today's Activity</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Notifications Data</h2>
+        <div style="margin-bottom: 15px;">
+            <button onclick="loadNotifications()">🔄 Refresh</button>
+            <button onclick="exportData('notifications')" style="background: #059669;">📥 Export CSV</button>
+            <button onclick="showRawData('notifications')" style="background: #7c3aed;">{ } View JSON</button>
+            <button class="danger" onclick="clearData('notifications')">🗑️ Clear All</button>
+        </div>
+        <div id="notificationsTable"></div>
+    </div>
+
+    <div class="section">
+        <h2>Inspections Data</h2>
+        <div style="margin-bottom: 15px;">
+            <button onclick="loadInspections()">🔄 Refresh</button>
+            <button onclick="exportData('inspections')" style="background: #059669;">📥 Export CSV</button>
+            <button onclick="showRawData('inspections')" style="background: #7c3aed;">{ } View JSON</button>
+            <button class="danger" onclick="clearData('inspections')">🗑️ Clear All</button>
+        </div>
+        <div id="inspectionsTable"></div>
+    </div>
+
+    <div class="section" id="jsonView" style="display: none;">
+        <h2>Raw JSON Data</h2>
+        <button onclick="document.getElementById('jsonView').style.display='none'">✖️ Close</button>
+        <div class="json-view" id="jsonContent"></div>
+    </div>
+
+    <script>
+        let notificationsData = [];
+        let inspectionsData = [];
+
+        // Load data on page load
+        window.onload = function() {
+            loadStats();
+            loadNotifications();
+            loadInspections();
+        };
+
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/stats');
+                const result = await response.json();
+                if (result.success) {
+                    const stats = result.data.overview;
+                    document.getElementById('totalNotifications').textContent = stats.totalNotifications || 0;
+                    document.getElementById('totalInspections').textContent = stats.totalInspections || 0;
+                    
+                    // Calculate unique drivers from notifications
+                    const notifResponse = await fetch('/api/notifications');
+                    const notifResult = await notifResponse.json();
+                    if (notifResult.success) {
+                        const uniqueDrivers = new Set(notifResult.data.map(n => n.driver)).size;
+                        document.getElementById('uniqueDrivers').textContent = uniqueDrivers;
+                        
+                        // Today's activity
+                        const today = new Date().toDateString();
+                        const todayCount = notifResult.data.filter(n => 
+                            new Date(n.timestamp).toDateString() === today
+                        ).length;
+                        document.getElementById('todayActivity').textContent = todayCount;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function loadNotifications() {
+            try {
+                const response = await fetch('/api/notifications');
+                const result = await response.json();
+                if (result.success) {
+                    notificationsData = result.data;
+                    displayNotifications(result.data);
+                }
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+            }
+        }
+
+        async function loadInspections() {
+            try {
+                const response = await fetch('/api/inspections');
+                const result = await response.json();
+                if (result.success) {
+                    inspectionsData = result.data;
+                    displayInspections(result.data);
+                }
+            } catch (error) {
+                console.error('Error loading inspections:', error);
+            }
+        }
+
+        function displayNotifications(data) {
+            if (data.length === 0) {
+                document.getElementById('notificationsTable').innerHTML = '<p>No notifications found</p>';
+                return;
+            }
+
+            let html = '<table><thead><tr>';
+            html += '<th>Driver</th><th>Status</th><th>Location</th><th>Warehouse</th>';
+            html += '<th>ETA</th><th>Timestamp</th><th>MongoDB ID</th>';
+            html += '</tr></thead><tbody>';
+
+            data.forEach(item => {
+                const date = new Date(item.timestamp).toLocaleString();
+                html += '<tr>';
+                html += `<td>${item.driver}</td>`;
+                html += `<td><span class="status status-${item.status}">${item.status}</span></td>`;
+                html += `<td>${item.location}</td>`;
+                html += `<td>${item.warehouse}</td>`;
+                html += `<td>${item.estimatedArrival || '-'}</td>`;
+                html += `<td>${date}</td>`;
+                html += `<td style="font-family: monospace; font-size: 11px;">${item._id}</td>`;
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+            document.getElementById('notificationsTable').innerHTML = html;
+        }
+
+        function displayInspections(data) {
+            if (data.length === 0) {
+                document.getElementById('inspectionsTable').innerHTML = '<p>No inspections found</p>';
+                return;
+            }
+
+            let html = '<table><thead><tr>';
+            html += '<th>Driver</th><th>Tractor</th><th>Trailer</th><th>Fuel</th>';
+            html += '<th>Urgency</th><th>Submitted</th><th>MongoDB ID</th>';
+            html += '</tr></thead><tbody>';
+
+            data.forEach(item => {
+                const date = new Date(item.submittedAt || item.checkInTime).toLocaleString();
+                html += '<tr>';
+                html += `<td>${item.driver}</td>`;
+                html += `<td>${item.tractorNumber}</td>`;
+                html += `<td>${item.trailerNumber}</td>`;
+                html += `<td>${item.fuelLevel}</td>`;
+                html += `<td><span class="status status-${item.urgencyLevel}">${item.urgencyLevel || 'low'}</span></td>`;
+                html += `<td>${date}</td>`;
+                html += `<td style="font-family: monospace; font-size: 11px;">${item._id}</td>`;
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+            document.getElementById('inspectionsTable').innerHTML = html;
+        }
+
+        function exportData(type) {
+            const data = type === 'notifications' ? notificationsData : inspectionsData;
+            if (data.length === 0) {
+                alert('No data to export');
+                return;
+            }
+
+            // Convert to CSV
+            const headers = Object.keys(data[0]).join(',');
+            const rows = data.map(item => 
+                Object.values(item).map(v => `"${v}"`).join(',')
+            ).join('\n');
+            
+            const csv = headers + '\n' + rows;
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${type}-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+        }
+
+        function showRawData(type) {
+            const data = type === 'notifications' ? notificationsData : inspectionsData;
+            document.getElementById('jsonContent').textContent = JSON.stringify(data, null, 2);
+            document.getElementById('jsonView').style.display = 'block';
+        }
+
+        function clearData(type) {
+            if (!confirm(`Are you sure you want to delete ALL ${type}? This cannot be undone!`)) {
+                return;
+            }
+            alert('Delete functionality not implemented for safety. Use MongoDB Atlas to delete data.');
+        }
+
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            loadStats();
+            loadNotifications();
+            loadInspections();
+        }, 30000);
+    </script>
+</body>
+</html>
