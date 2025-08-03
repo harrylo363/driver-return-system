@@ -925,8 +925,14 @@
         
         .checklist-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(2, 1fr);
             gap: 1rem;
+        }
+        
+        @media (max-width: 600px) {
+            .checklist-grid {
+                grid-template-columns: 1fr;
+            }
         }
         
         .checklist-item {
@@ -935,10 +941,11 @@
             border-radius: 12px;
             padding: 1rem;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 0.75rem;
             cursor: pointer;
             transition: all 0.2s ease;
+            min-height: 80px;
         }
         
         .checklist-item:hover {
@@ -975,15 +982,34 @@
             border-color: var(--danger);
         }
         
-        .checklist-label {
+        .checklist-item-content {
             flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .checklist-item-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: nowrap;
+        }
+        
+        .checklist-label {
             font-size: 0.875rem;
             color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
         .checklist-status {
             display: flex;
             gap: 0.5rem;
+            margin-left: auto;
+            flex-shrink: 0;
         }
         
         .status-btn {
