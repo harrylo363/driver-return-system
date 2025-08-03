@@ -426,14 +426,6 @@
 </head>
 <body>
     <div class="container">
-        <!-- Notification Permission Banner -->
-        <div class="notification-banner" id="notificationBanner">
-            <p>🔔 Enable notifications to receive updates from dispatch</p>
-            <button class="enable-notifications-btn" onclick="requestNotificationPermission()">
-                Enable Notifications
-            </button>
-        </div>
-
         <!-- Login Screen -->
         <div class="login-screen" id="loginScreen">
             <div class="logo-section">
@@ -517,13 +509,9 @@
     <script>
         let currentDriver = null;
         let updateHistory = [];
-        let notificationPermission = false;
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            // Check notification permission
-            checkNotificationPermission();
-            
             // Check if already logged in
             const savedDriver = localStorage.getItem('currentDriver');
             if (savedDriver) {
@@ -612,9 +600,6 @@
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('mainScreen').style.display = 'flex';
             document.getElementById('driverNameDisplay').textContent = currentDriver;
-            
-            // Hide notification banner on main screen
-            document.getElementById('notificationBanner').classList.remove('show');
         }
 
         function showLoginScreen() {
@@ -622,9 +607,6 @@
             document.getElementById('loginScreen').style.display = 'flex';
             document.getElementById('driverSelect').value = '';
             document.getElementById('loginBtn').disabled = true;
-            
-            // Check notification permission again
-            checkNotificationPermission();
         }
 
         async function sendStatus(status, button) {
@@ -642,12 +624,15 @@
                 
                 // Prepare notification data
                 const notificationData = {
+                    message: `${currentDriver} is ${status}`,
                     driver: currentDriver,
                     status: status === '30 minutes away' ? 'en-route' : 'arrived',
                     location: location,
-                    warehouse: 'Main Warehouse',
-                    estimatedArrival: status === '30 minutes away' ? '30 minutes' : 'At warehouse',
-                    priority: 'normal'
+                    warehouse: 'Miami Distribution Center',
+                    estimatedArrival: status === '30 minutes away' ? '30 minutes' : null,
+                    priority: status === 'arrived' ? 'high' : 'normal',
+                    timestamp: new Date().toISOString(),
+                    read: false
                 };
 
                 // Send to server
@@ -664,10 +649,7 @@
                     showMessage(`✅ Status updated: ${status}`, 'success');
                     addToHistory(status);
                     
-                    // Send local notification
-                    if (notificationPermission) {
-                        sendStatusNotification(status);
-                    }
+                    // Note: Push notifications to dispatch/admin would be handled server-side
                 } else {
                     throw new Error('Failed to update status');
                 }
