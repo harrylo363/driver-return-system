@@ -43,7 +43,27 @@ const notificationSchema = new mongoose.Schema({
     estimatedArrival: String,
     priority: String,
     timestamp: { type: Date, default: Date.now },
-    read: { type: Boolean, default: false }
+    read: { type: Boolean, default: false },
+    checkedIn: { type: Boolean, default: false },
+    checkInData: {
+        checkInTime: Date,
+        vehicleInfo: {
+            truckNumber: String,
+            trailerNumber: String,
+            mileage: Number,
+            fuelLevel: String
+        },
+        equipmentCheck: {
+            items: [{
+                id: String,
+                label: String,
+                status: String,
+                issue: String
+            }],
+            totalIssues: Number
+        },
+        additionalNotes: String
+    }
 });
 
 const Notification = mongoose.model('Notification', notificationSchema);
@@ -282,6 +302,24 @@ app.put('/api/notifications/:id/read', async (req, res) => {
         const notification = await Notification.findByIdAndUpdate(
             req.params.id,
             { read: true },
+            { new: true }
+        );
+        res.json({ success: true, data: notification });
+    } catch (error) {
+        res.status(400).json({ success: false, error: error.message });
+    }
+});
+
+// Check-in driver with equipment inspection
+app.put('/api/notifications/:id/checkin', async (req, res) => {
+    try {
+        const notification = await Notification.findByIdAndUpdate(
+            req.params.id,
+            { 
+                checkedIn: true,
+                checkInData: req.body,
+                read: true
+            },
             { new: true }
         );
         res.json({ success: true, data: notification });
