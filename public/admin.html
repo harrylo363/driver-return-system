@@ -326,7 +326,48 @@
             font-size: 16px;
         }
         
-        @media (max-width: 768px) {
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            background: #f8f9fa;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        table th, table td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #e1e5e9;
+        }
+        
+        table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+        
+        table tr:hover {
+            background: #f8f9fa;
+        }
             .container { padding: 15px; }
             .data-item { flex-direction: column; align-items: stretch; }
             .data-actions { justify-content: center; margin-top: 15px; }
@@ -369,8 +410,9 @@
         <div class="card hidden" id="mainPanel">
             <div class="tab-navigation">
                 <button class="tab-btn active" onclick="showTab('dashboard')">📊 Dashboard</button>
+                <button class="tab-btn" onclick="showTab('users')">👥 Users</button>
                 <button class="tab-btn" onclick="showTab('notifications')">🔔 Notifications</button>
-                <button class="tab-btn" onclick="showTab('drivers')">👥 Drivers</button>
+                <button class="tab-btn" onclick="showTab('drivers')">🚚 Drivers</button>
                 <button class="tab-btn" onclick="showTab('settings')">⚙️ Settings</button>
             </div>
 
@@ -406,8 +448,116 @@
                 <div id="dashboardMessage"></div>
             </div>
 
-            <!-- Notifications Tab -->
-            <div id="notificationsTab" class="hidden">
+            <!-- Users Tab -->
+            <div id="usersTab" class="hidden">
+                <h2>👥 User Management</h2>
+                
+                <div style="margin-bottom: 30px;">
+                    <button class="btn btn-primary" onclick="showAddUserForm()">➕ Add Single User</button>
+                    <button class="btn btn-success" onclick="showBulkUpload()">📁 Bulk Import</button>
+                    <button class="btn btn-info" onclick="downloadTemplate()">📥 Download CSV Template</button>
+                </div>
+                
+                <!-- Add Single User Form -->
+                <div id="addUserForm" class="hidden" style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                    <h3>Add New User</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="form-group">
+                            <label>Name *</label>
+                            <input type="text" id="newUserName" placeholder="John Smith">
+                        </div>
+                        <div class="form-group">
+                            <label>Email *</label>
+                            <input type="email" id="newUserEmail" placeholder="john@company.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Role *</label>
+                            <select id="newUserRole" onchange="togglePasswordField()">
+                                <option value="driver">Driver</option>
+                                <option value="dispatcher">Dispatcher</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="passwordGroup" style="display: none;">
+                            <label>Password *</label>
+                            <input type="password" id="newUserPassword" placeholder="Required for non-drivers">
+                        </div>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <button class="btn btn-success" onclick="addUser()">✅ Create User</button>
+                        <button class="btn btn-secondary" onclick="hideAddUserForm()">Cancel</button>
+                    </div>
+                </div>
+                
+                <!-- Bulk Upload Form -->
+                <div id="bulkUploadForm" class="hidden" style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                    <h3>📁 Bulk Import Users</h3>
+                    <p style="margin-bottom: 15px;">Upload a CSV file with columns: name, email, role (optional), password (optional)</p>
+                    
+                    <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 15px;">
+                        <input type="file" id="csvFile" accept=".csv,.xlsx,.xls" onchange="handleFileSelect(event)">
+                        <button class="btn btn-primary" onclick="parseFile()">📊 Preview Data</button>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label>Or paste from Google Sheets / Excel:</label>
+                        <textarea id="pasteData" rows="5" style="width: 100%; padding: 10px; border: 2px solid #e1e5e9; border-radius: 8px;" 
+                                  placeholder="Paste data here (tab or comma separated)..."></textarea>
+                        <button class="btn btn-primary" onclick="parsePastedData()">📋 Parse Pasted Data</button>
+                    </div>
+                    
+                    <div id="previewContainer" class="hidden">
+                        <h4>Preview (First 5 rows):</h4>
+                        <div id="previewTable" style="max-height: 300px; overflow-y: auto;"></div>
+                        <div style="margin-top: 15px;">
+                            <button class="btn btn-success" onclick="uploadBulkUsers()">✅ Import All Users</button>
+                            <button class="btn btn-secondary" onclick="hideBulkUpload()">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- User Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalUsers">0</div>
+                        <div class="stat-label">Total Users</div>
+                    </div>
+                    <div class="stat-card" style="border-left-color: #28a745;">
+                        <div class="stat-number" id="totalDrivers">0</div>
+                        <div class="stat-label">Drivers</div>
+                    </div>
+                    <div class="stat-card" style="border-left-color: #ffc107;">
+                        <div class="stat-number" id="totalDispatchers">0</div>
+                        <div class="stat-label">Dispatchers</div>
+                    </div>
+                    <div class="stat-card" style="border-left-color: #dc3545;">
+                        <div class="stat-number" id="totalAdmins">0</div>
+                        <div class="stat-label">Admins</div>
+                    </div>
+                </div>
+                
+                <!-- User List -->
+                <div class="data-container">
+                    <h3>All Users</h3>
+                    <div class="search-box">
+                        <input type="text" id="userSearchInput" placeholder="Search by name or email..." onkeyup="searchUsers()">
+                        <select id="roleFilter" onchange="filterUsersByRole()">
+                            <option value="all">All Roles</option>
+                            <option value="driver">Drivers</option>
+                            <option value="dispatcher">Dispatchers</option>
+                            <option value="admin">Admins</option>
+                        </select>
+                    </div>
+                    <div id="usersList">
+                        <div class="empty-state">
+                            <div class="icon">👥</div>
+                            <p>Loading users...</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="usersMessage"></div>
+            </div>
                 <h2>🔔 All Notifications</h2>
                 
                 <div class="search-box">
@@ -490,6 +640,8 @@
 
     <script>
         let notifications = [];
+        let users = [];
+        let bulkUsers = [];
         let isLoggedIn = false;
         let currentTab = 'dashboard';
 
@@ -536,6 +688,7 @@
                 document.getElementById('mainPanel').classList.remove('hidden');
                 showMessage('dashboardMessage', '🎉 Welcome to the Admin Panel!', 'success');
                 loadNotifications();
+                loadUsers();
             } else {
                 showMessage('loginMessage', '❌ Invalid credentials', 'error');
             }
@@ -550,8 +703,9 @@
 
         function showTab(tabName) {
             // Hide all tabs
-            ['dashboard', 'notifications', 'drivers', 'settings'].forEach(tab => {
-                document.getElementById(tab + 'Tab').classList.add('hidden');
+            ['dashboard', 'users', 'notifications', 'drivers', 'settings'].forEach(tab => {
+                const tabElement = document.getElementById(tab + 'Tab');
+                if (tabElement) tabElement.classList.add('hidden');
             });
             
             // Remove active class from all buttons
@@ -567,9 +721,341 @@
             // Refresh data when switching tabs
             if (tabName === 'drivers') {
                 updateDriverStats();
+            } else if (tabName === 'users') {
+                loadUsers();
             }
         }
 
+        // USER MANAGEMENT FUNCTIONS
+        
+        async function loadUsers() {
+            try {
+                const response = await fetch('/api/users');
+                if (response.ok) {
+                    const data = await response.json();
+                    users = data.data || [];
+                    updateUserStats();
+                    displayUsers();
+                }
+            } catch (error) {
+                console.error('Error loading users:', error);
+                showMessage('usersMessage', '❌ Error loading users', 'error');
+            }
+        }
+
+        function updateUserStats() {
+            const drivers = users.filter(u => u.role === 'driver').length;
+            const dispatchers = users.filter(u => u.role === 'dispatcher').length;
+            const admins = users.filter(u => u.role === 'admin').length;
+            
+            document.getElementById('totalUsers').textContent = users.length;
+            document.getElementById('totalDrivers').textContent = drivers;
+            document.getElementById('totalDispatchers').textContent = dispatchers;
+            document.getElementById('totalAdmins').textContent = admins;
+        }
+
+        function displayUsers() {
+            const container = document.getElementById('usersList');
+            
+            if (users.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">👥</div>
+                        <p>No users found</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const html = users.map(user => {
+                const roleColors = {
+                    driver: 'status-arrived',
+                    dispatcher: 'status-en-route',
+                    admin: 'status-delayed'
+                };
+                
+                return `
+                    <div class="data-item ${user.role}">
+                        <div class="data-info">
+                            <div style="font-weight: bold; font-size: 16px;">${user.name}</div>
+                            <div style="color: #666; margin: 5px 0;">${user.email}</div>
+                            <span class="status-badge ${roleColors[user.role]}">${user.role.toUpperCase()}</span>
+                            ${!user.active ? '<span class="status-badge status-delayed" style="margin-left: 10px;">INACTIVE</span>' : ''}
+                        </div>
+                        <div class="data-actions">
+                            <button class="btn btn-info" style="font-size: 14px; padding: 8px 16px;" onclick="editUser('${user._id}')">✏️ Edit</button>
+                            <button class="btn btn-danger" style="font-size: 14px; padding: 8px 16px;" onclick="deleteUser('${user._id}', '${user.name}')">🗑️</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = html;
+        }
+
+        function showAddUserForm() {
+            document.getElementById('addUserForm').classList.remove('hidden');
+            document.getElementById('bulkUploadForm').classList.add('hidden');
+        }
+
+        function hideAddUserForm() {
+            document.getElementById('addUserForm').classList.add('hidden');
+            document.getElementById('newUserName').value = '';
+            document.getElementById('newUserEmail').value = '';
+            document.getElementById('newUserPassword').value = '';
+            document.getElementById('newUserRole').value = 'driver';
+            togglePasswordField();
+        }
+
+        function togglePasswordField() {
+            const role = document.getElementById('newUserRole').value;
+            const passwordGroup = document.getElementById('passwordGroup');
+            
+            if (role === 'driver') {
+                passwordGroup.style.display = 'none';
+            } else {
+                passwordGroup.style.display = 'block';
+            }
+        }
+
+        async function addUser() {
+            const name = document.getElementById('newUserName').value.trim();
+            const email = document.getElementById('newUserEmail').value.trim();
+            const role = document.getElementById('newUserRole').value;
+            const password = document.getElementById('newUserPassword').value;
+            
+            if (!name || !email) {
+                showMessage('usersMessage', '❌ Name and email are required', 'error');
+                return;
+            }
+            
+            if (role !== 'driver' && !password) {
+                showMessage('usersMessage', '❌ Password is required for dispatchers and admins', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/users', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, role, password })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    showMessage('usersMessage', `✅ User ${name} created successfully!`, 'success');
+                    hideAddUserForm();
+                    loadUsers();
+                } else {
+                    showMessage('usersMessage', `❌ ${result.error || 'Failed to create user'}`, 'error');
+                }
+            } catch (error) {
+                showMessage('usersMessage', '❌ Error creating user', 'error');
+            }
+        }
+
+        function showBulkUpload() {
+            document.getElementById('bulkUploadForm').classList.remove('hidden');
+            document.getElementById('addUserForm').classList.add('hidden');
+        }
+
+        function hideBulkUpload() {
+            document.getElementById('bulkUploadForm').classList.add('hidden');
+            document.getElementById('csvFile').value = '';
+            document.getElementById('pasteData').value = '';
+            document.getElementById('previewContainer').classList.add('hidden');
+            bulkUsers = [];
+        }
+
+        function downloadTemplate() {
+            const csv = 'name,email,role,password\n' +
+                       'John Smith,john@company.com,driver,\n' +
+                       'Jane Doe,jane@company.com,dispatcher,password123\n' +
+                       'Admin User,admin@company.com,admin,adminpass';
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'users_template.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showMessage('usersMessage', '✅ Template downloaded!', 'success');
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                parseCSVData(e.target.result);
+            };
+            reader.readAsText(file);
+        }
+
+        function parsePastedData() {
+            const data = document.getElementById('pasteData').value.trim();
+            if (!data) {
+                showMessage('usersMessage', '❌ Please paste data first', 'error');
+                return;
+            }
+            
+            parseCSVData(data);
+        }
+
+        function parseCSVData(csvText) {
+            const lines = csvText.split('\n').filter(line => line.trim());
+            const headers = lines[0].toLowerCase().split(/[,\t]/).map(h => h.trim());
+            
+            bulkUsers = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(/[,\t]/);
+                const user = {};
+                
+                headers.forEach((header, index) => {
+                    user[header] = values[index]?.trim() || '';
+                });
+                
+                // Set default role if not specified
+                if (!user.role) user.role = 'driver';
+                
+                bulkUsers.push(user);
+            }
+            
+            showPreview();
+        }
+
+        function showPreview() {
+            const container = document.getElementById('previewContainer');
+            const table = document.getElementById('previewTable');
+            
+            if (bulkUsers.length === 0) {
+                showMessage('usersMessage', '❌ No valid data found', 'error');
+                return;
+            }
+            
+            const previewUsers = bulkUsers.slice(0, 5);
+            
+            let html = '<table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Password</th></tr></thead><tbody>';
+            
+            previewUsers.forEach(user => {
+                html += `
+                    <tr>
+                        <td>${user.name || ''}</td>
+                        <td>${user.email || ''}</td>
+                        <td>${user.role || 'driver'}</td>
+                        <td>${user.password ? '***' : 'N/A'}</td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table>';
+            
+            if (bulkUsers.length > 5) {
+                html += `<p style="margin-top: 10px; color: #666;">... and ${bulkUsers.length - 5} more users</p>`;
+            }
+            
+            table.innerHTML = html;
+            container.classList.remove('hidden');
+        }
+
+        async function uploadBulkUsers() {
+            if (bulkUsers.length === 0) {
+                showMessage('usersMessage', '❌ No users to upload', 'error');
+                return;
+            }
+            
+            showMessage('usersMessage', '📤 Uploading users...', 'info');
+            
+            try {
+                const response = await fetch('/api/users/bulk', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ users: bulkUsers })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    const { created, errors } = result.data;
+                    let message = `✅ Successfully created ${created.length} users`;
+                    
+                    if (errors.length > 0) {
+                        message += ` (${errors.length} errors)`;
+                        console.error('Bulk upload errors:', errors);
+                    }
+                    
+                    showMessage('usersMessage', message, 'success');
+                    hideBulkUpload();
+                    loadUsers();
+                } else {
+                    showMessage('usersMessage', `❌ ${result.error || 'Upload failed'}`, 'error');
+                }
+            } catch (error) {
+                showMessage('usersMessage', '❌ Error uploading users', 'error');
+            }
+        }
+
+        async function deleteUser(userId, userName) {
+            if (!confirm(`Delete user ${userName}?`)) return;
+            
+            try {
+                const response = await fetch(`/api/users/${userId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    showMessage('usersMessage', '✅ User deleted successfully', 'success');
+                    loadUsers();
+                } else {
+                    showMessage('usersMessage', '❌ Error deleting user', 'error');
+                }
+            } catch (error) {
+                showMessage('usersMessage', '❌ Error deleting user', 'error');
+            }
+        }
+
+        function searchUsers() {
+            const searchTerm = document.getElementById('userSearchInput').value.toLowerCase();
+            const roleFilter = document.getElementById('roleFilter').value;
+            
+            let filteredUsers = users;
+            
+            if (searchTerm) {
+                filteredUsers = filteredUsers.filter(user => 
+                    user.name.toLowerCase().includes(searchTerm) ||
+                    user.email.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            if (roleFilter !== 'all') {
+                filteredUsers = filteredUsers.filter(user => user.role === roleFilter);
+            }
+            
+            // Update display with filtered users
+            const tempUsers = users;
+            users = filteredUsers;
+            displayUsers();
+            users = tempUsers;
+        }
+
+        function filterUsersByRole() {
+            searchUsers();
+        }
+
+        // Placeholder for edit user function
+        function editUser(userId) {
+            showMessage('usersMessage', 'Edit functionality coming soon!', 'info');
+        }
+
+        // NOTIFICATION MANAGEMENT FUNCTIONS (existing code)
+        
         async function loadNotifications() {
             try {
                 const response = await fetch('/api/notifications');
