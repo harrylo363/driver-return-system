@@ -1610,6 +1610,11 @@
                             <div class="activity-content">
                                 <div class="activity-info">
                                     <div class="activity-driver">${notification.driver}</div>
+                                    ${notification.checkedIn && notification.checkInData ? `
+                                        <div style="font-size: 0.875rem; color: var(--success); margin-top: 0.25rem;">
+                                            <span>✓ Arrived at ${new Date(notification.checkInData.checkInTime).toLocaleTimeString()}</span>
+                                        </div>
+                                    ` : ''}
                                     <div class="activity-details">
                                         <span class="activity-detail">
                                             <span>⏱</span>
@@ -1619,20 +1624,28 @@
                                             <span>📍</span>
                                             <span>5856 Tampa FDC</span>
                                         </span>
-                                        ${notification.estimatedArrival ? `
+                                        ${notification.estimatedArrival && !notification.checkedIn ? `
                                             <span class="activity-detail">
                                                 <span>⏳</span>
                                                 <span>ETA: ${notification.estimatedArrival}</span>
                                             </span>
                                         ` : ''}
+                                        ${notification.checkedIn && notification.checkInData?.equipmentCheck?.totalIssues > 0 ? `
+                                            <span class="activity-detail" style="color: var(--warning);">
+                                                <span>⚠️</span>
+                                                <span>${notification.checkInData.equipmentCheck.totalIssues} issue(s)</span>
+                                            </span>
+                                        ` : ''}
                                     </div>
                                 </div>
                                 <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                    <span class="status-badge status-${notification.status}">
-                                        ${notification.status.replace('-', ' ')}
-                                    </span>
+                                    ${!notification.checkedIn ? `
+                                        <span class="status-badge status-${notification.status}">
+                                            ${notification.status.replace('-', ' ')}
+                                        </span>
+                                    ` : ''}
                                     ${notification.status === 'arrived' && !notification.checkedIn ? `
-                                        <button class="btn btn-primary btn-sm" onclick="openCheckInModal('${notification._id}', '${notification.driver.replace(/'/g, "\\'")}')">
+                                        <button class="btn btn-primary btn-sm" onclick="openCheckInModal('${notification._id}', '${notification.driver.replace(/'/g, "\\'")}'); event.stopPropagation();">
                                             <span>📋</span>
                                             <span>Check In</span>
                                         </button>
@@ -1647,6 +1660,7 @@
                         </div>
                     `;
                 }).join('');
+        }
         }
         
         // Update Map
