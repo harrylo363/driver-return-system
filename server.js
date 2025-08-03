@@ -20,6 +20,12 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/driver-re
 // Notification Schema
 const notificationSchema = new mongoose.Schema({
     message: String,
+    driver: String,
+    status: String,
+    location: String,
+    warehouse: String,
+    estimatedArrival: String,
+    priority: String,
     timestamp: { type: Date, default: Date.now },
     read: { type: Boolean, default: false }
 });
