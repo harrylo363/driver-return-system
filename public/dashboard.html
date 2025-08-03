@@ -1507,22 +1507,42 @@
         async function loadRecentActivity() {
             try {
                 const response = await fetch(`${API_URL}/notifications?limit=50`);
-                const result = await response.json();
                 
-                if (result.success && result.data && result.data.length > 0) {
-                    activityData = result.data;
-                    applyFilters();
+                if (response.ok) {
+                    // Handle both array and object responses
+                    const result = await response.json();
+                    const notifications = Array.isArray(result) ? result : (result.data || []);
                     
-                    // Update map markers
-                    activityData.forEach(driver => {
-                        if (driver.status !== 'completed') {
-                            addDriverMarker(driver);
-                        }
-                    });
+                    if (notifications.length > 0) {
+                        // Filter out notifications without driver info for dispatch view
+                        activityData = notifications.filter(n => n.driver && n.status);
+                        applyFilters();
+                        
+                        // Update map markers
+                        activityData.forEach(driver => {
+                            if (driver.status !== 'completed') {
+                                addDriverMarker(driver);
+                            }
+                        });
+                        
+                        // Show notification for new arrivals
+                        const newArrivals = activityData.filter(n => 
+                            n.status === 'arrived' && 
+                            !n.read && 
+                            (new Date() - new Date(n.timestamp)) < 60000 // Within last minute
+                        );
+                        
+                        newArrivals.forEach(arrival => {
+                            showToast(`🎉 ${arrival.driver} has arrived at ${arrival.warehouse || 'warehouse'}!`, 'success');
+                        });
+                    }
+                } else {
+                    console.error('Failed to load notifications');
+                    updateConnectionStatus(false);
                 }
             } catch (error) {
                 console.error('Error loading activity:', error);
-                // Don't show error toast here, handled in initialization
+                updateConnectionStatus(false);
             }
         }
         
@@ -1726,14 +1746,17 @@
         
         // Start live updates
         function startLiveUpdates() {
-            // Update every 30 seconds
+            // Update every 10 seconds for more responsive updates
             refreshInterval = setInterval(() => {
                 if (activityData.length > 0 && !activityData[0]._id.startsWith('demo-')) {
                     // Only refresh if using real data
                     loadRecentActivity();
                     loadStats();
+                } else {
+                    // Even with no data, check for new notifications
+                    loadRecentActivity();
                 }
-            }, 30000);
+            }, 10000); // Reduced from 30 seconds to 10 seconds
             
             // Check connection every 10 seconds
             connectionCheckInterval = setInterval(checkConnection, 10000);
@@ -1742,9 +1765,8 @@
         // Check connection status
         async function checkConnection() {
             try {
-                const response = await fetch(`${API_URL}/health`);
-                const result = await response.json();
-                updateConnectionStatus(result.status === 'OK');
+                const response = await fetch(`${API_URL}/notifications`);
+                updateConnectionStatus(response.ok);
             } catch (error) {
                 updateConnectionStatus(false);
             }
