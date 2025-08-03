@@ -812,7 +812,7 @@
             border: 1px solid var(--border);
             border-radius: 20px;
             width: 90%;
-            max-width: 600px;
+            max-width: 800px;
             max-height: 90vh;
             margin: 2% auto;
             overflow: hidden;
@@ -874,10 +874,13 @@
             max-height: calc(90vh - 140px);
             overflow-y: auto;
             overflow-x: hidden;
+            width: 100%;
         }
         
         .form-section {
             margin-bottom: 2rem;
+            width: 100%;
+            overflow: hidden;
         }
         
         .form-section-title {
@@ -926,11 +929,12 @@
         
         .checklist-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 1rem;
+            width: 100%;
         }
         
-        @media (max-width: 600px) {
+        @media (max-width: 700px) {
             .checklist-grid {
                 grid-template-columns: 1fr;
             }
@@ -947,6 +951,8 @@
             cursor: pointer;
             transition: all 0.2s ease;
             min-height: 80px;
+            width: 100%;
+            overflow: hidden;
         }
         
         .checklist-item:hover {
