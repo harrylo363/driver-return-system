@@ -267,6 +267,7 @@
         let markers = {};
         let notifications = [];
         let currentFilter = 'all';
+        let lastNotificationIds = new Set();
         
         // Initialize map
         function initMap() {
@@ -284,8 +285,12 @@
                 if (!response.ok) throw new Error('Failed to fetch');
                 
                 const data = await response.json();
-                notifications = Array.isArray(data) ? data : (data.data || []);
+                const newNotifications = Array.isArray(data) ? data : (data.data || []);
                 
+                // Check for new driver updates
+                checkForNewDriverUpdates(newNotifications);
+                
+                notifications = newNotifications;
                 updateDisplay();
                 updateLastUpdateTime();
             } catch (error) {
@@ -293,6 +298,49 @@
                 document.getElementById('activityList').innerHTML = 
                     '<div class="loading">Error loading data. Please check your connection.</div>';
             }
+        }
+        
+        // Check for new driver updates and show notifications
+        function checkForNewDriverUpdates(newNotifications) {
+            // Only check if we have previous data to compare
+            if (lastNotificationIds.size === 0) {
+                // First load - just store the IDs
+                newNotifications.forEach(n => {
+                    if (n._id) lastNotificationIds.add(n._id);
+                });
+                return;
+            }
+            
+            // Find new driver notifications
+            const newDriverUpdates = newNotifications.filter(n => 
+                n._id && 
+                n.driver && 
+                n.status && 
+                !lastNotificationIds.has(n._id) &&
+                // Only notify for updates within last 30 seconds
+                (new Date() - new Date(n.timestamp)) < 30000
+            );
+            
+            // Show notifications for new updates
+            newDriverUpdates.forEach(update => {
+                const icon = update.status === 'arrived' ? '🎉' : '🚚';
+                const message = update.status === 'arrived' 
+                    ? `${update.driver} has arrived at ${update.warehouse || 'the warehouse'}!`
+                    : `${update.driver} is 30 minutes away from ${update.warehouse || 'the warehouse'}!`;
+                
+                showToast(message, 'success', icon);
+                
+                // Play a sound if arrived
+                if (update.status === 'arrived') {
+                    playNotificationSound();
+                }
+            });
+            
+            // Update the stored IDs
+            lastNotificationIds.clear();
+            newNotifications.forEach(n => {
+                if (n._id) lastNotificationIds.add(n._id);
+            });
         }
         
         // Update display
@@ -467,14 +515,14 @@
         }
         
         // Show toast message
-        function showToast(message, type = 'success') {
+        function showToast(message, type = 'success', icon = null) {
             const existingToast = document.querySelector('.toast');
             if (existingToast) existingToast.remove();
             
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
             toast.innerHTML = `
-                <span>${type === 'success' ? '✅' : '❌'}</span>
+                <span style="font-size: 24px;">${icon || (type === 'success' ? '✅' : '❌')}</span>
                 <span>${message}</span>
             `;
             
@@ -483,7 +531,29 @@
             setTimeout(() => {
                 toast.style.animation = 'slideIn 0.3s ease reverse';
                 setTimeout(() => toast.remove(), 300);
-            }, 3000);
+            }, 5000); // Show for 5 seconds
+        }
+        
+        // Play notification sound
+        function playNotificationSound() {
+            try {
+                // Create a simple beep sound
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = 800;
+                oscillator.type = 'sine';
+                gainNode.gain.value = 0.3;
+                
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + 0.2);
+            } catch (error) {
+                console.log('Could not play sound:', error);
+            }
         }
         
         // Update last update time
