@@ -1296,6 +1296,100 @@
         </div>
     </div>
     
+    <!-- Check-In Modal -->
+    <div id="checkInModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <span>📋</span>
+                    <span>Equipment Check-In</span>
+                </h2>
+                <button class="modal-close" onclick="closeCheckInModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Driver Info -->
+                <div class="form-section">
+                    <div class="form-group">
+                        <label class="form-label">Driver Name</label>
+                        <input type="text" class="form-input" id="checkInDriver" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Check-In Time</label>
+                        <input type="text" class="form-input" id="checkInTime" readonly>
+                    </div>
+                </div>
+                
+                <!-- Equipment Checklist -->
+                <div class="form-section">
+                    <h3 class="form-section-title">
+                        <span>🔧</span>
+                        <span>Equipment Inspection</span>
+                    </h3>
+                    <div class="checklist-grid" id="equipmentChecklist">
+                        <!-- Checklist items will be populated by JavaScript -->
+                    </div>
+                </div>
+                
+                <!-- Vehicle Information -->
+                <div class="form-section">
+                    <h3 class="form-section-title">
+                        <span>🚚</span>
+                        <span>Vehicle Information</span>
+                    </h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label">Truck Number</label>
+                            <input type="text" class="form-input" id="truckNumber" placeholder="e.g., T-1234">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Trailer Number</label>
+                            <input type="text" class="form-input" id="trailerNumber" placeholder="e.g., TR-5678">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Mileage</label>
+                            <input type="number" class="form-input" id="mileage" placeholder="Current odometer reading">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Fuel Level</label>
+                            <select class="form-select" id="fuelLevel">
+                                <option value="">Select fuel level</option>
+                                <option value="full">Full</option>
+                                <option value="3/4">3/4</option>
+                                <option value="1/2">1/2</option>
+                                <option value="1/4">1/4</option>
+                                <option value="empty">Empty</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Additional Notes -->
+                <div class="form-section">
+                    <h3 class="form-section-title">
+                        <span>📝</span>
+                        <span>Additional Notes</span>
+                    </h3>
+                    <div class="form-group">
+                        <label class="form-label">Comments or Observations</label>
+                        <textarea class="form-textarea" id="additionalNotes" placeholder="Any additional information about the vehicle or equipment condition..."></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="summary-text">
+                    Issues Found: <span class="summary-count" id="issueCount">0</span>
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <button class="btn btn-secondary" onclick="closeCheckInModal()">Cancel</button>
+                    <button class="btn btn-primary" onclick="submitCheckIn()">
+                        <span>✓</span>
+                        <span>Complete Check-In</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
