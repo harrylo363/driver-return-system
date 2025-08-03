@@ -1401,6 +1401,22 @@
         let currentFilter = 'all';
         let isHeatmapVisible = false;
         let refreshInterval;
+        let currentCheckInId = null;
+        let equipmentIssues = {};
+        
+        // Equipment checklist items
+        const equipmentItems = [
+            { id: 'tires', label: 'Tires & Wheels', icon: '🛞' },
+            { id: 'brakes', label: 'Brakes', icon: '🛑' },
+            { id: 'lights', label: 'Lights & Signals', icon: '💡' },
+            { id: 'fluids', label: 'Fluid Levels', icon: '🛢️' },
+            { id: 'belts', label: 'Belts & Hoses', icon: '🔗' },
+            { id: 'cabin', label: 'Cabin Condition', icon: '🚪' },
+            { id: 'cargo', label: 'Cargo Area', icon: '📦' },
+            { id: 'documents', label: 'Documents', icon: '📄' },
+            { id: 'safety', label: 'Safety Equipment', icon: '🦺' },
+            { id: 'refrigeration', label: 'Refrigeration Unit', icon: '❄️' }
+        ];
         
         // Initialize Dashboard
         document.addEventListener('DOMContentLoaded', function() {
@@ -1863,10 +1879,166 @@
             }, 5000);
         }
         
-        // Cleanup
-        window.addEventListener('beforeunload', () => {
-            if (refreshInterval) clearInterval(refreshInterval);
-        });
+        // Check-In Modal Functions
+        function openCheckInModal(notificationId, driverName) {
+            currentCheckInId = notificationId;
+            equipmentIssues = {};
+            
+            // Set driver info
+            document.getElementById('checkInDriver').value = driverName;
+            document.getElementById('checkInTime').value = new Date().toLocaleString();
+            
+            // Reset form
+            document.getElementById('truckNumber').value = '';
+            document.getElementById('trailerNumber').value = '';
+            document.getElementById('mileage').value = '';
+            document.getElementById('fuelLevel').value = '';
+            document.getElementById('additionalNotes').value = '';
+            
+            // Build equipment checklist
+            const checklistContainer = document.getElementById('equipmentChecklist');
+            checklistContainer.innerHTML = equipmentItems.map(item => `
+                <div class="checklist-item" id="item-${item.id}">
+                    <div class="checklist-checkbox">
+                        <span style="display: none;">✓</span>
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span>${item.icon}</span>
+                            <span class="checklist-label">${item.label}</span>
+                        </div>
+                        <div class="issue-details" id="issue-${item.id}">
+                            <input type="text" class="issue-input" placeholder="Describe the issue..." 
+                                   onkeyup="updateIssueDescription('${item.id}', this.value)">
+                        </div>
+                    </div>
+                    <div class="checklist-status">
+                        <button class="status-btn ok" onclick="setItemStatus('${item.id}', 'ok')">OK</button>
+                        <button class="status-btn issue" onclick="setItemStatus('${item.id}', 'issue')">Issue</button>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Show modal
+            document.getElementById('checkInModal').style.display = 'block';
+            updateIssueCount();
+        }
+        
+        function closeCheckInModal() {
+            document.getElementById('checkInModal').style.display = 'none';
+            currentCheckInId = null;
+            equipmentIssues = {};
+        }
+        
+        function setItemStatus(itemId, status) {
+            const item = document.getElementById(`item-${itemId}`);
+            const checkbox = item.querySelector('.checklist-checkbox');
+            const checkmark = checkbox.querySelector('span');
+            const okBtn = item.querySelector('.status-btn.ok');
+            const issueBtn = item.querySelector('.status-btn.issue');
+            const issueDetails = document.getElementById(`issue-${itemId}`);
+            
+            // Update visual state
+            if (status === 'ok') {
+                item.classList.add('checked');
+                item.classList.remove('issue');
+                checkbox.style.background = 'var(--success)';
+                checkbox.style.borderColor = 'var(--success)';
+                checkmark.style.display = 'block';
+                okBtn.classList.add('active');
+                issueBtn.classList.remove('active');
+                issueDetails.classList.remove('show');
+                delete equipmentIssues[itemId];
+            } else if (status === 'issue') {
+                item.classList.add('issue');
+                item.classList.remove('checked');
+                checkbox.style.background = 'var(--danger)';
+                checkbox.style.borderColor = 'var(--danger)';
+                checkmark.style.display = 'block';
+                checkmark.textContent = '!';
+                okBtn.classList.remove('active');
+                issueBtn.classList.add('active');
+                issueDetails.classList.add('show');
+                equipmentIssues[itemId] = { status: 'issue', description: '' };
+            }
+            
+            updateIssueCount();
+        }
+        
+        function updateIssueDescription(itemId, description) {
+            if (equipmentIssues[itemId]) {
+                equipmentIssues[itemId].description = description;
+            }
+        }
+        
+        function updateIssueCount() {
+            const count = Object.keys(equipmentIssues).length;
+            document.getElementById('issueCount').textContent = count;
+        }
+        
+        async function submitCheckIn() {
+            const checkInData = {
+                driverId: currentCheckInId,
+                checkInTime: new Date().toISOString(),
+                vehicleInfo: {
+                    truckNumber: document.getElementById('truckNumber').value,
+                    trailerNumber: document.getElementById('trailerNumber').value,
+                    mileage: document.getElementById('mileage').value,
+                    fuelLevel: document.getElementById('fuelLevel').value
+                },
+                equipmentCheck: {
+                    items: equipmentItems.map(item => {
+                        const itemElement = document.getElementById(`item-${item.id}`);
+                        const isChecked = itemElement.classList.contains('checked');
+                        const hasIssue = itemElement.classList.contains('issue');
+                        
+                        return {
+                            id: item.id,
+                            label: item.label,
+                            status: isChecked ? 'ok' : (hasIssue ? 'issue' : 'not_checked'),
+                            issue: equipmentIssues[item.id]?.description || ''
+                        };
+                    }),
+                    totalIssues: Object.keys(equipmentIssues).length
+                },
+                additionalNotes: document.getElementById('additionalNotes').value
+            };
+            
+            // Find the notification and update it
+            const notification = notifications.find(n => n._id === currentCheckInId);
+            if (notification) {
+                notification.checkedIn = true;
+                notification.checkInData = checkInData;
+                
+                // Update the notification on the server (if connected)
+                try {
+                    await fetch(`/api/notifications/${currentCheckInId}/checkin`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(checkInData)
+                    });
+                } catch (error) {
+                    console.log('Offline mode - check-in saved locally');
+                }
+                
+                // Update display
+                const driverNotifications = notifications.filter(n => n.driver && n.status);
+                updateDisplay(driverNotifications);
+                
+                // Show appropriate toast based on issues
+                if (checkInData.equipmentCheck.totalIssues > 0) {
+                    showToast('Check-In Complete', 
+                             `${notification.driver} checked in with ${checkInData.equipmentCheck.totalIssues} issue(s) reported`, 
+                             'warning');
+                } else {
+                    showToast('Check-In Complete', 
+                             `${notification.driver} checked in successfully - All equipment OK`, 
+                             'success');
+                }
+            }
+            
+            closeCheckInModal();
+        }
     </script>
 </body>
 </html>
