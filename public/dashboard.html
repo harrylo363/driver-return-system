@@ -873,6 +873,7 @@
             padding: 1.5rem;
             max-height: calc(90vh - 140px);
             overflow-y: auto;
+            overflow-x: hidden;
         }
         
         .form-section {
@@ -1937,19 +1938,19 @@
                     <div class="checklist-checkbox">
                         <span style="display: none;">✓</span>
                     </div>
-                    <div style="flex: 1;">
-                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <div class="checklist-item-content">
+                        <div class="checklist-item-header">
                             <span>${item.icon}</span>
-                            <span class="checklist-label">${item.label}</span>
+                            <span class="checklist-label" title="${item.label}">${item.label}</span>
+                            <div class="checklist-status">
+                                <button class="status-btn ok" onclick="setItemStatus('${item.id}', 'ok')">OK</button>
+                                <button class="status-btn issue" onclick="setItemStatus('${item.id}', 'issue')">Issue</button>
+                            </div>
                         </div>
                         <div class="issue-details" id="issue-${item.id}">
                             <input type="text" class="issue-input" placeholder="Describe the issue..." 
                                    onkeyup="updateIssueDescription('${item.id}', this.value)">
                         </div>
-                    </div>
-                    <div class="checklist-status">
-                        <button class="status-btn ok" onclick="setItemStatus('${item.id}', 'ok')">OK</button>
-                        <button class="status-btn issue" onclick="setItemStatus('${item.id}', 'issue')">Issue</button>
                     </div>
                 </div>
             `).join('');
