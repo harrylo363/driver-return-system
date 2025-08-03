@@ -604,11 +604,10 @@
     </div>
 
     <script>
-        let notifications = [];
         let users = [];
         let bulkUsers = [];
         let isLoggedIn = false;
-        let currentTab = 'dashboard';
+        let currentTab = 'users';
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
@@ -651,8 +650,7 @@
                 isLoggedIn = true;
                 document.getElementById('loginCard').classList.add('hidden');
                 document.getElementById('mainPanel').classList.remove('hidden');
-                showMessage('dashboardMessage', '🎉 Welcome to the Admin Panel!', 'success');
-                loadNotifications();
+                showMessage('usersMessage', '🎉 Welcome to the Admin Panel!', 'success');
                 loadUsers();
             } else {
                 showMessage('loginMessage', '❌ Invalid credentials', 'error');
@@ -668,7 +666,7 @@
 
         function showTab(tabName) {
             // Hide all tabs
-            ['dashboard', 'users', 'notifications', 'drivers', 'settings'].forEach(tab => {
+            ['users', 'settings'].forEach(tab => {
                 const tabElement = document.getElementById(tab + 'Tab');
                 if (tabElement) tabElement.classList.add('hidden');
             });
@@ -684,9 +682,7 @@
             currentTab = tabName;
             
             // Refresh data when switching tabs
-            if (tabName === 'drivers') {
-                updateDriverStats();
-            } else if (tabName === 'users') {
+            if (tabName === 'users') {
                 loadUsers();
             }
         }
