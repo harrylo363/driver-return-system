@@ -1947,14 +1947,19 @@
             const issueBtn = item.querySelector('.status-btn.issue');
             const issueDetails = document.getElementById(`issue-${itemId}`);
             
+            // Reset checkbox first
+            checkbox.style.background = '';
+            checkbox.style.borderColor = '';
+            
             // Update visual state
             if (status === 'ok') {
                 item.classList.add('checked');
                 item.classList.remove('issue');
                 checkbox.style.background = 'var(--success)';
                 checkbox.style.borderColor = 'var(--success)';
-                checkmark.textContent = '✓';  // FIX: Reset to checkmark
+                checkmark.textContent = '✓';  // Always set to checkmark
                 checkmark.style.display = 'block';
+                checkmark.style.color = 'white';
                 okBtn.classList.add('active');
                 issueBtn.classList.remove('active');
                 issueDetails.classList.remove('show');
@@ -1964,8 +1969,9 @@
                 item.classList.remove('checked');
                 checkbox.style.background = 'var(--danger)';
                 checkbox.style.borderColor = 'var(--danger)';
-                checkmark.textContent = '!';
+                checkmark.textContent = '!';  // Set to exclamation
                 checkmark.style.display = 'block';
+                checkmark.style.color = 'white';
                 okBtn.classList.remove('active');
                 issueBtn.classList.add('active');
                 issueDetails.classList.add('show');
