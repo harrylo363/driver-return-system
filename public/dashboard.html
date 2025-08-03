@@ -1089,36 +1089,51 @@
                 maxZoom: 20
             }).addTo(map);
             
-            // Add warehouses
-            const warehouses = {
-                'Miami Distribution Center': [25.7617, -80.1918],
-                'Orlando Warehouse': [28.5383, -81.3792],
-                'Fort Lauderdale Hub': [26.1224, -80.1373],
-                'Tampa Depot': [27.9506, -82.4572]
+            // Add warehouse
+            const warehouse = {
+                name: '5856 Tampa FDC',
+                address: '6995 N US-41, Apollo Beach, FL 33572',
+                coords: [27.7728, -82.4090] // Apollo Beach coordinates
             };
             
-            Object.entries(warehouses).forEach(([name, coords]) => {
-                L.marker(coords, {
-                    icon: L.divIcon({
-                        className: 'warehouse-marker',
-                        html: `<div style="
-                            background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
-                            color: white;
-                            width: 40px;
-                            height: 40px;
-                            border-radius: 50%;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            font-weight: bold;
-                            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5);
-                            border: 3px solid rgba(255, 255, 255, 0.2);
-                        ">🏢</div>`,
-                        iconSize: [40, 40],
-                        iconAnchor: [20, 40]
-                    })
-                }).addTo(map).bindPopup(`<strong>${name}</strong><br>Distribution Center`);
-            });
+            // Center map on warehouse
+            map.setView(warehouse.coords, 12);
+            
+            // Add warehouse marker
+            L.marker(warehouse.coords, {
+                icon: L.divIcon({
+                    className: 'warehouse-marker',
+                    html: `<div style="
+                        background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
+                        color: white;
+                        width: 50px;
+                        height: 50px;
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-weight: bold;
+                        font-size: 20px;
+                        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+                        border: 3px solid rgba(255, 255, 255, 0.3);
+                    ">🏢</div>`,
+                    iconSize: [50, 50],
+                    iconAnchor: [25, 50]
+                })
+            }).addTo(map).bindPopup(`
+                <strong style="font-size: 16px;">${warehouse.name}</strong><br>
+                <span style="color: #666;">${warehouse.address}</span><br>
+                <span style="color: #3B82F6; font-weight: bold;">Distribution Center</span>
+            `).openPopup();
+            
+            // Add a subtle circle around warehouse to show service area
+            L.circle(warehouse.coords, {
+                color: '#3B82F6',
+                fillColor: '#3B82F6',
+                fillOpacity: 0.1,
+                weight: 2,
+                radius: 10000 // 10km radius
+            }).addTo(map);
         }
         
         // Load Notifications
@@ -1182,7 +1197,7 @@
                                         </span>
                                         <span class="activity-detail">
                                             <span>📍</span>
-                                            <span>${notification.warehouse || 'Main Hub'}</span>
+                                            <span>5856 Tampa FDC</span>
                                         </span>
                                         ${notification.estimatedArrival ? `
                                             <span class="activity-detail">
@@ -1252,7 +1267,7 @@
                             marker.bindPopup(`
                                 <strong>${notification.driver}</strong><br>
                                 Status: ${notification.status}<br>
-                                ${notification.warehouse || 'Main Hub'}<br>
+                                Destination: 5856 Tampa FDC<br>
                                 ${notification.estimatedArrival ? `ETA: ${notification.estimatedArrival}` : ''}
                             `);
                             
@@ -1356,8 +1371,8 @@
         
         // Map Functions
         function centerMap() {
-            map.setView([25.7617, -80.1918], 10);
-            showToast('Map Centered', 'View reset to Miami region', 'info');
+            map.setView([27.7728, -82.4090], 12);
+            showToast('Map Centered', 'View reset to 5856 Tampa FDC', 'info');
         }
         
         function toggleHeatmap() {
@@ -1379,23 +1394,19 @@
             const demoDrivers = ['John Smith', 'Sarah Johnson', 'Mike Davis', 'Lisa Wilson', 
                                'Robert Taylor', 'Maria Garcia', 'James Brown', 'Jennifer Lee'];
             const statuses = ['en-route', 'arrived', 'en-route', 'delayed'];
-            const warehouses = Object.keys({
-                'Miami Distribution Center': [25.7617, -80.1918],
-                'Fort Lauderdale Hub': [26.1224, -80.1373]
-            });
             
             const demoNotifications = demoDrivers.map((driver, index) => {
-                const warehouse = warehouses[index % warehouses.length];
                 const status = statuses[index % statuses.length];
-                const baseLat = 25.7617 + (Math.random() - 0.5) * 0.3;
-                const baseLng = -80.1918 + (Math.random() - 0.5) * 0.3;
+                // Generate locations around Apollo Beach/Tampa area
+                const baseLat = 27.7728 + (Math.random() - 0.5) * 0.3;
+                const baseLng = -82.4090 + (Math.random() - 0.5) * 0.3;
                 
                 return {
                     _id: 'demo-' + Date.now() + '-' + index,
                     driver: driver,
                     status: status,
                     location: `${baseLat.toFixed(6)}, ${baseLng.toFixed(6)}`,
-                    warehouse: warehouse,
+                    warehouse: '5856 Tampa FDC',
                     timestamp: new Date(Date.now() - Math.random() * 3600000),
                     estimatedArrival: status === 'en-route' ? `${Math.floor(Math.random() * 45 + 10)} min` : null
                 };
