@@ -572,13 +572,14 @@
 
         async function checkDatabaseConnection() {
             try {
-                const response = await fetch('/api/health');
-                const data = await response.json();
+                const response = await fetch('/api/notifications');
                 
-                const statusEl = document.getElementById('connectionStatus');
-                if (data.status === 'OK') {
+                // Check if response is ok (status 200-299)
+                if (response.ok) {
+                    const statusEl = document.getElementById('connectionStatus');
                     statusEl.innerHTML = '<span class="status-connected">🟢 Connected to Database</span>';
                 } else {
+                    const statusEl = document.getElementById('connectionStatus');
                     statusEl.innerHTML = '<span class="status-disconnected">🔴 Database Offline</span>';
                 }
             } catch (error) {
@@ -658,9 +659,8 @@
                     body: JSON.stringify(notificationData)
                 });
 
-                const result = await response.json();
-
-                if (response.ok && result.success) {
+                if (response.ok) {
+                    const result = await response.json();
                     showMessage(`✅ Status updated: ${status}`, 'success');
                     addToHistory(status);
                     
@@ -669,7 +669,7 @@
                         sendStatusNotification(status);
                     }
                 } else {
-                    throw new Error(result.error || 'Failed to update status');
+                    throw new Error('Failed to update status');
                 }
 
             } catch (error) {
