@@ -440,22 +440,7 @@
                 <div class="form-group">
                     <label class="form-label" for="driverSelect">Driver Name</label>
                     <select id="driverSelect" class="driver-select">
-                        <option value="">-- Choose your name --</option>
-                        <option value="John Smith">John Smith</option>
-                        <option value="Sarah Johnson">Sarah Johnson</option>
-                        <option value="Mike Davis">Mike Davis</option>
-                        <option value="Lisa Wilson">Lisa Wilson</option>
-                        <option value="David Brown">David Brown</option>
-                        <option value="Anna Martinez">Anna Martinez</option>
-                        <option value="James Miller">James Miller</option>
-                        <option value="Maria Garcia">Maria Garcia</option>
-                        <option value="Robert Taylor">Robert Taylor</option>
-                        <option value="Jennifer Anderson">Jennifer Anderson</option>
-                        <option value="Tom Wilson">Tom Wilson</option>
-                        <option value="Chris Lee">Chris Lee</option>
-                        <option value="Patricia Thomas">Patricia Thomas</option>
-                        <option value="Kevin White">Kevin White</option>
-                        <option value="Sandra Clark">Sandra Clark</option>
+                        <option value="">-- Loading drivers... --</option>
                     </select>
                 </div>
                 
@@ -512,6 +497,9 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
+            // Load drivers from database
+            loadDriverList();
+            
             // Check if already logged in
             const savedDriver = localStorage.getItem('currentDriver');
             if (savedDriver) {
@@ -529,6 +517,51 @@
             // Check database connection
             checkDatabaseConnection();
         });
+
+        async function loadDriverList() {
+            try {
+                const response = await fetch('/api/drivers');
+                if (response.ok) {
+                    const result = await response.json();
+                    const drivers = result.data || [];
+                    
+                    const select = document.getElementById('driverSelect');
+                    select.innerHTML = '<option value="">-- Choose your name --</option>';
+                    
+                    drivers.forEach(driver => {
+                        const option = document.createElement('option');
+                        option.value = driver.name;
+                        option.textContent = driver.name;
+                        select.appendChild(option);
+                    });
+                    
+                    // If previously logged in driver exists, select them
+                    const savedDriver = localStorage.getItem('currentDriver');
+                    if (savedDriver && drivers.some(d => d.name === savedDriver)) {
+                        select.value = savedDriver;
+                        document.getElementById('loginBtn').disabled = false;
+                    }
+                } else {
+                    // Fallback to hardcoded list if API fails
+                    const select = document.getElementById('driverSelect');
+                    select.innerHTML = `
+                        <option value="">-- Choose your name --</option>
+                        <option value="John Smith">John Smith</option>
+                        <option value="Sarah Johnson">Sarah Johnson</option>
+                        <option value="Mike Davis">Mike Davis</option>
+                        <option value="Demo Driver">Demo Driver</option>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading drivers:', error);
+                // Use fallback list
+                const select = document.getElementById('driverSelect');
+                select.innerHTML = `
+                    <option value="">-- Choose your name --</option>
+                    <option value="Demo Driver">Demo Driver</option>
+                `;
+            }
+        }
 
         function checkNotificationPermission() {
             if ('Notification' in window) {
