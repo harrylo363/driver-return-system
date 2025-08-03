@@ -409,47 +409,12 @@
         <!-- Main Panel -->
         <div class="card hidden" id="mainPanel">
             <div class="tab-navigation">
-                <button class="tab-btn active" onclick="showTab('dashboard')">📊 Dashboard</button>
-                <button class="tab-btn" onclick="showTab('users')">👥 Users</button>
-                <button class="tab-btn" onclick="showTab('notifications')">🔔 Notifications</button>
-                <button class="tab-btn" onclick="showTab('drivers')">🚚 Drivers</button>
+                <button class="tab-btn active" onclick="showTab('users')">👥 Users</button>
                 <button class="tab-btn" onclick="showTab('settings')">⚙️ Settings</button>
             </div>
 
-            <!-- Dashboard Tab -->
-            <div id="dashboardTab">
-                <h2>📊 Fleet Dashboard</h2>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-number" id="totalNotifications">0</div>
-                        <div class="stat-label">Total Notifications</div>
-                    </div>
-                    <div class="stat-card" style="border-left-color: #28a745;">
-                        <div class="stat-number" id="arrivedCount">0</div>      
-                        <div class="stat-label">Drivers Arrived</div>
-                    </div>
-                    <div class="stat-card" style="border-left-color: #ffc107;">
-                        <div class="stat-number" id="enRouteCount">0</div>
-                        <div class="stat-label">Drivers En Route</div>
-                    </div>
-                    <div class="stat-card" style="border-left-color: #17a2b8;">
-                        <div class="stat-number" id="todayCount">0</div>
-                        <div class="stat-label">Updates Today</div>
-                    </div>
-                </div>
-                
-                <div style="margin: 30px 0;">
-                    <h3>🚀 Quick Actions</h3>
-                    <button class="btn btn-primary" onclick="refreshData()">🔄 Refresh Data</button>
-                    <button class="btn btn-success" onclick="exportData()">📊 Export CSV</button>
-                    <button class="btn btn-danger" onclick="clearOldData()">🗑️ Clear Old Data</button>
-                </div>
-                
-                <div id="dashboardMessage"></div>
-            </div>
-
             <!-- Users Tab -->
-            <div id="usersTab" class="hidden">
+            <div id="usersTab">
                 <h2>👥 User Management</h2>
                 
                 <div style="margin-bottom: 30px;">
