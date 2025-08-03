@@ -1492,7 +1492,7 @@
         // Initialize Map with Dark Theme
         function initializeMap() {
             map = L.map('map', {
-                center: [25.7617, -80.1918],
+                center: [26.664, -81.619],
                 zoom: 10,
                 zoomControl: false
             });
@@ -1509,11 +1509,11 @@
                 maxZoom: 20
             }).addTo(map);
             
-            // Add warehouse
+            // Add warehouse - using coordinates from your actual data
             const warehouse = {
                 name: '5856 Tampa FDC',
-                address: '6995 N US-41, Apollo Beach, FL 33572',
-                coords: [27.7728, -82.4090] // Apollo Beach coordinates
+                address: 'Distribution Center',
+                coords: [26.664, -81.619] // Fort Myers area based on your data
             };
             
             // Center map on warehouse
@@ -1556,16 +1556,47 @@
             }).addTo(map);
         }
         
-        // Load Notifications
+        // Load Notifications - FIXED VERSION
         async function loadNotifications() {
             try {
+                console.log('Loading notifications...');
                 const response = await fetch('/api/notifications');
+                console.log('Response status:', response.status);
+                
                 if (response.ok) {
                     const data = await response.json();
+                    console.log('Data received:', data);
                     notifications = Array.isArray(data) ? data : (data.data || []);
                     
-                    // Filter driver notifications
+                    // Process notifications to extract driver info from message if needed
+                    notifications = notifications.map(n => {
+                        // If driver/status missing, try to extract from message
+                        if (!n.driver && n.message) {
+                            const match = n.message.match(/^(.*?)\s+is\s+(.*?)$/);
+                            if (match) {
+                                n.driver = match[1];
+                                const statusText = match[2];
+                                if (statusText.includes('30 minutes')) {
+                                    n.status = 'en-route';
+                                    n.estimatedArrival = '30 minutes';
+                                } else if (statusText === 'arrived') {
+                                    n.status = 'arrived';
+                                }
+                            }
+                        }
+                        
+                        // Normalize warehouse name
+                        if (n.warehouse) {
+                            n.warehouse = '5856 Tampa FDC'; // Standardize all warehouse names
+                        }
+                        
+                        return n;
+                    });
+                    
+                    // Filter driver notifications - now should catch more entries
                     const driverNotifications = notifications.filter(n => n.driver && n.status);
+                    
+                    console.log('Processed notifications:', driverNotifications.length);
                     
                     updateDisplay(driverNotifications);
                     updateMap(driverNotifications);
@@ -1573,14 +1604,18 @@
                     
                     // Update last sync time
                     document.getElementById('lastUpdate').innerHTML = `Last updated: ${new Date().toLocaleTimeString()}`;
+                } else {
+                    console.error('Response not OK:', response.status, response.statusText);
+                    document.getElementById('lastUpdate').innerHTML = `<span style="color: var(--danger);">Connection Error</span>`;
                 }
             } catch (error) {
                 console.error('Error loading notifications:', error);
+                document.getElementById('lastUpdate').innerHTML = `<span style="color: var(--danger);">Failed to load data</span>`;
                 showToast('Connection Error', 'Unable to load fleet data', 'error');
             }
         }
         
-        // Update Display
+        // Update Display - FIXED VERSION
         function updateDisplay(driverNotifications) {
             const filtered = currentFilter === 'all' 
                 ? driverNotifications 
@@ -1660,7 +1695,6 @@
                         </div>
                     `;
                 }).join('');
-        }
         }
         
         // Update Map
@@ -1818,7 +1852,7 @@
         
         // Map Functions
         function centerMap() {
-            map.setView([27.7728, -82.4090], 12);
+            map.setView([26.664, -81.619], 12);
             showToast('Map Centered', 'View reset to 5856 Tampa FDC', 'info');
         }
         
@@ -1844,9 +1878,9 @@
             
             const demoNotifications = demoDrivers.map((driver, index) => {
                 const status = statuses[index % statuses.length];
-                // Generate locations around Apollo Beach/Tampa area
-                const baseLat = 27.7728 + (Math.random() - 0.5) * 0.3;
-                const baseLng = -82.4090 + (Math.random() - 0.5) * 0.3;
+                // Generate locations around Fort Myers area
+                const baseLat = 26.664 + (Math.random() - 0.5) * 0.3;
+                const baseLng = -81.619 + (Math.random() - 0.5) * 0.3;
                 
                 return {
                     _id: 'demo-' + Date.now() + '-' + index,
