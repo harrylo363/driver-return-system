@@ -59,12 +59,6 @@
             border: 2px solid #f5c6cb;
         }
         
-        .connection-status.demo {
-            background: #fff3cd;
-            color: #856404;
-            border: 2px solid #ffeaa7;
-        }
-        
         .card {
             background: white;
             border-radius: 15px;
@@ -95,7 +89,7 @@
             color: #555;
         }
         
-        .form-group input, .form-group select, .form-group textarea {
+        .form-group input, .form-group select {
             width: 100%;
             padding: 12px;
             border: 2px solid #e1e5e9;
@@ -105,7 +99,7 @@
             transition: all 0.3s;
         }
         
-        .form-group input:focus, .form-group select:focus {
+        .form-group input:focus {
             outline: none;
             border-color: #667eea;
             background: white;
@@ -184,12 +178,6 @@
             border: 1px solid #bee5eb;
         }
         
-        .warning {
-            background: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
-        }
-        
         .tab-navigation {
             display: flex;
             gap: 10px;
@@ -224,7 +212,7 @@
         
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
             margin: 25px 0;
         }
@@ -262,6 +250,8 @@
             padding: 25px;
             border-radius: 12px;
             margin-top: 25px;
+            max-height: 600px;
+            overflow-y: auto;
         }
         
         .data-item {
@@ -283,31 +273,17 @@
             box-shadow: 0 6px 20px rgba(0,0,0,0.1);
         }
         
-        .data-item.admin { border-left-color: #dc3545; }
-        .data-item.dispatcher { border-left-color: #ffc107; }
-        .data-item.driver { border-left-color: #28a745; }
-        .data-item.critical { border-left-color: #dc3545; background: #fff5f5; }
-        .data-item.issues { border-left-color: #ffc107; background: #fffbf0; }
+        .data-item.arrived { border-left-color: #28a745; }
+        .data-item.en-route { border-left-color: #ffc107; }
+        .data-item.delayed { border-left-color: #dc3545; }
         
         .data-info {
             flex: 1;
-            min-width: 250px;
         }
         
         .data-actions {
             display: flex;
             gap: 8px;
-            flex-wrap: wrap;
-        }
-        
-        .data-actions button {
-            padding: 8px 16px;
-            font-size: 12px;
-            border-radius: 6px;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
         }
         
         .status-badge {
@@ -316,11 +292,13 @@
             font-size: 12px;
             font-weight: 700;
             text-transform: uppercase;
+            display: inline-block;
+            margin-top: 5px;
         }
         
-        .status-good { background: #d4edda; color: #155724; }
-        .status-issues { background: #fff3cd; color: #856404; }
-        .status-critical { background: #f8d7da; color: #721c24; }
+        .status-arrived { background: #d4edda; color: #155724; }
+        .status-en-route { background: #fff3cd; color: #856404; }
+        .status-delayed { background: #f8d7da; color: #721c24; }
         
         .empty-state {
             text-align: center;
@@ -334,21 +312,18 @@
             opacity: 0.5;
         }
         
-        .url-setup {
-            background: #e3f2fd;
-            border: 2px solid #2196f3;
-            padding: 20px;
-            border-radius: 12px;
+        .search-box {
+            display: flex;
+            gap: 10px;
             margin-bottom: 20px;
         }
         
-        .url-input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #2196f3;
+        .search-box input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e1e5e9;
             border-radius: 8px;
             font-size: 16px;
-            margin: 10px 0;
         }
         
         @media (max-width: 768px) {
@@ -360,8 +335,8 @@
 </head>
 <body>
     <!-- Connection Status -->
-    <div id="connectionStatus" class="connection-status demo">
-        🟡 Railway Setup
+    <div id="connectionStatus" class="connection-status disconnected">
+        🔴 Disconnected
     </div>
 
     <div class="container">
@@ -370,29 +345,8 @@
             <p>Driver Return System - Fleet Management</p>
         </div>
 
-        <!-- Railway URL Setup -->
-        <div class="card" id="setupCard">
-            <h2>🚀 Quick Setup</h2>
-            <div class="url-setup">
-                <h3>Step 1: Enter Your Railway URL</h3>
-                <p><strong>Copy this exactly:</strong> <code>https://driver-return-system-production.up.railway.app</code></p>
-                <input type="text" id="railwayUrl" class="url-input" 
-                       placeholder="Paste your Railway URL here"
-                       value="https://driver-return-system-production.up.railway.app">
-                <div style="margin: 15px 0;">
-                    <button class="btn btn-success" onclick="connectToRailway()">🔗 Connect to Railway</button>
-                    <button class="btn btn-warning" onclick="useDemoMode()">📋 Use Demo Mode Instead</button>
-                </div>
-                <div style="font-size: 14px; color: #666; margin-top: 15px;">
-                    <strong>Demo Mode:</strong> Test all features without connecting to your database<br>
-                    <strong>Railway Mode:</strong> Connect to your live Railway app and MongoDB database
-                </div>
-            </div>
-            <div id="setupMessage"></div>
-        </div>
-
         <!-- Login Card -->
-        <div class="card hidden" id="loginCard">
+        <div class="card" id="loginCard">
             <h2>🔐 Admin Login</h2>
             <div class="login-section">
                 <div class="form-group">
@@ -415,8 +369,8 @@
         <div class="card hidden" id="mainPanel">
             <div class="tab-navigation">
                 <button class="tab-btn active" onclick="showTab('dashboard')">📊 Dashboard</button>
-                <button class="tab-btn" onclick="showTab('users')">👥 Users</button>
-                <button class="tab-btn" onclick="showTab('reports')">🚛 Reports</button>
+                <button class="tab-btn" onclick="showTab('notifications')">🔔 Notifications</button>
+                <button class="tab-btn" onclick="showTab('drivers')">👥 Drivers</button>
                 <button class="tab-btn" onclick="showTab('settings')">⚙️ Settings</button>
             </div>
 
@@ -425,196 +379,80 @@
                 <h2>📊 Fleet Dashboard</h2>
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <div class="stat-number" id="totalUsers">6</div>
-                        <div class="stat-label">Total Users</div>
+                        <div class="stat-number" id="totalNotifications">0</div>
+                        <div class="stat-label">Total Notifications</div>
                     </div>
                     <div class="stat-card" style="border-left-color: #28a745;">
-                        <div class="stat-number" id="activeDrivers">4</div>      
-                        <div class="stat-label">Active Drivers</div>
+                        <div class="stat-number" id="arrivedCount">0</div>      
+                        <div class="stat-label">Drivers Arrived</div>
                     </div>
                     <div class="stat-card" style="border-left-color: #ffc107;">
-                        <div class="stat-number" id="pendingReports">3</div>
-                        <div class="stat-label">Pending Reports</div>
+                        <div class="stat-number" id="enRouteCount">0</div>
+                        <div class="stat-label">Drivers En Route</div>
                     </div>
-                    <div class="stat-card" style="border-left-color: #dc3545;">
-                        <div class="stat-number" id="criticalIssues">1</div>
-                        <div class="stat-label">Critical Issues</div>
+                    <div class="stat-card" style="border-left-color: #17a2b8;">
+                        <div class="stat-number" id="todayCount">0</div>
+                        <div class="stat-label">Updates Today</div>
                     </div>
                 </div>
                 
                 <div style="margin: 30px 0;">
                     <h3>🚀 Quick Actions</h3>
-                    <button class="btn btn-primary" onclick="showTab('users')">👥 Manage Users</button>
-                    <button class="btn btn-success" onclick="showTab('reports')">📋 View Reports</button>
-                    <button class="btn btn-info" onclick="testConnection()">🔍 Test Connection</button>
-                    <button class="btn btn-warning" onclick="exportData()">📊 Export Data</button>
+                    <button class="btn btn-primary" onclick="refreshData()">🔄 Refresh Data</button>
+                    <button class="btn btn-success" onclick="exportData()">📊 Export CSV</button>
+                    <button class="btn btn-danger" onclick="clearOldData()">🗑️ Clear Old Data</button>
                 </div>
                 
                 <div id="dashboardMessage"></div>
             </div>
 
-            <!-- Users Tab -->
-            <div id="usersTab" class="hidden">
-                <h2>👥 User Management</h2>
+            <!-- Notifications Tab -->
+            <div id="notificationsTab" class="hidden">
+                <h2>🔔 All Notifications</h2>
                 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
-                    <div>
-                        <h3>Create New User</h3>
-                        <div class="form-group">
-                            <label>Username</label>
-                            <input type="text" id="newUsername" placeholder="Enter username">
-                        </div>
-                        <div class="form-group">
-                            <label>Email</label>
-                            <input type="email" id="newEmail" placeholder="user@company.com">
-                        </div>
-                        <div class="form-group">
-                            <label>Role</label>
-                            <select id="newRole">
-                                <option value="driver">Driver</option>
-                                <option value="dispatcher">Dispatcher</option>
-                                <option value="admin">Admin</option>
-                            </select>
-                        </div>
-                        <button class="btn btn-success" onclick="createUser()">✅ Create User</button>
-                    </div>
-                    <div>
-                        <h3>User Statistics</h3>
-                        <div class="stats-grid">
-                            <div class="stat-card">
-                                <div class="stat-number">6</div>
-                                <div class="stat-label">Total Users</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-number">4</div>
-                                <div class="stat-label">Drivers</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-number">1</div>
-                                <div class="stat-label">Dispatchers</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-number">1</div>
-                                <div class="stat-label">Admins</div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Search by driver name..." onkeyup="searchNotifications()">
+                    <button class="btn btn-primary" onclick="refreshData()">🔄 Refresh</button>
                 </div>
-
+                
                 <div class="data-container">
-                    <h3>Active Users</h3>
-                    <div id="usersList">
-                        <div class="data-item admin">
-                            <div class="data-info">
-                                <div style="font-weight: bold; font-size: 16px;">Admin User</div>
-                                <div style="color: #666; margin: 5px 0;">admin@company.com</div>
-                                <span class="status-badge" style="background: #f8d7da; color: #721c24;">ADMIN</span>
-                            </div>
-                            <div class="data-actions">
-                                <button style="background: #17a2b8; color: white;">👁️ View</button>
-                                <button style="background: #ffc107; color: #212529;">✏️ Edit</button>
-                            </div>
-                        </div>
-                        <div class="data-item driver">
-                            <div class="data-info">
-                                <div style="font-weight: bold; font-size: 16px;">John Smith</div>
-                                <div style="color: #666; margin: 5px 0;">john.smith@company.com</div>
-                                <span class="status-badge" style="background: #d4edda; color: #155724;">DRIVER</span>
-                            </div>
-                            <div class="data-actions">
-                                <button style="background: #17a2b8; color: white;">👁️ View</button>
-                                <button style="background: #ffc107; color: #212529;">✏️ Edit</button>
-                            </div>
-                        </div>
-                        <div class="data-item driver">
-                            <div class="data-info">
-                                <div style="font-weight: bold; font-size: 16px;">Sarah Johnson</div>
-                                <div style="color: #666; margin: 5px 0;">sarah.johnson@company.com</div>
-                                <span class="status-badge" style="background: #d4edda; color: #155724;">DRIVER</span>
-                            </div>
-                            <div class="data-actions">
-                                <button style="background: #17a2b8; color: white;">👁️ View</button>
-                                <button style="background: #ffc107; color: #212529;">✏️ Edit</button>
-                            </div>
+                    <div id="notificationsList">
+                        <div class="empty-state">
+                            <div class="icon">📭</div>
+                            <p>Loading notifications...</p>
                         </div>
                     </div>
                 </div>
                 
-                <div id="usersMessage"></div>
+                <div id="notificationsMessage"></div>
             </div>
 
-            <!-- Reports Tab -->
-            <div id="reportsTab" class="hidden">
-                <h2>🚛 Inspection Reports</h2>
+            <!-- Drivers Tab -->
+            <div id="driversTab" class="hidden">
+                <h2>👥 Driver Activity</h2>
                 
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <div class="stat-number">15</div>
-                        <div class="stat-label">Total Reports</div>
+                        <div class="stat-number" id="uniqueDrivers">0</div>
+                        <div class="stat-label">Active Drivers</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number">11</div>
-                        <div class="stat-label">No Issues</div>
-                    </div>
-                    <div class="stat-card" style="border-left-color: #ffc107;">
-                        <div class="stat-number">3</div>
-                        <div class="stat-label">Minor Issues</div>
-                    </div>
-                    <div class="stat-card" style="border-left-color: #dc3545;">
-                        <div class="stat-number">1</div>
-                        <div class="stat-label">Critical Issues</div>
+                        <div class="stat-number" id="mostActiveDriver">-</div>
+                        <div class="stat-label">Most Active Driver</div>
                     </div>
                 </div>
-
-                <div style="margin: 25px 0;">
-                    <button class="btn btn-primary" onclick="loadReports()">🔄 Refresh Reports</button>
-                    <button class="btn btn-success" onclick="exportReports()">📄 Export CSV</button>
-                    <button class="btn btn-info" onclick="generateReport()">📑 Generate PDF</button>
-                </div>
-
+                
                 <div class="data-container">
-                    <h3>Recent Inspection Reports</h3>
-                    <div class="data-item">
-                        <div class="data-info">
-                            <div style="font-weight: bold;">T-007 / TR-201 - Mike Davis</div>
-                            <div style="color: #666; margin: 5px 0;">Yesterday 2:30 PM</div>
-                            <span class="status-badge status-critical">🚨 CRITICAL</span>
-                            <div style="margin: 8px 0; font-size: 14px;">Hydraulic leak detected, immediate attention required</div>
-                        </div>
-                        <div class="data-actions">
-                            <button style="background: #17a2b8; color: white;">👁️ View</button>
-                            <button style="background: #28a745; color: white;">📄 Export</button>
-                        </div>
-                    </div>
-                    
-                    <div class="data-item">
-                        <div class="data-info">
-                            <div style="font-weight: bold;">T-003 / TR-108 - Sarah Johnson</div>
-                            <div style="color: #666; margin: 5px 0;">Yesterday 1:15 PM</div>
-                            <span class="status-badge status-good">✅ NO ISSUES</span>
-                            <div style="margin: 8px 0; font-size: 14px;">Vehicle passed inspection</div>
-                        </div>
-                        <div class="data-actions">
-                            <button style="background: #17a2b8; color: white;">👁️ View</button>
-                            <button style="background: #28a745; color: white;">📄 Export</button>
-                        </div>
-                    </div>
-                    
-                    <div class="data-item">
-                        <div class="data-info">
-                            <div style="font-weight: bold;">T-001 / TR-105 - John Smith</div>
-                            <div style="color: #666; margin: 5px 0;">2 days ago 4:45 PM</div>
-                            <span class="status-badge status-issues">⚠️ MINOR ISSUES</span>
-                            <div style="margin: 8px 0; font-size: 14px;">Small scratch on trailer side panel</div>
-                        </div>
-                        <div class="data-actions">
-                            <button style="background: #17a2b8; color: white;">👁️ View</button>
-                            <button style="background: #28a745; color: white;">📄 Export</button>
+                    <h3>Driver Summary</h3>
+                    <div id="driversList">
+                        <div class="empty-state">
+                            <div class="icon">👥</div>
+                            <p>Loading driver data...</p>
                         </div>
                     </div>
                 </div>
                 
-                <div id="reportsMessage"></div>
+                <div id="driversMessage"></div>
             </div>
 
             <!-- Settings Tab -->
@@ -623,50 +461,24 @@
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
                     <div>
-                        <h3>🔗 Connection Settings</h3>
+                        <h3>🔗 API Information</h3>
                         <div class="form-group">
-                            <label>Railway API URL</label>
-                            <input type="text" id="settingsRailwayUrl" readonly>
+                            <label>API Endpoint</label>
+                            <input type="text" value="/api/notifications" readonly>
                         </div>
                         <div class="form-group">
                             <label>Connection Status</label>
-                            <input type="text" id="connectionStatusText" readonly>
+                            <input type="text" id="connectionStatusText" value="Connected" readonly>
                         </div>
                         <button class="btn btn-info" onclick="testConnection()">🔍 Test Connection</button>
-                        <button class="btn btn-warning" onclick="changeUrl()">🔄 Change URL</button>
                     </div>
                     
                     <div>
                         <h3>🎛️ System Actions</h3>
                         <div style="display: flex; flex-direction: column; gap: 10px;">
-                            <button class="btn btn-success" onclick="exportAllData()">📊 Export All Data</button>
-                            <button class="btn btn-info" onclick="systemCheck()">🔍 System Health Check</button>
-                            <button class="btn btn-warning" onclick="clearCache()">🗑️ Clear Cache</button>
+                            <button class="btn btn-warning" onclick="markAllAsRead()">✅ Mark All as Read</button>
+                            <button class="btn btn-danger" onclick="clearAllNotifications()">🗑️ Clear All Notifications</button>
                             <button class="btn btn-danger" onclick="logout()">🚪 Logout</button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div style="margin-top: 30px;">
-                    <h3>📊 System Information</h3>
-                    <div class="data-container">
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-                            <div style="padding: 15px; background: white; border-radius: 8px;">
-                                <strong>Environment:</strong><br>
-                                <span id="envInfo">Production</span>
-                            </div>
-                            <div style="padding: 15px; background: white; border-radius: 8px;">
-                                <strong>Version:</strong><br>
-                                <span>v2.1.0</span>
-                            </div>
-                            <div style="padding: 15px; background: white; border-radius: 8px;">
-                                <strong>Last Updated:</strong><br>
-                                <span>Today</span>
-                            </div>
-                            <div style="padding: 15px; background: white; border-radius: 8px;">
-                                <strong>Database:</strong><br>
-                                <span id="dbStatus">MongoDB Atlas</span>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -677,96 +489,40 @@
     </div>
 
     <script>
-        let currentMode = 'demo';
-        let railwayUrl = '';
+        let notifications = [];
         let isLoggedIn = false;
         let currentTab = 'dashboard';
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            updateConnectionStatus();
+            checkConnection();
         });
 
-        function connectToRailway() {
-            const url = document.getElementById('railwayUrl').value.trim();
-            
-            if (!url) {
-                showMessage('setupMessage', '❌ Please enter your Railway URL', 'error');
-                return;
-            }
-            
-            railwayUrl = url.endsWith('/api') ? url : url + '/api';
-            currentMode = 'railway';
-            
-            // Test connection
-            testRailwayConnection().then(success => {
-                if (success) {
-                    showMessage('setupMessage', '✅ Connected to Railway successfully!', 'success');
-                    setTimeout(() => {
-                        document.getElementById('setupCard').classList.add('hidden');
-                        document.getElementById('loginCard').classList.remove('hidden');
-                        document.getElementById('adminEmail').focus();
-                    }, 1500);
-                } else {
-                    showMessage('setupMessage', '❌ Cannot connect to Railway. Check your URL or use Demo Mode.', 'error');
-                }
-            });
-            
-            updateConnectionStatus();
-        }
-
-        function useDemoMode() {
-            currentMode = 'demo';
-            railwayUrl = 'demo-mode';
-            
-            showMessage('setupMessage', '📋 Demo mode activated! You can test all features.', 'success');
-            
-            setTimeout(() => {
-                document.getElementById('setupCard').classList.add('hidden');
-                document.getElementById('loginCard').classList.remove('hidden');
-                document.getElementById('adminEmail').focus();
-            }, 1500);
-            
-            updateConnectionStatus();
-        }
-
-        async function testRailwayConnection() {
-            if (currentMode === 'demo') return true;
-            
+        async function checkConnection() {
             try {
-                const response = await fetch(railwayUrl + '/health', {
-                    method: 'GET',
-                    headers: { 'Content-Type': 'application/json' },
-                    mode: 'cors'
-                });
-                return response.ok;
+                const response = await fetch('/api/notifications');
+                if (response.ok) {
+                    updateConnectionStatus(true);
+                } else {
+                    updateConnectionStatus(false);
+                }
             } catch (error) {
-                console.error('Connection test failed:', error);
-                return false;
+                updateConnectionStatus(false);
             }
         }
 
-        function updateConnectionStatus() {
+        function updateConnectionStatus(connected) {
             const status = document.getElementById('connectionStatus');
-            const settingsUrl = document.getElementById('settingsRailwayUrl');
-            const settingsStatus = document.getElementById('connectionStatusText');
-            const envInfo = document.getElementById('envInfo');
-            const dbStatus = document.getElementById('dbStatus');
+            const statusText = document.getElementById('connectionStatusText');
             
-            if (currentMode === 'demo') {
-                status.className = 'connection-status demo';
-                status.textContent = '📋 Demo Mode';
-                if (settingsUrl) settingsUrl.value = 'Demo Mode - No API Connection';
-                if (settingsStatus) settingsStatus.value = 'Demo Mode Active';
-                if (envInfo) envInfo.textContent = 'Demo Environment';
-                if (dbStatus) dbStatus.textContent = 'Demo Data';
-            } else {
+            if (connected) {
                 status.className = 'connection-status connected';
-                status.textContent = '🟢 Railway Connected';
-                if (settingsUrl) settingsUrl.value = railwayUrl;
-                if (settingsStatus) settingsStatus.value = 'Connected to Railway';
-                if (envInfo) envInfo.textContent = 'Railway Production';
-                if (dbStatus) dbStatus.textContent = 'MongoDB Atlas';
+                status.textContent = '🟢 Connected';
+                if (statusText) statusText.value = 'Connected to API';
+            } else {
+                status.className = 'connection-status disconnected';
+                status.textContent = '🔴 Disconnected';
+                if (statusText) statusText.value = 'API Disconnected';
             }
         }
 
@@ -779,8 +535,9 @@
                 document.getElementById('loginCard').classList.add('hidden');
                 document.getElementById('mainPanel').classList.remove('hidden');
                 showMessage('dashboardMessage', '🎉 Welcome to the Admin Panel!', 'success');
+                loadNotifications();
             } else {
-                showMessage('loginMessage', '❌ Invalid credentials. Use: admin@company.com / admin123', 'error');
+                showMessage('loginMessage', '❌ Invalid credentials', 'error');
             }
         }
 
@@ -793,7 +550,7 @@
 
         function showTab(tabName) {
             // Hide all tabs
-            ['dashboard', 'users', 'reports', 'settings'].forEach(tab => {
+            ['dashboard', 'notifications', 'drivers', 'settings'].forEach(tab => {
                 document.getElementById(tab + 'Tab').classList.add('hidden');
             });
             
@@ -806,107 +563,311 @@
             document.getElementById(tabName + 'Tab').classList.remove('hidden');
             event.target.classList.add('active');
             currentTab = tabName;
+            
+            // Refresh data when switching tabs
+            if (tabName === 'drivers') {
+                updateDriverStats();
+            }
         }
 
-        function createUser() {
-            const username = document.getElementById('newUsername').value;
-            const email = document.getElementById('newEmail').value;
-            const role = document.getElementById('newRole').value;
+        async function loadNotifications() {
+            try {
+                const response = await fetch('/api/notifications');
+                if (response.ok) {
+                    const data = await response.json();
+                    notifications = Array.isArray(data) ? data : (data.data || []);
+                    updateStats();
+                    displayNotifications();
+                    updateDriverStats();
+                    updateConnectionStatus(true);
+                }
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+                showMessage('dashboardMessage', '❌ Error loading data', 'error');
+                updateConnectionStatus(false);
+            }
+        }
+
+        function updateStats() {
+            const driverNotifications = notifications.filter(n => n.driver && n.status);
+            const today = new Date().toDateString();
+            const todayNotifications = driverNotifications.filter(n => 
+                new Date(n.timestamp).toDateString() === today
+            );
             
-            if (!username) {
-                showMessage('usersMessage', '❌ Username is required', 'error');
+            document.getElementById('totalNotifications').textContent = notifications.length;
+            document.getElementById('arrivedCount').textContent = 
+                driverNotifications.filter(n => n.status === 'arrived').length;
+            document.getElementById('enRouteCount').textContent = 
+                driverNotifications.filter(n => n.status === 'en-route').length;
+            document.getElementById('todayCount').textContent = todayNotifications.length;
+        }
+
+        function displayNotifications() {
+            const container = document.getElementById('notificationsList');
+            const driverNotifications = notifications.filter(n => n.driver && n.status);
+            
+            if (driverNotifications.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">📭</div>
+                        <p>No notifications found</p>
+                    </div>
+                `;
                 return;
             }
             
-            showMessage('usersMessage', `✅ User "${username}" created successfully as ${role}!`, 'success');
+            const html = driverNotifications
+                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+                .map(notification => {
+                    const time = new Date(notification.timestamp).toLocaleString();
+                    const statusClass = `status-${notification.status}`;
+                    
+                    return `
+                        <div class="data-item ${notification.status}">
+                            <div class="data-info">
+                                <div style="font-weight: bold; font-size: 16px;">${notification.driver}</div>
+                                <div style="color: #666; margin: 5px 0;">${time}</div>
+                                <span class="status-badge ${statusClass}">${notification.status}</span>
+                                ${notification.location ? `<div style="margin-top: 5px; font-size: 14px;">📍 ${notification.location}</div>` : ''}
+                            </div>
+                            <div class="data-actions">
+                                ${!notification.read ? 
+                                    `<button class="btn btn-success" style="font-size: 14px; padding: 8px 16px;" onclick="markAsRead('${notification._id}')">✅ Mark Read</button>` : 
+                                    '<span style="color: #28a745;">✓ Read</span>'
+                                }
+                                <button class="btn btn-danger" style="font-size: 14px; padding: 8px 16px;" onclick="deleteNotification('${notification._id}')">🗑️</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
             
-            // Clear form
-            document.getElementById('newUsername').value = '';
-            document.getElementById('newEmail').value = '';
+            container.innerHTML = html;
         }
 
-        function testConnection() {
-            const messageId = currentTab + 'Message';
+        function updateDriverStats() {
+            const driverNotifications = notifications.filter(n => n.driver && n.status);
+            const driverCounts = {};
             
-            if (currentMode === 'demo') {
-                showMessage(messageId, '📋 Demo mode - all connections simulated', 'info');
-            } else {
-                showMessage(messageId, '🔍 Testing Railway connection...', 'info');
-                testRailwayConnection().then(success => {
-                    if (success) {
-                        showMessage(messageId, '✅ Railway connection successful!', 'success');
-                    } else {
-                        showMessage(messageId, '❌ Railway connection failed', 'error');
-                    }
+            driverNotifications.forEach(n => {
+                driverCounts[n.driver] = (driverCounts[n.driver] || 0) + 1;
+            });
+            
+            const uniqueDrivers = Object.keys(driverCounts).length;
+            const mostActive = Object.entries(driverCounts).sort((a, b) => b[1] - a[1])[0];
+            
+            document.getElementById('uniqueDrivers').textContent = uniqueDrivers;
+            document.getElementById('mostActiveDriver').textContent = mostActive ? mostActive[0] : '-';
+            
+            // Display driver list
+            const driversList = document.getElementById('driversList');
+            if (uniqueDrivers === 0) {
+                driversList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">👥</div>
+                        <p>No driver activity found</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const driversHtml = Object.entries(driverCounts)
+                .sort((a, b) => b[1] - a[1])
+                .map(([driver, count]) => {
+                    const lastUpdate = driverNotifications
+                        .filter(n => n.driver === driver)
+                        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0];
+                    
+                    return `
+                        <div class="data-item">
+                            <div class="data-info">
+                                <div style="font-weight: bold; font-size: 16px;">${driver}</div>
+                                <div style="color: #666;">Total updates: ${count}</div>
+                                <div style="color: #666; font-size: 14px;">Last: ${lastUpdate.status} - ${new Date(lastUpdate.timestamp).toLocaleString()}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            
+            driversList.innerHTML = driversHtml;
+        }
+
+        function searchNotifications() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const items = document.querySelectorAll('#notificationsList .data-item');
+            
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(searchTerm) ? 'flex' : 'none';
+            });
+        }
+
+        async function markAsRead(id) {
+            try {
+                const response = await fetch(`/api/notifications/${id}/read`, {
+                    method: 'PUT'
                 });
+                
+                if (response.ok) {
+                    showMessage('notificationsMessage', '✅ Marked as read', 'success');
+                    loadNotifications();
+                }
+            } catch (error) {
+                showMessage('notificationsMessage', '❌ Error updating notification', 'error');
             }
         }
 
-        function changeUrl() {
-            document.getElementById('mainPanel').classList.add('hidden');
-            document.getElementById('setupCard').classList.remove('hidden');
+        async function deleteNotification(id) {
+            if (!confirm('Delete this notification?')) return;
+            
+            try {
+                const response = await fetch(`/api/notifications/${id}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    showMessage('notificationsMessage', '✅ Notification deleted', 'success');
+                    loadNotifications();
+                }
+            } catch (error) {
+                showMessage('notificationsMessage', '❌ Error deleting notification', 'error');
+            }
         }
 
-        function loadReports() {
-            showMessage('reportsMessage', '🔄 Loading latest inspection reports...', 'info');
-            setTimeout(() => {
-                showMessage('reportsMessage', '✅ Reports refreshed successfully!', 'success');
-            }, 1500);
+        async function markAllAsRead() {
+            if (!confirm('Mark all notifications as read?')) return;
+            
+            const unreadNotifications = notifications.filter(n => !n.read);
+            let updated = 0;
+            
+            for (const notification of unreadNotifications) {
+                try {
+                    await fetch(`/api/notifications/${notification._id}/read`, {
+                        method: 'PUT'
+                    });
+                    updated++;
+                } catch (error) {
+                    console.error('Error marking as read:', error);
+                }
+            }
+            
+            showMessage('settingsMessage', `✅ Marked ${updated} notifications as read`, 'success');
+            loadNotifications();
         }
 
-        function exportReports() {
-            showMessage('reportsMessage', '📄 Exporting reports to CSV...', 'info');
-            setTimeout(() => {
-                showMessage('reportsMessage', '✅ CSV file downloaded!', 'success');
-            }, 1000);
+        async function clearAllNotifications() {
+            if (!confirm('⚠️ This will delete ALL notifications. Are you sure?')) return;
+            
+            try {
+                const response = await fetch('/api/notifications', {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    showMessage('settingsMessage', '✅ All notifications cleared', 'success');
+                    loadNotifications();
+                }
+            } catch (error) {
+                showMessage('settingsMessage', '❌ Error clearing notifications', 'error');
+            }
         }
 
-        function generateReport() {
-            showMessage('reportsMessage', '📑 Generating PDF report...', 'info');
-            setTimeout(() => {
-                showMessage('reportsMessage', '✅ PDF report generated!', 'success');
-            }, 2000);
+        async function clearOldData() {
+            if (!confirm('Delete notifications older than 7 days?')) return;
+            
+            const oneWeekAgo = new Date();
+            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+            
+            const oldNotifications = notifications.filter(n => 
+                new Date(n.timestamp) < oneWeekAgo
+            );
+            
+            let deleted = 0;
+            for (const notification of oldNotifications) {
+                try {
+                    await fetch(`/api/notifications/${notification._id}`, {
+                        method: 'DELETE'
+                    });
+                    deleted++;
+                } catch (error) {
+                    console.error('Error deleting old notification:', error);
+                }
+            }
+            
+            showMessage('dashboardMessage', `✅ Deleted ${deleted} old notifications`, 'success');
+            loadNotifications();
+        }
+
+        function refreshData() {
+            showMessage(currentTab + 'Message', '🔄 Refreshing data...', 'info');
+            loadNotifications();
         }
 
         function exportData() {
-            showMessage('dashboardMessage', '📊 Exporting all system data...', 'info');
-            setTimeout(() => {
-                showMessage('dashboardMessage', '✅ Data export completed!', 'success');
-            }, 1500);
+            const driverNotifications = notifications.filter(n => n.driver && n.status);
+            
+            // Create CSV content
+            const csv = [
+                ['Timestamp', 'Driver', 'Status', 'Location', 'Warehouse', 'Read'],
+                ...driverNotifications.map(n => [
+                    new Date(n.timestamp).toLocaleString(),
+                    n.driver,
+                    n.status,
+                    n.location || 'N/A',
+                    n.warehouse || 'N/A',
+                    n.read ? 'Yes' : 'No'
+                ])
+            ].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+            
+            // Download file
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `driver-notifications-${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showMessage('dashboardMessage', '✅ Data exported successfully', 'success');
         }
 
-        function exportAllData() {
-            showMessage('settingsMessage', '📊 Exporting complete system backup...', 'info');
-            setTimeout(() => {
-                showMessage('settingsMessage', '✅ System backup exported successfully!', 'success');
-            }, 2000);
-        }
-
-        function systemCheck() {
-            showMessage('settingsMessage', '🔍 Running system health check...', 'info');
-            setTimeout(() => {
-                showMessage('settingsMessage', '✅ System health check completed - All systems operational!', 'success');
-            }, 2500);
-        }
-
-        function clearCache() {
-            showMessage('settingsMessage', '🗑️ Clearing system cache...', 'info');
-            setTimeout(() => {
-                showMessage('settingsMessage', '✅ Cache cleared successfully!', 'success');
-            }, 1000);
+        async function testConnection() {
+            showMessage('settingsMessage', '🔍 Testing connection...', 'info');
+            
+            try {
+                const response = await fetch('/api/notifications');
+                if (response.ok) {
+                    showMessage('settingsMessage', '✅ Connection successful!', 'success');
+                    updateConnectionStatus(true);
+                } else {
+                    showMessage('settingsMessage', '❌ Connection failed', 'error');
+                    updateConnectionStatus(false);
+                }
+            } catch (error) {
+                showMessage('settingsMessage', '❌ Connection error: ' + error.message, 'error');
+                updateConnectionStatus(false);
+            }
         }
 
         function showMessage(elementId, message, type) {
             const element = document.getElementById(elementId);
             if (!element) return;
             
-            const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
-            element.innerHTML = `<div class="message ${type}">${icons[type]} ${message}</div>`;
+            element.innerHTML = `<div class="message ${type}">${message}</div>`;
             
             if (type === 'success' || type === 'info') {
                 setTimeout(() => element.innerHTML = '', 4000);
             }
         }
+
+        // Auto-refresh every 30 seconds when logged in
+        setInterval(() => {
+            if (isLoggedIn) {
+                loadNotifications();
+            }
+        }, 30000);
     </script>
 </body>
 </html>
