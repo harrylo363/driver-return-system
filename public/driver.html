@@ -32,34 +32,6 @@
             margin: 0 auto;
         }
 
-        /* Navigation Bar */
-        .nav-bar {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 10px;
-            margin: -20px -20px 20px -20px;
-            display: flex;
-            gap: 10px;
-            overflow-x: auto;
-        }
-
-        .nav-bar a {
-            color: white;
-            text-decoration: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            transition: background 0.2s;
-            white-space: nowrap;
-            font-size: 14px;
-        }
-
-        .nav-bar a:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .nav-bar a.active {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
         /* Notification Permission Banner */
         .notification-banner {
             background: #fff3cd;
@@ -454,14 +426,6 @@
 </head>
 <body>
     <div class="container">
-        <!-- Navigation Bar -->
-        <nav class="nav-bar">
-            <a href="index.html">📊 Main Dashboard</a>
-            <a href="dashboard.html">🗺️ Dispatch Map</a>
-            <a href="driver.html" class="active">🚚 Driver Portal</a>
-            <a href="admin.html">🔧 Admin Panel</a>
-        </nav>
-
         <!-- Notification Permission Banner -->
         <div class="notification-banner" id="notificationBanner">
             <p>🔔 Enable notifications to receive updates from dispatch</p>
