@@ -946,6 +946,7 @@
         }
         
         .checklist-checkbox {
+            min-width: 20px;
             width: 20px;
             height: 20px;
             border: 2px solid var(--border);
@@ -954,6 +955,14 @@
             align-items: center;
             justify-content: center;
             transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        
+        .checklist-checkbox span {
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            line-height: 1;
         }
         
         .checklist-item.checked .checklist-checkbox {
@@ -1944,6 +1953,7 @@
                 item.classList.remove('issue');
                 checkbox.style.background = 'var(--success)';
                 checkbox.style.borderColor = 'var(--success)';
+                checkmark.textContent = '✓';  // FIX: Reset to checkmark
                 checkmark.style.display = 'block';
                 okBtn.classList.add('active');
                 issueBtn.classList.remove('active');
@@ -1954,8 +1964,8 @@
                 item.classList.remove('checked');
                 checkbox.style.background = 'var(--danger)';
                 checkbox.style.borderColor = 'var(--danger)';
-                checkmark.style.display = 'block';
                 checkmark.textContent = '!';
+                checkmark.style.display = 'block';
                 okBtn.classList.remove('active');
                 issueBtn.classList.add('active');
                 issueDetails.classList.add('show');
