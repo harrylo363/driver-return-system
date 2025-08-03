@@ -1015,276 +1015,11 @@
             showMessage('usersMessage', 'Edit functionality coming soon!', 'info');
         }
 
-        // NOTIFICATION MANAGEMENT FUNCTIONS (existing code)
-        
-        async function loadNotifications() {
-            try {
-                const response = await fetch('/api/notifications');
-                if (response.ok) {
-                    const data = await response.json();
-                    notifications = Array.isArray(data) ? data : (data.data || []);
-                    updateStats();
-                    displayNotifications();
-                    updateDriverStats();
-                    updateConnectionStatus(true);
-                }
-            } catch (error) {
-                console.error('Error loading notifications:', error);
-                showMessage('dashboardMessage', '❌ Error loading data', 'error');
-                updateConnectionStatus(false);
-            }
-        }
-
-        function updateStats() {
-            const driverNotifications = notifications.filter(n => n.driver && n.status);
-            const today = new Date().toDateString();
-            const todayNotifications = driverNotifications.filter(n => 
-                new Date(n.timestamp).toDateString() === today
-            );
-            
-            document.getElementById('totalNotifications').textContent = notifications.length;
-            document.getElementById('arrivedCount').textContent = 
-                driverNotifications.filter(n => n.status === 'arrived').length;
-            document.getElementById('enRouteCount').textContent = 
-                driverNotifications.filter(n => n.status === 'en-route').length;
-            document.getElementById('todayCount').textContent = todayNotifications.length;
-        }
-
-        function displayNotifications() {
-            const container = document.getElementById('notificationsList');
-            const driverNotifications = notifications.filter(n => n.driver && n.status);
-            
-            if (driverNotifications.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="icon">📭</div>
-                        <p>No notifications found</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            const html = driverNotifications
-                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-                .map(notification => {
-                    const time = new Date(notification.timestamp).toLocaleString();
-                    const statusClass = `status-${notification.status}`;
-                    
-                    return `
-                        <div class="data-item ${notification.status}">
-                            <div class="data-info">
-                                <div style="font-weight: bold; font-size: 16px;">${notification.driver}</div>
-                                <div style="color: #666; margin: 5px 0;">${time}</div>
-                                <span class="status-badge ${statusClass}">${notification.status}</span>
-                                ${notification.location ? `<div style="margin-top: 5px; font-size: 14px;">📍 ${notification.location}</div>` : ''}
-                            </div>
-                            <div class="data-actions">
-                                ${!notification.read ? 
-                                    `<button class="btn btn-success" style="font-size: 14px; padding: 8px 16px;" onclick="markAsRead('${notification._id}')">✅ Mark Read</button>` : 
-                                    '<span style="color: #28a745;">✓ Read</span>'
-                                }
-                                <button class="btn btn-danger" style="font-size: 14px; padding: 8px 16px;" onclick="deleteNotification('${notification._id}')">🗑️</button>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            
-            container.innerHTML = html;
-        }
-
-        function updateDriverStats() {
-            const driverNotifications = notifications.filter(n => n.driver && n.status);
-            const driverCounts = {};
-            
-            driverNotifications.forEach(n => {
-                driverCounts[n.driver] = (driverCounts[n.driver] || 0) + 1;
-            });
-            
-            const uniqueDrivers = Object.keys(driverCounts).length;
-            const mostActive = Object.entries(driverCounts).sort((a, b) => b[1] - a[1])[0];
-            
-            document.getElementById('uniqueDrivers').textContent = uniqueDrivers;
-            document.getElementById('mostActiveDriver').textContent = mostActive ? mostActive[0] : '-';
-            
-            // Display driver list
-            const driversList = document.getElementById('driversList');
-            if (uniqueDrivers === 0) {
-                driversList.innerHTML = `
-                    <div class="empty-state">
-                        <div class="icon">👥</div>
-                        <p>No driver activity found</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            const driversHtml = Object.entries(driverCounts)
-                .sort((a, b) => b[1] - a[1])
-                .map(([driver, count]) => {
-                    const lastUpdate = driverNotifications
-                        .filter(n => n.driver === driver)
-                        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0];
-                    
-                    return `
-                        <div class="data-item">
-                            <div class="data-info">
-                                <div style="font-weight: bold; font-size: 16px;">${driver}</div>
-                                <div style="color: #666;">Total updates: ${count}</div>
-                                <div style="color: #666; font-size: 14px;">Last: ${lastUpdate.status} - ${new Date(lastUpdate.timestamp).toLocaleString()}</div>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            
-            driversList.innerHTML = driversHtml;
-        }
-
-        function searchNotifications() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const items = document.querySelectorAll('#notificationsList .data-item');
-            
-            items.forEach(item => {
-                const text = item.textContent.toLowerCase();
-                item.style.display = text.includes(searchTerm) ? 'flex' : 'none';
-            });
-        }
-
-        async function markAsRead(id) {
-            try {
-                const response = await fetch(`/api/notifications/${id}/read`, {
-                    method: 'PUT'
-                });
-                
-                if (response.ok) {
-                    showMessage('notificationsMessage', '✅ Marked as read', 'success');
-                    loadNotifications();
-                }
-            } catch (error) {
-                showMessage('notificationsMessage', '❌ Error updating notification', 'error');
-            }
-        }
-
-        async function deleteNotification(id) {
-            if (!confirm('Delete this notification?')) return;
-            
-            try {
-                const response = await fetch(`/api/notifications/${id}`, {
-                    method: 'DELETE'
-                });
-                
-                if (response.ok) {
-                    showMessage('notificationsMessage', '✅ Notification deleted', 'success');
-                    loadNotifications();
-                }
-            } catch (error) {
-                showMessage('notificationsMessage', '❌ Error deleting notification', 'error');
-            }
-        }
-
-        async function markAllAsRead() {
-            if (!confirm('Mark all notifications as read?')) return;
-            
-            const unreadNotifications = notifications.filter(n => !n.read);
-            let updated = 0;
-            
-            for (const notification of unreadNotifications) {
-                try {
-                    await fetch(`/api/notifications/${notification._id}/read`, {
-                        method: 'PUT'
-                    });
-                    updated++;
-                } catch (error) {
-                    console.error('Error marking as read:', error);
-                }
-            }
-            
-            showMessage('settingsMessage', `✅ Marked ${updated} notifications as read`, 'success');
-            loadNotifications();
-        }
-
-        async function clearAllNotifications() {
-            if (!confirm('⚠️ This will delete ALL notifications. Are you sure?')) return;
-            
-            try {
-                const response = await fetch('/api/notifications', {
-                    method: 'DELETE'
-                });
-                
-                if (response.ok) {
-                    showMessage('settingsMessage', '✅ All notifications cleared', 'success');
-                    loadNotifications();
-                }
-            } catch (error) {
-                showMessage('settingsMessage', '❌ Error clearing notifications', 'error');
-            }
-        }
-
-        async function clearOldData() {
-            if (!confirm('Delete notifications older than 7 days?')) return;
-            
-            const oneWeekAgo = new Date();
-            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-            
-            const oldNotifications = notifications.filter(n => 
-                new Date(n.timestamp) < oneWeekAgo
-            );
-            
-            let deleted = 0;
-            for (const notification of oldNotifications) {
-                try {
-                    await fetch(`/api/notifications/${notification._id}`, {
-                        method: 'DELETE'
-                    });
-                    deleted++;
-                } catch (error) {
-                    console.error('Error deleting old notification:', error);
-                }
-            }
-            
-            showMessage('dashboardMessage', `✅ Deleted ${deleted} old notifications`, 'success');
-            loadNotifications();
-        }
-
-        function refreshData() {
-            showMessage(currentTab + 'Message', '🔄 Refreshing data...', 'info');
-            loadNotifications();
-        }
-
-        function exportData() {
-            const driverNotifications = notifications.filter(n => n.driver && n.status);
-            
-            // Create CSV content
-            const csv = [
-                ['Timestamp', 'Driver', 'Status', 'Location', 'Warehouse', 'Read'],
-                ...driverNotifications.map(n => [
-                    new Date(n.timestamp).toLocaleString(),
-                    n.driver,
-                    n.status,
-                    n.location || 'N/A',
-                    n.warehouse || 'N/A',
-                    n.read ? 'Yes' : 'No'
-                ])
-            ].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
-            
-            // Download file
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `driver-notifications-${new Date().toISOString().split('T')[0]}.csv`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-            
-            showMessage('dashboardMessage', '✅ Data exported successfully', 'success');
-        }
-
         async function testConnection() {
             showMessage('settingsMessage', '🔍 Testing connection...', 'info');
             
             try {
-                const response = await fetch('/api/notifications');
+                const response = await fetch('/api/users');
                 if (response.ok) {
                     showMessage('settingsMessage', '✅ Connection successful!', 'success');
                     updateConnectionStatus(true);
@@ -1298,6 +1033,66 @@
             }
         }
 
+        function exportAllUsers() {
+            if (users.length === 0) {
+                showMessage('settingsMessage', '❌ No users to export', 'error');
+                return;
+            }
+            
+            // Create CSV content
+            const csv = [
+                ['Name', 'Email', 'Role', 'Active', 'Created'],
+                ...users.map(u => [
+                    u.name,
+                    u.email,
+                    u.role,
+                    u.active ? 'Yes' : 'No',
+                    new Date(u.createdAt).toLocaleDateString()
+                ])
+            ].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+            
+            // Download file
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `all-users-${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showMessage('settingsMessage', '✅ User data exported successfully', 'success');
+        }
+
+        function backupData() {
+            showMessage('settingsMessage', '💾 Creating backup...', 'info');
+            
+            const backup = {
+                timestamp: new Date().toISOString(),
+                users: users,
+                totalUsers: users.length,
+                breakdown: {
+                    drivers: users.filter(u => u.role === 'driver').length,
+                    dispatchers: users.filter(u => u.role === 'dispatcher').length,
+                    admins: users.filter(u => u.role === 'admin').length
+                }
+            };
+            
+            const json = JSON.stringify(backup, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `system-backup-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showMessage('settingsMessage', '✅ Backup created successfully', 'success');
+        }
+
         function showMessage(elementId, message, type) {
             const element = document.getElementById(elementId);
             if (!element) return;
@@ -1309,10 +1104,10 @@
             }
         }
 
-        // Auto-refresh every 30 seconds when logged in
+        // Auto-refresh users every 30 seconds when logged in
         setInterval(() => {
-            if (isLoggedIn) {
-                loadNotifications();
+            if (isLoggedIn && currentTab === 'users') {
+                loadUsers();
             }
         }, 30000);
     </script>
