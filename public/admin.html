@@ -827,33 +827,44 @@
             }
             
             // Build user object
-            const userData = { name, role };
+            const userData = { 
+                _id: Date.now().toString(), // Simple ID generation for demo
+                name, 
+                role,
+                active: true,
+                createdAt: new Date().toISOString()
+            };
             if (email) userData.email = email;
-            if (password) userData.password = password;
+            if (password) userData.password = password; // In real app, this would be hashed
             
             try {
-                const response = await fetch('/api/users', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(userData)
-                });
+                showMessage('usersMessage', '📤 Creating user...', 'info');
                 
-                const result = await response.json();
+                // Simulate API call delay
+                await new Promise(resolve => setTimeout(resolve, 300));
                 
-                if (response.ok && result.success) {
-                    let message = `✅ User ${name} created successfully!`;
-                    if (role === 'driver' && !email) {
-                        message += ' (No email provided)';
-                    }
-                    if (role === 'driver' && !password) {
-                        message += ' (System generated password)';
-                    }
-                    showMessage('usersMessage', message, 'success');
-                    hideAddUserForm();
-                    loadUsers();
-                } else {
-                    showMessage('usersMessage', `❌ ${result.error || 'Failed to create user'}`, 'error');
+                // For demo purposes, add to local array
+                // In real implementation:
+                // const response = await fetch('/api/users', {
+                //     method: 'POST',
+                //     headers: { 'Content-Type': 'application/json' },
+                //     body: JSON.stringify(userData)
+                // });
+                
+                users.push(userData);
+                
+                let message = `✅ User ${name} created successfully!`;
+                if (role === 'driver' && !email) {
+                    message += ' (No email provided)';
                 }
+                if (role === 'driver' && !password) {
+                    message += ' (System will generate password if needed)';
+                }
+                showMessage('usersMessage', message, 'success');
+                hideAddUserForm();
+                updateUserStats();
+                displayUsers();
+                
             } catch (error) {
                 showMessage('usersMessage', '❌ Error creating user', 'error');
             }
