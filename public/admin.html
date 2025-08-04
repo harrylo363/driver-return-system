@@ -858,6 +858,16 @@
             showMessage('usersMessage', '✅ Template downloaded! Note: email and password are optional for drivers', 'success');
         }
 
+        function parseFile() {
+            const fileInput = document.getElementById('csvFile');
+            const file = fileInput.files[0];
+            if (!file) {
+                showMessage('usersMessage', '❌ Please select a file first', 'error');
+                return;
+            }
+            handleFileSelect({ target: { files: [file] } });
+        }
+
         function handleFileSelect(event) {
             const file = event.target.files[0];
             if (!file) return;
