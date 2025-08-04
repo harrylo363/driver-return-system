@@ -574,7 +574,32 @@
     </div>
 
     <script>
-        let users = [];
+        let users = [
+            {
+                _id: '1',
+                name: 'John Driver',
+                email: 'john@company.com',
+                role: 'driver',
+                active: true,
+                createdAt: new Date().toISOString()
+            },
+            {
+                _id: '2',
+                name: 'Jane Smith',
+                email: '',
+                role: 'driver',
+                active: true,
+                createdAt: new Date().toISOString()
+            },
+            {
+                _id: '3',
+                name: 'Admin User',
+                email: 'admin@company.com',
+                role: 'admin',
+                active: true,
+                createdAt: new Date().toISOString()
+            }
+        ];
         let bulkUsers = [];
         let isLoggedIn = false;
         let currentTab = 'users';
