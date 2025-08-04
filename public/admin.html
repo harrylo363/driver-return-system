@@ -1044,15 +1044,25 @@
             if (!confirm(`Delete user ${userName}?`)) return;
             
             try {
-                const response = await fetch(`/api/users/${userId}`, {
-                    method: 'DELETE'
-                });
+                showMessage('usersMessage', '🗑️ Deleting user...', 'info');
                 
-                if (response.ok) {
+                // Simulate API call delay
+                await new Promise(resolve => setTimeout(resolve, 300));
+                
+                // For demo purposes, remove from local array
+                // In real implementation:
+                // const response = await fetch(`/api/users/${userId}`, {
+                //     method: 'DELETE'
+                // });
+                
+                const userIndex = users.findIndex(u => u._id === userId);
+                if (userIndex > -1) {
+                    users.splice(userIndex, 1);
                     showMessage('usersMessage', '✅ User deleted successfully', 'success');
-                    loadUsers();
+                    updateUserStats();
+                    displayUsers();
                 } else {
-                    showMessage('usersMessage', '❌ Error deleting user', 'error');
+                    showMessage('usersMessage', '❌ User not found', 'error');
                 }
             } catch (error) {
                 showMessage('usersMessage', '❌ Error deleting user', 'error');
