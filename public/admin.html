@@ -1012,29 +1012,60 @@
             showMessage('usersMessage', '📤 Uploading users...', 'info');
             
             try {
-                const response = await fetch('/api/users/bulk', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ users: bulkUsers })
-                });
+                // Simulate API call delay
+                await new Promise(resolve => setTimeout(resolve, 1000));
                 
-                const result = await response.json();
+                // For demo purposes, process locally
+                // In real implementation:
+                // const response = await fetch('/api/users/bulk', {
+                //     method: 'POST',
+                //     headers: { 'Content-Type': 'application/json' },
+                //     body: JSON.stringify({ users: bulkUsers })
+                // });
                 
-                if (response.ok && result.success) {
-                    const { created, errors } = result.data;
-                    let message = `✅ Successfully created ${created.length} users`;
-                    
-                    if (errors.length > 0) {
-                        message += ` (${errors.length} errors - check console for details)`;
-                        console.error('Bulk upload errors:', errors);
+                let created = [];
+                let errors = [];
+                
+                bulkUsers.forEach((user, index) => {
+                    // Validate user data
+                    if (!user.name) {
+                        errors.push({ row: index + 1, error: 'Name is required' });
+                        return;
                     }
                     
-                    showMessage('usersMessage', message, 'success');
-                    hideBulkUpload();
-                    loadUsers();
-                } else {
-                    showMessage('usersMessage', `❌ ${result.error || 'Upload failed'}`, 'error');
+                    if (user.role !== 'driver' && (!user.email || !user.password)) {
+                        errors.push({ row: index + 1, error: 'Email and password required for non-drivers' });
+                        return;
+                    }
+                    
+                    // Create user object
+                    const newUser = {
+                        _id: Date.now().toString() + index, // Simple ID generation
+                        name: user.name,
+                        role: user.role || 'driver',
+                        active: true,
+                        createdAt: new Date().toISOString()
+                    };
+                    
+                    if (user.email) newUser.email = user.email;
+                    if (user.password) newUser.password = user.password;
+                    
+                    users.push(newUser);
+                    created.push(newUser);
+                });
+                
+                let message = `✅ Successfully created ${created.length} users`;
+                
+                if (errors.length > 0) {
+                    message += ` (${errors.length} errors - check console for details)`;
+                    console.error('Bulk upload errors:', errors);
                 }
+                
+                showMessage('usersMessage', message, 'success');
+                hideBulkUpload();
+                updateUserStats();
+                displayUsers();
+                
             } catch (error) {
                 showMessage('usersMessage', '❌ Error uploading users', 'error');
             }
