@@ -89,6 +89,12 @@
             color: #555;
         }
         
+        .form-group label .optional {
+            color: #999;
+            font-weight: normal;
+            font-size: 0.9em;
+        }
+        
         .form-group input, .form-group select {
             width: 100%;
             padding: 12px;
@@ -368,6 +374,14 @@
         table tr:hover {
             background: #f8f9fa;
         }
+        
+        .field-hint {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        @media (max-width: 768px) {
             .container { padding: 15px; }
             .data-item { flex-direction: column; align-items: stretch; }
             .data-actions { justify-content: center; margin-top: 15px; }
@@ -432,20 +446,22 @@
                             <input type="text" id="newUserName" placeholder="John Smith">
                         </div>
                         <div class="form-group">
-                            <label>Email *</label>
+                            <label id="emailLabel">Email *</label>
                             <input type="email" id="newUserEmail" placeholder="john@company.com">
+                            <div class="field-hint" id="emailHint"></div>
                         </div>
                         <div class="form-group">
                             <label>Role *</label>
-                            <select id="newUserRole" onchange="togglePasswordField()">
+                            <select id="newUserRole" onchange="toggleRequiredFields()">
                                 <option value="driver">Driver</option>
                                 <option value="dispatcher">Dispatcher</option>
                                 <option value="admin">Admin</option>
                             </select>
                         </div>
-                        <div class="form-group" id="passwordGroup" style="display: none;">
-                            <label>Password *</label>
-                            <input type="password" id="newUserPassword" placeholder="Required for non-drivers">
+                        <div class="form-group" id="passwordGroup">
+                            <label id="passwordLabel">Password *</label>
+                            <input type="password" id="newUserPassword" placeholder="Enter password">
+                            <div class="field-hint" id="passwordHint"></div>
                         </div>
                     </div>
                     <div style="margin-top: 15px;">
@@ -457,7 +473,7 @@
                 <!-- Bulk Upload Form -->
                 <div id="bulkUploadForm" class="hidden" style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
                     <h3>📁 Bulk Import Users</h3>
-                    <p style="margin-bottom: 15px;">Upload a CSV file with columns: name, email, role (optional), password (optional)</p>
+                    <p style="margin-bottom: 15px;">Upload a CSV file with columns: name, email (optional for drivers), role (optional), password (optional for drivers)</p>
                     
                     <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 15px;">
                         <input type="file" id="csvFile" accept=".csv,.xlsx,.xls" onchange="handleFileSelect(event)">
@@ -523,52 +539,6 @@
                 
                 <div id="usersMessage"></div>
             </div>
-                <h2>🔔 All Notifications</h2>
-                
-                <div class="search-box">
-                    <input type="text" id="searchInput" placeholder="Search by driver name..." onkeyup="searchNotifications()">
-                    <button class="btn btn-primary" onclick="refreshData()">🔄 Refresh</button>
-                </div>
-                
-                <div class="data-container">
-                    <div id="notificationsList">
-                        <div class="empty-state">
-                            <div class="icon">📭</div>
-                            <p>Loading notifications...</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div id="notificationsMessage"></div>
-            </div>
-
-            <!-- Drivers Tab -->
-            <div id="driversTab" class="hidden">
-                <h2>👥 Driver Activity</h2>
-                
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-number" id="uniqueDrivers">0</div>
-                        <div class="stat-label">Active Drivers</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="mostActiveDriver">-</div>
-                        <div class="stat-label">Most Active Driver</div>
-                    </div>
-                </div>
-                
-                <div class="data-container">
-                    <h3>Driver Summary</h3>
-                    <div id="driversList">
-                        <div class="empty-state">
-                            <div class="icon">👥</div>
-                            <p>Loading driver data...</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div id="driversMessage"></div>
-            </div>
 
             <!-- Settings Tab -->
             <div id="settingsTab" class="hidden">
@@ -612,6 +582,7 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             checkConnection();
+            toggleRequiredFields(); // Set initial field states
         });
 
         async function checkConnection() {
@@ -739,7 +710,7 @@
                     <div class="data-item ${user.role}">
                         <div class="data-info">
                             <div style="font-weight: bold; font-size: 16px;">${user.name}</div>
-                            <div style="color: #666; margin: 5px 0;">${user.email}</div>
+                            <div style="color: #666; margin: 5px 0;">${user.email || 'No email provided'}</div>
                             <span class="status-badge ${roleColors[user.role]}">${user.role.toUpperCase()}</span>
                             ${!user.active ? '<span class="status-badge status-delayed" style="margin-left: 10px;">INACTIVE</span>' : ''}
                         </div>
@@ -757,6 +728,7 @@
         function showAddUserForm() {
             document.getElementById('addUserForm').classList.remove('hidden');
             document.getElementById('bulkUploadForm').classList.add('hidden');
+            toggleRequiredFields(); // Update field requirements
         }
 
         function hideAddUserForm() {
@@ -765,17 +737,34 @@
             document.getElementById('newUserEmail').value = '';
             document.getElementById('newUserPassword').value = '';
             document.getElementById('newUserRole').value = 'driver';
-            togglePasswordField();
+            toggleRequiredFields();
         }
 
-        function togglePasswordField() {
+        function toggleRequiredFields() {
             const role = document.getElementById('newUserRole').value;
-            const passwordGroup = document.getElementById('passwordGroup');
+            const emailLabel = document.getElementById('emailLabel');
+            const emailHint = document.getElementById('emailHint');
+            const passwordLabel = document.getElementById('passwordLabel');
+            const passwordHint = document.getElementById('passwordHint');
+            const emailInput = document.getElementById('newUserEmail');
+            const passwordInput = document.getElementById('newUserPassword');
             
             if (role === 'driver') {
-                passwordGroup.style.display = 'none';
+                // For drivers: email and password are optional
+                emailLabel.innerHTML = 'Email <span class="optional">(optional)</span>';
+                emailHint.textContent = 'Optional for drivers - leave blank if not available';
+                passwordLabel.innerHTML = 'Password <span class="optional">(optional)</span>';
+                passwordHint.textContent = 'Optional for drivers - system will generate if needed';
+                emailInput.placeholder = 'john@company.com (optional)';
+                passwordInput.placeholder = 'Leave blank for auto-generation';
             } else {
-                passwordGroup.style.display = 'block';
+                // For dispatchers and admins: email and password are required
+                emailLabel.innerHTML = 'Email *';
+                emailHint.textContent = 'Required for dispatchers and admins';
+                passwordLabel.innerHTML = 'Password *';
+                passwordHint.textContent = 'Required for dispatchers and admins';
+                emailInput.placeholder = 'john@company.com';
+                passwordInput.placeholder = 'Enter secure password';
             }
         }
 
@@ -785,27 +774,47 @@
             const role = document.getElementById('newUserRole').value;
             const password = document.getElementById('newUserPassword').value;
             
-            if (!name || !email) {
-                showMessage('usersMessage', '❌ Name and email are required', 'error');
+            // Name is always required
+            if (!name) {
+                showMessage('usersMessage', '❌ Name is required', 'error');
                 return;
             }
             
-            if (role !== 'driver' && !password) {
-                showMessage('usersMessage', '❌ Password is required for dispatchers and admins', 'error');
-                return;
+            // For non-drivers, email and password are required
+            if (role !== 'driver') {
+                if (!email) {
+                    showMessage('usersMessage', '❌ Email is required for dispatchers and admins', 'error');
+                    return;
+                }
+                if (!password) {
+                    showMessage('usersMessage', '❌ Password is required for dispatchers and admins', 'error');
+                    return;
+                }
             }
+            
+            // Build user object
+            const userData = { name, role };
+            if (email) userData.email = email;
+            if (password) userData.password = password;
             
             try {
                 const response = await fetch('/api/users', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, email, role, password })
+                    body: JSON.stringify(userData)
                 });
                 
                 const result = await response.json();
                 
                 if (response.ok && result.success) {
-                    showMessage('usersMessage', `✅ User ${name} created successfully!`, 'success');
+                    let message = `✅ User ${name} created successfully!`;
+                    if (role === 'driver' && !email) {
+                        message += ' (No email provided)';
+                    }
+                    if (role === 'driver' && !password) {
+                        message += ' (System generated password)';
+                    }
+                    showMessage('usersMessage', message, 'success');
                     hideAddUserForm();
                     loadUsers();
                 } else {
@@ -832,6 +841,7 @@
         function downloadTemplate() {
             const csv = 'name,email,role,password\n' +
                        'John Smith,john@company.com,driver,\n' +
+                       'Driver Two,,driver,\n' +
                        'Jane Doe,jane@company.com,dispatcher,password123\n' +
                        'Admin User,admin@company.com,admin,adminpass';
             
@@ -845,7 +855,7 @@
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
             
-            showMessage('usersMessage', '✅ Template downloaded!', 'success');
+            showMessage('usersMessage', '✅ Template downloaded! Note: email and password are optional for drivers', 'success');
         }
 
         function handleFileSelect(event) {
@@ -880,13 +890,19 @@
                 const user = {};
                 
                 headers.forEach((header, index) => {
-                    user[header] = values[index]?.trim() || '';
+                    const value = values[index]?.trim() || '';
+                    if (value) {
+                        user[header] = value;
+                    }
                 });
                 
                 // Set default role if not specified
                 if (!user.role) user.role = 'driver';
                 
-                bulkUsers.push(user);
+                // Only add users with at least a name
+                if (user.name) {
+                    bulkUsers.push(user);
+                }
             }
             
             showPreview();
@@ -897,21 +913,27 @@
             const table = document.getElementById('previewTable');
             
             if (bulkUsers.length === 0) {
-                showMessage('usersMessage', '❌ No valid data found', 'error');
+                showMessage('usersMessage', '❌ No valid data found - make sure there is at least a "name" column', 'error');
                 return;
             }
             
             const previewUsers = bulkUsers.slice(0, 5);
             
-            let html = '<table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Password</th></tr></thead><tbody>';
+            let html = '<table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Password</th><th>Status</th></tr></thead><tbody>';
             
             previewUsers.forEach(user => {
+                let status = '✅ Valid';
+                if (user.role !== 'driver' && (!user.email || !user.password)) {
+                    status = '⚠️ Missing email/password (required for non-drivers)';
+                }
+                
                 html += `
                     <tr>
                         <td>${user.name || ''}</td>
-                        <td>${user.email || ''}</td>
+                        <td>${user.email || '<em>Not provided</em>'}</td>
                         <td>${user.role || 'driver'}</td>
-                        <td>${user.password ? '***' : 'N/A'}</td>
+                        <td>${user.password ? '***' : '<em>Not provided</em>'}</td>
+                        <td>${status}</td>
                     </tr>
                 `;
             });
@@ -948,7 +970,7 @@
                     let message = `✅ Successfully created ${created.length} users`;
                     
                     if (errors.length > 0) {
-                        message += ` (${errors.length} errors)`;
+                        message += ` (${errors.length} errors - check console for details)`;
                         console.error('Bulk upload errors:', errors);
                     }
                     
@@ -991,7 +1013,7 @@
             if (searchTerm) {
                 filteredUsers = filteredUsers.filter(user => 
                     user.name.toLowerCase().includes(searchTerm) ||
-                    user.email.toLowerCase().includes(searchTerm)
+                    (user.email && user.email.toLowerCase().includes(searchTerm))
                 );
             }
             
@@ -1044,7 +1066,7 @@
                 ['Name', 'Email', 'Role', 'Active', 'Created'],
                 ...users.map(u => [
                     u.name,
-                    u.email,
+                    u.email || 'No email',
                     u.role,
                     u.active ? 'Yes' : 'No',
                     new Date(u.createdAt).toLocaleDateString()
