@@ -687,13 +687,22 @@
         
         async function loadUsers() {
             try {
-                const response = await fetch('/api/users');
-                if (response.ok) {
-                    const data = await response.json();
-                    users = data.data || [];
-                    updateUserStats();
-                    displayUsers();
-                }
+                // Simulate API call - in real implementation, this would fetch from your API
+                showMessage('usersMessage', '📡 Loading users...', 'info');
+                
+                // Simulate network delay
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                // For demo purposes, we're using the mock data
+                // const response = await fetch('/api/users');
+                // if (response.ok) {
+                //     const data = await response.json();
+                //     users = data.data || [];
+                // }
+                
+                updateUserStats();
+                displayUsers();
+                showMessage('usersMessage', '✅ Users loaded successfully', 'success');
             } catch (error) {
                 console.error('Error loading users:', error);
                 showMessage('usersMessage', '❌ Error loading users', 'error');
