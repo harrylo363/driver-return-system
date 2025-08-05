@@ -687,25 +687,46 @@
         
         async function loadUsers() {
             try {
-                // Simulate API call - in real implementation, this would fetch from your API
                 showMessage('usersMessage', '📡 Loading users...', 'info');
                 
-                // Simulate network delay
-                await new Promise(resolve => setTimeout(resolve, 500));
-                
-                // For demo purposes, we're using the mock data
-                // const response = await fetch('/api/users');
-                // if (response.ok) {
-                //     const data = await response.json();
-                //     users = data.data || [];
-                // }
-                
-                updateUserStats();
-                displayUsers();
-                showMessage('usersMessage', '✅ Users loaded successfully', 'success');
+                const response = await fetch('/api/users');
+                if (response.ok) {
+                    const data = await response.json();
+                    users = data.data || data || [];
+                    updateUserStats();
+                    displayUsers();
+                    showMessage('usersMessage', '✅ Users loaded successfully', 'success');
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
             } catch (error) {
                 console.error('Error loading users:', error);
-                showMessage('usersMessage', '❌ Error loading users', 'error');
+                
+                // Fallback to existing mock data if API fails
+                if (users.length === 0) {
+                    users = [
+                        {
+                            _id: '1',
+                            name: 'John Driver',
+                            email: 'john@company.com',
+                            role: 'driver',
+                            active: true,
+                            createdAt: new Date().toISOString()
+                        },
+                        {
+                            _id: '2',
+                            name: 'Jane Smith',
+                            email: '',
+                            role: 'driver',
+                            active: true,
+                            createdAt: new Date().toISOString()
+                        }
+                    ];
+                    updateUserStats();
+                    displayUsers();
+                }
+                
+                showMessage('usersMessage', '⚠️ Using offline data - check connection', 'error');
             }
         }
 
@@ -828,45 +849,42 @@
             
             // Build user object
             const userData = { 
-                _id: Date.now().toString(), // Simple ID generation for demo
                 name, 
                 role,
-                active: true,
-                createdAt: new Date().toISOString()
+                active: true
             };
             if (email) userData.email = email;
-            if (password) userData.password = password; // In real app, this would be hashed
+            if (password) userData.password = password;
             
             try {
                 showMessage('usersMessage', '📤 Creating user...', 'info');
                 
-                // Simulate API call delay
-                await new Promise(resolve => setTimeout(resolve, 300));
+                const response = await fetch('/api/users', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(userData)
+                });
                 
-                // For demo purposes, add to local array
-                // In real implementation:
-                // const response = await fetch('/api/users', {
-                //     method: 'POST',
-                //     headers: { 'Content-Type': 'application/json' },
-                //     body: JSON.stringify(userData)
-                // });
+                const result = await response.json();
                 
-                users.push(userData);
-                
-                let message = `✅ User ${name} created successfully!`;
-                if (role === 'driver' && !email) {
-                    message += ' (No email provided)';
+                if (response.ok && (result.success || result._id)) {
+                    let message = `✅ User ${name} created successfully!`;
+                    if (role === 'driver' && !email) {
+                        message += ' (No email provided)';
+                    }
+                    if (role === 'driver' && !password) {
+                        message += ' (System will generate password if needed)';
+                    }
+                    showMessage('usersMessage', message, 'success');
+                    hideAddUserForm();
+                    loadUsers(); // Reload from server
+                } else {
+                    throw new Error(result.error || result.message || 'Failed to create user');
                 }
-                if (role === 'driver' && !password) {
-                    message += ' (System will generate password if needed)';
-                }
-                showMessage('usersMessage', message, 'success');
-                hideAddUserForm();
-                updateUserStats();
-                displayUsers();
                 
             } catch (error) {
-                showMessage('usersMessage', '❌ Error creating user', 'error');
+                console.error('Error creating user:', error);
+                showMessage('usersMessage', `❌ Error: ${error.message}`, 'error');
             }
         }
 
@@ -1012,62 +1030,34 @@
             showMessage('usersMessage', '📤 Uploading users...', 'info');
             
             try {
-                // Simulate API call delay
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                
-                // For demo purposes, process locally
-                // In real implementation:
-                // const response = await fetch('/api/users/bulk', {
-                //     method: 'POST',
-                //     headers: { 'Content-Type': 'application/json' },
-                //     body: JSON.stringify({ users: bulkUsers })
-                // });
-                
-                let created = [];
-                let errors = [];
-                
-                bulkUsers.forEach((user, index) => {
-                    // Validate user data
-                    if (!user.name) {
-                        errors.push({ row: index + 1, error: 'Name is required' });
-                        return;
-                    }
-                    
-                    if (user.role !== 'driver' && (!user.email || !user.password)) {
-                        errors.push({ row: index + 1, error: 'Email and password required for non-drivers' });
-                        return;
-                    }
-                    
-                    // Create user object
-                    const newUser = {
-                        _id: Date.now().toString() + index, // Simple ID generation
-                        name: user.name,
-                        role: user.role || 'driver',
-                        active: true,
-                        createdAt: new Date().toISOString()
-                    };
-                    
-                    if (user.email) newUser.email = user.email;
-                    if (user.password) newUser.password = user.password;
-                    
-                    users.push(newUser);
-                    created.push(newUser);
+                const response = await fetch('/api/users/bulk', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ users: bulkUsers })
                 });
                 
-                let message = `✅ Successfully created ${created.length} users`;
+                const result = await response.json();
                 
-                if (errors.length > 0) {
-                    message += ` (${errors.length} errors - check console for details)`;
-                    console.error('Bulk upload errors:', errors);
+                if (response.ok && (result.success || result.created)) {
+                    const created = result.created || result.data?.created || bulkUsers.length;
+                    const errors = result.errors || result.data?.errors || [];
+                    
+                    let message = `✅ Successfully created ${Array.isArray(created) ? created.length : created} users`;
+                    
+                    if (errors.length > 0) {
+                        message += ` (${errors.length} errors - check console for details)`;
+                        console.error('Bulk upload errors:', errors);
+                    }
+                    
+                    showMessage('usersMessage', message, 'success');
+                    hideBulkUpload();
+                    loadUsers(); // Reload from server
+                } else {
+                    throw new Error(result.error || result.message || 'Upload failed');
                 }
-                
-                showMessage('usersMessage', message, 'success');
-                hideBulkUpload();
-                updateUserStats();
-                displayUsers();
-                
             } catch (error) {
-                showMessage('usersMessage', '❌ Error uploading users', 'error');
+                console.error('Error uploading users:', error);
+                showMessage('usersMessage', `❌ Error: ${error.message}`, 'error');
             }
         }
 
@@ -1077,26 +1067,20 @@
             try {
                 showMessage('usersMessage', '🗑️ Deleting user...', 'info');
                 
-                // Simulate API call delay
-                await new Promise(resolve => setTimeout(resolve, 300));
+                const response = await fetch(`/api/users/${userId}`, {
+                    method: 'DELETE'
+                });
                 
-                // For demo purposes, remove from local array
-                // In real implementation:
-                // const response = await fetch(`/api/users/${userId}`, {
-                //     method: 'DELETE'
-                // });
-                
-                const userIndex = users.findIndex(u => u._id === userId);
-                if (userIndex > -1) {
-                    users.splice(userIndex, 1);
+                if (response.ok) {
                     showMessage('usersMessage', '✅ User deleted successfully', 'success');
-                    updateUserStats();
-                    displayUsers();
+                    loadUsers(); // Reload from server
                 } else {
-                    showMessage('usersMessage', '❌ User not found', 'error');
+                    const result = await response.json();
+                    throw new Error(result.error || result.message || 'Failed to delete user');
                 }
             } catch (error) {
-                showMessage('usersMessage', '❌ Error deleting user', 'error');
+                console.error('Error deleting user:', error);
+                showMessage('usersMessage', `❌ Error: ${error.message}`, 'error');
             }
         }
 
