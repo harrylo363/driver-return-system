@@ -550,51 +550,72 @@
 
         async function loadDriverList() {
             try {
-                // Try to load from the same source as admin panel
-                // This simulates fetching from the shared user database
-                const drivers = getDriversFromAdminSystem();
+                showMessage('Loading drivers...', 'info');
                 
-                const select = document.getElementById('driverSelect');
+                // Fetch drivers from the real API
+                const response = await fetch('/api/users?role=driver');
                 
-                if (drivers.length === 0) {
-                    select.innerHTML = '<option value="">-- No drivers found. Please contact admin. --</option>';
-                    showMessage('No drivers found in system. Contact your administrator.', 'error');
-                    return;
-                }
-                
-                select.innerHTML = '<option value="">-- Choose your name --</option>';
-                
-                drivers.forEach(driver => {
-                    const option = document.createElement('option');
-                    option.value = driver._id; // Use driver ID as value
-                    option.textContent = `${driver.name}${driver.email ? ` (${driver.email})` : ''}`;
-                    option.setAttribute('data-driver', JSON.stringify(driver));
-                    select.appendChild(option);
-                });
-                
-                // If previously logged in driver exists, verify and select them
-                const savedDriver = localStorage.getItem('currentDriver');
-                const savedDriverData = localStorage.getItem('currentDriverData');
-                if (savedDriver && savedDriverData) {
-                    const driverData = JSON.parse(savedDriverData);
-                    const driverStillExists = drivers.find(d => d._id === driverData._id);
-                    if (driverStillExists) {
-                        select.value = driverData._id;
-                        document.getElementById('loginBtn').disabled = false;
-                    } else {
-                        // Driver no longer exists, clear saved data
-                        localStorage.removeItem('currentDriver');
-                        localStorage.removeItem('currentDriverData');
-                        showMessage('Your driver account was not found. Please contact admin.', 'error');
+                if (response.ok) {
+                    const result = await response.json();
+                    let drivers = result.data || result || [];
+                    
+                    // Filter to only active drivers
+                    drivers = drivers.filter(user => 
+                        user.role === 'driver' && 
+                        user.active !== false &&
+                        user.name && user.name.trim() !== ''
+                    );
+                    
+                    const select = document.getElementById('driverSelect');
+                    
+                    if (drivers.length === 0) {
+                        select.innerHTML = '<option value="">-- No drivers found. Please contact admin. --</option>';
+                        showMessage('No drivers found in system. Contact your administrator.', 'error');
+                        return;
                     }
+                    
+                    select.innerHTML = '<option value="">-- Choose your name --</option>';
+                    
+                    drivers.forEach(driver => {
+                        const option = document.createElement('option');
+                        option.value = driver._id; // Use driver ID as value
+                        option.textContent = `${driver.name}${driver.email ? ` (${driver.email})` : ''}`;
+                        option.setAttribute('data-driver', JSON.stringify(driver));
+                        select.appendChild(option);
+                    });
+                    
+                    // If previously logged in driver exists, verify and select them
+                    const savedDriverData = localStorage.getItem('currentDriverData');
+                    if (savedDriverData) {
+                        const driverData = JSON.parse(savedDriverData);
+                        const driverStillExists = drivers.find(d => d._id === driverData._id);
+                        if (driverStillExists) {
+                            select.value = driverData._id;
+                            document.getElementById('loginBtn').disabled = false;
+                        } else {
+                            // Driver no longer exists, clear saved data
+                            localStorage.removeItem('currentDriver');
+                            localStorage.removeItem('currentDriverData');
+                            showMessage('Your driver account was not found. Please contact admin.', 'error');
+                        }
+                    }
+                    
+                    showMessage('Drivers loaded successfully', 'success');
+                    
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
                 
             } catch (error) {
                 console.error('Error loading drivers:', error);
-                showMessage('Error loading driver list. Please refresh the page.', 'error');
+                showMessage(`Error loading drivers: ${error.message}`, 'error');
                 
+                // Fallback drivers for development/demo
                 const select = document.getElementById('driverSelect');
-                select.innerHTML = '<option value="">-- Error loading drivers --</option>';
+                select.innerHTML = `
+                    <option value="">-- Error loading from server --</option>
+                    <option value="demo1" data-driver='{"_id":"demo1","name":"Demo Driver","role":"driver","active":true}'>Demo Driver (Offline Mode)</option>
+                `;
             }
         }
 
@@ -701,26 +722,32 @@
 
         async function verifyAndLoginDriver(savedDriverName) {
             try {
-                const drivers = getDriversFromAdminSystem();
                 const savedDriverData = localStorage.getItem('currentDriverData');
                 
                 if (savedDriverData) {
                     const driverData = JSON.parse(savedDriverData);
-                    const driverExists = drivers.find(d => d._id === driverData._id);
                     
-                    if (driverExists) {
-                        currentDriver = driverExists.name;
-                        currentDriverData = driverExists;
-                        showMainScreen();
-                        loadHistory();
-                        return;
+                    // Verify driver still exists in the database
+                    const response = await fetch(`/api/users/${driverData._id}`);
+                    
+                    if (response.ok) {
+                        const result = await response.json();
+                        const driverExists = result.data || result;
+                        
+                        if (driverExists && driverExists.role === 'driver' && driverExists.active !== false) {
+                            currentDriver = driverExists.name;
+                            currentDriverData = driverExists;
+                            showMainScreen();
+                            loadHistory();
+                            return;
+                        }
                     }
                 }
                 
-                // Driver not found, clear saved data
+                // Driver not found or inactive, clear saved data
                 localStorage.removeItem('currentDriver');
                 localStorage.removeItem('currentDriverData');
-                showMessage('Driver account not found. Please select your name again.', 'error');
+                showMessage('Driver account not found or inactive. Please select your name again.', 'error');
             } catch (error) {
                 console.error('Error verifying driver:', error);
                 showMessage('Error verifying driver account. Please log in again.', 'error');
@@ -756,11 +783,17 @@
 
         async function checkDatabaseConnection() {
             try {
-                // Simulate connection check
-                // In real implementation: await fetch('/api/health')
+                const response = await fetch('/api/health');
                 const statusEl = document.getElementById('connectionStatus');
-                if (statusEl) {
-                    statusEl.innerHTML = '<span class="status-connected">🟢 Connected to System</span>';
+                
+                if (response.ok) {
+                    if (statusEl) {
+                        statusEl.innerHTML = '<span class="status-connected">🟢 Connected to Database</span>';
+                    }
+                } else {
+                    if (statusEl) {
+                        statusEl.innerHTML = '<span class="status-disconnected">🔴 Database Offline</span>';
+                    }
                 }
             } catch (error) {
                 console.error('Connection check failed:', error);
@@ -859,16 +892,27 @@
                     read: false
                 };
 
-                // Simulate sending to server
-                // In real implementation: await fetch('/api/notifications', { ... })
-                await simulateServerRequest(notificationData);
-                
-                showMessage(`✅ Status updated: ${status}`, 'success');
-                addToHistory(status);
-                
-                // Send local notification
-                sendStatusNotification(status);
-                
+                // Send to server
+                const response = await fetch('/api/notifications', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(notificationData)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    showMessage(`✅ Status updated: ${status}`, 'success');
+                    addToHistory(status);
+                    
+                    // Send local notification
+                    sendStatusNotification(status);
+                } else {
+                    const errorResult = await response.json().catch(() => ({}));
+                    throw new Error(errorResult.error || errorResult.message || `HTTP ${response.status}`);
+                }
+
             } catch (error) {
                 console.error('Error sending status:', error);
                 showMessage(`⚠️ Error: ${error.message}`, 'error');
@@ -1031,12 +1075,28 @@
             }, 4000);
         }
 
-        // Refresh driver list periodically to catch admin changes
+        // Remove the old simulation functions and update refresh interval
+        function getDriversFromAdminSystem() {
+            // This function is no longer needed as we're using real API calls
+            return [];
+        }
+
+        function getSharedUserData() {
+            // This function is no longer needed as we're using real API calls
+            return [];
+        }
+
+        async function simulateServerRequest(data) {
+            // This function is no longer needed as we're using real API calls
+            return { success: true };
+        }
+
+        // Refresh driver list more frequently to catch admin changes
         setInterval(() => {
             if (document.getElementById('loginScreen').style.display !== 'none') {
                 loadDriverList();
             }
-        }, 60000); // Check every minute
+        }, 30000); // Check every 30 seconds
 
         // Check connection status periodically
         setInterval(checkDatabaseConnection, 30000);
