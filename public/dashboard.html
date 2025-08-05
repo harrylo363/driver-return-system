@@ -1739,4 +1739,421 @@
                                         font-size: 12px;
                                         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
                                         border: 2px solid rgba(255, 255, 255, 0.3);
-                                    ">${notification.
+                                    ">${notification.driver.split(' ').map(n => n[0]).join('')}</div>`,
+                                    iconSize: [36, 36],
+                                    iconAnchor: [18, 36]
+                                })
+                            }).addTo(map);
+                            
+                            marker.bindPopup(`
+                                <strong>${notification.driver}</strong><br>
+                                Status: ${notification.status}<br>
+                                Destination: 5856 Tampa FDC<br>
+                                ${notification.estimatedArrival ? `ETA: ${notification.estimatedArrival}` : ''}
+                            `);
+                            
+                            markers[notification._id] = marker;
+                        }
+                    } catch (error) {
+                        console.error('Error parsing location:', error);
+                    }
+                }
+            });
+        }
+        
+        // Update Metrics
+        function updateMetrics(driverNotifications) {
+            // Update KPIs
+            document.getElementById('activeDrivers').textContent = driverNotifications.length;
+            document.getElementById('enRouteCount').textContent = 
+                driverNotifications.filter(n => n.status === 'en-route').length;
+            document.getElementById('arrivedCount').textContent = 
+                driverNotifications.filter(n => n.status === 'arrived').length;
+            document.getElementById('avgResponseTime').textContent = 
+                Math.floor(Math.random() * 30 + 15) + 'm';
+            
+            // Update performance metrics
+            const utilization = Math.min((driverNotifications.length / 50) * 100, 95);
+            document.getElementById('fleetUtilization').textContent = Math.floor(utilization) + '%';
+            document.getElementById('utilizationBar').style.width = utilization + '%';
+            
+            const onTime = Math.min(85 + Math.random() * 10, 98);
+            document.getElementById('onTimeRate').textContent = Math.floor(onTime) + '%';
+            document.getElementById('onTimeBar').style.width = onTime + '%';
+            
+            document.getElementById('dailyThroughput').textContent = 
+                Math.floor(driverNotifications.length * 2.5);
+        }
+        
+        // Animate KPIs
+        function animateKPIs() {
+            document.querySelectorAll('.kpi-value').forEach(kpi => {
+                const finalValue = kpi.textContent;
+                const isNumeric = /^\d+/.test(finalValue);
+                
+                if (isNumeric) {
+                    const numValue = parseInt(finalValue);
+                    let current = 0;
+                    const increment = Math.ceil(numValue / 20);
+                    const timer = setInterval(() => {
+                        current += increment;
+                        if (current >= numValue) {
+                            current = numValue;
+                            clearInterval(timer);
+                        }
+                        kpi.textContent = current + finalValue.replace(/^\d+/, '');
+                    }, 50);
+                }
+            });
+        }
+        
+        // Time Functions
+        function startClock() {
+            const updateTime = () => {
+                const now = new Date();
+                document.getElementById('currentTime').textContent = 
+                    now.toLocaleTimeString('en-US', { hour12: false });
+            };
+            updateTime();
+            setInterval(updateTime, 1000);
+        }
+        
+        function getTimeAgo(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+            if (seconds < 60) return 'just now';
+            const minutes = Math.floor(seconds / 60);
+            if (minutes < 60) return `${minutes}m ago`;
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `${hours}h ago`;
+            return `${Math.floor(hours / 24)}d ago`;
+        }
+        
+        // Auto Refresh
+        function startAutoRefresh() {
+            refreshInterval = setInterval(() => {
+                loadNotifications();
+            }, 10000); // Refresh every 10 seconds
+        }
+        
+        // Filter Functions
+        function filterStatus(status, button) {
+            currentFilter = status;
+            
+            // Update button states
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            button.classList.add('active');
+            
+            // Reload display
+            const driverNotifications = notifications.filter(n => n.driver && n.status);
+            updateDisplay(driverNotifications);
+        }
+        
+        // Map Functions
+        function centerMap() {
+            map.setView([26.664, -81.619], 12);
+            showToast('Map Centered', 'View reset to 5856 Tampa FDC', 'info');
+        }
+        
+        function toggleHeatmap() {
+            isHeatmapVisible = !isHeatmapVisible;
+            showToast('Heatmap ' + (isHeatmapVisible ? 'Enabled' : 'Disabled'), 
+                     'Density visualization ' + (isHeatmapVisible ? 'activated' : 'deactivated'), 
+                     'info');
+        }
+        
+        function focusOnDriver(id) {
+            if (markers[id]) {
+                map.setView(markers[id].getLatLng(), 15);
+                markers[id].openPopup();
+            }
+        }
+        
+        // Demo Data
+        function loadDemoData() {
+            const demoDrivers = ['John Smith', 'Sarah Johnson', 'Mike Davis', 'Lisa Wilson', 
+                               'Robert Taylor', 'Maria Garcia', 'James Brown', 'Jennifer Lee'];
+            const statuses = ['en-route', 'arrived', 'en-route', 'delayed'];
+            
+            const demoNotifications = demoDrivers.map((driver, index) => {
+                const status = statuses[index % statuses.length];
+                // Generate locations around Fort Myers area
+                const baseLat = 26.664 + (Math.random() - 0.5) * 0.3;
+                const baseLng = -81.619 + (Math.random() - 0.5) * 0.3;
+                
+                return {
+                    _id: 'demo-' + Date.now() + '-' + index,
+                    driver: driver,
+                    status: status,
+                    location: `${baseLat.toFixed(6)}, ${baseLng.toFixed(6)}`,
+                    warehouse: '5856 Tampa FDC',
+                    timestamp: new Date(Date.now() - Math.random() * 3600000),
+                    estimatedArrival: status === 'en-route' ? `${Math.floor(Math.random() * 45 + 10)} min` : null
+                };
+            });
+            
+            notifications = demoNotifications;
+            const driverNotifications = notifications.filter(n => n.driver && n.status);
+            updateDisplay(driverNotifications);
+            updateMap(driverNotifications);
+            updateMetrics(driverNotifications);
+            
+            showToast('Demo Mode Activated', 'Displaying simulated fleet data', 'success');
+        }
+        
+        // Export Functions
+        function exportData() {
+            const driverNotifications = notifications.filter(n => n.driver && n.status);
+            
+            const csv = [
+                ['Timestamp', 'Driver', 'Status', 'Location', 'Warehouse', 'ETA'],
+                ...driverNotifications.map(n => [
+                    new Date(n.timestamp).toLocaleString(),
+                    n.driver,
+                    n.status,
+                    n.location || 'N/A',
+                    n.warehouse || 'N/A',
+                    n.estimatedArrival || 'N/A'
+                ])
+            ].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `fleet-report-${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showToast('Export Complete', 'Fleet report downloaded successfully', 'success');
+        }
+        
+        // Action Functions
+        function refreshDashboard() {
+            showToast('Refreshing', 'Updating fleet data...', 'info');
+            loadNotifications();
+        }
+        
+        function dispatchAlert() {
+            showToast('Feature Coming Soon', 'Dispatch alert system in development', 'info');
+        }
+        
+        function viewReports() {
+            showToast('Feature Coming Soon', 'Advanced analytics module in development', 'info');
+        }
+        
+        function openSettings() {
+            showToast('Feature Coming Soon', 'System configuration in development', 'info');
+        }
+        
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+        
+        // Toast Notification System
+        function showToast(title, message, type = 'info') {
+            const existingToast = document.querySelector('.toast');
+            if (existingToast) existingToast.remove();
+            
+            const icons = {
+                success: '✅',
+                error: '❌',
+                info: 'ℹ️',
+                warning: '⚠️'
+            };
+            
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `
+                <div class="toast-icon">${icons[type]}</div>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideUp 0.3s ease reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        }
+        
+        // Check-In Modal Functions
+        function openCheckInModal(notificationId, driverName) {
+            currentCheckInId = notificationId;
+            equipmentIssues = {};
+            
+            // Set driver info
+            document.getElementById('checkInDriver').value = driverName;
+            document.getElementById('checkInTime').value = new Date().toLocaleString();
+            
+            // Reset form
+            document.getElementById('truckNumber').value = '';
+            document.getElementById('trailerNumber').value = '';
+            document.getElementById('mileage').value = '';
+            document.getElementById('fuelLevel').value = '';
+            document.getElementById('additionalNotes').value = '';
+            
+            // Build equipment checklist
+            const checklistContainer = document.getElementById('equipmentChecklist');
+            checklistContainer.innerHTML = equipmentItems.map(item => `
+                <div class="checklist-item" id="item-${item.id}">
+                    <div class="checklist-checkbox">
+                        <span style="display: none;">✓</span>
+                    </div>
+                    <div class="checklist-item-content">
+                        <div class="checklist-item-header">
+                            <span>${item.icon}</span>
+                            <span class="checklist-label" title="${item.label}">${item.label}</span>
+                            <div class="checklist-status">
+                                <button class="status-btn ok" onclick="setItemStatus('${item.id}', 'ok')">OK</button>
+                                <button class="status-btn issue" onclick="setItemStatus('${item.id}', 'issue')">Issue</button>
+                            </div>
+                        </div>
+                        <div class="issue-details" id="issue-${item.id}">
+                            <input type="text" class="issue-input" placeholder="Describe the issue..." 
+                                   onkeyup="updateIssueDescription('${item.id}', this.value)">
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Show modal
+            document.getElementById('checkInModal').style.display = 'block';
+            updateIssueCount();
+        }
+        
+        function closeCheckInModal() {
+            document.getElementById('checkInModal').style.display = 'none';
+            currentCheckInId = null;
+            equipmentIssues = {};
+        }
+        
+        function setItemStatus(itemId, status) {
+            const item = document.getElementById(`item-${itemId}`);
+            const checkbox = item.querySelector('.checklist-checkbox');
+            const checkmark = checkbox.querySelector('span');
+            const okBtn = item.querySelector('.status-btn.ok');
+            const issueBtn = item.querySelector('.status-btn.issue');
+            const issueDetails = document.getElementById(`issue-${itemId}`);
+            
+            // Reset checkbox first
+            checkbox.style.background = '';
+            checkbox.style.borderColor = '';
+            
+            // Update visual state
+            if (status === 'ok') {
+                item.classList.add('checked');
+                item.classList.remove('issue');
+                checkbox.style.background = 'var(--success)';
+                checkbox.style.borderColor = 'var(--success)';
+                checkmark.textContent = '✓';  // Always set to checkmark
+                checkmark.style.display = 'block';
+                checkmark.style.color = 'white';
+                okBtn.classList.add('active');
+                issueBtn.classList.remove('active');
+                issueDetails.classList.remove('show');
+                delete equipmentIssues[itemId];
+            } else if (status === 'issue') {
+                item.classList.add('issue');
+                item.classList.remove('checked');
+                checkbox.style.background = 'var(--danger)';
+                checkbox.style.borderColor = 'var(--danger)';
+                checkmark.textContent = '!';  // Set to exclamation
+                checkmark.style.display = 'block';
+                checkmark.style.color = 'white';
+                okBtn.classList.remove('active');
+                issueBtn.classList.add('active');
+                issueDetails.classList.add('show');
+                equipmentIssues[itemId] = { status: 'issue', description: '' };
+            }
+            
+            updateIssueCount();
+        }
+        
+        function updateIssueDescription(itemId, description) {
+            if (equipmentIssues[itemId]) {
+                equipmentIssues[itemId].description = description;
+            }
+        }
+        
+        function updateIssueCount() {
+            const count = Object.keys(equipmentIssues).length;
+            document.getElementById('issueCount').textContent = count;
+        }
+        
+        async function submitCheckIn() {
+            const checkInData = {
+                driverId: currentCheckInId,
+                checkInTime: new Date().toISOString(),
+                vehicleInfo: {
+                    truckNumber: document.getElementById('truckNumber').value,
+                    trailerNumber: document.getElementById('trailerNumber').value,
+                    mileage: document.getElementById('mileage').value,
+                    fuelLevel: document.getElementById('fuelLevel').value
+                },
+                equipmentCheck: {
+                    items: equipmentItems.map(item => {
+                        const itemElement = document.getElementById(`item-${item.id}`);
+                        const isChecked = itemElement.classList.contains('checked');
+                        const hasIssue = itemElement.classList.contains('issue');
+                        
+                        return {
+                            id: item.id,
+                            label: item.label,
+                            status: isChecked ? 'ok' : (hasIssue ? 'issue' : 'not_checked'),
+                            issue: equipmentIssues[item.id]?.description || ''
+                        };
+                    }),
+                    totalIssues: Object.keys(equipmentIssues).length
+                },
+                additionalNotes: document.getElementById('additionalNotes').value
+            };
+            
+            // Find the notification and update it
+            const notification = notifications.find(n => n._id === currentCheckInId);
+            if (notification) {
+                notification.checkedIn = true;
+                notification.checkInData = checkInData;
+                
+                // Update the notification on the server (if connected)
+                try {
+                    await fetch(`/api/notifications/${currentCheckInId}/checkin`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(checkInData)
+                    });
+                } catch (error) {
+                    console.log('Offline mode - check-in saved locally');
+                }
+                
+                // Update display
+                const driverNotifications = notifications.filter(n => n.driver && n.status);
+                updateDisplay(driverNotifications);
+                
+                // Show appropriate toast based on issues
+                if (checkInData.equipmentCheck.totalIssues > 0) {
+                    showToast('Check-In Complete', 
+                             `${notification.driver} checked in with ${checkInData.equipmentCheck.totalIssues} issue(s) reported`, 
+                             'warning');
+                } else {
+                    showToast('Check-In Complete', 
+                             `${notification.driver} checked in successfully - All equipment OK`, 
+                             'success');
+                }
+            }
+            
+            closeCheckInModal();
+        }
+    </script>
+</body>
+</html>
