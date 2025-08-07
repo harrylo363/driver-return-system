@@ -1006,11 +1006,10 @@
             
             container.innerHTML = messageHtml;
             
-            if (type === 'success') {
-                setTimeout(function() {
-                    container.innerHTML = '';
-                }, 5000);
-            }
+            // Auto-hide all message types after 5 seconds
+            setTimeout(function() {
+                container.innerHTML = '';
+            }, 5000);
         }
         
         function checkConnection() {
@@ -1474,11 +1473,10 @@
             
             container.innerHTML = messageHtml;
             
-            if (type === 'success') {
-                setTimeout(function() {
-                    container.innerHTML = '';
-                }, 5000);
-            }
+            // Auto-hide all message types after 5 seconds
+            setTimeout(function() {
+                container.innerHTML = '';
+            }, 5000);
         }
         
         function showMessage(message, type) {
@@ -1492,11 +1490,10 @@
             
             container.innerHTML = messageHtml;
             
-            if (type === 'success') {
-                setTimeout(function() {
-                    container.innerHTML = '';
-                }, 5000);
-            }
+            // Auto-hide all message types after 5 seconds
+            setTimeout(function() {
+                container.innerHTML = '';
+            }, 5000);
         }
         
         // Auto-refresh data every 30 seconds when on dashboard or users tab
