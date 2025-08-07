@@ -1225,10 +1225,7 @@
                 <span>🔄</span>
                 <span>Refresh</span>
             </button>
-            <button class="btn btn-primary" onclick="loadDemoData()">
-                <span>▶</span>
-                <span>Demo Mode</span>
-            </button>
+
         </div>
         
         <!-- Dashboard Grid -->
@@ -1855,36 +1852,7 @@
             return notifications.filter(n => n.driver && n.status);
         }
         
-        // Demo Data
-        function loadDemoData() {
-            const demoDrivers = ['John Smith', 'Sarah Johnson', 'Mike Davis', 'Lisa Wilson', 
-                               'Robert Taylor', 'Maria Garcia', 'James Brown', 'Jennifer Lee'];
-            const statuses = ['en-route', 'arrived', 'en-route', 'delayed'];
-            
-            const demoNotifications = demoDrivers.map((driver, index) => {
-                const status = statuses[index % statuses.length];
-                // Generate locations around Fort Myers area
-                const baseLat = 26.664 + (Math.random() - 0.5) * 0.3;
-                const baseLng = -81.619 + (Math.random() - 0.5) * 0.3;
-                
-                return {
-                    _id: 'demo-' + Date.now() + '-' + index,
-                    driver: driver,
-                    status: status,
-                    location: `${baseLat.toFixed(6)}, ${baseLng.toFixed(6)}`,
-                    warehouse: '5856 Tampa FDC',
-                    timestamp: new Date(Date.now() - Math.random() * 3600000),
-                    estimatedArrival: status === 'en-route' ? `${Math.floor(Math.random() * 45 + 10)} min` : null
-                };
-            });
-            
-            notifications = demoNotifications;
-            const driverNotifications = notifications.filter(n => n.driver && n.status);
-            updateDisplay(driverNotifications);
-            updateMetrics(driverNotifications);
-            
-            showToast('Demo Mode Activated', 'Displaying simulated fleet data with geocoded locations', 'success');
-        }
+
         
         // Export Functions
         function exportData() {
