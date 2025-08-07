@@ -4,23 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FleetForce Enterprise | Command Center</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        * { 
-            margin: 0; 
-            padding: 0; 
-            box-sizing: border-box; 
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         :root {
             --primary: #0F172A;
-            --primary-light: #1E293B;
-            --primary-lighter: #334155;
             --accent: #3B82F6;
-            --accent-hover: #2563EB;
-            --accent-light: #60A5FA;
             --success: #10B981;
             --warning: #F59E0B;
             --danger: #EF4444;
@@ -29,64 +19,36 @@
             --text-muted: #64748B;
             --bg-dark: #0B1120;
             --bg-card: #1E293B;
-            --bg-elevated: #2D3748;
             --bg-hover: #374151;
             --border: #374151;
-            --border-light: #4B5563;
-            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             --gradient-hero: linear-gradient(135deg, #1e3a8a 0%, #3730a3 50%, #581c87 100%);
             --gradient-card: linear-gradient(145deg, #1E293B 0%, #2D3748 100%);
-            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
-            --shadow-md: 0 8px 16px rgba(0, 0, 0, 0.15);
             --shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.2);
             --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.25);
-            --shadow-2xl: 0 32px 64px rgba(0, 0, 0, 0.3);
         }
         
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            font-family: 'Inter', system-ui, sans-serif;
             background: var(--bg-dark);
             color: var(--text-primary);
             line-height: 1.6;
-            overflow-x: hidden;
-            font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
             -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
         }
         
-        /* Animated Premium Background */
         body::before {
             content: '';
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: 
                 radial-gradient(circle at 25% 25%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
                 radial-gradient(circle at 75% 75%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.05) 0%, transparent 50%),
                 linear-gradient(135deg, #0B1120 0%, #1E293B 100%);
-            z-index: -2;
-        }
-        
-        body::after {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                radial-gradient(circle at 2px 2px, rgba(255,255,255,0.02) 1px, transparent 0);
-            background-size: 40px 40px;
             z-index: -1;
         }
         
-        /* Premium Header */
         .top-header {
             background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(24px) saturate(180%);
+            backdrop-filter: blur(20px);
             border-bottom: 1px solid rgba(59, 130, 246, 0.2);
             padding: 1.25rem 2rem;
             position: sticky;
@@ -110,8 +72,7 @@
         }
         
         .logo {
-            width: 52px;
-            height: 52px;
+            width: 52px; height: 52px;
             background: var(--gradient-hero);
             border-radius: 14px;
             display: flex;
@@ -120,28 +81,7 @@
             font-size: 26px;
             font-weight: 800;
             color: white;
-            box-shadow: 
-                0 8px 32px rgba(59, 130, 246, 0.4),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .logo::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            transform: rotate(45deg);
-            animation: logoShine 4s ease-in-out infinite;
-        }
-        
-        @keyframes logoShine {
-            0%, 100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-            50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.4);
         }
         
         .brand-text h1 {
@@ -150,9 +90,7 @@
             background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 50%, #06B6D4 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
             margin: 0;
-            letter-spacing: -0.025em;
         }
         
         .brand-text p {
@@ -160,13 +98,6 @@
             color: var(--text-secondary);
             margin: 0;
             font-weight: 500;
-            letter-spacing: 0.025em;
-        }
-        
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
         }
         
         .status-indicator {
@@ -180,16 +111,12 @@
             font-size: 0.875rem;
             color: var(--success);
             font-weight: 600;
-            backdrop-filter: blur(8px);
-            box-shadow: var(--shadow-sm);
         }
         
         .pulse {
-            width: 10px;
-            height: 10px;
+            width: 10px; height: 10px;
             background: var(--success);
             border-radius: 50%;
-            box-shadow: 0 0 12px rgba(16, 185, 129, 0.6);
             animation: pulse 2s infinite;
         }
         
@@ -199,86 +126,25 @@
             100% { opacity: 1; transform: scale(1); }
         }
         
-        .user-profile {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1rem;
-            background: var(--gradient-card);
-            border: 1px solid var(--border-light);
-            border-radius: 14px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: var(--shadow-sm);
-        }
-        
-        .user-profile:hover {
-            background: var(--bg-elevated);
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-md);
-        }
-        
-        .user-avatar {
-            width: 36px;
-            height: 36px;
-            background: var(--gradient-hero);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            color: white;
-            font-size: 0.875rem;
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
-        }
-        
-        .user-info {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .user-name {
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            line-height: 1.2;
-        }
-        
-        .user-role {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            line-height: 1.2;
-        }
-        
-        /* Main Container */
         .container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 2rem;
-            min-height: calc(100vh - 100px);
         }
         
-        /* Premium Navigation */
         .nav-container {
             background: var(--gradient-card);
-            border: 1px solid var(--border-light);
+            border: 1px solid var(--border);
             border-radius: 20px;
             padding: 1rem;
             margin-bottom: 2rem;
             box-shadow: var(--shadow-lg);
-            backdrop-filter: blur(12px);
         }
         
         .nav-tabs {
             display: flex;
             gap: 0.5rem;
             overflow-x: auto;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-        }
-        
-        .nav-tabs::-webkit-scrollbar {
-            display: none;
         }
         
         .nav-tab {
@@ -295,106 +161,39 @@
             border-radius: 14px;
             transition: all 0.3s ease;
             white-space: nowrap;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .nav-tab::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            transition: left 0.6s ease;
-        }
-        
-        .nav-tab:hover::before {
-            left: 100%;
         }
         
         .nav-tab:hover {
             color: var(--text-primary);
             background: var(--bg-hover);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
         }
         
         .nav-tab.active {
             color: white;
             background: var(--gradient-hero);
-            transform: translateY(-2px);
-            box-shadow: 
-                var(--shadow-lg),
-                0 0 20px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
         }
         
-        .nav-tab-icon {
-            font-size: 1.25rem;
-        }
-        
-        /* Tab Content */
         .tab-content {
             display: none;
-            animation: fadeInUp 0.4s ease-out;
         }
         
         .tab-content.active {
             display: block;
         }
         
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(24px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        /* Premium Cards */
         .card {
             background: var(--gradient-card);
-            border: 1px solid var(--border-light);
+            border: 1px solid var(--border);
             border-radius: 24px;
             padding: 2.5rem;
             box-shadow: var(--shadow-xl);
             margin-bottom: 2rem;
-            position: relative;
-            overflow: hidden;
-            backdrop-filter: blur(12px);
-        }
-        
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: var(--gradient-hero);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        
-        .card:hover::before {
-            opacity: 1;
         }
         
         .card:hover {
             transform: translateY(-4px);
-            box-shadow: var(--shadow-2xl);
             border-color: rgba(59, 130, 246, 0.3);
-        }
-        
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 2rem;
         }
         
         .card-title {
@@ -404,12 +203,7 @@
             display: flex;
             align-items: center;
             gap: 1rem;
-            margin: 0;
-        }
-        
-        .card-title-icon {
-            font-size: 2rem;
-            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+            margin: 0 0 2rem 0;
         }
         
         .card-subtitle {
@@ -419,44 +213,24 @@
             font-weight: 500;
         }
         
-        /* Executive Stats Grid */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 2rem;
             margin-bottom: 2rem;
         }
         
         .stat-card {
             background: var(--gradient-card);
-            border: 1px solid var(--border-light);
+            border: 1px solid var(--border);
             border-radius: 20px;
             padding: 2rem;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.4s ease;
-            backdrop-filter: blur(12px);
-        }
-        
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: var(--gradient-hero);
-            transform: scaleX(0);
-            transition: transform 0.3s ease;
-        }
-        
-        .stat-card:hover::before {
-            transform: scaleX(1);
+            transition: all 0.3s ease;
         }
         
         .stat-card:hover {
             transform: translateY(-8px);
-            box-shadow: var(--shadow-2xl);
+            box-shadow: var(--shadow-xl);
             border-color: rgba(59, 130, 246, 0.4);
         }
         
@@ -468,40 +242,23 @@
         }
         
         .stat-icon {
-            width: 56px;
-            height: 56px;
+            width: 56px; height: 56px;
             background: rgba(59, 130, 246, 0.1);
             border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 28px;
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            backdrop-filter: blur(8px);
         }
         
         .stat-trend {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.875rem;
-            font-weight: 700;
             padding: 0.5rem 1rem;
             border-radius: 100px;
-            backdrop-filter: blur(8px);
-            box-shadow: var(--shadow-sm);
-        }
-        
-        .stat-trend.up {
+            font-size: 0.875rem;
+            font-weight: 700;
             color: var(--success);
             background: rgba(16, 185, 129, 0.15);
             border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-        
-        .stat-trend.down {
-            color: var(--danger);
-            background: rgba(239, 68, 68, 0.15);
-            border: 1px solid rgba(239, 68, 68, 0.3);
         }
         
         .stat-value {
@@ -510,8 +267,6 @@
             color: var(--text-primary);
             line-height: 1;
             margin-bottom: 0.75rem;
-            font-variant-numeric: tabular-nums;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
         
         .stat-label {
@@ -520,16 +275,55 @@
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.075em;
-            margin-bottom: 0.25rem;
         }
         
         .stat-sublabel {
             font-size: 0.75rem;
             color: var(--text-muted);
             font-weight: 500;
+            margin-top: 0.25rem;
         }
         
-        /* Executive Form Styling */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .quick-action-card {
+            background: var(--gradient-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .quick-action-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+        
+        .quick-action-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .quick-action-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .quick-action-description {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+        
         .form-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -547,7 +341,6 @@
             color: var(--text-secondary);
             margin-bottom: 0.75rem;
             font-weight: 600;
-            letter-spacing: 0.025em;
         }
         
         .form-input, .form-select {
@@ -560,23 +353,14 @@
             font-size: 0.875rem;
             font-weight: 500;
             transition: all 0.3s ease;
-            backdrop-filter: blur(8px);
         }
         
         .form-input:focus, .form-select:focus {
             outline: none;
             border-color: var(--accent);
-            box-shadow: 
-                0 0 0 4px rgba(59, 130, 246, 0.1),
-                var(--shadow-md);
-            background: rgba(15, 23, 42, 0.9);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
         }
         
-        .form-input::placeholder {
-            color: var(--text-muted);
-        }
-        
-        /* Premium Button System */
         .btn {
             display: inline-flex;
             align-items: center;
@@ -591,85 +375,50 @@
             text-decoration: none;
             margin-right: 0.75rem;
             margin-bottom: 0.75rem;
-            position: relative;
-            overflow: hidden;
-            backdrop-filter: blur(8px);
-        }
-        
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.6s ease;
-        }
-        
-        .btn:hover::before {
-            left: 100%;
         }
         
         .btn-primary {
             background: var(--gradient-hero);
             color: white;
-            box-shadow: 
-                var(--shadow-lg),
-                0 0 20px rgba(59, 130, 246, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
         }
         
         .btn-primary:hover:not(:disabled) {
             transform: translateY(-3px);
-            box-shadow: 
-                var(--shadow-xl),
-                0 0 30px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
         }
         
         .btn-secondary {
-            background: var(--bg-elevated);
+            background: #374151;
             color: var(--text-primary);
-            border: 1px solid var(--border-light);
-            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border);
         }
         
         .btn-secondary:hover:not(:disabled) {
             background: var(--bg-hover);
             transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
         }
         
         .btn-success {
             background: linear-gradient(135deg, #10B981 0%, #059669 100%);
             color: white;
-            box-shadow: 
-                var(--shadow-lg),
-                0 0 20px rgba(16, 185, 129, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
         }
         
         .btn-success:hover:not(:disabled) {
             transform: translateY(-3px);
-            box-shadow: 
-                var(--shadow-xl),
-                0 0 30px rgba(16, 185, 129, 0.4);
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.4);
         }
         
         .btn-danger {
             background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
             color: white;
-            box-shadow: 
-                var(--shadow-lg),
-                0 0 20px rgba(239, 68, 68, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
         }
         
         .btn-danger:hover:not(:disabled) {
             transform: translateY(-3px);
-            box-shadow: 
-                var(--shadow-xl),
-                0 0 30px rgba(239, 68, 68, 0.4);
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.4);
         }
         
         .btn:disabled {
@@ -680,8 +429,7 @@
         
         .loading-spinner {
             display: none;
-            width: 18px;
-            height: 18px;
+            width: 18px; height: 18px;
             border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
             border-top-color: white;
@@ -696,25 +444,9 @@
             to { transform: rotate(360deg); }
         }
         
-        /* Executive User Directory */
         .users-list {
-            max-height: 700px;
+            max-height: 600px;
             overflow-y: auto;
-            scrollbar-width: thin;
-            scrollbar-color: var(--border) transparent;
-        }
-        
-        .users-list::-webkit-scrollbar {
-            width: 6px;
-        }
-        
-        .users-list::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        
-        .users-list::-webkit-scrollbar-thumb {
-            background: var(--border);
-            border-radius: 3px;
         }
         
         .user-item {
@@ -727,7 +459,6 @@
             justify-content: space-between;
             align-items: center;
             transition: all 0.3s ease;
-            backdrop-filter: blur(8px);
         }
         
         .user-item:hover {
@@ -756,10 +487,8 @@
             font-size: 0.75rem;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
             display: inline-block;
             margin-bottom: 0.5rem;
-            box-shadow: var(--shadow-sm);
         }
         
         .badge-driver { 
@@ -784,7 +513,6 @@
             font-weight: 500;
         }
         
-        /* Executive Search Interface */
         .search-filters {
             display: flex;
             gap: 1.5rem;
@@ -795,7 +523,7 @@
         
         .search-input {
             flex: 1;
-            min-width: 320px;
+            min-width: 300px;
             padding: 1rem 1.25rem;
             background: rgba(15, 23, 42, 0.8);
             border: 1px solid var(--border);
@@ -803,7 +531,6 @@
             color: var(--text-primary);
             font-size: 0.875rem;
             font-weight: 500;
-            backdrop-filter: blur(8px);
         }
         
         .search-input:focus {
@@ -812,11 +539,6 @@
             box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
         }
         
-        .search-input::placeholder {
-            color: var(--text-muted);
-        }
-        
-        /* Premium Upload Interface */
         .upload-section {
             background: rgba(59, 130, 246, 0.05);
             border: 2px dashed rgba(59, 130, 246, 0.3);
@@ -826,7 +548,6 @@
             transition: all 0.3s ease;
             margin-bottom: 2rem;
             cursor: pointer;
-            backdrop-filter: blur(8px);
         }
         
         .upload-section:hover {
@@ -840,7 +561,6 @@
             margin-bottom: 1.5rem;
             color: var(--accent);
             opacity: 0.8;
-            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
         }
         
         .upload-title {
@@ -855,14 +575,12 @@
             margin-bottom: 2rem;
             font-size: 1rem;
             font-weight: 500;
-            line-height: 1.6;
         }
         
         .file-input {
             display: none;
         }
         
-        /* Premium Messages */
         .message {
             padding: 1.25rem 1.75rem;
             border-radius: 16px;
@@ -871,8 +589,6 @@
             display: flex;
             align-items: center;
             gap: 1rem;
-            backdrop-filter: blur(8px);
-            box-shadow: var(--shadow-md);
         }
         
         .message.success {
@@ -893,7 +609,6 @@
             border: 1px solid rgba(245, 158, 11, 0.3);
         }
         
-        /* Loading States */
         .loading-state {
             display: flex;
             align-items: center;
@@ -904,8 +619,7 @@
         }
         
         .spinner {
-            width: 28px;
-            height: 28px;
+            width: 28px; height: 28px;
             border: 3px solid var(--border);
             border-top: 3px solid var(--accent);
             border-radius: 50%;
@@ -922,7 +636,6 @@
             font-size: 5rem;
             margin-bottom: 1.5rem;
             opacity: 0.3;
-            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
         }
         
         .empty-title {
@@ -937,14 +650,12 @@
             font-size: 1rem;
         }
         
-        /* Template Section */
         .template-section {
             background: rgba(16, 185, 129, 0.05);
             border: 1px solid rgba(16, 185, 129, 0.2);
             border-radius: 20px;
             padding: 2rem;
             margin-bottom: 2rem;
-            backdrop-filter: blur(8px);
         }
         
         .template-title {
@@ -964,111 +675,19 @@
             font-weight: 500;
         }
         
-        /* Quick Actions Enhancement */
-        .quick-actions {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-        }
-        
-        .quick-action-card {
-            background: var(--gradient-card);
-            border: 1px solid var(--border-light);
-            border-radius: 16px;
-            padding: 1.5rem;
-            text-align: center;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            backdrop-filter: blur(8px);
-        }
-        
-        .quick-action-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-xl);
-            border-color: rgba(59, 130, 246, 0.3);
-        }
-        
-        .quick-action-icon {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
-        }
-        
-        .quick-action-title {
-            font-size: 1.125rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 0.5rem;
-        }
-        
-        .quick-action-description {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            margin-bottom: 1.5rem;
-        }
-        
-        /* Responsive Design */
-        @media (max-width: 1200px) {
-            .stats-grid {
-                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            }
-            
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-        
         @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-            
-            .header-content {
-                flex-direction: column;
-                gap: 1rem;
-                align-items: flex-start;
-            }
-            
-            .header-actions {
-                width: 100%;
-                justify-content: space-between;
-            }
-            
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .user-item {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 1rem;
-            }
-            
-            .search-filters {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .search-input {
-                min-width: auto;
-            }
-            
-            .quick-actions {
-                grid-template-columns: 1fr;
-            }
-            
-            .upload-section {
-                padding: 2rem;
-            }
-            
-            .card {
-                padding: 1.5rem;
-            }
+            .container { padding: 1rem; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .form-grid { grid-template-columns: 1fr; }
+            .user-item { flex-direction: column; align-items: flex-start; gap: 1rem; }
+            .search-filters { flex-direction: column; align-items: stretch; }
+            .search-input { min-width: auto; }
+            .quick-actions { grid-template-columns: 1fr; }
+            .upload-section { padding: 2rem; }
         }
     </style>
 </head>
 <body>
-    <!-- Premium Header -->
     <header class="top-header">
         <div class="header-content">
             <div class="brand">
@@ -1078,50 +697,37 @@
                     <p>Logistics Command Center</p>
                 </div>
             </div>
-            <div class="header-actions">
-                <div class="status-indicator" id="connectionStatus">
-                    <div class="pulse"></div>
-                    <span>System Operational</span>
-                </div>
-                <div class="user-profile">
-                    <div class="user-avatar">AD</div>
-                    <div class="user-info">
-                        <div class="user-name">Admin User</div>
-                        <div class="user-role">System Administrator</div>
-                    </div>
-                </div>
+            <div class="status-indicator" id="connectionStatus">
+                <div class="pulse"></div>
+                <span>System Operational</span>
             </div>
         </div>
     </header>
     
-    <!-- Main Container -->
     <div class="container">
-        <!-- Premium Navigation -->
         <div class="nav-container">
             <nav class="nav-tabs">
                 <button class="nav-tab active" onclick="switchTab('dashboard', this)">
-                    <span class="nav-tab-icon">📊</span>
+                    <span>📊</span>
                     <span>Executive Dashboard</span>
                 </button>
                 <button class="nav-tab" onclick="switchTab('users', this)">
-                    <span class="nav-tab-icon">👥</span>
+                    <span>👥</span>
                     <span>User Management</span>
                 </button>
                 <button class="nav-tab" onclick="switchTab('bulk-upload', this)">
-                    <span class="nav-tab-icon">📁</span>
+                    <span>📁</span>
                     <span>Bulk Operations</span>
                 </button>
             </nav>
         </div>
         
-        <!-- Executive Dashboard Tab -->
         <div id="dashboard-tab" class="tab-content active">
-            <!-- Executive KPI Grid -->
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-header">
                         <div class="stat-icon">👥</div>
-                        <div class="stat-trend up">↑ 12%</div>
+                        <div class="stat-trend">↑ 12%</div>
                     </div>
                     <div class="stat-value" id="totalUsers">0</div>
                     <div class="stat-label">Total Users</div>
@@ -1131,7 +737,7 @@
                 <div class="stat-card">
                     <div class="stat-header">
                         <div class="stat-icon">🚚</div>
-                        <div class="stat-trend up">↑ 8%</div>
+                        <div class="stat-trend">↑ 8%</div>
                     </div>
                     <div class="stat-value" id="totalDrivers">0</div>
                     <div class="stat-label">Active Drivers</div>
@@ -1141,7 +747,7 @@
                 <div class="stat-card">
                     <div class="stat-header">
                         <div class="stat-icon">📡</div>
-                        <div class="stat-trend up">↑ 15%</div>
+                        <div class="stat-trend">↑ 15%</div>
                     </div>
                     <div class="stat-value" id="totalDispatchers">0</div>
                     <div class="stat-label">Dispatchers</div>
@@ -1151,7 +757,7 @@
                 <div class="stat-card">
                     <div class="stat-header">
                         <div class="stat-icon">🛡️</div>
-                        <div class="stat-trend down">↓ 2%</div>
+                        <div class="stat-trend">↓ 2%</div>
                     </div>
                     <div class="stat-value" id="totalAdmins">0</div>
                     <div class="stat-label">Administrators</div>
@@ -1159,53 +765,40 @@
                 </div>
             </div>
             
-            <!-- Executive Quick Actions -->
             <div class="card">
-                <div class="card-header">
-                    <div>
-                        <h2 class="card-title">
-                            <span class="card-title-icon">⚡</span>
-                            Quick Actions
-                        </h2>
-                        <p class="card-subtitle">Streamlined administrative operations</p>
-                    </div>
-                </div>
+                <h2 class="card-title">
+                    <span>⚡</span>
+                    Quick Actions
+                </h2>
+                <p class="card-subtitle">Streamlined administrative operations</p>
                 
                 <div class="quick-actions">
                     <div class="quick-action-card" onclick="goToUsersTab()">
                         <div class="quick-action-icon">👤</div>
                         <div class="quick-action-title">Add New User</div>
                         <div class="quick-action-description">Create individual user accounts with role-based permissions</div>
-                        <button class="btn btn-primary">
-                            <span>Get Started</span>
-                        </button>
+                        <button class="btn btn-primary">Get Started</button>
                     </div>
                     
                     <div class="quick-action-card" onclick="goToBulkUploadTab()">
                         <div class="quick-action-icon">📤</div>
                         <div class="quick-action-title">Bulk Upload</div>
                         <div class="quick-action-description">Import multiple driver records from CSV or Excel files</div>
-                        <button class="btn btn-primary">
-                            <span>Upload Data</span>
-                        </button>
+                        <button class="btn btn-primary">Upload Data</button>
                     </div>
                     
                     <div class="quick-action-card" onclick="exportUsersFromDashboard()">
                         <div class="quick-action-icon">📊</div>
                         <div class="quick-action-title">Export Data</div>
                         <div class="quick-action-description">Generate comprehensive reports and data exports</div>
-                        <button class="btn btn-success">
-                            <span>Export Now</span>
-                        </button>
+                        <button class="btn btn-success">Export Now</button>
                     </div>
                     
                     <div class="quick-action-card" onclick="refreshDashboardFromQuickActions()">
                         <div class="quick-action-icon">🔄</div>
                         <div class="quick-action-title">Refresh Data</div>
                         <div class="quick-action-description">Update dashboard with latest system information</div>
-                        <button class="btn btn-primary">
-                            <span>Refresh</span>
-                        </button>
+                        <button class="btn btn-primary">Refresh</button>
                     </div>
                 </div>
                 
@@ -1213,19 +806,13 @@
             </div>
         </div>
         
-        <!-- User Management Tab -->
         <div id="users-tab" class="tab-content">
-            <!-- User Creation Interface -->
             <div class="card">
-                <div class="card-header">
-                    <div>
-                        <h2 class="card-title">
-                            <span class="card-title-icon">👤</span>
-                            User Account Creation
-                        </h2>
-                        <p class="card-subtitle">Create and configure individual user accounts with role-based access</p>
-                    </div>
-                </div>
+                <h2 class="card-title">
+                    <span>👤</span>
+                    User Account Creation
+                </h2>
+                <p class="card-subtitle">Create and configure individual user accounts with role-based access</p>
                 
                 <div class="form-grid">
                     <div class="form-group">
@@ -1258,32 +845,25 @@
                     </div>
                 </div>
                 
-                <div style="margin-top: 1rem;">
-                    <button class="btn btn-primary" onclick="createUser()">
-                        <span class="loading-spinner"></span>
-                        <span>✅</span>
-                        <span>Create User Account</span>
-                    </button>
-                    <button class="btn btn-secondary" onclick="clearUserForm()">
-                        <span>🗑️</span>
-                        <span>Clear Form</span>
-                    </button>
-                </div>
+                <button class="btn btn-primary" onclick="createUser()">
+                    <span class="loading-spinner"></span>
+                    <span>✅</span>
+                    <span>Create User Account</span>
+                </button>
+                <button class="btn btn-secondary" onclick="clearUserForm()">
+                    <span>🗑️</span>
+                    <span>Clear Form</span>
+                </button>
                 
                 <div id="userMessage"></div>
             </div>
             
-            <!-- User Directory -->
             <div class="card">
-                <div class="card-header">
-                    <div>
-                        <h2 class="card-title">
-                            <span class="card-title-icon">👥</span>
-                            User Directory
-                        </h2>
-                        <p class="card-subtitle">Comprehensive user management and administration</p>
-                    </div>
-                </div>
+                <h2 class="card-title">
+                    <span>👥</span>
+                    User Directory
+                </h2>
+                <p class="card-subtitle">Comprehensive user management and administration</p>
                 
                 <div class="search-filters">
                     <input type="text" class="search-input" id="searchInput" placeholder="Search users by name, email, or vehicle ID..." onkeyup="searchUsers()">
@@ -1308,9 +888,7 @@
             </div>
         </div>
         
-        <!-- Bulk Upload Tab -->
         <div id="bulk-upload-tab" class="tab-content">
-            <!-- Template Section -->
             <div class="template-section">
                 <h3 class="template-title">
                     <span>📋</span>
@@ -1326,17 +904,12 @@
                 </button>
             </div>
             
-            <!-- Upload Interface -->
             <div class="card">
-                <div class="card-header">
-                    <div>
-                        <h2 class="card-title">
-                            <span class="card-title-icon">📁</span>
-                            Bulk Data Import
-                        </h2>
-                        <p class="card-subtitle">Import multiple driver records efficiently with automated validation</p>
-                    </div>
-                </div>
+                <h2 class="card-title">
+                    <span>📁</span>
+                    Bulk Data Import
+                </h2>
+                <p class="card-subtitle">Import multiple driver records efficiently with automated validation</p>
                 
                 <div class="upload-section" id="uploadArea" onclick="document.getElementById('fileInput').click()">
                     <div class="upload-icon">📂</div>
@@ -1355,291 +928,65 @@
                 
                 <div id="uploadMessage"></div>
                 
-                <div style="margin-top: 2rem;">
-                    <button class="btn btn-success" id="uploadBtn" onclick="uploadDrivers()" disabled>
-                        <span class="loading-spinner"></span>
-                        <span>✅</span>
-                        <span>Process Import</span>
-                    </button>
-                    <button class="btn btn-secondary" onclick="clearUpload()">
-                        <span>🗑️</span>
-                        <span>Clear Upload</span>
-                    </button>
-                </div>
+                <button class="btn btn-success" id="uploadBtn" onclick="uploadDrivers()" disabled>
+                    <span class="loading-spinner"></span>
+                    <span>✅</span>
+                    <span>Process Import</span>
+                </button>
+                <button class="btn btn-secondary" onclick="clearUpload()">
+                    <span>🗑️</span>
+                    <span>Clear Upload</span>
+                </button>
             </div>
         </div>
     </div>
 
     <script>
-        // Global variables
-        const API_BASE = window.location.origin;
-        let users = [];
-        let filteredUsers = [];
-        let currentTab = 'dashboard';
+        var API_BASE = window.location.origin;
+        var users = [];
+        var filteredUsers = [];
+        var currentTab = 'dashboard';
         
-        // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             console.log('FleetForce Enterprise Admin loaded');
             checkConnection();
         });
         
-        // Premium Tab Management
         function switchTab(tabName, buttonElement) {
-            // Hide all tabs with fade effect
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
+            var tabContents = document.querySelectorAll('.tab-content');
+            for (var i = 0; i < tabContents.length; i++) {
+                tabContents[i].classList.remove('active');
+            }
             
-            // Remove active from all nav tabs
-            document.querySelectorAll('.nav-tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
+            var navTabs = document.querySelectorAll('.nav-tab');
+            for (var i = 0; i < navTabs.length; i++) {
+                navTabs[i].classList.remove('active');
+            }
             
-            // Show selected tab
-            setTimeout(() => {
+            setTimeout(function() {
                 document.getElementById(tabName + '-tab').classList.add('active');
             }, 50);
             
             buttonElement.classList.add('active');
-            
             currentTab = tabName;
             
-            // Load data if needed
             if (tabName === 'dashboard' || tabName === 'users') {
                 loadUsers();
             }
         }
         
-        // Quick Action Helper Functions
         function goToUsersTab() {
-            const usersTabButton = document.querySelector('[onclick*="users"]');
+            var usersTabButton = document.querySelector('[onclick*="users"]');
             switchTab('users', usersTabButton);
         }
         
         function goToBulkUploadTab() {
-            const bulkUploadTabButton = document.querySelector('[onclick*="bulk-upload"]');
+            var bulkUploadTabButton = document.querySelector('[onclick*="bulk-upload"]');
             switchTab('bulk-upload', bulkUploadTabButton);
         }
         
         function exportUsersFromDashboard() {
-            if (users.length === 0) {
-                showDashboardMessage('No users to export', 'error');
-                return;
-            }
-            
-            const csv = [
-                ['Name', 'Email', 'Phone', 'Role', 'Vehicle ID', 'Created'],
-                ...users.map(u => [
-                    u.name,
-                    u.email || '',
-                    u.phoneNumber || '',
-                    u.role,
-                    u.vehicleId || '',
-                    new Date(u.createdAt).toLocaleDateString()
-                ])
-            ].map(row => row.map(cell => '"' + cell + '"').join(',')).join('\n');
-            
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'fleetforce-users-' + new Date().toISOString().split('T')[0] + '.csv';
-            document.body.appendChild(a);
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-            
-            showMessage('Exported ' + users.length + ' users to CSV', 'success');
-        }
-        
-        // Bulk Upload Functions
-        function handleFileSelect(event) {
-            const file = event.target.files[0];
-            if (file) {
-                showUploadMessage('File selected: ' + file.name + '. Ready for processing...', 'success');
-                document.getElementById('uploadBtn').disabled = false;
-            }
-        }
-        
-        function downloadTemplate() {
-            const template = [
-                ['name', 'email', 'phoneNumber', 'vehicleId'],
-                ['John Doe', 'john@company.com', '+1-555-0123', 'T-1234'],
-                ['Jane Smith', 'jane@company.com', '+1-555-0124', 'T-5678'],
-                ['Mike Johnson', '', '+1-555-0125', 'T-9012']
-            ];
-            
-            const csv = template.map(row => 
-                row.map(cell => '"' + cell + '"').join(',')
-            ).join('\n');
-            
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'fleetforce-driver-template.csv';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-            
-            showUploadMessage('Template downloaded successfully!', 'success');
-        }
-        
-        async function uploadDrivers() {
-            const fileInput = document.getElementById('fileInput');
-            const file = fileInput.files[0];
-            
-            if (!file) {
-                showUploadMessage('Please select a file first', 'error');
-                return;
-            }
-            
-            const button = event.target;
-            button.classList.add('loading');
-            button.disabled = true;
-            
-            try {
-                showUploadMessage('Processing file and creating driver accounts...', 'success');
-                
-                // Simple CSV parsing for demo
-                const text = await readFileAsText(file);
-                const lines = text.split('\n').filter(line => line.trim());
-                
-                if (lines.length < 2) {
-                    throw new Error('File must have at least a header and one data row');
-                }
-                
-                const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
-                let successCount = 0;
-                let errorCount = 0;
-                const errors = [];
-                
-                for (let i = 1; i < lines.length; i++) {
-                    const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
-                    
-                    if (values[0]) { // If name exists
-                        const userData = {
-                            name: values[0],
-                            role: 'driver',
-                            active: true
-                        };
-                        
-                        if (values[1]) userData.email = values[1];
-                        if (values[2]) userData.phoneNumber = values[2];
-                        if (values[3]) userData.vehicleId = values[3];
-                        
-                        try {
-                            const response = await fetch(API_BASE + '/api/users', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify(userData)
-                            });
-                            
-                            if (response.ok) {
-                                successCount++;
-                            } else {
-                                const errorData = await response.json().catch(() => ({}));
-                                errors.push(userData.name + ': ' + (errorData.error || 'Failed'));
-                                errorCount++;
-                            }
-                        } catch (error) {
-                            errors.push(userData.name + ': ' + error.message);
-                            errorCount++;
-                        }
-                        
-                        // Small delay to prevent overwhelming server
-                        await new Promise(resolve => setTimeout(resolve, 100));
-                    }
-                }
-                
-                let message = 'Import completed! ' + successCount + ' drivers created successfully';
-                if (errorCount > 0) {
-                    message += ', ' + errorCount + ' failed';
-                }
-                
-                showUploadMessage(message, successCount > 0 ? 'success' : 'error');
-                
-                if (errors.length > 0 && errors.length <= 5) {
-                    showUploadMessage('Errors: ' + errors.join(', '), 'warning');
-                } else if (errors.length > 5) {
-                    showUploadMessage(errors.length + ' errors occurred. First few: ' + errors.slice(0, 3).join(', ') + '...', 'warning');
-                }
-                
-                loadUsers();
-                clearUpload();
-                
-            } catch (error) {
-                showUploadMessage('Import failed: ' + error.message, 'error');
-            } finally {
-                button.classList.remove('loading');
-                button.disabled = true;
-            }
-        }
-        
-        function readFileAsText(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = e => resolve(e.target.result);
-                reader.onerror = () => reject(new Error('Failed to read file'));
-                reader.readAsText(file);
-            });
-        }
-        
-        function clearUpload() {
-            document.getElementById('fileInput').value = '';
-            document.getElementById('uploadBtn').disabled = true;
-            showUploadMessage('', '');
-        }
-        
-        function showUploadMessage(message, type) {
-            const container = document.getElementById('uploadMessage');
-            if (!message) {
-                container.innerHTML = '';
-                return;
-            }
-            
-            const icons = { success: '✅', error: '❌', warning: '⚠️' };
-            
-            container.innerHTML = '<div class="message ' + type + '">' +
-                '<span>' + (icons[type] || '') + '</span>' +
-                '<span>' + message + '</span>' +
-                '</div>';
-            
-            if (type === 'success') {
-                setTimeout(() => container.innerHTML = '', 5000);
-            }
-        }
-        
-        // Utility Functions
-        function showMessage(message, type) {
-            const container = document.getElementById('userMessage');
-            const icons = { success: '✅', error: '❌', warning: '⚠️' };
-            
-            container.innerHTML = '<div class="message ' + type + '">' +
-                '<span>' + (icons[type] || '') + '</span>' +
-                '<span>' + message + '</span>' +
-                '</div>';
-            
-            if (type === 'success') {
-                setTimeout(() => container.innerHTML = '', 5000);
-            }
-        }
-        
-        // Auto-refresh for real-time updates
-        setInterval(() => {
-            if (currentTab === 'dashboard' || currentTab === 'users') {
-                loadUsers();
-            }
-        }, 30000);
-        
-        // Check connection status periodically
-        setInterval(checkConnection, 60000);
-    </script>
-</body>
-</html>
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-            
+            exportUsers();
             showDashboardMessage('Successfully exported ' + users.length + ' user records', 'success');
         }
         
@@ -1650,40 +997,44 @@
         }
         
         function showDashboardMessage(message, type) {
-            const container = document.getElementById('dashboardMessage');
-            const icons = { success: '✅', error: '❌', warning: '⚠️' };
+            var container = document.getElementById('dashboardMessage');
+            var icons = { success: '✅', error: '❌', warning: '⚠️' };
             
-            container.innerHTML = '<div class="message ' + type + '">' +
-                '<span>' + (icons[type] || '') + '</span>' +
-                '<span>' + message + '</span>' +
-                '</div>';
+            var messageHtml = '<div class="message ' + type + '">';
+            messageHtml += '<span>' + (icons[type] || '') + '</span>';
+            messageHtml += '<span>' + message + '</span>';
+            messageHtml += '</div>';
+            
+            container.innerHTML = messageHtml;
             
             if (type === 'success') {
-                setTimeout(() => container.innerHTML = '', 5000);
+                setTimeout(function() {
+                    container.innerHTML = '';
+                }, 5000);
             }
         }
         
-        // Connection and Data Loading
-        async function checkConnection() {
-            try {
-                const response = await fetch(API_BASE + '/api/health');
-                
-                if (response.ok) {
-                    const data = await response.json();
+        function checkConnection() {
+            fetch(API_BASE + '/api/health')
+                .then(function(response) {
+                    if (response.ok) {
+                        return response.json();
+                    }
+                    throw new Error('HTTP ' + response.status);
+                })
+                .then(function(data) {
                     console.log('Health check passed:', data);
                     updateConnectionStatus(true);
                     loadUsers();
-                } else {
-                    throw new Error('HTTP ' + response.status);
-                }
-            } catch (error) {
-                console.error('Connection failed:', error);
-                updateConnectionStatus(false);
-            }
+                })
+                .catch(function(error) {
+                    console.error('Connection failed:', error);
+                    updateConnectionStatus(false);
+                });
         }
         
         function updateConnectionStatus(connected) {
-            const status = document.getElementById('connectionStatus');
+            var status = document.getElementById('connectionStatus');
             if (connected) {
                 status.innerHTML = '<div class="pulse"></div><span>System Operational</span>';
             } else {
@@ -1691,60 +1042,68 @@
             }
         }
         
-        async function loadUsers() {
-            try {
-                const response = await fetch(API_BASE + '/api/users');
-                
-                if (response.ok) {
-                    const data = await response.json();
+        function loadUsers() {
+            fetch(API_BASE + '/api/users')
+                .then(function(response) {
+                    if (response.ok) {
+                        return response.json();
+                    }
+                    throw new Error('HTTP ' + response.status);
+                })
+                .then(function(data) {
                     users = data.data || data || [];
-                    filteredUsers = [...users];
-                    
+                    filteredUsers = users.slice();
                     console.log('Loaded ' + users.length + ' users');
                     displayUsers();
                     updateStats();
-                } else {
-                    throw new Error('HTTP ' + response.status);
-                }
-            } catch (error) {
-                console.error('Failed to load users:', error);
-                showMessage('Failed to load users: ' + error.message, 'error');
-            }
+                })
+                .catch(function(error) {
+                    console.error('Failed to load users:', error);
+                    showMessage('Failed to load users: ' + error.message, 'error');
+                });
         }
         
         function displayUsers() {
-            const container = document.getElementById('usersList');
+            var container = document.getElementById('usersList');
             
             if (filteredUsers.length === 0) {
                 container.innerHTML = '<div class="empty-state"><div class="empty-icon">👥</div><div class="empty-title">No Users Found</div><div class="empty-description">Create your first user account to get started</div></div>';
                 return;
             }
             
-            const html = filteredUsers.map(user => 
-                '<div class="user-item">' +
-                    '<div class="user-info">' +
-                        '<h3>' + user.name + '</h3>' +
-                        '<p>' + (user.email || 'No email provided') + '</p>' +
-                        (user.phoneNumber ? '<p>📞 ' + user.phoneNumber + '</p>' : '') +
-                        (user.vehicleId ? '<p>🚗 ' + user.vehicleId + '</p>' : '') +
-                        '<span class="user-badge badge-' + user.role + '">' + user.role + '</span>' +
-                        '<div class="user-meta">Created: ' + new Date(user.createdAt).toLocaleDateString() + ' • ID: ' + user._id + '</div>' +
-                    '</div>' +
-                    '<div>' +
-                        '<button class="btn btn-danger" onclick="deleteUser(\'' + user._id + '\', \'' + user.name.replace(/'/g, "\\'") + '\')">🗑️ Delete</button>' +
-                    '</div>' +
-                '</div>'
-            ).join('');
+            var html = '';
+            for (var i = 0; i < filteredUsers.length; i++) {
+                var user = filteredUsers[i];
+                html += '<div class="user-item">';
+                html += '<div class="user-info">';
+                html += '<h3>' + user.name + '</h3>';
+                html += '<p>' + (user.email || 'No email provided') + '</p>';
+                if (user.phoneNumber) {
+                    html += '<p>📞 ' + user.phoneNumber + '</p>';
+                }
+                if (user.vehicleId) {
+                    html += '<p>🚗 ' + user.vehicleId + '</p>';
+                }
+                html += '<span class="user-badge badge-' + user.role + '">' + user.role + '</span>';
+                html += '<div class="user-meta">Created: ' + new Date(user.createdAt).toLocaleDateString() + ' • ID: ' + user._id + '</div>';
+                html += '</div>';
+                html += '<div>';
+                html += '<button class="btn btn-danger" onclick="deleteUser(\'' + user._id + '\', \'' + user.name.replace(/'/g, "\\'") + '\')">🗑️ Delete</button>';
+                html += '</div>';
+                html += '</div>';
+            }
             
             container.innerHTML = html;
         }
         
         function updateStats() {
-            const drivers = users.filter(u => u.role === 'driver').length;
-            const dispatchers = users.filter(u => u.role === 'dispatcher').length;
-            const admins = users.filter(u => u.role === 'admin').length;
+            var drivers = 0, dispatchers = 0, admins = 0;
+            for (var i = 0; i < users.length; i++) {
+                if (users[i].role === 'driver') drivers++;
+                else if (users[i].role === 'dispatcher') dispatchers++;
+                else if (users[i].role === 'admin') admins++;
+            }
             
-            // Animate counters
             animateCounter('totalUsers', users.length);
             animateCounter('totalDrivers', drivers);
             animateCounter('totalDispatchers', dispatchers);
@@ -1752,15 +1111,15 @@
         }
         
         function animateCounter(elementId, targetValue) {
-            const element = document.getElementById(elementId);
-            const currentValue = parseInt(element.textContent) || 0;
-            const increment = Math.ceil((targetValue - currentValue) / 20);
+            var element = document.getElementById(elementId);
+            var currentValue = parseInt(element.textContent) || 0;
+            var increment = Math.ceil((targetValue - currentValue) / 20);
             
             if (currentValue === targetValue) return;
             
-            const timer = setInterval(() => {
-                const current = parseInt(element.textContent);
-                const next = current + increment;
+            var timer = setInterval(function() {
+                var current = parseInt(element.textContent);
+                var next = current + increment;
                 
                 if ((increment > 0 && next >= targetValue) || (increment < 0 && next <= targetValue)) {
                     element.textContent = targetValue;
@@ -1771,17 +1130,16 @@
             }, 50);
         }
         
-        // User Management Functions
-        async function createUser() {
-            const button = event.target;
+        function createUser() {
+            var button = event.target;
             button.classList.add('loading');
             
-            const name = document.getElementById('userName').value.trim();
-            const email = document.getElementById('userEmail').value.trim();
-            const role = document.getElementById('userRole').value;
-            const password = document.getElementById('userPassword').value;
-            const phoneNumber = document.getElementById('userPhone').value.trim();
-            const vehicleId = document.getElementById('userVehicle').value.trim();
+            var name = document.getElementById('userName').value.trim();
+            var email = document.getElementById('userEmail').value.trim();
+            var role = document.getElementById('userRole').value;
+            var password = document.getElementById('userPassword').value;
+            var phoneNumber = document.getElementById('userPhone').value.trim();
+            var vehicleId = document.getElementById('userVehicle').value.trim();
             
             if (!name) {
                 showMessage('Full name is required', 'error');
@@ -1789,32 +1147,36 @@
                 return;
             }
             
-            const userData = { name: name, role: role, active: true };
+            var userData = { name: name, role: role, active: true };
             if (email) userData.email = email;
             if (password) userData.password = password;
             if (phoneNumber) userData.phoneNumber = phoneNumber;
             if (vehicleId) userData.vehicleId = vehicleId;
             
-            try {
-                const response = await fetch(API_BASE + '/api/users', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(userData)
-                });
-                
+            fetch(API_BASE + '/api/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+            })
+            .then(function(response) {
                 if (response.ok) {
-                    showMessage('User account "' + name + '" created successfully', 'success');
-                    clearUserForm();
-                    loadUsers();
-                } else {
-                    const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.error || 'HTTP ' + response.status);
+                    return response.json();
                 }
-            } catch (error) {
+                return response.json().then(function(errorData) {
+                    throw new Error(errorData.error || 'HTTP ' + response.status);
+                });
+            })
+            .then(function(result) {
+                showMessage('User account "' + name + '" created successfully', 'success');
+                clearUserForm();
+                loadUsers();
+            })
+            .catch(function(error) {
                 showMessage('Failed to create user: ' + error.message, 'error');
-            } finally {
+            })
+            .finally(function() {
                 button.classList.remove('loading');
-            }
+            });
         }
         
         function clearUserForm() {
@@ -1826,40 +1188,42 @@
             document.getElementById('userRole').value = 'driver';
         }
         
-        async function deleteUser(userId, userName) {
+        function deleteUser(userId, userName) {
             if (!confirm('Delete user "' + userName + '"?\n\nThis action cannot be undone.')) return;
             
-            try {
-                const response = await fetch(API_BASE + '/api/users/' + userId, {
-                    method: 'DELETE'
+            fetch(API_BASE + '/api/users/' + userId, { method: 'DELETE' })
+                .then(function(response) {
+                    if (response.ok) {
+                        showMessage('User "' + userName + '" deleted successfully', 'success');
+                        loadUsers();
+                    } else {
+                        throw new Error('HTTP ' + response.status);
+                    }
+                })
+                .catch(function(error) {
+                    showMessage('Failed to delete user: ' + error.message, 'error');
                 });
-                
-                if (response.ok) {
-                    showMessage('User "' + userName + '" deleted successfully', 'success');
-                    loadUsers();
-                } else {
-                    throw new Error('HTTP ' + response.status);
-                }
-            } catch (error) {
-                showMessage('Failed to delete user: ' + error.message, 'error');
-            }
         }
         
         function searchUsers() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            const roleFilter = document.getElementById('roleFilter').value;
+            var query = document.getElementById('searchInput').value.toLowerCase();
+            var roleFilter = document.getElementById('roleFilter').value;
             
-            filteredUsers = users.filter(user => {
-                const matchesSearch = !query || 
-                    user.name.toLowerCase().includes(query) ||
-                    (user.email && user.email.toLowerCase().includes(query)) ||
-                    (user.phoneNumber && user.phoneNumber.includes(query)) ||
-                    (user.vehicleId && user.vehicleId.toLowerCase().includes(query));
+            filteredUsers = [];
+            for (var i = 0; i < users.length; i++) {
+                var user = users[i];
+                var matchesSearch = !query || 
+                    user.name.toLowerCase().indexOf(query) !== -1 ||
+                    (user.email && user.email.toLowerCase().indexOf(query) !== -1) ||
+                    (user.phoneNumber && user.phoneNumber.indexOf(query) !== -1) ||
+                    (user.vehicleId && user.vehicleId.toLowerCase().indexOf(query) !== -1);
                 
-                const matchesRole = roleFilter === 'all' || user.role === roleFilter;
+                var matchesRole = roleFilter === 'all' || user.role === roleFilter;
                 
-                return matchesSearch && matchesRole;
-            });
+                if (matchesSearch && matchesRole) {
+                    filteredUsers.push(user);
+                }
+            }
             
             displayUsers();
         }
@@ -1874,22 +1238,264 @@
                 return;
             }
             
-            const csv = [
-                ['Name', 'Email', 'Phone', 'Role', 'Vehicle ID', 'Created'],
-                ...users.map(u => [
-                    u.name,
-                    u.email || '',
-                    u.phoneNumber || '',
-                    u.role,
-                    u.vehicleId || '',
-                    new Date(u.createdAt).toLocaleDateString()
-                ])
-            ].map(row => row.map(cell => '"' + cell + '"').join(',')).join('\n');
+            var csvData = [
+                ['Name', 'Email', 'Phone', 'Role', 'Vehicle ID', 'Created']
+            ];
             
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
+            for (var i = 0; i < users.length; i++) {
+                var user = users[i];
+                csvData.push([
+                    user.name,
+                    user.email || '',
+                    user.phoneNumber || '',
+                    user.role,
+                    user.vehicleId || '',
+                    new Date(user.createdAt).toLocaleDateString()
+                ]);
+            }
+            
+            var csv = '';
+            for (var i = 0; i < csvData.length; i++) {
+                var row = csvData[i];
+                var csvRow = '';
+                for (var j = 0; j < row.length; j++) {
+                    csvRow += '"' + row[j] + '"';
+                    if (j < row.length - 1) csvRow += ',';
+                }
+                csv += csvRow + '\n';
+            }
+            
+            var blob = new Blob([csv], { type: 'text/csv' });
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement('a');
             a.href = url;
             a.download = 'fleetforce-users-' + new Date().toISOString().split('T')[0] + '.csv';
             document.body.appendChild(a);
             a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showMessage('Exported ' + users.length + ' users to CSV', 'success');
+        }
+        
+        function handleFileSelect(event) {
+            var file = event.target.files[0];
+            if (file) {
+                showUploadMessage('File selected: ' + file.name + '. Ready for processing...', 'success');
+                document.getElementById('uploadBtn').disabled = false;
+            }
+        }
+        
+        function downloadTemplate() {
+            var template = [
+                ['name', 'email', 'phoneNumber', 'vehicleId'],
+                ['John Doe', 'john@company.com', '+1-555-0123', 'T-1234'],
+                ['Jane Smith', 'jane@company.com', '+1-555-0124', 'T-5678'],
+                ['Mike Johnson', '', '+1-555-0125', 'T-9012']
+            ];
+            
+            var csv = '';
+            for (var i = 0; i < template.length; i++) {
+                var row = template[i];
+                var csvRow = '';
+                for (var j = 0; j < row.length; j++) {
+                    csvRow += '"' + row[j] + '"';
+                    if (j < row.length - 1) csvRow += ',';
+                }
+                csv += csvRow + '\n';
+            }
+            
+            var blob = new Blob([csv], { type: 'text/csv' });
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'fleetforce-driver-template.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showUploadMessage('Template downloaded successfully!', 'success');
+        }
+        
+        function uploadDrivers() {
+            var fileInput = document.getElementById('fileInput');
+            var file = fileInput.files[0];
+            
+            if (!file) {
+                showUploadMessage('Please select a file first', 'error');
+                return;
+            }
+            
+            var button = event.target;
+            button.classList.add('loading');
+            button.disabled = true;
+            
+            showUploadMessage('Processing file and creating driver accounts...', 'success');
+            
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var text = e.target.result;
+                var lines = text.split('\n');
+                var validLines = [];
+                for (var i = 0; i < lines.length; i++) {
+                    if (lines[i].trim()) {
+                        validLines.push(lines[i]);
+                    }
+                }
+                
+                if (validLines.length < 2) {
+                    showUploadMessage('File must have at least a header and one data row', 'error');
+                    button.classList.remove('loading');
+                    button.disabled = true;
+                    return;
+                }
+                
+                var headers = validLines[0].split(',');
+                for (var i = 0; i < headers.length; i++) {
+                    headers[i] = headers[i].trim().replace(/"/g, '');
+                }
+                
+                var successCount = 0;
+                var errorCount = 0;
+                var errors = [];
+                var processedCount = 0;
+                
+                function processNextRow() {
+                    var lineIndex = processedCount + 1;
+                    if (lineIndex >= validLines.length) {
+                        // All done
+                        var message = 'Import completed! ' + successCount + ' drivers created successfully';
+                        if (errorCount > 0) {
+                            message += ', ' + errorCount + ' failed';
+                        }
+                        
+                        showUploadMessage(message, successCount > 0 ? 'success' : 'error');
+                        
+                        if (errors.length > 0 && errors.length <= 5) {
+                            showUploadMessage('Errors: ' + errors.join(', '), 'warning');
+                        } else if (errors.length > 5) {
+                            showUploadMessage(errors.length + ' errors occurred. First few: ' + errors.slice(0, 3).join(', ') + '...', 'warning');
+                        }
+                        
+                        loadUsers();
+                        clearUpload();
+                        button.classList.remove('loading');
+                        button.disabled = true;
+                        return;
+                    }
+                    
+                    var values = validLines[lineIndex].split(',');
+                    for (var j = 0; j < values.length; j++) {
+                        values[j] = values[j].trim().replace(/"/g, '');
+                    }
+                    
+                    if (values[0]) {
+                        var userData = {
+                            name: values[0],
+                            role: 'driver',
+                            active: true
+                        };
+                        
+                        if (values[1]) userData.email = values[1];
+                        if (values[2]) userData.phoneNumber = values[2];
+                        if (values[3]) userData.vehicleId = values[3];
+                        
+                        fetch(API_BASE + '/api/users', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(userData)
+                        })
+                        .then(function(response) {
+                            if (response.ok) {
+                                successCount++;
+                            } else {
+                                return response.json().then(function(errorData) {
+                                    errors.push(userData.name + ': ' + (errorData.error || 'Failed'));
+                                    errorCount++;
+                                });
+                            }
+                        })
+                        .catch(function(error) {
+                            errors.push(userData.name + ': ' + error.message);
+                            errorCount++;
+                        })
+                        .finally(function() {
+                            processedCount++;
+                            setTimeout(processNextRow, 100);
+                        });
+                    } else {
+                        processedCount++;
+                        setTimeout(processNextRow, 10);
+                    }
+                }
+                
+                processNextRow();
+            };
+            
+            reader.onerror = function() {
+                showUploadMessage('Failed to read file', 'error');
+                button.classList.remove('loading');
+                button.disabled = true;
+            };
+            
+            reader.readAsText(file);
+        }
+        
+        function clearUpload() {
+            document.getElementById('fileInput').value = '';
+            document.getElementById('uploadBtn').disabled = true;
+            showUploadMessage('', '');
+        }
+        
+        function showUploadMessage(message, type) {
+            var container = document.getElementById('uploadMessage');
+            if (!message) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            var icons = { success: '✅', error: '❌', warning: '⚠️' };
+            
+            var messageHtml = '<div class="message ' + type + '">';
+            messageHtml += '<span>' + (icons[type] || '') + '</span>';
+            messageHtml += '<span>' + message + '</span>';
+            messageHtml += '</div>';
+            
+            container.innerHTML = messageHtml;
+            
+            if (type === 'success') {
+                setTimeout(function() {
+                    container.innerHTML = '';
+                }, 5000);
+            }
+        }
+        
+        function showMessage(message, type) {
+            var container = document.getElementById('userMessage');
+            var icons = { success: '✅', error: '❌', warning: '⚠️' };
+            
+            var messageHtml = '<div class="message ' + type + '">';
+            messageHtml += '<span>' + (icons[type] || '') + '</span>';
+            messageHtml += '<span>' + message + '</span>';
+            messageHtml += '</div>';
+            
+            container.innerHTML = messageHtml;
+            
+            if (type === 'success') {
+                setTimeout(function() {
+                    container.innerHTML = '';
+                }, 5000);
+            }
+        }
+        
+        setInterval(function() {
+            if (currentTab === 'dashboard' || currentTab === 'users') {
+                loadUsers();
+            }
+        }, 30000);
+        
+        setInterval(checkConnection, 60000);
+    </script>
+</body>
+</html>
