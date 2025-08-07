@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Driver Return System</title>
+    <title>Admin Panel - Fleet Management System</title>
     <style>
         * {
             margin: 0;
@@ -57,6 +57,12 @@
             background: #f8d7da;
             color: #721c24;
             border: 2px solid #f5c6cb;
+        }
+        
+        .connection-status.checking {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 2px solid #bee5eb;
         }
         
         .card {
@@ -122,6 +128,7 @@
             margin-right: 10px;
             margin-bottom: 10px;
             transition: all 0.3s;
+            position: relative;
         }
         
         .btn:hover:not(:disabled) {
@@ -159,6 +166,30 @@
             color: white;
         }
         
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .loading-spinner {
+            display: none;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+        
+        .btn.loading .loading-spinner {
+            display: inline-block;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
         .message {
             padding: 15px;
             border-radius: 8px;
@@ -182,6 +213,12 @@
             background: #d1ecf1;
             color: #0c5460;
             border: 1px solid #bee5eb;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
         }
         
         .tab-navigation {
@@ -279,10 +316,6 @@
             box-shadow: 0 6px 20px rgba(0,0,0,0.1);
         }
         
-        .data-item.arrived { border-left-color: #28a745; }
-        .data-item.en-route { border-left-color: #ffc107; }
-        .data-item.delayed { border-left-color: #dc3545; }
-        
         .data-info {
             flex: 1;
         }
@@ -302,9 +335,9 @@
             margin-top: 5px;
         }
         
-        .status-arrived { background: #d4edda; color: #155724; }
-        .status-en-route { background: #fff3cd; color: #856404; }
-        .status-delayed { background: #f8d7da; color: #721c24; }
+        .status-driver { background: #d4edda; color: #155724; }
+        .status-dispatcher { background: #fff3cd; color: #856404; }
+        .status-admin { background: #f8d7da; color: #721c24; }
         
         .empty-state {
             text-align: center;
@@ -332,26 +365,22 @@
             font-size: 16px;
         }
         
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
+        .connection-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
         }
         
-        textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e1e5e9;
-            border-radius: 8px;
-            font-size: 16px;
-            background: #f8f9fa;
-            transition: all 0.3s;
-            font-family: inherit;
+        .connection-error h3 {
+            margin-bottom: 10px;
         }
         
-        textarea:focus {
-            outline: none;
-            border-color: #667eea;
-            background: white;
+        .retry-btn {
+            margin-top: 15px;
         }
         
         table {
@@ -390,18 +419,34 @@
 </head>
 <body>
     <!-- Connection Status -->
-    <div id="connectionStatus" class="connection-status disconnected">
-        🔴 Disconnected
+    <div id="connectionStatus" class="connection-status checking">
+        🔄 Connecting to Railway...
     </div>
 
     <div class="container">
         <div class="header">
             <h1>🛠️ Admin Panel</h1>
-            <p>Driver Return System - Fleet Management</p>
+            <p>Fleet Management System - Railway + MongoDB</p>
+        </div>
+
+        <!-- Connection Error -->
+        <div class="connection-error hidden" id="connectionError">
+            <h3>🚫 Cannot Connect to Backend</h3>
+            <p>Unable to connect to Railway.app server. Please check:</p>
+            <ul style="text-align: left; margin: 15px 0;">
+                <li>Railway deployment is running</li>
+                <li>MongoDB Atlas is connected</li>
+                <li>Environment variables are set</li>
+                <li>No network connectivity issues</li>
+            </ul>
+            <button class="btn btn-primary retry-btn" onclick="retryConnection()">
+                <span class="loading-spinner"></span>
+                Retry Connection
+            </button>
         </div>
 
         <!-- Login Card -->
-        <div class="card" id="loginCard">
+        <div class="card hidden" id="loginCard">
             <h2>🔐 Admin Login</h2>
             <div class="login-section">
                 <div class="form-group">
@@ -412,7 +457,10 @@
                     <label for="adminPassword">Password</label>
                     <input type="password" id="adminPassword" value="admin123">
                 </div>
-                <button class="btn btn-primary" onclick="login()">🚀 Login</button>
+                <button class="btn btn-primary" onclick="login()">
+                    <span class="loading-spinner"></span>
+                    🚀 Login
+                </button>
                 <div style="margin-top: 15px; font-size: 14px; color: #666;">
                     <strong>Demo:</strong> admin@company.com / admin123
                 </div>
@@ -465,7 +513,10 @@
                         </div>
                     </div>
                     <div style="margin-top: 15px;">
-                        <button class="btn btn-success" onclick="addUser()">✅ Create User</button>
+                        <button class="btn btn-success" onclick="addUser()">
+                            <span class="loading-spinner"></span>
+                            ✅ Create User
+                        </button>
                         <button class="btn btn-secondary" onclick="hideAddUserForm()">Cancel</button>
                     </div>
                 </div>
@@ -491,7 +542,10 @@
                         <h4>Preview (First 5 rows):</h4>
                         <div id="previewTable" style="max-height: 300px; overflow-y: auto;"></div>
                         <div style="margin-top: 15px;">
-                            <button class="btn btn-success" onclick="uploadBulkUsers()">✅ Import All Users</button>
+                            <button class="btn btn-success" onclick="uploadBulkUsers()">
+                                <span class="loading-spinner"></span>
+                                ✅ Import All Users
+                            </button>
                             <button class="btn btn-secondary" onclick="hideBulkUpload()">Cancel</button>
                         </div>
                     </div>
@@ -528,11 +582,15 @@
                             <option value="dispatcher">Dispatchers</option>
                             <option value="admin">Admins</option>
                         </select>
+                        <button class="btn btn-info" onclick="loadUsers()">
+                            <span class="loading-spinner"></span>
+                            🔄 Refresh
+                        </button>
                     </div>
                     <div id="usersList">
                         <div class="empty-state">
                             <div class="icon">👥</div>
-                            <p>Loading users...</p>
+                            <p>Loading users from Railway...</p>
                         </div>
                     </div>
                 </div>
@@ -546,23 +604,37 @@
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
                     <div>
-                        <h3>🔗 API Information</h3>
+                        <h3>🔗 Backend Information</h3>
                         <div class="form-group">
-                            <label>API Endpoint</label>
-                            <input type="text" value="/api/notifications" readonly>
+                            <label>Railway Deployment</label>
+                            <input type="text" id="railwayUrl" readonly placeholder="Detecting...">
                         </div>
                         <div class="form-group">
-                            <label>Connection Status</label>
-                            <input type="text" id="connectionStatusText" value="Connected" readonly>
+                            <label>MongoDB Status</label>
+                            <input type="text" id="mongoStatus" readonly placeholder="Checking...">
                         </div>
-                        <button class="btn btn-info" onclick="testConnection()">🔍 Test Connection</button>
+                        <div class="form-group">
+                            <label>API Health</label>
+                            <input type="text" id="apiHealth" readonly placeholder="Testing...">
+                        </div>
+                        <button class="btn btn-info" onclick="testConnection()">
+                            <span class="loading-spinner"></span>
+                            🔍 Test All Connections
+                        </button>
                     </div>
                     
                     <div>
                         <h3>🎛️ System Actions</h3>
                         <div style="display: flex; flex-direction: column; gap: 10px;">
-                            <button class="btn btn-info" onclick="exportAllUsers()">📊 Export All Users</button>
-                            <button class="btn btn-warning" onclick="backupData()">💾 Backup System</button>
+                            <button class="btn btn-info" onclick="exportAllUsers()">
+                                <span class="loading-spinner"></span>
+                                📊 Export All Users
+                            </button>
+                            <button class="btn btn-warning" onclick="backupData()">
+                                <span class="loading-spinner"></span>
+                                💾 Backup System
+                            </button>
+                            <button class="btn btn-secondary" onclick="viewLogs()">📋 View API Logs</button>
                             <button class="btn btn-danger" onclick="logout()">🚪 Logout</button>
                         </div>
                     </div>
@@ -574,71 +646,124 @@
     </div>
 
     <script>
-        let users = [
-            {
-                _id: '1',
-                name: 'John Driver',
-                email: 'john@company.com',
-                role: 'driver',
-                active: true,
-                createdAt: new Date().toISOString()
-            },
-            {
-                _id: '2',
-                name: 'Jane Smith',
-                email: '',
-                role: 'driver',
-                active: true,
-                createdAt: new Date().toISOString()
-            },
-            {
-                _id: '3',
-                name: 'Admin User',
-                email: 'admin@company.com',
-                role: 'admin',
-                active: true,
-                createdAt: new Date().toISOString()
-            }
-        ];
+        let users = [];
         let bulkUsers = [];
         let isLoggedIn = false;
         let currentTab = 'users';
+        let isConnected = false;
+        let apiBaseUrl = '';
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
+            detectApiUrl();
             checkConnection();
-            toggleRequiredFields(); // Set initial field states
+            toggleRequiredFields();
         });
 
+        function detectApiUrl() {
+            // Auto-detect if we're on Railway or localhost
+            if (window.location.hostname.includes('railway.app')) {
+                apiBaseUrl = window.location.origin;
+            } else if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                apiBaseUrl = window.location.origin;
+            } else {
+                // Custom domain - use current origin
+                apiBaseUrl = window.location.origin;
+            }
+            
+            console.log('🌐 Detected API URL:', apiBaseUrl);
+            document.getElementById('railwayUrl').value = apiBaseUrl;
+        }
+
         async function checkConnection() {
+            updateConnectionStatus('checking');
+            
             try {
-                const response = await fetch('/api/notifications');
+                console.log('🔍 Testing connection to:', `${apiBaseUrl}/api/health`);
+                
+                const response = await fetch(`${apiBaseUrl}/api/health`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    timeout: 10000
+                });
+                
                 if (response.ok) {
-                    updateConnectionStatus(true);
-                } else {
-                    updateConnectionStatus(false);
+                    const data = await response.json();
+                    console.log('✅ Health check response:', data);
+                    
+                    if (data.success && data.data) {
+                        updateConnectionStatus('connected');
+                        isConnected = true;
+                        
+                        // Update health info
+                        document.getElementById('mongoStatus').value = 
+                            data.data.database === 'connected' ? '✅ MongoDB Connected' : '❌ MongoDB Disconnected';
+                        document.getElementById('apiHealth').value = 
+                            `✅ ${data.data.status} (${Math.round(data.data.uptime)}s uptime)`;
+                        
+                        // Show login form
+                        document.getElementById('connectionError').classList.add('hidden');
+                        document.getElementById('loginCard').classList.remove('hidden');
+                        
+                        return true;
+                    }
                 }
+                
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                
             } catch (error) {
-                updateConnectionStatus(false);
+                console.error('❌ Connection failed:', error);
+                updateConnectionStatus('disconnected');
+                isConnected = false;
+                
+                // Show connection error
+                document.getElementById('connectionError').classList.remove('hidden');
+                document.getElementById('loginCard').classList.add('hidden');
+                document.getElementById('mainPanel').classList.add('hidden');
+                
+                return false;
             }
         }
 
-        function updateConnectionStatus(connected) {
-            const status = document.getElementById('connectionStatus');
-            const statusText = document.getElementById('connectionStatusText');
+        function updateConnectionStatus(status) {
+            const statusElement = document.getElementById('connectionStatus');
             
-            if (connected) {
-                status.className = 'connection-status connected';
-                status.textContent = '🟢 Connected';
-                if (statusText) statusText.value = 'Connected to API';
-            } else {
-                status.className = 'connection-status disconnected';
-                status.textContent = '🔴 Disconnected';
-                if (statusText) statusText.value = 'API Disconnected';
+            switch (status) {
+                case 'connected':
+                    statusElement.className = 'connection-status connected';
+                    statusElement.textContent = '🟢 Railway Connected';
+                    break;
+                case 'checking':
+                    statusElement.className = 'connection-status checking';
+                    statusElement.textContent = '🔄 Connecting...';
+                    break;
+                case 'disconnected':
+                    statusElement.className = 'connection-status disconnected';
+                    statusElement.textContent = '🔴 Railway Offline';
+                    break;
             }
+        }
+
+        async function retryConnection() {
+            const button = event.target;
+            button.classList.add('loading');
+            
+            const connected = await checkConnection();
+            
+            setTimeout(() => {
+                button.classList.remove('loading');
+            }, 1000);
         }
 
         function login() {
+            if (!isConnected) {
+                showMessage('loginMessage', '❌ Cannot login - no backend connection', 'error');
+                return;
+            }
+            
             const email = document.getElementById('adminEmail').value;
             const password = document.getElementById('adminPassword').value;
             
@@ -661,72 +786,69 @@
         }
 
         function showTab(tabName) {
-            // Hide all tabs
             ['users', 'settings'].forEach(tab => {
                 const tabElement = document.getElementById(tab + 'Tab');
                 if (tabElement) tabElement.classList.add('hidden');
             });
             
-            // Remove active class from all buttons
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
             
-            // Show selected tab
             document.getElementById(tabName + 'Tab').classList.remove('hidden');
             event.target.classList.add('active');
             currentTab = tabName;
             
-            // Refresh data when switching tabs
             if (tabName === 'users') {
                 loadUsers();
             }
         }
 
-        // USER MANAGEMENT FUNCTIONS
-        
         async function loadUsers() {
+            if (!isConnected) {
+                showMessage('usersMessage', '❌ Cannot load users - no backend connection', 'error');
+                return;
+            }
+            
             try {
-                showMessage('usersMessage', '📡 Loading users...', 'info');
+                showMessage('usersMessage', '📡 Loading users from Railway + MongoDB...', 'info');
                 
-                const response = await fetch('/api/users');
+                const response = await fetch(`${apiBaseUrl}/api/users`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
                 if (response.ok) {
                     const data = await response.json();
-                    users = data.data || data || [];
-                    updateUserStats();
-                    displayUsers();
-                    showMessage('usersMessage', '✅ Users loaded successfully', 'success');
+                    
+                    if (data.success && data.data) {
+                        users = data.data;
+                        updateUserStats();
+                        displayUsers();
+                        showMessage('usersMessage', `✅ Loaded ${users.length} users from MongoDB`, 'success');
+                    } else {
+                        throw new Error(data.message || 'Invalid response format');
+                    }
                 } else {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
                 }
+                
             } catch (error) {
                 console.error('Error loading users:', error);
+                showMessage('usersMessage', `❌ Failed to load users: ${error.message}`, 'error');
                 
-                // Fallback to existing mock data if API fails
-                if (users.length === 0) {
-                    users = [
-                        {
-                            _id: '1',
-                            name: 'John Driver',
-                            email: 'john@company.com',
-                            role: 'driver',
-                            active: true,
-                            createdAt: new Date().toISOString()
-                        },
-                        {
-                            _id: '2',
-                            name: 'Jane Smith',
-                            email: '',
-                            role: 'driver',
-                            active: true,
-                            createdAt: new Date().toISOString()
-                        }
-                    ];
-                    updateUserStats();
-                    displayUsers();
-                }
-                
-                showMessage('usersMessage', '⚠️ Using offline data - check connection', 'error');
+                // Show empty state
+                document.getElementById('usersList').innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">❌</div>
+                        <p>Failed to load users from Railway</p>
+                        <button class="btn btn-primary" onclick="loadUsers()">Retry</button>
+                    </div>
+                `;
             }
         }
 
@@ -748,7 +870,8 @@
                 container.innerHTML = `
                     <div class="empty-state">
                         <div class="icon">👥</div>
-                        <p>No users found</p>
+                        <p>No users found in MongoDB</p>
+                        <p style="color: #666; font-size: 0.9em;">Create your first user using the form above</p>
                     </div>
                 `;
                 return;
@@ -756,22 +879,25 @@
             
             const html = users.map(user => {
                 const roleColors = {
-                    driver: 'status-arrived',
-                    dispatcher: 'status-en-route',
-                    admin: 'status-delayed'
+                    driver: 'status-driver',
+                    dispatcher: 'status-dispatcher',
+                    admin: 'status-admin'
                 };
                 
                 return `
-                    <div class="data-item ${user.role}">
+                    <div class="data-item">
                         <div class="data-info">
                             <div style="font-weight: bold; font-size: 16px;">${user.name}</div>
                             <div style="color: #666; margin: 5px 0;">${user.email || 'No email provided'}</div>
                             <span class="status-badge ${roleColors[user.role]}">${user.role.toUpperCase()}</span>
-                            ${!user.active ? '<span class="status-badge status-delayed" style="margin-left: 10px;">INACTIVE</span>' : ''}
+                            ${!user.active ? '<span class="status-badge" style="background: #f8d7da; color: #721c24; margin-left: 10px;">INACTIVE</span>' : ''}
+                            <div style="font-size: 0.8em; color: #888; margin-top: 5px;">
+                                ID: ${user._id} • Created: ${new Date(user.createdAt).toLocaleDateString()}
+                            </div>
                         </div>
                         <div class="data-actions">
                             <button class="btn btn-info" style="font-size: 14px; padding: 8px 16px;" onclick="editUser('${user._id}')">✏️ Edit</button>
-                            <button class="btn btn-danger" style="font-size: 14px; padding: 8px 16px;" onclick="deleteUser('${user._id}', '${user.name}')">🗑️</button>
+                            <button class="btn btn-danger" style="font-size: 14px; padding: 8px 16px;" onclick="deleteUser('${user._id}', '${user.name.replace(/'/g, "\\'")}')">🗑️ Delete</button>
                         </div>
                     </div>
                 `;
@@ -783,7 +909,7 @@
         function showAddUserForm() {
             document.getElementById('addUserForm').classList.remove('hidden');
             document.getElementById('bulkUploadForm').classList.add('hidden');
-            toggleRequiredFields(); // Update field requirements
+            toggleRequiredFields();
         }
 
         function hideAddUserForm() {
@@ -805,7 +931,6 @@
             const passwordInput = document.getElementById('newUserPassword');
             
             if (role === 'driver') {
-                // For drivers: email and password are optional
                 emailLabel.innerHTML = 'Email <span class="optional">(optional)</span>';
                 emailHint.textContent = 'Optional for drivers - leave blank if not available';
                 passwordLabel.innerHTML = 'Password <span class="optional">(optional)</span>';
@@ -813,7 +938,6 @@
                 emailInput.placeholder = 'john@company.com (optional)';
                 passwordInput.placeholder = 'Leave blank for auto-generation';
             } else {
-                // For dispatchers and admins: email and password are required
                 emailLabel.innerHTML = 'Email *';
                 emailHint.textContent = 'Required for dispatchers and admins';
                 passwordLabel.innerHTML = 'Password *';
@@ -824,30 +948,39 @@
         }
 
         async function addUser() {
+            if (!isConnected) {
+                showMessage('usersMessage', '❌ Cannot create user - no backend connection', 'error');
+                return;
+            }
+            
+            const button = event.target;
+            button.classList.add('loading');
+            
             const name = document.getElementById('newUserName').value.trim();
             const email = document.getElementById('newUserEmail').value.trim();
             const role = document.getElementById('newUserRole').value;
             const password = document.getElementById('newUserPassword').value;
             
-            // Name is always required
+            // Validation
             if (!name) {
                 showMessage('usersMessage', '❌ Name is required', 'error');
+                button.classList.remove('loading');
                 return;
             }
             
-            // For non-drivers, email and password are required
             if (role !== 'driver') {
                 if (!email) {
                     showMessage('usersMessage', '❌ Email is required for dispatchers and admins', 'error');
+                    button.classList.remove('loading');
                     return;
                 }
                 if (!password) {
                     showMessage('usersMessage', '❌ Password is required for dispatchers and admins', 'error');
+                    button.classList.remove('loading');
                     return;
                 }
             }
             
-            // Build user object
             const userData = { 
                 name, 
                 role,
@@ -857,34 +990,78 @@
             if (password) userData.password = password;
             
             try {
-                showMessage('usersMessage', '📤 Creating user...', 'info');
+                showMessage('usersMessage', '📤 Creating user in MongoDB...', 'info');
                 
-                const response = await fetch('/api/users', {
+                const response = await fetch(`${apiBaseUrl}/api/users`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
                     body: JSON.stringify(userData)
                 });
                 
-                const result = await response.json();
-                
-                if (response.ok && (result.success || result._id)) {
-                    let message = `✅ User ${name} created successfully!`;
-                    if (role === 'driver' && !email) {
-                        message += ' (No email provided)';
+                if (response.ok) {
+                    const result = await response.json();
+                    
+                    if (result.success && result.data) {
+                        let message = `✅ User ${name} created successfully in MongoDB!`;
+                        if (role === 'driver' && !email) {
+                            message += ' (No email provided)';
+                        }
+                        if (role === 'driver' && !password) {
+                            message += ' (Password auto-generated)';
+                        }
+                        
+                        showMessage('usersMessage', message, 'success');
+                        hideAddUserForm();
+                        loadUsers(); // Reload from MongoDB
+                    } else {
+                        throw new Error(result.message || 'Invalid response format');
                     }
-                    if (role === 'driver' && !password) {
-                        message += ' (System will generate password if needed)';
-                    }
-                    showMessage('usersMessage', message, 'success');
-                    hideAddUserForm();
-                    loadUsers(); // Reload from server
                 } else {
-                    throw new Error(result.error || result.message || 'Failed to create user');
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
                 }
                 
             } catch (error) {
                 console.error('Error creating user:', error);
-                showMessage('usersMessage', `❌ Error: ${error.message}`, 'error');
+                showMessage('usersMessage', `❌ Failed to create user: ${error.message}`, 'error');
+            } finally {
+                button.classList.remove('loading');
+            }
+        }
+
+        async function deleteUser(userId, userName) {
+            if (!isConnected) {
+                showMessage('usersMessage', '❌ Cannot delete user - no backend connection', 'error');
+                return;
+            }
+            
+            if (!confirm(`Delete user ${userName} from MongoDB?`)) return;
+            
+            try {
+                showMessage('usersMessage', '🗑️ Deleting user from MongoDB...', 'info');
+                
+                const response = await fetch(`${apiBaseUrl}/api/users/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    showMessage('usersMessage', '✅ User deleted successfully from MongoDB', 'success');
+                    loadUsers(); // Reload from MongoDB
+                } else {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+            } catch (error) {
+                console.error('Error deleting user:', error);
+                showMessage('usersMessage', `❌ Failed to delete user: ${error.message}`, 'error');
             }
         }
 
@@ -960,7 +1137,9 @@
             
             for (let i = 1; i < lines.length; i++) {
                 const values = lines[i].split(/[,\t]/);
-                const user = {};
+                const user = {
+                    active: true
+                };
                 
                 headers.forEach((header, index) => {
                     const value = values[index]?.trim() || '';
@@ -969,10 +1148,8 @@
                     }
                 });
                 
-                // Set default role if not specified
                 if (!user.role) user.role = 'driver';
                 
-                // Only add users with at least a name
                 if (user.name) {
                     bulkUsers.push(user);
                 }
@@ -1022,65 +1199,61 @@
         }
 
         async function uploadBulkUsers() {
+            if (!isConnected) {
+                showMessage('usersMessage', '❌ Cannot upload users - no backend connection', 'error');
+                return;
+            }
+            
             if (bulkUsers.length === 0) {
                 showMessage('usersMessage', '❌ No users to upload', 'error');
                 return;
             }
             
-            showMessage('usersMessage', '📤 Uploading users...', 'info');
+            const button = event.target;
+            button.classList.add('loading');
             
             try {
-                const response = await fetch('/api/users/bulk', {
+                showMessage('usersMessage', '📤 Uploading users to MongoDB...', 'info');
+                
+                const response = await fetch(`${apiBaseUrl}/api/users/bulk`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
                     body: JSON.stringify({ users: bulkUsers })
                 });
                 
-                const result = await response.json();
-                
-                if (response.ok && (result.success || result.created)) {
-                    const created = result.created || result.data?.created || bulkUsers.length;
-                    const errors = result.errors || result.data?.errors || [];
+                if (response.ok) {
+                    const result = await response.json();
                     
-                    let message = `✅ Successfully created ${Array.isArray(created) ? created.length : created} users`;
-                    
-                    if (errors.length > 0) {
-                        message += ` (${errors.length} errors - check console for details)`;
-                        console.error('Bulk upload errors:', errors);
+                    if (result.success && result.data) {
+                        const created = result.data.created || [];
+                        const errors = result.data.errors || [];
+                        
+                        let message = `✅ Successfully created ${created.length} users in MongoDB`;
+                        
+                        if (errors.length > 0) {
+                            message += ` (${errors.length} errors - check console for details)`;
+                            console.error('Bulk upload errors:', errors);
+                        }
+                        
+                        showMessage('usersMessage', message, 'success');
+                        hideBulkUpload();
+                        loadUsers(); // Reload from MongoDB
+                    } else {
+                        throw new Error(result.message || 'Invalid response format');
                     }
-                    
-                    showMessage('usersMessage', message, 'success');
-                    hideBulkUpload();
-                    loadUsers(); // Reload from server
                 } else {
-                    throw new Error(result.error || result.message || 'Upload failed');
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
                 }
+                
             } catch (error) {
                 console.error('Error uploading users:', error);
-                showMessage('usersMessage', `❌ Error: ${error.message}`, 'error');
-            }
-        }
-
-        async function deleteUser(userId, userName) {
-            if (!confirm(`Delete user ${userName}?`)) return;
-            
-            try {
-                showMessage('usersMessage', '🗑️ Deleting user...', 'info');
-                
-                const response = await fetch(`/api/users/${userId}`, {
-                    method: 'DELETE'
-                });
-                
-                if (response.ok) {
-                    showMessage('usersMessage', '✅ User deleted successfully', 'success');
-                    loadUsers(); // Reload from server
-                } else {
-                    const result = await response.json();
-                    throw new Error(result.error || result.message || 'Failed to delete user');
-                }
-            } catch (error) {
-                console.error('Error deleting user:', error);
-                showMessage('usersMessage', `❌ Error: ${error.message}`, 'error');
+                showMessage('usersMessage', `❌ Failed to upload users: ${error.message}`, 'error');
+            } finally {
+                button.classList.remove('loading');
             }
         }
 
@@ -1101,7 +1274,6 @@
                 filteredUsers = filteredUsers.filter(user => user.role === roleFilter);
             }
             
-            // Update display with filtered users
             const tempUsers = users;
             users = filteredUsers;
             displayUsers();
@@ -1112,87 +1284,131 @@
             searchUsers();
         }
 
-        // Placeholder for edit user function
         function editUser(userId) {
             showMessage('usersMessage', 'Edit functionality coming soon!', 'info');
         }
 
         async function testConnection() {
-            showMessage('settingsMessage', '🔍 Testing connection...', 'info');
+            const button = event.target;
+            button.classList.add('loading');
             
-            try {
-                const response = await fetch('/api/users');
-                if (response.ok) {
-                    showMessage('settingsMessage', '✅ Connection successful!', 'success');
-                    updateConnectionStatus(true);
-                } else {
-                    showMessage('settingsMessage', '❌ Connection failed', 'error');
-                    updateConnectionStatus(false);
-                }
-            } catch (error) {
-                showMessage('settingsMessage', '❌ Connection error: ' + error.message, 'error');
-                updateConnectionStatus(false);
+            showMessage('settingsMessage', '🔍 Testing all connections...', 'info');
+            
+            const connected = await checkConnection();
+            
+            if (connected) {
+                showMessage('settingsMessage', '✅ All connections successful!', 'success');
+            } else {
+                showMessage('settingsMessage', '❌ Connection test failed', 'error');
             }
+            
+            setTimeout(() => {
+                button.classList.remove('loading');
+            }, 1000);
         }
 
-        function exportAllUsers() {
-            if (users.length === 0) {
-                showMessage('settingsMessage', '❌ No users to export', 'error');
+        async function exportAllUsers() {
+            if (!isConnected) {
+                showMessage('settingsMessage', '❌ Cannot export - no backend connection', 'error');
                 return;
             }
             
-            // Create CSV content
-            const csv = [
-                ['Name', 'Email', 'Role', 'Active', 'Created'],
-                ...users.map(u => [
-                    u.name,
-                    u.email || 'No email',
-                    u.role,
-                    u.active ? 'Yes' : 'No',
-                    new Date(u.createdAt).toLocaleDateString()
-                ])
-            ].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+            const button = event.target;
+            button.classList.add('loading');
             
-            // Download file
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `all-users-${new Date().toISOString().split('T')[0]}.csv`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-            
-            showMessage('settingsMessage', '✅ User data exported successfully', 'success');
+            try {
+                await loadUsers(); // Ensure we have latest data
+                
+                if (users.length === 0) {
+                    showMessage('settingsMessage', '❌ No users to export', 'error');
+                    return;
+                }
+                
+                const csv = [
+                    ['Name', 'Email', 'Role', 'Active', 'Created', 'MongoDB ID'],
+                    ...users.map(u => [
+                        u.name,
+                        u.email || 'No email',
+                        u.role,
+                        u.active ? 'Yes' : 'No',
+                        new Date(u.createdAt).toLocaleDateString(),
+                        u._id
+                    ])
+                ].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+                
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `mongodb-users-${new Date().toISOString().split('T')[0]}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                
+                showMessage('settingsMessage', '✅ Users exported successfully from MongoDB', 'success');
+                
+            } catch (error) {
+                showMessage('settingsMessage', `❌ Export failed: ${error.message}`, 'error');
+            } finally {
+                button.classList.remove('loading');
+            }
         }
 
-        function backupData() {
-            showMessage('settingsMessage', '💾 Creating backup...', 'info');
+        async function backupData() {
+            if (!isConnected) {
+                showMessage('settingsMessage', '❌ Cannot backup - no backend connection', 'error');
+                return;
+            }
             
-            const backup = {
-                timestamp: new Date().toISOString(),
-                users: users,
-                totalUsers: users.length,
-                breakdown: {
-                    drivers: users.filter(u => u.role === 'driver').length,
-                    dispatchers: users.filter(u => u.role === 'dispatcher').length,
-                    admins: users.filter(u => u.role === 'admin').length
-                }
-            };
+            const button = event.target;
+            button.classList.add('loading');
             
-            const json = JSON.stringify(backup, null, 2);
-            const blob = new Blob([json], { type: 'application/json' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `system-backup-${new Date().toISOString().split('T')[0]}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-            
-            showMessage('settingsMessage', '✅ Backup created successfully', 'success');
+            try {
+                showMessage('settingsMessage', '💾 Creating backup from MongoDB...', 'info');
+                
+                await loadUsers(); // Get latest data
+                
+                const backup = {
+                    timestamp: new Date().toISOString(),
+                    source: 'Railway + MongoDB Atlas',
+                    apiUrl: apiBaseUrl,
+                    users: users,
+                    totalUsers: users.length,
+                    breakdown: {
+                        drivers: users.filter(u => u.role === 'driver').length,
+                        dispatchers: users.filter(u => u.role === 'dispatcher').length,
+                        admins: users.filter(u => u.role === 'admin').length
+                    }
+                };
+                
+                const json = JSON.stringify(backup, null, 2);
+                const blob = new Blob([json], { type: 'application/json' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `mongodb-backup-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                
+                showMessage('settingsMessage', '✅ Backup created successfully from MongoDB', 'success');
+                
+            } catch (error) {
+                showMessage('settingsMessage', `❌ Backup failed: ${error.message}`, 'error');
+            } finally {
+                button.classList.remove('loading');
+            }
+        }
+
+        function viewLogs() {
+            const railwayUrl = document.getElementById('railwayUrl').value;
+            if (railwayUrl.includes('railway.app')) {
+                window.open('https://railway.app/project/27fe9944-d3dc-461f-b1ec-997533e63df4', '_blank');
+            } else {
+                showMessage('settingsMessage', 'Open your Railway dashboard to view logs', 'info');
+            }
         }
 
         function showMessage(elementId, message, type) {
@@ -1202,14 +1418,14 @@
             element.innerHTML = `<div class="message ${type}">${message}</div>`;
             
             if (type === 'success' || type === 'info') {
-                setTimeout(() => element.innerHTML = '', 4000);
+                setTimeout(() => element.innerHTML = '', 5000);
             }
         }
 
-        // Auto-refresh users every 30 seconds when logged in
+        // Auto-check connection every 30 seconds
         setInterval(() => {
-            if (isLoggedIn && currentTab === 'users') {
-                loadUsers();
+            if (!isConnected) {
+                checkConnection();
             }
         }, 30000);
     </script>
