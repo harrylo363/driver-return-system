@@ -511,11 +511,60 @@
             color: var(--accent);
             font-family: 'Courier New', monospace;
             font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
         
         .address {
             color: var(--text-secondary);
             font-style: italic;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .location-link {
+            color: inherit;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex: 1;
+        }
+        
+        .location-link:hover {
+            color: var(--text-primary);
+            text-decoration: underline;
+        }
+        
+        .coordinates .location-link:hover {
+            color: #60A5FA;
+        }
+        
+        .map-btn {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 4px;
+            color: var(--accent);
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            transition: all 0.2s ease;
+            min-width: 28px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .map-btn:hover {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: var(--accent);
+            transform: scale(1.05);
+        }
+        
+        .map-btn:active {
+            transform: scale(0.95);
         }
         
         .status-badge {
@@ -1559,9 +1608,25 @@
                                 </div>
                                 ${notification.location && notification.location !== 'Location unavailable' ? `
                                     <div class="location-info">
-                                        <div class="coordinates">📍 ${notification.location}</div>
+                                        <div class="coordinates">
+                                            <span>📍</span>
+                                            <a href="#" onclick="openLocationMap('${notification.location}', '${notification.driver}'); return false;" 
+                                               class="location-link" title="Click to view on map">
+                                                ${notification.location}
+                                            </a>
+                                            <button class="map-btn" onclick="openLocationMap('${notification.location}', '${notification.driver}')" 
+                                                    title="Open in external map">
+                                                🗺️
+                                            </button>
+                                        </div>
                                         ${notification.geocodedAddress ? `
-                                            <div class="address">📍 ${notification.geocodedAddress.address}</div>
+                                            <div class="address">
+                                                <span>📍</span>
+                                                <a href="#" onclick="openLocationMap('${notification.location}', '${notification.driver}'); return false;" 
+                                                   class="location-link" title="Click to view on map">
+                                                    ${notification.geocodedAddress.address}
+                                                </a>
+                                            </div>
                                         ` : `
                                             <div class="address">📍 Geocoding location...</div>
                                         `}
@@ -1742,10 +1807,173 @@
             showToast('Export Complete', 'Fleet report with location data downloaded successfully', 'success');
         }
         
-        // Action Functions
-        function refreshDashboard() {
-            showToast('Refreshing', 'Updating fleet data...', 'info');
-            loadNotifications();
+        // Map Integration Functions
+        function openLocationMap(coordinates, driverName) {
+            if (!coordinates || coordinates === 'Location unavailable') {
+                showToast('Location Unavailable', 'No coordinates available for this driver', 'error');
+                return;
+            }
+            
+            try {
+                const [lat, lng] = coordinates.split(',').map(coord => parseFloat(coord.trim()));
+                
+                if (isNaN(lat) || isNaN(lng)) {
+                    showToast('Invalid Coordinates', 'Unable to parse location coordinates', 'error');
+                    return;
+                }
+                
+                // Show map service selection modal
+                showMapServiceModal(lat, lng, driverName);
+                
+            } catch (error) {
+                console.error('Error parsing coordinates:', error);
+                showToast('Location Error', 'Unable to process location data', 'error');
+            }
+        }
+        
+        function showMapServiceModal(lat, lng, driverName) {
+            // Remove existing modal if present
+            const existingModal = document.getElementById('mapServiceModal');
+            if (existingModal) existingModal.remove();
+            
+            // Create map service selection modal
+            const modal = document.createElement('div');
+            modal.id = 'mapServiceModal';
+            modal.className = 'modal';
+            modal.style.display = 'block';
+            
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 500px; margin: 10% auto;">
+                    <div class="modal-header">
+                        <h2 class="modal-title">
+                            <span>🗺️</span>
+                            <span>View ${driverName}'s Location</span>
+                        </h2>
+                        <button class="modal-close" onclick="closeMapServiceModal()">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <p style="margin-bottom: 1.5rem; color: var(--text-secondary);">
+                            Choose your preferred map service to view the driver's location:
+                        </p>
+                        <div style="display: grid; gap: 1rem;">
+                            <button class="btn btn-primary" onclick="openInGoogleMaps(${lat}, ${lng}, '${driverName}')" style="width: 100%;">
+                                <span>🌍</span>
+                                <span>Google Maps</span>
+                                <span style="font-size: 0.75rem; opacity: 0.8;">(Recommended)</span>
+                            </button>
+                            <button class="btn btn-secondary" onclick="openInAppleMaps(${lat}, ${lng}, '${driverName}')" style="width: 100%;">
+                                <span>🍎</span>
+                                <span>Apple Maps</span>
+                                <span style="font-size: 0.75rem; opacity: 0.8;">(iOS/Mac)</span>
+                            </button>
+                            <button class="btn btn-secondary" onclick="openInBingMaps(${lat}, ${lng}, '${driverName}')" style="width: 100%;">
+                                <span>🔍</span>
+                                <span>Bing Maps</span>
+                                <span style="font-size: 0.75rem; opacity: 0.8;">(Microsoft)</span>
+                            </button>
+                            <button class="btn btn-secondary" onclick="openInOpenStreetMap(${lat}, ${lng}, '${driverName}')" style="width: 100%;">
+                                <span>🗺️</span>
+                                <span>OpenStreetMap</span>
+                                <span style="font-size: 0.75rem; opacity: 0.8;">(Open Source)</span>
+                            </button>
+                        </div>
+                        <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(59, 130, 246, 0.05); border-radius: 8px; font-size: 0.875rem;">
+                            <strong>Coordinates:</strong> ${lat.toFixed(6)}, ${lng.toFixed(6)}<br>
+                            <strong>Driver:</strong> ${driverName}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" onclick="closeMapServiceModal()">Cancel</button>
+                        <button class="btn btn-primary" onclick="copyCoordinates(${lat}, ${lng})">
+                            <span>📋</span>
+                            <span>Copy Coordinates</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Close modal when clicking outside
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeMapServiceModal();
+                }
+            });
+        }
+        
+        function closeMapServiceModal() {
+            const modal = document.getElementById('mapServiceModal');
+            if (modal) {
+                modal.style.animation = 'modalSlideIn 0.3s ease reverse';
+                setTimeout(() => modal.remove(), 300);
+            }
+        }
+        
+        function openInGoogleMaps(lat, lng, driverName) {
+            const url = `https://www.google.com/maps?q=${lat},${lng}&z=15&t=m`;
+            window.open(url, '_blank');
+            showToast('Opening Google Maps', `Viewing ${driverName}'s location in Google Maps`, 'success');
+            closeMapServiceModal();
+        }
+        
+        function openInAppleMaps(lat, lng, driverName) {
+            const url = `https://maps.apple.com/?q=${lat},${lng}&z=15`;
+            window.open(url, '_blank');
+            showToast('Opening Apple Maps', `Viewing ${driverName}'s location in Apple Maps`, 'success');
+            closeMapServiceModal();
+        }
+        
+        function openInBingMaps(lat, lng, driverName) {
+            const url = `https://www.bing.com/maps?cp=${lat}~${lng}&lvl=15`;
+            window.open(url, '_blank');
+            showToast('Opening Bing Maps', `Viewing ${driverName}'s location in Bing Maps`, 'success');
+            closeMapServiceModal();
+        }
+        
+        function openInOpenStreetMap(lat, lng, driverName) {
+            const url = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}&zoom=15`;
+            window.open(url, '_blank');
+            showToast('Opening OpenStreetMap', `Viewing ${driverName}'s location in OpenStreetMap`, 'success');
+            closeMapServiceModal();
+        }
+        
+        function copyCoordinates(lat, lng) {
+            const coordinates = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+            
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(coordinates).then(() => {
+                    showToast('Coordinates Copied', 'Location coordinates copied to clipboard', 'success');
+                }).catch(err => {
+                    console.error('Failed to copy coordinates:', err);
+                    fallbackCopyToClipboard(coordinates);
+                });
+            } else {
+                fallbackCopyToClipboard(coordinates);
+            }
+            
+            closeMapServiceModal();
+        }
+        
+        function fallbackCopyToClipboard(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                showToast('Coordinates Copied', 'Location coordinates copied to clipboard', 'success');
+            } catch (err) {
+                console.error('Fallback copy failed:', err);
+                showToast('Copy Failed', 'Unable to copy coordinates to clipboard', 'error');
+            }
+            
+            document.body.removeChild(textArea);
         }
         
         function dispatchAlert() {
