@@ -612,6 +612,8 @@
                     <h1>FleetForce Enterprise</h1>
                     <p>Logistics Command Center</p>
                 </div>
+                
+                <div id="dashboardMessage"></div>
             </div>
             <div class="status-indicator" id="connectionStatus">
                 <div class="pulse"></div>
@@ -691,11 +693,11 @@
                         <span>📤</span>
                         Bulk Upload
                     </button>
-                    <button class="btn btn-success" onclick="exportUsers()">
+                    <button class="btn btn-success" onclick="exportUsersFromDashboard()">
                         <span>📊</span>
                         Export Data
                     </button>
-                    <button class="btn btn-primary" onclick="refreshDashboard()">
+                    <button class="btn btn-primary" onclick="refreshDashboardFromQuickActions()">
                         <span>🔄</span>
                         Refresh
                     </button>
@@ -1070,6 +1072,57 @@
         
         function filterUsers() {
             searchUsers();
+        }
+        
+        function exportUsersFromDashboard() {
+            if (users.length === 0) {
+                showDashboardMessage('No users to export', 'error');
+                return;
+            }
+            
+            const csv = [
+                ['Name', 'Email', 'Phone', 'Role', 'Vehicle ID', 'Created'],
+                ...users.map(u => [
+                    u.name,
+                    u.email || '',
+                    u.phoneNumber || '',
+                    u.role,
+                    u.vehicleId || '',
+                    new Date(u.createdAt).toLocaleDateString()
+                ])
+            ].map(row => row.map(cell => '"' + cell + '"').join(',')).join('\n');
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'fleetforce-users-' + new Date().toISOString().split('T')[0] + '.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showDashboardMessage('Exported ' + users.length + ' users to CSV', 'success');
+        }
+        
+        function refreshDashboardFromQuickActions() {
+            showDashboardMessage('Refreshing dashboard...', 'success');
+            loadUsers();
+            checkConnection();
+        }
+        
+        function showDashboardMessage(message, type) {
+            const container = document.getElementById('dashboardMessage');
+            const icons = { success: '✅', error: '❌', warning: '⚠️' };
+            
+            container.innerHTML = '<div class="message ' + type + '">' +
+                '<span>' + (icons[type] || '') + '</span>' +
+                '<span>' + message + '</span>' +
+                '</div>';
+            
+            if (type === 'success') {
+                setTimeout(() => container.innerHTML = '', 5000);
+            }
         }
         
         function exportUsers() {
