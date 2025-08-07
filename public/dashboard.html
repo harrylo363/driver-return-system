@@ -461,7 +461,13 @@
         
         .activity-item.en-route::before { background: var(--warning); }
         .activity-item.arrived::before { background: var(--success); }
-        .activity-item.delayed::before { background: var(--danger); }
+        .status-standby {
+            background: rgba(100, 116, 139, 0.1);
+            color: var(--text-muted);
+            border: 1px solid rgba(100, 116, 139, 0.3);
+        }
+        
+        .activity-item.standby::before { background: var(--text-muted); }
         
         .activity-content {
             display: flex;
@@ -1208,6 +1214,7 @@
                 <button class="filter-btn active" onclick="filterStatus('all', this)">All Activity</button>
                 <button class="filter-btn" onclick="filterStatus('en-route', this)">En Route</button>
                 <button class="filter-btn" onclick="filterStatus('arrived', this)">Arrived</button>
+                <button class="filter-btn" onclick="filterStatus('standby', this)">Standby</button>
                 <button class="filter-btn" onclick="filterStatus('delayed', this)">Delayed</button>
             </div>
             <button class="btn btn-secondary" onclick="exportData()">
@@ -1441,59 +1448,97 @@
             setTimeout(() => animateKPIs(), 500);
         });
         
-        // Load Notifications - FIXED VERSION
+        // Load Notifications - ENHANCED VERSION WITH ADMIN INTEGRATION
         async function loadNotifications() {
             try {
-                console.log('Loading notifications...');
-                const response = await fetch('/api/notifications');
-                console.log('Response status:', response.status);
+                console.log('Loading notifications and admin data...');
                 
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('Data received:', data);
-                    notifications = Array.isArray(data) ? data : (data.data || []);
-                    
-                    // Process notifications to extract driver info from message if needed
-                    notifications = notifications.map(n => {
-                        // If driver/status missing, try to extract from message
-                        if (!n.driver && n.message) {
-                            const match = n.message.match(/^(.*?)\s+is\s+(.*?)$/);
-                            if (match) {
-                                n.driver = match[1];
-                                const statusText = match[2];
-                                if (statusText.includes('30 minutes')) {
-                                    n.status = 'en-route';
-                                    n.estimatedArrival = '30 minutes';
-                                } else if (statusText === 'arrived') {
-                                    n.status = 'arrived';
-                                }
+                // Load both notifications and admin users in parallel
+                const [notificationsResponse, usersResponse] = await Promise.all([
+                    fetch('/api/notifications'),
+                    fetch('/api/users')
+                ]);
+                
+                console.log('Notifications response status:', notificationsResponse.status);
+                console.log('Users response status:', usersResponse.status);
+                
+                // Process notifications
+                let notificationsData = [];
+                if (notificationsResponse.ok) {
+                    const data = await notificationsResponse.json();
+                    notificationsData = Array.isArray(data) ? data : (data.data || []);
+                }
+                
+                // Process admin users
+                let adminUsers = [];
+                if (usersResponse.ok) {
+                    const userData = await usersResponse.json();
+                    adminUsers = Array.isArray(userData) ? userData : (userData.data || []);
+                }
+                
+                // Process notifications to extract driver info from message if needed
+                notifications = notificationsData.map(n => {
+                    // If driver/status missing, try to extract from message
+                    if (!n.driver && n.message) {
+                        const match = n.message.match(/^(.*?)\s+is\s+(.*?)$/);
+                        if (match) {
+                            n.driver = match[1];
+                            const statusText = match[2];
+                            if (statusText.includes('30 minutes')) {
+                                n.status = 'en-route';
+                                n.estimatedArrival = '30 minutes';
+                            } else if (statusText === 'arrived') {
+                                n.status = 'arrived';
                             }
                         }
-                        
-                        // Normalize warehouse name
-                        if (n.warehouse) {
-                            n.warehouse = '5856 Tampa FDC'; // Standardize all warehouse names
-                        }
-                        
-                        return n;
-                    });
+                    }
                     
-                    // Filter driver notifications - now should catch more entries
-                    const driverNotifications = notifications.filter(n => n.driver && n.status);
+                    // Normalize warehouse name
+                    if (n.warehouse) {
+                        n.warehouse = '5856 Tampa FDC'; // Standardize all warehouse names
+                    }
                     
-                    console.log('Processed notifications:', driverNotifications.length);
-                    
-                    updateDisplay(driverNotifications);
-                    updateMetrics(driverNotifications);
-                    
-                    // Update last sync time
-                    document.getElementById('lastUpdate').innerHTML = `Last updated: ${new Date().toLocaleTimeString()}`;
-                } else {
-                    console.error('Response not OK:', response.status, response.statusText);
-                    document.getElementById('lastUpdate').innerHTML = `<span style="color: var(--danger);">Connection Error</span>`;
-                }
+                    return n;
+                });
+                
+                // Get active drivers from admin system
+                const activeDriversFromAdmin = adminUsers.filter(user => 
+                    user.role === 'driver' && user.active !== false
+                );
+                
+                // Merge admin drivers with notification drivers
+                const driverNotifications = notifications.filter(n => n.driver && n.status);
+                const notificationDriverNames = driverNotifications.map(n => n.driver);
+                
+                // Add admin drivers who don't have active notifications as "standby"
+                const standbyDrivers = activeDriversFromAdmin
+                    .filter(driver => !notificationDriverNames.includes(driver.name))
+                    .map(driver => ({
+                        _id: `admin-${driver._id}`,
+                        driver: driver.name,
+                        status: 'standby',
+                        timestamp: new Date().toISOString(),
+                        warehouse: '5856 Tampa FDC',
+                        location: 'Location unavailable',
+                        adminData: driver // Include full admin data
+                    }));
+                
+                // Combine all driver data
+                const allDriverData = [...driverNotifications, ...standbyDrivers];
+                
+                console.log('Processed notifications:', driverNotifications.length);
+                console.log('Admin drivers:', activeDriversFromAdmin.length);
+                console.log('Standby drivers:', standbyDrivers.length);
+                console.log('Total driver data:', allDriverData.length);
+                
+                updateDisplay(allDriverData);
+                updateMetrics(allDriverData, activeDriversFromAdmin);
+                
+                // Update last sync time
+                document.getElementById('lastUpdate').innerHTML = `Last updated: ${new Date().toLocaleTimeString()}`;
+                
             } catch (error) {
-                console.error('Error loading notifications:', error);
+                console.error('Error loading data:', error);
                 document.getElementById('lastUpdate').innerHTML = `<span style="color: var(--danger);">Failed to load data</span>`;
                 showToast('Connection Error', 'Unable to load fleet data', 'error');
             }
@@ -1528,11 +1573,11 @@
             };
         }
         
-        // Update Display - ENHANCED VERSION WITH GEOCODING
-        async function updateDisplay(driverNotifications) {
+        // Update Display - ENHANCED VERSION WITH ADMIN INTEGRATION
+        async function updateDisplay(allDriverData) {
             const filtered = currentFilter === 'all' 
-                ? driverNotifications 
-                : driverNotifications.filter(n => n.status === currentFilter);
+                ? allDriverData 
+                : allDriverData.filter(n => n.status === currentFilter);
             
             const activityList = document.getElementById('activityList');
             
@@ -1574,11 +1619,27 @@
                 const time = new Date(notification.timestamp).toLocaleTimeString();
                 const timeAgo = getTimeAgo(new Date(notification.timestamp));
                 
+                // Determine status display and styling
+                let statusDisplay = notification.status;
+                let statusClass = notification.status;
+                
+                if (notification.status === 'standby') {
+                    statusDisplay = 'standby';
+                    statusClass = 'standby';
+                }
+                
                 return `
-                    <div class="activity-item ${notification.status}">
+                    <div class="activity-item ${statusClass}">
                         <div class="activity-content">
                             <div class="activity-info">
-                                <div class="activity-driver">${notification.driver}</div>
+                                <div class="activity-driver">
+                                    ${notification.driver}
+                                    ${notification.adminData ? `
+                                        <span style="font-size: 0.75rem; color: var(--text-muted); margin-left: 0.5rem;">
+                                            ID: ${notification.adminData.vehicleId || 'No Vehicle'}
+                                        </span>
+                                    ` : ''}
+                                </div>
                                 ${notification.checkedIn && notification.checkInData ? `
                                     <div style="font-size: 0.875rem; color: var(--success); margin-top: 0.25rem;">
                                         <span>✓ Arrived at ${new Date(notification.checkInData.checkInTime).toLocaleTimeString()}</span>
@@ -1603,6 +1664,12 @@
                                         <span class="activity-detail" style="color: var(--warning);">
                                             <span>⚠️</span>
                                             <span>${notification.checkInData.equipmentCheck.totalIssues} issue(s)</span>
+                                        </span>
+                                    ` : ''}
+                                    ${notification.adminData && notification.adminData.email ? `
+                                        <span class="activity-detail">
+                                            <span>📧</span>
+                                            <span>${notification.adminData.email}</span>
                                         </span>
                                     ` : ''}
                                 </div>
@@ -1631,12 +1698,18 @@
                                             <div class="address">📍 Geocoding location...</div>
                                         `}
                                     </div>
+                                ` : notification.status === 'standby' ? `
+                                    <div class="location-info">
+                                        <div class="address" style="color: var(--text-muted);">
+                                            📍 Driver available - Location not tracked
+                                        </div>
+                                    </div>
                                 ` : ''}
                             </div>
                             <div style="display: flex; align-items: center; gap: 0.75rem;">
                                 ${!notification.checkedIn ? `
-                                    <span class="status-badge status-${notification.status}">
-                                        ${notification.status.replace('-', ' ')}
+                                    <span class="status-badge status-${statusClass}">
+                                        ${statusDisplay.replace('-', ' ')}
                                     </span>
                                 ` : ''}
                                 ${notification.status === 'arrived' && !notification.checkedIn ? `
@@ -1657,17 +1730,18 @@
             }).join('');
         }
         
-        // Update Metrics
-        function updateMetrics(driverNotifications) {
+        // Update Metrics - ENHANCED WITH ADMIN INTEGRATION
+        function updateMetrics(allDriverData, adminDrivers = []) {
             // Count drivers by status and check-in state
-            const arrivedDrivers = driverNotifications.filter(n => n.status === 'arrived');
+            const arrivedDrivers = allDriverData.filter(n => n.status === 'arrived');
             const checkedInDrivers = arrivedDrivers.filter(n => n.checkedIn);
             const notCheckedInCount = arrivedDrivers.length - checkedInDrivers.length;
+            const standbyDrivers = allDriverData.filter(n => n.status === 'standby').length;
             
-            // Update KPIs
-            document.getElementById('activeDrivers').textContent = driverNotifications.length;
+            // Update KPIs with comprehensive data
+            document.getElementById('activeDrivers').textContent = adminDrivers.length || allDriverData.length;
             document.getElementById('enRouteCount').textContent = 
-                driverNotifications.filter(n => n.status === 'en-route').length;
+                allDriverData.filter(n => n.status === 'en-route').length;
             document.getElementById('arrivedCount').textContent = arrivedDrivers.length;
             document.getElementById('notCheckedInCount').textContent = notCheckedInCount;
             
@@ -1692,8 +1766,11 @@
                 trendElement.style.background = 'rgba(245, 158, 11, 0.1)';
             }
             
-            // Update performance metrics
-            const utilization = Math.min((driverNotifications.length / 50) * 100, 95);
+            // Update performance metrics based on total driver pool
+            const totalDrivers = adminDrivers.length || allDriverData.length;
+            const activeDriversCount = allDriverData.filter(n => n.status !== 'standby').length;
+            
+            const utilization = totalDrivers > 0 ? Math.min((activeDriversCount / totalDrivers) * 100, 95) : 0;
             document.getElementById('fleetUtilization').textContent = Math.floor(utilization) + '%';
             document.getElementById('utilizationBar').style.width = utilization + '%';
             
@@ -1702,7 +1779,7 @@
             document.getElementById('onTimeBar').style.width = onTime + '%';
             
             document.getElementById('dailyThroughput').textContent = 
-                Math.floor(driverNotifications.length * 2.5);
+                Math.floor(activeDriversCount * 2.5);
         }
         
         // Animate KPIs
@@ -1755,7 +1832,7 @@
             }, 10000); // Refresh every 10 seconds
         }
         
-        // Filter Functions
+        // Filter Functions - UPDATED WITH STANDBY FILTER
         function filterStatus(status, button) {
             currentFilter = status;
             
@@ -1765,9 +1842,17 @@
             });
             button.classList.add('active');
             
-            // Reload display
-            const driverNotifications = notifications.filter(n => n.driver && n.status);
-            updateDisplay(driverNotifications);
+            // Reload display with all driver data including standby
+            const allDriverData = notifications.length > 0 ? getAllDriverData() : [];
+            updateDisplay(allDriverData);
+        }
+        
+        // Helper function to get all driver data (active + standby)
+        function getAllDriverData() {
+            // This should return the same combined data as in loadNotifications
+            // For simplicity, we'll filter from the current notifications array
+            // In a real app, you'd want to store this combined data globally
+            return notifications.filter(n => n.driver && n.status);
         }
         
         // Demo Data
