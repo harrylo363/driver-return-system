@@ -3,1429 +3,423 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Fleet Management System</title>
+    <title>Admin Panel - Simple Version</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: #333;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
             padding: 20px;
+            background: #f5f5f5;
         }
-        
         .header {
+            background: #333;
+            color: white;
+            padding: 20px;
             text-align: center;
-            color: white;
-            margin-bottom: 30px;
-        }
-        
-        .header h1 {
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
-        
-        .connection-status {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            z-index: 1000;
-            transition: all 0.3s;
-        }
-        
-        .connection-status.connected {
-            background: #d4edda;
-            color: #155724;
-            border: 2px solid #c3e6cb;
-        }
-        
-        .connection-status.disconnected {
-            background: #f8d7da;
-            color: #721c24;
-            border: 2px solid #f5c6cb;
-        }
-        
-        .connection-status.checking {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 2px solid #bee5eb;
-        }
-        
-        .card {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
-        
-        .hidden {
-            display: none;
-        }
-        
-        .login-section {
-            background: linear-gradient(135deg, #e3f2fd 0%, #f8f9fa 100%);
-            padding: 25px;
-            border-radius: 12px;
+            border-radius: 8px;
             margin-bottom: 20px;
         }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #555;
-        }
-        
-        .form-group label .optional {
-            color: #999;
-            font-weight: normal;
-            font-size: 0.9em;
-        }
-        
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e1e5e9;
-            border-radius: 8px;
-            font-size: 16px;
-            background: #f8f9fa;
-            transition: all 0.3s;
-        }
-        
-        .form-group input:focus {
-            outline: none;
-            border-color: #667eea;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-right: 10px;
-            margin-bottom: 10px;
-            transition: all 0.3s;
-            position: relative;
-        }
-        
-        .btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-        }
-        
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        
-        .btn-success {
-            background: #28a745;
-            color: white;
-        }
-        
-        .btn-info {
-            background: #17a2b8;
-            color: white;
-        }
-        
-        .btn-warning {
-            background: #ffc107;
-            color: #212529;
-        }
-        
-        .btn-danger {
-            background: #dc3545;
-            color: white;
-        }
-        
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-        
-        .loading-spinner {
-            display: none;
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s linear infinite;
-            margin-right: 8px;
-        }
-        
-        .btn.loading .loading-spinner {
-            display: inline-block;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        .message {
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            font-weight: 600;
-        }
-        
-        .success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .info {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
-        }
-        
-        .warning {
-            background: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
-        }
-        
-        .tab-navigation {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-            justify-content: center;
-            flex-wrap: wrap;
-            background: rgba(255,255,255,0.1);
+        .status {
             padding: 10px;
-            border-radius: 12px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
         }
-        
-        .tab-btn {
-            padding: 12px 24px;
-            border: 2px solid rgba(255,255,255,0.3);
-            background: rgba(255,255,255,0.1);
-            color: white;
+        .status.checking { background: #fff3cd; color: #856404; }
+        .status.connected { background: #d4edda; color: #155724; }
+        .status.error { background: #f8d7da; color: #721c24; }
+        .form-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
             border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
             cursor: pointer;
             font-size: 16px;
-            font-weight: 600;
-            transition: all 0.3s;
+            margin: 5px;
         }
-        
-        .tab-btn:hover {
-            background: rgba(255,255,255,0.2);
-        }
-        
-        .tab-btn.active {
-            background: white;
-            color: #667eea;
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin: 25px 0;
-        }
-        
-        .stat-card {
-            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-            padding: 25px;
-            border-radius: 12px;
-            text-align: center;
-            border-left: 4px solid #667eea;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            transition: transform 0.3s;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-3px);
-        }
-        
-        .stat-number {
-            font-size: 32px;
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 8px;
-        }
-        
-        .stat-label {
-            font-size: 12px;
-            color: #666;
-            text-transform: uppercase;
-            font-weight: 600;
-        }
-        
-        .data-container {
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 12px;
-            margin-top: 25px;
-            max-height: 600px;
-            overflow-y: auto;
-        }
-        
-        .data-item {
+        button:hover { background: #0056b3; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        .users-list {
             background: white;
             padding: 20px;
             border-radius: 8px;
-            margin-bottom: 15px;
-            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .user-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 15px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            transition: all 0.3s;
         }
-        
-        .data-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-        }
-        
-        .data-info {
+        .user-info {
             flex: 1;
         }
-        
-        .data-actions {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .status-badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            display: inline-block;
-            margin-top: 5px;
-        }
-        
-        .status-driver { background: #d4edda; color: #155724; }
-        .status-dispatcher { background: #fff3cd; color: #856404; }
-        .status-admin { background: #f8d7da; color: #721c24; }
-        
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #666;
-        }
-        
-        .empty-state .icon {
-            font-size: 64px;
-            margin-bottom: 20px;
-            opacity: 0.5;
-        }
-        
-        .search-box {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .search-box input {
-            flex: 1;
-            padding: 10px;
-            border: 2px solid #e1e5e9;
-            border-radius: 8px;
-            font-size: 16px;
-        }
-        
-        .connection-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-            padding: 20px;
-            border-radius: 10px;
+        .debug-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
             margin: 20px 0;
-            text-align: center;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
         }
-        
-        .connection-error h3 {
-            margin-bottom: 10px;
-        }
-        
-        .retry-btn {
-            margin-top: 15px;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        
-        table th, table td {
-            padding: 10px;
-            text-align: left;
-            border: 1px solid #e1e5e9;
-        }
-        
-        table th {
-            background: #f8f9fa;
-            font-weight: 600;
-        }
-        
-        table tr:hover {
-            background: #f8f9fa;
-        }
-        
-        .field-hint {
-            font-size: 0.85em;
-            color: #666;
-            margin-top: 5px;
-        }
-        
-        @media (max-width: 768px) {
-            .container { padding: 15px; }
-            .data-item { flex-direction: column; align-items: stretch; }
-            .data-actions { justify-content: center; margin-top: 15px; }
-        }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
-    <!-- Connection Status -->
-    <div id="connectionStatus" class="connection-status checking">
-        🔄 Connecting to Railway...
+    <div class="header">
+        <h1>🛠️ Admin Panel - Diagnostic Mode</h1>
+        <p>Railway + MongoDB Fleet Management</p>
     </div>
 
-    <div class="container">
-        <div class="header">
-            <h1>🛠️ Admin Panel</h1>
-            <p>Fleet Management System - Railway + MongoDB</p>
+    <!-- Status Display -->
+    <div id="statusDisplay" class="status checking">
+        🔄 Checking connection to Railway...
+    </div>
+
+    <!-- Debug Information -->
+    <div class="debug-info">
+        <strong>🔍 Debug Information:</strong><br>
+        <div id="debugLog">Starting diagnostic...</div>
+    </div>
+
+    <!-- Connection Test -->
+    <div class="form-section">
+        <h2>🌐 Connection Test</h2>
+        <div class="form-group">
+            <label>Railway URL:</label>
+            <input type="text" id="railwayUrl" readonly>
         </div>
-
-        <!-- Connection Error -->
-        <div class="connection-error hidden" id="connectionError">
-            <h3>🚫 Cannot Connect to Backend</h3>
-            <p>Unable to connect to Railway.app server. Please check:</p>
-            <ul style="text-align: left; margin: 15px 0;">
-                <li>Railway deployment is running</li>
-                <li>MongoDB Atlas is connected</li>
-                <li>Environment variables are set</li>
-                <li>No network connectivity issues</li>
-            </ul>
-            <button class="btn btn-primary retry-btn" onclick="retryConnection()">
-                <span class="loading-spinner"></span>
-                Retry Connection
-            </button>
+        <div class="form-group">
+            <label>API Health:</label>
+            <input type="text" id="apiStatus" readonly>
         </div>
-
-        <!-- Login Card -->
-        <div class="card hidden" id="loginCard">
-            <h2>🔐 Admin Login</h2>
-            <div class="login-section">
-                <div class="form-group">
-                    <label for="adminEmail">Email</label>
-                    <input type="email" id="adminEmail" value="admin@company.com">
-                </div>
-                <div class="form-group">
-                    <label for="adminPassword">Password</label>
-                    <input type="password" id="adminPassword" value="admin123">
-                </div>
-                <button class="btn btn-primary" onclick="login()">
-                    <span class="loading-spinner"></span>
-                    🚀 Login
-                </button>
-                <div style="margin-top: 15px; font-size: 14px; color: #666;">
-                    <strong>Demo:</strong> admin@company.com / admin123
-                </div>
-            </div>
-            <div id="loginMessage"></div>
+        <div class="form-group">
+            <label>MongoDB Status:</label>
+            <input type="text" id="mongoStatus" readonly>
         </div>
+        <button onclick="testConnection()">🔍 Test Connection</button>
+        <button onclick="clearDebug()">🧹 Clear Debug</button>
+    </div>
 
-        <!-- Main Panel -->
-        <div class="card hidden" id="mainPanel">
-            <div class="tab-navigation">
-                <button class="tab-btn active" onclick="showTab('users')">👥 Users</button>
-                <button class="tab-btn" onclick="showTab('settings')">⚙️ Settings</button>
-            </div>
-
-            <!-- Users Tab -->
-            <div id="usersTab">
-                <h2>👥 User Management</h2>
-                
-                <div style="margin-bottom: 30px;">
-                    <button class="btn btn-primary" onclick="showAddUserForm()">➕ Add Single User</button>
-                    <button class="btn btn-success" onclick="showBulkUpload()">📁 Bulk Import</button>
-                    <button class="btn btn-info" onclick="downloadTemplate()">📥 Download CSV Template</button>
-                </div>
-                
-                <!-- Add Single User Form -->
-                <div id="addUserForm" class="hidden" style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-                    <h3>Add New User</h3>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                        <div class="form-group">
-                            <label>Name *</label>
-                            <input type="text" id="newUserName" placeholder="John Smith">
-                        </div>
-                        <div class="form-group">
-                            <label id="emailLabel">Email *</label>
-                            <input type="email" id="newUserEmail" placeholder="john@company.com">
-                            <div class="field-hint" id="emailHint"></div>
-                        </div>
-                        <div class="form-group">
-                            <label>Role *</label>
-                            <select id="newUserRole" onchange="toggleRequiredFields()">
-                                <option value="driver">Driver</option>
-                                <option value="dispatcher">Dispatcher</option>
-                                <option value="admin">Admin</option>
-                            </select>
-                        </div>
-                        <div class="form-group" id="passwordGroup">
-                            <label id="passwordLabel">Password *</label>
-                            <input type="password" id="newUserPassword" placeholder="Enter password">
-                            <div class="field-hint" id="passwordHint"></div>
-                        </div>
-                    </div>
-                    <div style="margin-top: 15px;">
-                        <button class="btn btn-success" onclick="addUser()">
-                            <span class="loading-spinner"></span>
-                            ✅ Create User
-                        </button>
-                        <button class="btn btn-secondary" onclick="hideAddUserForm()">Cancel</button>
-                    </div>
-                </div>
-                
-                <!-- Bulk Upload Form -->
-                <div id="bulkUploadForm" class="hidden" style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-                    <h3>📁 Bulk Import Users</h3>
-                    <p style="margin-bottom: 15px;">Upload a CSV file with columns: name, email (optional for drivers), role (optional), password (optional for drivers)</p>
-                    
-                    <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 15px;">
-                        <input type="file" id="csvFile" accept=".csv,.xlsx,.xls" onchange="handleFileSelect(event)">
-                        <button class="btn btn-primary" onclick="parseFile()">📊 Preview Data</button>
-                    </div>
-                    
-                    <div style="margin-bottom: 15px;">
-                        <label>Or paste from Google Sheets / Excel:</label>
-                        <textarea id="pasteData" rows="5" style="width: 100%; padding: 10px; border: 2px solid #e1e5e9; border-radius: 8px;" 
-                                  placeholder="Paste data here (tab or comma separated)..."></textarea>
-                        <button class="btn btn-primary" onclick="parsePastedData()">📋 Parse Pasted Data</button>
-                    </div>
-                    
-                    <div id="previewContainer" class="hidden">
-                        <h4>Preview (First 5 rows):</h4>
-                        <div id="previewTable" style="max-height: 300px; overflow-y: auto;"></div>
-                        <div style="margin-top: 15px;">
-                            <button class="btn btn-success" onclick="uploadBulkUsers()">
-                                <span class="loading-spinner"></span>
-                                ✅ Import All Users
-                            </button>
-                            <button class="btn btn-secondary" onclick="hideBulkUpload()">Cancel</button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- User Stats -->
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-number" id="totalUsers">0</div>
-                        <div class="stat-label">Total Users</div>
-                    </div>
-                    <div class="stat-card" style="border-left-color: #28a745;">
-                        <div class="stat-number" id="totalDrivers">0</div>
-                        <div class="stat-label">Drivers</div>
-                    </div>
-                    <div class="stat-card" style="border-left-color: #ffc107;">
-                        <div class="stat-number" id="totalDispatchers">0</div>
-                        <div class="stat-label">Dispatchers</div>
-                    </div>
-                    <div class="stat-card" style="border-left-color: #dc3545;">
-                        <div class="stat-number" id="totalAdmins">0</div>
-                        <div class="stat-label">Admins</div>
-                    </div>
-                </div>
-                
-                <!-- User List -->
-                <div class="data-container">
-                    <h3>All Users</h3>
-                    <div class="search-box">
-                        <input type="text" id="userSearchInput" placeholder="Search by name or email..." onkeyup="searchUsers()">
-                        <select id="roleFilter" onchange="filterUsersByRole()">
-                            <option value="all">All Roles</option>
-                            <option value="driver">Drivers</option>
-                            <option value="dispatcher">Dispatchers</option>
-                            <option value="admin">Admins</option>
-                        </select>
-                        <button class="btn btn-info" onclick="loadUsers()">
-                            <span class="loading-spinner"></span>
-                            🔄 Refresh
-                        </button>
-                    </div>
-                    <div id="usersList">
-                        <div class="empty-state">
-                            <div class="icon">👥</div>
-                            <p>Loading users from Railway...</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div id="usersMessage"></div>
-            </div>
-
-            <!-- Settings Tab -->
-            <div id="settingsTab" class="hidden">
-                <h2>⚙️ Settings</h2>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
-                    <div>
-                        <h3>🔗 Backend Information</h3>
-                        <div class="form-group">
-                            <label>Railway Deployment</label>
-                            <input type="text" id="railwayUrl" readonly placeholder="Detecting...">
-                        </div>
-                        <div class="form-group">
-                            <label>MongoDB Status</label>
-                            <input type="text" id="mongoStatus" readonly placeholder="Checking...">
-                        </div>
-                        <div class="form-group">
-                            <label>API Health</label>
-                            <input type="text" id="apiHealth" readonly placeholder="Testing...">
-                        </div>
-                        <button class="btn btn-info" onclick="testConnection()">
-                            <span class="loading-spinner"></span>
-                            🔍 Test All Connections
-                        </button>
-                    </div>
-                    
-                    <div>
-                        <h3>🎛️ System Actions</h3>
-                        <div style="display: flex; flex-direction: column; gap: 10px;">
-                            <button class="btn btn-info" onclick="exportAllUsers()">
-                                <span class="loading-spinner"></span>
-                                📊 Export All Users
-                            </button>
-                            <button class="btn btn-warning" onclick="backupData()">
-                                <span class="loading-spinner"></span>
-                                💾 Backup System
-                            </button>
-                            <button class="btn btn-secondary" onclick="viewLogs()">📋 View API Logs</button>
-                            <button class="btn btn-danger" onclick="logout()">🚪 Logout</button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div id="settingsMessage"></div>
-            </div>
+    <!-- Simple Login -->
+    <div class="form-section" id="loginSection">
+        <h2>🔐 Admin Login</h2>
+        <div class="form-group">
+            <label>Email:</label>
+            <input type="email" id="adminEmail" value="admin@company.com">
         </div>
+        <div class="form-group">
+            <label>Password:</label>
+            <input type="password" id="adminPassword" value="admin123">
+        </div>
+        <button onclick="login()">Login</button>
+    </div>
+
+    <!-- Add User Form -->
+    <div class="form-section hidden" id="userForm">
+        <h2>➕ Add User</h2>
+        <div class="form-group">
+            <label>Name *:</label>
+            <input type="text" id="userName" placeholder="Driver Name">
+        </div>
+        <div class="form-group">
+            <label>Email (optional for drivers):</label>
+            <input type="email" id="userEmail" placeholder="email@company.com">
+        </div>
+        <div class="form-group">
+            <label>Role:</label>
+            <select id="userRole">
+                <option value="driver">Driver</option>
+                <option value="dispatcher">Dispatcher</option>
+                <option value="admin">Admin</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Password (optional for drivers):</label>
+            <input type="password" id="userPassword" placeholder="Password">
+        </div>
+        <button onclick="addUser()">Create User</button>
+        <button onclick="loadUsers()">Refresh Users</button>
+        <button onclick="logout()">Logout</button>
+    </div>
+
+    <!-- Users List -->
+    <div class="users-list hidden" id="usersList">
+        <h2>👥 Users</h2>
+        <div id="usersContainer">No users loaded yet</div>
     </div>
 
     <script>
-        let users = [];
-        let bulkUsers = [];
         let isLoggedIn = false;
-        let currentTab = 'users';
-        let isConnected = false;
-        let apiBaseUrl = '';
+        let users = [];
+        let apiUrl = '';
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
+            addLog('🚀 Admin panel loaded');
             detectApiUrl();
-            checkConnection();
-            toggleRequiredFields();
+            testConnection();
         });
 
         function detectApiUrl() {
-            // Auto-detect if we're on Railway or localhost
-            if (window.location.hostname.includes('railway.app')) {
-                apiBaseUrl = window.location.origin;
-            } else if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-                apiBaseUrl = window.location.origin;
-            } else {
-                // Custom domain - use current origin
-                apiBaseUrl = window.location.origin;
-            }
+            apiUrl = window.location.origin;
+            document.getElementById('railwayUrl').value = apiUrl;
+            addLog(`🌐 Detected API URL: ${apiUrl}`);
             
-            console.log('🌐 Detected API URL:', apiBaseUrl);
-            document.getElementById('railwayUrl').value = apiBaseUrl;
+            if (apiUrl.includes('railway.app')) {
+                addLog('✅ Running on Railway.app');
+            } else if (apiUrl.includes('localhost')) {
+                addLog('🏠 Running on localhost');
+            } else {
+                addLog('🌍 Running on custom domain');
+            }
         }
 
-        async function checkConnection() {
-            updateConnectionStatus('checking');
+        async function testConnection() {
+            addLog('🔍 Testing connection...');
+            updateStatus('checking', '🔄 Testing Railway connection...');
             
             try {
-                console.log('🔍 Testing connection to:', `${apiBaseUrl}/api/health`);
-                
-                const response = await fetch(`${apiBaseUrl}/api/health`, {
+                // Test 1: Health endpoint
+                addLog('📡 Testing /api/health endpoint...');
+                const healthResponse = await fetch(`${apiUrl}/api/health`, {
                     method: 'GET',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    timeout: 10000
+                    headers: { 'Accept': 'application/json' }
                 });
                 
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('✅ Health check response:', data);
+                if (healthResponse.ok) {
+                    const healthData = await healthResponse.json();
+                    addLog(`✅ Health check passed: ${JSON.stringify(healthData)}`);
                     
-                    if (data.success && data.data) {
-                        updateConnectionStatus('connected');
-                        isConnected = true;
-                        
-                        // Update health info
-                        document.getElementById('mongoStatus').value = 
-                            data.data.database === 'connected' ? '✅ MongoDB Connected' : '❌ MongoDB Disconnected';
-                        document.getElementById('apiHealth').value = 
-                            `✅ ${data.data.status} (${Math.round(data.data.uptime)}s uptime)`;
-                        
-                        // Show login form
-                        document.getElementById('connectionError').classList.add('hidden');
-                        document.getElementById('loginCard').classList.remove('hidden');
-                        
-                        return true;
+                    document.getElementById('apiStatus').value = '✅ API Connected';
+                    document.getElementById('mongoStatus').value = 
+                        healthData.data?.database === 'connected' ? '✅ MongoDB Connected' : '❌ MongoDB Disconnected';
+                    
+                    updateStatus('connected', '🟢 Railway + MongoDB Connected');
+                    
+                    // Test 2: Users endpoint
+                    addLog('📡 Testing /api/users endpoint...');
+                    const usersResponse = await fetch(`${apiUrl}/api/users`);
+                    if (usersResponse.ok) {
+                        addLog('✅ Users endpoint accessible');
+                    } else {
+                        addLog(`⚠️ Users endpoint returned: ${usersResponse.status}`);
                     }
+                    
+                } else {
+                    throw new Error(`Health check failed: ${healthResponse.status} ${healthResponse.statusText}`);
                 }
                 
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                
             } catch (error) {
-                console.error('❌ Connection failed:', error);
-                updateConnectionStatus('disconnected');
-                isConnected = false;
+                addLog(`❌ Connection failed: ${error.message}`);
+                document.getElementById('apiStatus').value = '❌ API Offline';
+                document.getElementById('mongoStatus').value = '❌ Unknown';
+                updateStatus('error', '🔴 Railway Connection Failed');
                 
-                // Show connection error
-                document.getElementById('connectionError').classList.remove('hidden');
-                document.getElementById('loginCard').classList.add('hidden');
-                document.getElementById('mainPanel').classList.add('hidden');
-                
-                return false;
+                // Show helpful error info
+                if (error.message.includes('fetch')) {
+                    addLog('💡 Possible causes: Backend not deployed, wrong URL, CORS issues');
+                }
             }
-        }
-
-        function updateConnectionStatus(status) {
-            const statusElement = document.getElementById('connectionStatus');
-            
-            switch (status) {
-                case 'connected':
-                    statusElement.className = 'connection-status connected';
-                    statusElement.textContent = '🟢 Railway Connected';
-                    break;
-                case 'checking':
-                    statusElement.className = 'connection-status checking';
-                    statusElement.textContent = '🔄 Connecting...';
-                    break;
-                case 'disconnected':
-                    statusElement.className = 'connection-status disconnected';
-                    statusElement.textContent = '🔴 Railway Offline';
-                    break;
-            }
-        }
-
-        async function retryConnection() {
-            const button = event.target;
-            button.classList.add('loading');
-            
-            const connected = await checkConnection();
-            
-            setTimeout(() => {
-                button.classList.remove('loading');
-            }, 1000);
         }
 
         function login() {
-            if (!isConnected) {
-                showMessage('loginMessage', '❌ Cannot login - no backend connection', 'error');
-                return;
-            }
-            
             const email = document.getElementById('adminEmail').value;
             const password = document.getElementById('adminPassword').value;
             
+            addLog(`🔐 Login attempt: ${email}`);
+            
             if (email === 'admin@company.com' && password === 'admin123') {
                 isLoggedIn = true;
-                document.getElementById('loginCard').classList.add('hidden');
-                document.getElementById('mainPanel').classList.remove('hidden');
-                showMessage('usersMessage', '🎉 Welcome to the Admin Panel!', 'success');
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('userForm').classList.remove('hidden');
+                document.getElementById('usersList').classList.remove('hidden');
+                addLog('✅ Login successful');
                 loadUsers();
             } else {
-                showMessage('loginMessage', '❌ Invalid credentials', 'error');
+                addLog('❌ Login failed - invalid credentials');
+                alert('Invalid credentials');
             }
         }
 
         function logout() {
             isLoggedIn = false;
-            document.getElementById('mainPanel').classList.add('hidden');
-            document.getElementById('loginCard').classList.remove('hidden');
-            showMessage('loginMessage', '👋 Logged out successfully', 'info');
-        }
-
-        function showTab(tabName) {
-            ['users', 'settings'].forEach(tab => {
-                const tabElement = document.getElementById(tab + 'Tab');
-                if (tabElement) tabElement.classList.add('hidden');
-            });
-            
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            document.getElementById(tabName + 'Tab').classList.remove('hidden');
-            event.target.classList.add('active');
-            currentTab = tabName;
-            
-            if (tabName === 'users') {
-                loadUsers();
-            }
-        }
-
-        async function loadUsers() {
-            if (!isConnected) {
-                showMessage('usersMessage', '❌ Cannot load users - no backend connection', 'error');
-                return;
-            }
-            
-            try {
-                showMessage('usersMessage', '📡 Loading users from Railway + MongoDB...', 'info');
-                
-                const response = await fetch(`${apiBaseUrl}/api/users`, {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    
-                    if (data.success && data.data) {
-                        users = data.data;
-                        updateUserStats();
-                        displayUsers();
-                        showMessage('usersMessage', `✅ Loaded ${users.length} users from MongoDB`, 'success');
-                    } else {
-                        throw new Error(data.message || 'Invalid response format');
-                    }
-                } else {
-                    const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
-                }
-                
-            } catch (error) {
-                console.error('Error loading users:', error);
-                showMessage('usersMessage', `❌ Failed to load users: ${error.message}`, 'error');
-                
-                // Show empty state
-                document.getElementById('usersList').innerHTML = `
-                    <div class="empty-state">
-                        <div class="icon">❌</div>
-                        <p>Failed to load users from Railway</p>
-                        <button class="btn btn-primary" onclick="loadUsers()">Retry</button>
-                    </div>
-                `;
-            }
-        }
-
-        function updateUserStats() {
-            const drivers = users.filter(u => u.role === 'driver').length;
-            const dispatchers = users.filter(u => u.role === 'dispatcher').length;
-            const admins = users.filter(u => u.role === 'admin').length;
-            
-            document.getElementById('totalUsers').textContent = users.length;
-            document.getElementById('totalDrivers').textContent = drivers;
-            document.getElementById('totalDispatchers').textContent = dispatchers;
-            document.getElementById('totalAdmins').textContent = admins;
-        }
-
-        function displayUsers() {
-            const container = document.getElementById('usersList');
-            
-            if (users.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="icon">👥</div>
-                        <p>No users found in MongoDB</p>
-                        <p style="color: #666; font-size: 0.9em;">Create your first user using the form above</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            const html = users.map(user => {
-                const roleColors = {
-                    driver: 'status-driver',
-                    dispatcher: 'status-dispatcher',
-                    admin: 'status-admin'
-                };
-                
-                return `
-                    <div class="data-item">
-                        <div class="data-info">
-                            <div style="font-weight: bold; font-size: 16px;">${user.name}</div>
-                            <div style="color: #666; margin: 5px 0;">${user.email || 'No email provided'}</div>
-                            <span class="status-badge ${roleColors[user.role]}">${user.role.toUpperCase()}</span>
-                            ${!user.active ? '<span class="status-badge" style="background: #f8d7da; color: #721c24; margin-left: 10px;">INACTIVE</span>' : ''}
-                            <div style="font-size: 0.8em; color: #888; margin-top: 5px;">
-                                ID: ${user._id} • Created: ${new Date(user.createdAt).toLocaleDateString()}
-                            </div>
-                        </div>
-                        <div class="data-actions">
-                            <button class="btn btn-info" style="font-size: 14px; padding: 8px 16px;" onclick="editUser('${user._id}')">✏️ Edit</button>
-                            <button class="btn btn-danger" style="font-size: 14px; padding: 8px 16px;" onclick="deleteUser('${user._id}', '${user.name.replace(/'/g, "\\'")}')">🗑️ Delete</button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            
-            container.innerHTML = html;
-        }
-
-        function showAddUserForm() {
-            document.getElementById('addUserForm').classList.remove('hidden');
-            document.getElementById('bulkUploadForm').classList.add('hidden');
-            toggleRequiredFields();
-        }
-
-        function hideAddUserForm() {
-            document.getElementById('addUserForm').classList.add('hidden');
-            document.getElementById('newUserName').value = '';
-            document.getElementById('newUserEmail').value = '';
-            document.getElementById('newUserPassword').value = '';
-            document.getElementById('newUserRole').value = 'driver';
-            toggleRequiredFields();
-        }
-
-        function toggleRequiredFields() {
-            const role = document.getElementById('newUserRole').value;
-            const emailLabel = document.getElementById('emailLabel');
-            const emailHint = document.getElementById('emailHint');
-            const passwordLabel = document.getElementById('passwordLabel');
-            const passwordHint = document.getElementById('passwordHint');
-            const emailInput = document.getElementById('newUserEmail');
-            const passwordInput = document.getElementById('newUserPassword');
-            
-            if (role === 'driver') {
-                emailLabel.innerHTML = 'Email <span class="optional">(optional)</span>';
-                emailHint.textContent = 'Optional for drivers - leave blank if not available';
-                passwordLabel.innerHTML = 'Password <span class="optional">(optional)</span>';
-                passwordHint.textContent = 'Optional for drivers - system will generate if needed';
-                emailInput.placeholder = 'john@company.com (optional)';
-                passwordInput.placeholder = 'Leave blank for auto-generation';
-            } else {
-                emailLabel.innerHTML = 'Email *';
-                emailHint.textContent = 'Required for dispatchers and admins';
-                passwordLabel.innerHTML = 'Password *';
-                passwordHint.textContent = 'Required for dispatchers and admins';
-                emailInput.placeholder = 'john@company.com';
-                passwordInput.placeholder = 'Enter secure password';
-            }
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('userForm').classList.add('hidden');
+            document.getElementById('usersList').classList.add('hidden');
+            addLog('👋 Logged out');
         }
 
         async function addUser() {
-            if (!isConnected) {
-                showMessage('usersMessage', '❌ Cannot create user - no backend connection', 'error');
+            if (!isLoggedIn) {
+                addLog('❌ Not logged in');
                 return;
             }
             
-            const button = event.target;
-            button.classList.add('loading');
+            const name = document.getElementById('userName').value.trim();
+            const email = document.getElementById('userEmail').value.trim();
+            const role = document.getElementById('userRole').value;
+            const password = document.getElementById('userPassword').value;
             
-            const name = document.getElementById('newUserName').value.trim();
-            const email = document.getElementById('newUserEmail').value.trim();
-            const role = document.getElementById('newUserRole').value;
-            const password = document.getElementById('newUserPassword').value;
-            
-            // Validation
             if (!name) {
-                showMessage('usersMessage', '❌ Name is required', 'error');
-                button.classList.remove('loading');
+                addLog('❌ Name is required');
+                alert('Name is required');
                 return;
             }
             
-            if (role !== 'driver') {
-                if (!email) {
-                    showMessage('usersMessage', '❌ Email is required for dispatchers and admins', 'error');
-                    button.classList.remove('loading');
-                    return;
-                }
-                if (!password) {
-                    showMessage('usersMessage', '❌ Password is required for dispatchers and admins', 'error');
-                    button.classList.remove('loading');
-                    return;
-                }
-            }
-            
-            const userData = { 
-                name, 
-                role,
-                active: true
-            };
+            const userData = { name, role, active: true };
             if (email) userData.email = email;
             if (password) userData.password = password;
             
+            addLog(`📤 Creating user: ${JSON.stringify(userData)}`);
+            
             try {
-                showMessage('usersMessage', '📤 Creating user in MongoDB...', 'info');
-                
-                const response = await fetch(`${apiBaseUrl}/api/users`, {
+                const response = await fetch(`${apiUrl}/api/users`, {
                     method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(userData)
                 });
                 
                 if (response.ok) {
                     const result = await response.json();
+                    addLog(`✅ User created: ${JSON.stringify(result)}`);
+                    alert(`User ${name} created successfully!`);
                     
-                    if (result.success && result.data) {
-                        let message = `✅ User ${name} created successfully in MongoDB!`;
-                        if (role === 'driver' && !email) {
-                            message += ' (No email provided)';
-                        }
-                        if (role === 'driver' && !password) {
-                            message += ' (Password auto-generated)';
-                        }
-                        
-                        showMessage('usersMessage', message, 'success');
-                        hideAddUserForm();
-                        loadUsers(); // Reload from MongoDB
-                    } else {
-                        throw new Error(result.message || 'Invalid response format');
-                    }
+                    // Clear form
+                    document.getElementById('userName').value = '';
+                    document.getElementById('userEmail').value = '';
+                    document.getElementById('userPassword').value = '';
+                    
+                    loadUsers();
                 } else {
                     const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+                    throw new Error(errorData.error || `HTTP ${response.status}`);
                 }
                 
             } catch (error) {
-                console.error('Error creating user:', error);
-                showMessage('usersMessage', `❌ Failed to create user: ${error.message}`, 'error');
-            } finally {
-                button.classList.remove('loading');
+                addLog(`❌ Failed to create user: ${error.message}`);
+                alert(`Failed to create user: ${error.message}`);
             }
+        }
+
+        async function loadUsers() {
+            if (!isLoggedIn) return;
+            
+            addLog('📡 Loading users...');
+            
+            try {
+                const response = await fetch(`${apiUrl}/api/users`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    users = data.data || data || [];
+                    addLog(`✅ Loaded ${users.length} users`);
+                    displayUsers();
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+            } catch (error) {
+                addLog(`❌ Failed to load users: ${error.message}`);
+                document.getElementById('usersContainer').innerHTML = `Error loading users: ${error.message}`;
+            }
+        }
+
+        function displayUsers() {
+            const container = document.getElementById('usersContainer');
+            
+            if (users.length === 0) {
+                container.innerHTML = 'No users found';
+                return;
+            }
+            
+            const html = users.map(user => `
+                <div class="user-item">
+                    <div class="user-info">
+                        <strong>${user.name}</strong><br>
+                        ${user.email || 'No email'} • ${user.role}<br>
+                        <small>ID: ${user._id}</small>
+                    </div>
+                    <button onclick="deleteUser('${user._id}', '${user.name.replace(/'/g, "\\'")}')">Delete</button>
+                </div>
+            `).join('');
+            
+            container.innerHTML = html;
         }
 
         async function deleteUser(userId, userName) {
-            if (!isConnected) {
-                showMessage('usersMessage', '❌ Cannot delete user - no backend connection', 'error');
-                return;
-            }
+            if (!confirm(`Delete user ${userName}?`)) return;
             
-            if (!confirm(`Delete user ${userName} from MongoDB?`)) return;
+            addLog(`🗑️ Deleting user: ${userId}`);
             
             try {
-                showMessage('usersMessage', '🗑️ Deleting user from MongoDB...', 'info');
-                
-                const response = await fetch(`${apiBaseUrl}/api/users/${userId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    }
+                const response = await fetch(`${apiUrl}/api/users/${userId}`, {
+                    method: 'DELETE'
                 });
                 
                 if (response.ok) {
-                    showMessage('usersMessage', '✅ User deleted successfully from MongoDB', 'success');
-                    loadUsers(); // Reload from MongoDB
+                    addLog(`✅ User deleted: ${userId}`);
+                    alert(`User ${userName} deleted successfully!`);
+                    loadUsers();
                 } else {
-                    const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
                 
             } catch (error) {
-                console.error('Error deleting user:', error);
-                showMessage('usersMessage', `❌ Failed to delete user: ${error.message}`, 'error');
+                addLog(`❌ Failed to delete user: ${error.message}`);
+                alert(`Failed to delete user: ${error.message}`);
             }
         }
 
-        function showBulkUpload() {
-            document.getElementById('bulkUploadForm').classList.remove('hidden');
-            document.getElementById('addUserForm').classList.add('hidden');
+        function updateStatus(type, message) {
+            const status = document.getElementById('statusDisplay');
+            status.className = `status ${type}`;
+            status.textContent = message;
         }
 
-        function hideBulkUpload() {
-            document.getElementById('bulkUploadForm').classList.add('hidden');
-            document.getElementById('csvFile').value = '';
-            document.getElementById('pasteData').value = '';
-            document.getElementById('previewContainer').classList.add('hidden');
-            bulkUsers = [];
+        function addLog(message) {
+            const log = document.getElementById('debugLog');
+            const timestamp = new Date().toLocaleTimeString();
+            log.innerHTML += `<br>[${timestamp}] ${message}`;
+            log.scrollTop = log.scrollHeight;
+            console.log(`[Admin Panel] ${message}`);
         }
 
-        function downloadTemplate() {
-            const csv = 'name,email,role,password\n' +
-                       'John Smith,john@company.com,driver,\n' +
-                       'Driver Two,,driver,\n' +
-                       'Jane Doe,jane@company.com,dispatcher,password123\n' +
-                       'Admin User,admin@company.com,admin,adminpass';
-            
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'users_template.csv';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-            
-            showMessage('usersMessage', '✅ Template downloaded! Note: email and password are optional for drivers', 'success');
+        function clearDebug() {
+            document.getElementById('debugLog').innerHTML = 'Debug log cleared...';
         }
 
-        function parseFile() {
-            const fileInput = document.getElementById('csvFile');
-            const file = fileInput.files[0];
-            if (!file) {
-                showMessage('usersMessage', '❌ Please select a file first', 'error');
-                return;
-            }
-            handleFileSelect({ target: { files: [file] } });
-        }
-
-        function handleFileSelect(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                parseCSVData(e.target.result);
-            };
-            reader.readAsText(file);
-        }
-
-        function parsePastedData() {
-            const data = document.getElementById('pasteData').value.trim();
-            if (!data) {
-                showMessage('usersMessage', '❌ Please paste data first', 'error');
-                return;
-            }
-            
-            parseCSVData(data);
-        }
-
-        function parseCSVData(csvText) {
-            const lines = csvText.split('\n').filter(line => line.trim());
-            const headers = lines[0].toLowerCase().split(/[,\t]/).map(h => h.trim());
-            
-            bulkUsers = [];
-            
-            for (let i = 1; i < lines.length; i++) {
-                const values = lines[i].split(/[,\t]/);
-                const user = {
-                    active: true
-                };
-                
-                headers.forEach((header, index) => {
-                    const value = values[index]?.trim() || '';
-                    if (value) {
-                        user[header] = value;
-                    }
-                });
-                
-                if (!user.role) user.role = 'driver';
-                
-                if (user.name) {
-                    bulkUsers.push(user);
-                }
-            }
-            
-            showPreview();
-        }
-
-        function showPreview() {
-            const container = document.getElementById('previewContainer');
-            const table = document.getElementById('previewTable');
-            
-            if (bulkUsers.length === 0) {
-                showMessage('usersMessage', '❌ No valid data found - make sure there is at least a "name" column', 'error');
-                return;
-            }
-            
-            const previewUsers = bulkUsers.slice(0, 5);
-            
-            let html = '<table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Password</th><th>Status</th></tr></thead><tbody>';
-            
-            previewUsers.forEach(user => {
-                let status = '✅ Valid';
-                if (user.role !== 'driver' && (!user.email || !user.password)) {
-                    status = '⚠️ Missing email/password (required for non-drivers)';
-                }
-                
-                html += `
-                    <tr>
-                        <td>${user.name || ''}</td>
-                        <td>${user.email || '<em>Not provided</em>'}</td>
-                        <td>${user.role || 'driver'}</td>
-                        <td>${user.password ? '***' : '<em>Not provided</em>'}</td>
-                        <td>${status}</td>
-                    </tr>
-                `;
-            });
-            
-            html += '</tbody></table>';
-            
-            if (bulkUsers.length > 5) {
-                html += `<p style="margin-top: 10px; color: #666;">... and ${bulkUsers.length - 5} more users</p>`;
-            }
-            
-            table.innerHTML = html;
-            container.classList.remove('hidden');
-        }
-
-        async function uploadBulkUsers() {
-            if (!isConnected) {
-                showMessage('usersMessage', '❌ Cannot upload users - no backend connection', 'error');
-                return;
-            }
-            
-            if (bulkUsers.length === 0) {
-                showMessage('usersMessage', '❌ No users to upload', 'error');
-                return;
-            }
-            
-            const button = event.target;
-            button.classList.add('loading');
-            
-            try {
-                showMessage('usersMessage', '📤 Uploading users to MongoDB...', 'info');
-                
-                const response = await fetch(`${apiBaseUrl}/api/users/bulk`, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({ users: bulkUsers })
-                });
-                
-                if (response.ok) {
-                    const result = await response.json();
-                    
-                    if (result.success && result.data) {
-                        const created = result.data.created || [];
-                        const errors = result.data.errors || [];
-                        
-                        let message = `✅ Successfully created ${created.length} users in MongoDB`;
-                        
-                        if (errors.length > 0) {
-                            message += ` (${errors.length} errors - check console for details)`;
-                            console.error('Bulk upload errors:', errors);
-                        }
-                        
-                        showMessage('usersMessage', message, 'success');
-                        hideBulkUpload();
-                        loadUsers(); // Reload from MongoDB
-                    } else {
-                        throw new Error(result.message || 'Invalid response format');
-                    }
-                } else {
-                    const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
-                }
-                
-            } catch (error) {
-                console.error('Error uploading users:', error);
-                showMessage('usersMessage', `❌ Failed to upload users: ${error.message}`, 'error');
-            } finally {
-                button.classList.remove('loading');
-            }
-        }
-
-        function searchUsers() {
-            const searchTerm = document.getElementById('userSearchInput').value.toLowerCase();
-            const roleFilter = document.getElementById('roleFilter').value;
-            
-            let filteredUsers = users;
-            
-            if (searchTerm) {
-                filteredUsers = filteredUsers.filter(user => 
-                    user.name.toLowerCase().includes(searchTerm) ||
-                    (user.email && user.email.toLowerCase().includes(searchTerm))
-                );
-            }
-            
-            if (roleFilter !== 'all') {
-                filteredUsers = filteredUsers.filter(user => user.role === roleFilter);
-            }
-            
-            const tempUsers = users;
-            users = filteredUsers;
-            displayUsers();
-            users = tempUsers;
-        }
-
-        function filterUsersByRole() {
-            searchUsers();
-        }
-
-        function editUser(userId) {
-            showMessage('usersMessage', 'Edit functionality coming soon!', 'info');
-        }
-
-        async function testConnection() {
-            const button = event.target;
-            button.classList.add('loading');
-            
-            showMessage('settingsMessage', '🔍 Testing all connections...', 'info');
-            
-            const connected = await checkConnection();
-            
-            if (connected) {
-                showMessage('settingsMessage', '✅ All connections successful!', 'success');
-            } else {
-                showMessage('settingsMessage', '❌ Connection test failed', 'error');
-            }
-            
-            setTimeout(() => {
-                button.classList.remove('loading');
-            }, 1000);
-        }
-
-        async function exportAllUsers() {
-            if (!isConnected) {
-                showMessage('settingsMessage', '❌ Cannot export - no backend connection', 'error');
-                return;
-            }
-            
-            const button = event.target;
-            button.classList.add('loading');
-            
-            try {
-                await loadUsers(); // Ensure we have latest data
-                
-                if (users.length === 0) {
-                    showMessage('settingsMessage', '❌ No users to export', 'error');
-                    return;
-                }
-                
-                const csv = [
-                    ['Name', 'Email', 'Role', 'Active', 'Created', 'MongoDB ID'],
-                    ...users.map(u => [
-                        u.name,
-                        u.email || 'No email',
-                        u.role,
-                        u.active ? 'Yes' : 'No',
-                        new Date(u.createdAt).toLocaleDateString(),
-                        u._id
-                    ])
-                ].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
-                
-                const blob = new Blob([csv], { type: 'text/csv' });
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `mongodb-users-${new Date().toISOString().split('T')[0]}.csv`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);
-                
-                showMessage('settingsMessage', '✅ Users exported successfully from MongoDB', 'success');
-                
-            } catch (error) {
-                showMessage('settingsMessage', `❌ Export failed: ${error.message}`, 'error');
-            } finally {
-                button.classList.remove('loading');
-            }
-        }
-
-        async function backupData() {
-            if (!isConnected) {
-                showMessage('settingsMessage', '❌ Cannot backup - no backend connection', 'error');
-                return;
-            }
-            
-            const button = event.target;
-            button.classList.add('loading');
-            
-            try {
-                showMessage('settingsMessage', '💾 Creating backup from MongoDB...', 'info');
-                
-                await loadUsers(); // Get latest data
-                
-                const backup = {
-                    timestamp: new Date().toISOString(),
-                    source: 'Railway + MongoDB Atlas',
-                    apiUrl: apiBaseUrl,
-                    users: users,
-                    totalUsers: users.length,
-                    breakdown: {
-                        drivers: users.filter(u => u.role === 'driver').length,
-                        dispatchers: users.filter(u => u.role === 'dispatcher').length,
-                        admins: users.filter(u => u.role === 'admin').length
-                    }
-                };
-                
-                const json = JSON.stringify(backup, null, 2);
-                const blob = new Blob([json], { type: 'application/json' });
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `mongodb-backup-${new Date().toISOString().split('T')[0]}.json`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);
-                
-                showMessage('settingsMessage', '✅ Backup created successfully from MongoDB', 'success');
-                
-            } catch (error) {
-                showMessage('settingsMessage', `❌ Backup failed: ${error.message}`, 'error');
-            } finally {
-                button.classList.remove('loading');
-            }
-        }
-
-        function viewLogs() {
-            const railwayUrl = document.getElementById('railwayUrl').value;
-            if (railwayUrl.includes('railway.app')) {
-                window.open('https://railway.app/project/27fe9944-d3dc-461f-b1ec-997533e63df4', '_blank');
-            } else {
-                showMessage('settingsMessage', 'Open your Railway dashboard to view logs', 'info');
-            }
-        }
-
-        function showMessage(elementId, message, type) {
-            const element = document.getElementById(elementId);
-            if (!element) return;
-            
-            element.innerHTML = `<div class="message ${type}">${message}</div>`;
-            
-            if (type === 'success' || type === 'info') {
-                setTimeout(() => element.innerHTML = '', 5000);
-            }
-        }
-
-        // Auto-check connection every 30 seconds
+        // Auto-refresh every 30 seconds
         setInterval(() => {
-            if (!isConnected) {
-                checkConnection();
+            if (isLoggedIn) {
+                loadUsers();
             }
         }, 30000);
     </script>
