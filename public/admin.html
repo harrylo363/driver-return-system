@@ -691,11 +691,11 @@
                         <span>📤</span>
                         Bulk Upload
                     </button>
-                    <button class="btn btn-secondary" onclick="exportAllUsers()">
+                    <button class="btn btn-success" onclick="exportUsers()">
                         <span>📊</span>
                         Export Data
                     </button>
-                    <button class="btn btn-secondary" onclick="refreshDashboard()">
+                    <button class="btn btn-primary" onclick="refreshDashboard()">
                         <span>🔄</span>
                         Refresh
                     </button>
@@ -1101,10 +1101,6 @@
             window.URL.revokeObjectURL(url);
             
             showMessage('Exported ' + users.length + ' users to CSV', 'success');
-        }
-        
-        function exportAllUsers() {
-            exportUsers();
         }
         
         function refreshDashboard() {
