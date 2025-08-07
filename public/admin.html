@@ -987,7 +987,6 @@
         
         function exportUsersFromDashboard() {
             exportUsers();
-            showDashboardMessage('Successfully exported ' + users.length + ' user records', 'success');
         }
         
         function refreshDashboardFromQuickActions() {
@@ -1234,7 +1233,12 @@
         
         function exportUsers() {
             if (users.length === 0) {
-                showMessage('No users to export', 'error');
+                // Show message in the appropriate location based on current tab
+                if (currentTab === 'dashboard') {
+                    showDashboardMessage('No users to export', 'error');
+                } else {
+                    showMessage('No users to export', 'error');
+                }
                 return;
             }
             
@@ -1275,7 +1279,13 @@
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
             
-            showMessage('Exported ' + users.length + ' users to CSV', 'success');
+            // Show success message in the appropriate location
+            var successMessage = 'Exported ' + users.length + ' users to CSV';
+            if (currentTab === 'dashboard') {
+                showDashboardMessage(successMessage, 'success');
+            } else {
+                showMessage(successMessage, 'success');
+            }
         }
         
         function handleFileSelect(event) {
@@ -1489,12 +1499,14 @@
             }
         }
         
+        // Auto-refresh data every 30 seconds when on dashboard or users tab
         setInterval(function() {
             if (currentTab === 'dashboard' || currentTab === 'users') {
                 loadUsers();
             }
         }, 30000);
         
+        // Check connection every minute
         setInterval(checkConnection, 60000);
     </script>
 </body>
