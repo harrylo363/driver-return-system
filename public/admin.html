@@ -1,159 +1,562 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Admin Test</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fleet Admin Panel - Railway</title>
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            max-width: 600px; 
-            margin: 50px auto; 
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
             padding: 20px;
-            background: #f5f5f5;
         }
-        .test-section { 
-            background: white; 
-            padding: 20px; 
-            margin: 20px 0; 
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            z-index: 1000;
+            transition: all 0.3s;
+        }
+        
+        .status.connected {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            border-left: 4px solid #667eea;
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-3px);
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
             border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            font-size: 16px;
+            transition: border-color 0.3s;
         }
-        button { 
-            background: #007bff; 
-            color: white; 
-            padding: 10px 20px; 
-            border: none; 
-            border-radius: 4px; 
-            cursor: pointer; 
-            margin: 5px;
+        
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
         }
-        button:hover { background: #0056b3; }
-        .result { 
-            background: #f8f9fa; 
-            padding: 15px; 
-            border-radius: 4px; 
-            margin: 10px 0; 
-            font-family: monospace;
-            font-size: 12px;
-            max-height: 200px;
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-right: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+        }
+        
+        .btn-success {
+            background: #28a745;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: 600;
+        }
+        
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .users-list {
+            max-height: 500px;
             overflow-y: auto;
         }
-        .status { 
-            padding: 10px; 
-            border-radius: 4px; 
-            margin: 10px 0; 
-            font-weight: bold;
+        
+        .user-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
         }
-        .success { background: #d4edda; color: #155724; }
-        .error { background: #f8d7da; color: #721c24; }
-        input { 
-            width: 100%; 
-            padding: 8px; 
-            margin: 5px 0; 
-            border: 1px solid #ddd; 
-            border-radius: 4px;
+        
+        .user-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .user-info h3 {
+            margin-bottom: 5px;
+            color: #333;
+        }
+        
+        .user-info p {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+        
+        .user-badge {
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+        
+        .badge-driver { background: #d4edda; color: #155724; }
+        .badge-dispatcher { background: #fff3cd; color: #856404; }
+        .badge-admin { background: #f8d7da; color: #721c24; }
+        
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .search-bar {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        .hidden { display: none; }
+        
+        .loading-spinner {
+            display: none;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+        
+        .btn.loading .loading-spinner {
+            display: inline-block;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .stats { grid-template-columns: 1fr; }
+            .user-item { 
+                flex-direction: column; 
+                align-items: flex-start; 
+                gap: 15px; 
+            }
+            .actions {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>🔧 Railway Admin Test</h1>
-    <p><strong>URL:</strong> https://driver-return-system-production.up.railway.app</p>
+    <div id="connectionStatus" class="status connected">🟢 Railway Connected</div>
     
-    <div class="test-section">
-        <h2>🌐 API Connection Test</h2>
-        <button onclick="testHealth()">Test Health API</button>
-        <button onclick="testUsers()">Test Users API</button>
-        <div id="apiResult" class="result">Click buttons to test APIs...</div>
-    </div>
-    
-    <div class="test-section">
-        <h2>👤 Create Test User</h2>
-        <input type="text" id="testName" placeholder="User Name" value="Test Driver">
-        <input type="email" id="testEmail" placeholder="Email (optional)" value="test@company.com">
-        <select id="testRole">
-            <option value="driver">Driver</option>
-            <option value="dispatcher">Dispatcher</option>
-            <option value="admin">Admin</option>
-        </select>
-        <br><br>
-        <button onclick="createUser()">Create User</button>
-        <button onclick="loadUsers()">Load All Users</button>
-        <div id="userResult" class="result">Ready to create user...</div>
-    </div>
-    
-    <div class="test-section">
-        <h2>📋 Environment Check</h2>
-        <div id="envResult" class="result">
-Backend URL: https://driver-return-system-production.up.railway.app
-Expected Files:
-✅ server.js (confirmed - server running on port 8080)
-✅ package.json (confirmed - from your earlier message)
-✅ public/admin.html (this file)
-⚠️  MongoDB connection: Testing...
+    <div class="container">
+        <div class="header">
+            <h1>🛠️ Fleet Admin Panel</h1>
+            <p>Railway + MongoDB Atlas - Production Ready</p>
+        </div>
+        
+        <!-- Stats Dashboard -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalUsers">0</div>
+                <div class="stat-label">Total Users</div>
+            </div>
+            <div class="stat-card" style="border-left-color: #28a745;">
+                <div class="stat-number" id="totalDrivers">0</div>
+                <div class="stat-label">Drivers</div>
+            </div>
+            <div class="stat-card" style="border-left-color: #ffc107;">
+                <div class="stat-number" id="totalDispatchers">0</div>
+                <div class="stat-label">Dispatchers</div>
+            </div>
+            <div class="stat-card" style="border-left-color: #dc3545;">
+                <div class="stat-number" id="totalAdmins">0</div>
+                <div class="stat-label">Admins</div>
+            </div>
+        </div>
+        
+        <!-- Add User Form -->
+        <div class="card">
+            <h2>➕ Add New User</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="userName">Name *</label>
+                    <input type="text" id="userName" placeholder="Enter user name" required>
+                </div>
+                <div class="form-group">
+                    <label for="userEmail">Email <span style="color: #999;">(optional for drivers)</span></label>
+                    <input type="email" id="userEmail" placeholder="user@company.com">
+                </div>
+                <div class="form-group">
+                    <label for="userRole">Role *</label>
+                    <select id="userRole" required>
+                        <option value="driver">Driver</option>
+                        <option value="dispatcher">Dispatcher</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="userPassword">Password <span style="color: #999;">(optional for drivers)</span></label>
+                    <input type="password" id="userPassword" placeholder="Enter password">
+                </div>
+            </div>
+            
+            <button class="btn" onclick="createUser()">
+                <span class="loading-spinner"></span>
+                ✅ Create User
+            </button>
+            <button class="btn btn-success" onclick="loadUsers()">
+                <span class="loading-spinner"></span>
+                🔄 Refresh Users
+            </button>
+            <button class="btn btn-secondary" onclick="exportUsers()">
+                📊 Export CSV
+            </button>
+            
+            <div id="userMessage"></div>
+        </div>
+        
+        <!-- Users List -->
+        <div class="card">
+            <h2>👥 User Management</h2>
+            
+            <div class="search-bar">
+                <input type="text" class="search-input" id="searchInput" placeholder="Search users..." onkeyup="searchUsers()">
+                <select id="roleFilter" onchange="filterUsers()">
+                    <option value="all">All Roles</option>
+                    <option value="driver">Drivers Only</option>
+                    <option value="dispatcher">Dispatchers Only</option>
+                    <option value="admin">Admins Only</option>
+                </select>
+            </div>
+            
+            <div id="usersList" class="users-list">
+                <p style="text-align: center; color: #666; padding: 40px;">
+                    Loading users from MongoDB...
+                </p>
+            </div>
         </div>
     </div>
 
     <script>
-        const API_URL = 'https://driver-return-system-production.up.railway.app';
+        const API_BASE = window.location.origin;
+        let users = [];
+        let filteredUsers = [];
         
-        async function testHealth() {
-            log('apiResult', '🔍 Testing /api/health...');
-            
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Fleet Admin Panel loaded');
+            console.log('🌐 API Base:', API_BASE);
+            checkConnection();
+        });
+        
+        async function checkConnection() {
             try {
-                const response = await fetch(`${API_URL}/api/health`);
-                const data = await response.json();
+                const response = await fetch(`${API_BASE}/api/health`);
                 
                 if (response.ok) {
-                    log('apiResult', `✅ Health API working!\n${JSON.stringify(data, null, 2)}`);
+                    const data = await response.json();
+                    console.log('✅ Health check passed:', data);
                     
-                    // Check MongoDB status
-                    if (data.data && data.data.database === 'connected') {
-                        log('envResult', '✅ MongoDB: Connected and working!');
+                    if (data.data.database === 'connected') {
+                        updateConnectionStatus(true);
+                        loadUsers();
                     } else {
-                        log('envResult', '❌ MongoDB: Not connected - check MONGODB_URI env var');
+                        updateConnectionStatus(false);
                     }
                 } else {
-                    log('apiResult', `❌ Health API failed: ${response.status} ${response.statusText}`);
+                    throw new Error(`HTTP ${response.status}`);
                 }
+                
             } catch (error) {
-                log('apiResult', `❌ Health API error: ${error.message}`);
+                console.error('❌ Connection failed:', error);
+                updateConnectionStatus(false);
+                showMessage('Connection failed: ' + error.message, 'error');
             }
         }
         
-        async function testUsers() {
-            log('apiResult', '👥 Testing /api/users...');
+        function updateConnectionStatus(connected) {
+            const status = document.getElementById('connectionStatus');
             
+            if (connected) {
+                status.className = 'status connected';
+                status.textContent = '🟢 Railway + MongoDB';
+            } else {
+                status.className = 'status error';
+                status.textContent = '🔴 Connection Failed';
+            }
+        }
+        
+        async function loadUsers() {
             try {
-                const response = await fetch(`${API_URL}/api/users`);
-                const data = await response.json();
+                console.log('📡 Loading users...');
+                
+                const response = await fetch(`${API_BASE}/api/users`);
                 
                 if (response.ok) {
-                    const users = data.data || data || [];
-                    log('apiResult', `✅ Users API working! Found ${users.length} users\n${JSON.stringify(users, null, 2)}`);
+                    const data = await response.json();
+                    users = data.data || data || [];
+                    filteredUsers = [...users];
+                    
+                    console.log(`✅ Loaded ${users.length} users`);
+                    displayUsers();
+                    updateStats();
                 } else {
-                    log('apiResult', `❌ Users API failed: ${response.status} ${response.statusText}`);
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
+                
             } catch (error) {
-                log('apiResult', `❌ Users API error: ${error.message}`);
+                console.error('❌ Failed to load users:', error);
+                showMessage('Failed to load users: ' + error.message, 'error');
             }
+        }
+        
+        function displayUsers() {
+            const container = document.getElementById('usersList');
+            
+            if (filteredUsers.length === 0) {
+                container.innerHTML = `
+                    <p style="text-align: center; color: #666; padding: 40px;">
+                        ${users.length === 0 ? 'No users found. Create your first user above!' : 'No users match your search criteria.'}
+                    </p>
+                `;
+                return;
+            }
+            
+            const html = filteredUsers.map(user => `
+                <div class="user-item">
+                    <div class="user-info">
+                        <h3>${user.name}</h3>
+                        <p>${user.email || 'No email provided'}</p>
+                        <span class="user-badge badge-${user.role}">${user.role}</span>
+                        <p style="font-size: 0.8rem; color: #999; margin-top: 8px;">
+                            Created: ${new Date(user.createdAt).toLocaleDateString()} • ID: ${user._id}
+                        </p>
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-danger" onclick="deleteUser('${user._id}', '${user.name.replace(/'/g, "\\'")}')">
+                            🗑️ Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            
+            container.innerHTML = html;
+        }
+        
+        function updateStats() {
+            const drivers = users.filter(u => u.role === 'driver').length;
+            const dispatchers = users.filter(u => u.role === 'dispatcher').length;
+            const admins = users.filter(u => u.role === 'admin').length;
+            
+            // Animate counter
+            animateCounter('totalUsers', users.length);
+            animateCounter('totalDrivers', drivers);
+            animateCounter('totalDispatchers', dispatchers);
+            animateCounter('totalAdmins', admins);
+        }
+        
+        function animateCounter(elementId, targetValue) {
+            const element = document.getElementById(elementId);
+            const currentValue = parseInt(element.textContent) || 0;
+            const increment = targetValue > currentValue ? 1 : -1;
+            
+            if (currentValue === targetValue) return;
+            
+            const timer = setInterval(() => {
+                const current = parseInt(element.textContent);
+                const next = current + increment;
+                
+                element.textContent = next;
+                
+                if (next === targetValue) {
+                    clearInterval(timer);
+                }
+            }, 50);
         }
         
         async function createUser() {
-            const name = document.getElementById('testName').value;
-            const email = document.getElementById('testEmail').value;
-            const role = document.getElementById('testRole').value;
+            const button = event.target;
+            button.classList.add('loading');
+            
+            const name = document.getElementById('userName').value.trim();
+            const email = document.getElementById('userEmail').value.trim();
+            const role = document.getElementById('userRole').value;
+            const password = document.getElementById('userPassword').value;
             
             if (!name) {
-                log('userResult', '❌ Name is required');
+                showMessage('Name is required', 'error');
+                button.classList.remove('loading');
+                return;
+            }
+            
+            // Role-based validation
+            if (role !== 'driver' && !email) {
+                showMessage('Email is required for dispatchers and admins', 'error');
+                button.classList.remove('loading');
+                return;
+            }
+            
+            if (role !== 'driver' && !password) {
+                showMessage('Password is required for dispatchers and admins', 'error');
+                button.classList.remove('loading');
                 return;
             }
             
             const userData = { name, role, active: true };
             if (email) userData.email = email;
-            
-            log('userResult', `📤 Creating user: ${JSON.stringify(userData)}`);
+            if (password) userData.password = password;
             
             try {
-                const response = await fetch(`${API_URL}/api/users`, {
+                console.log('📤 Creating user:', userData);
+                
+                const response = await fetch(`${API_BASE}/api/users`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(userData)
@@ -161,49 +564,127 @@ Expected Files:
                 
                 if (response.ok) {
                     const result = await response.json();
-                    log('userResult', `✅ User created successfully!\n${JSON.stringify(result, null, 2)}`);
+                    console.log('✅ User created:', result);
                     
-                    // Auto-load users after creation
-                    setTimeout(loadUsers, 1000);
+                    let message = `User "${name}" created successfully!`;
+                    if (role === 'driver' && !email) message += ' (No email provided)';
+                    if (role === 'driver' && !password) message += ' (No password needed)';
+                    
+                    showMessage(message, 'success');
+                    
+                    // Clear form
+                    document.getElementById('userName').value = '';
+                    document.getElementById('userEmail').value = '';
+                    document.getElementById('userPassword').value = '';
+                    document.getElementById('userRole').value = 'driver';
+                    
+                    // Reload users
+                    loadUsers();
                 } else {
                     const errorData = await response.json().catch(() => ({}));
-                    log('userResult', `❌ Create user failed: ${errorData.error || response.statusText}`);
+                    throw new Error(errorData.error || `HTTP ${response.status}`);
                 }
+                
             } catch (error) {
-                log('userResult', `❌ Create user error: ${error.message}`);
+                console.error('❌ Failed to create user:', error);
+                showMessage('Failed to create user: ' + error.message, 'error');
+            } finally {
+                button.classList.remove('loading');
             }
         }
         
-        async function loadUsers() {
-            log('userResult', '📋 Loading all users...');
+        async function deleteUser(userId, userName) {
+            if (!confirm(`Delete user "${userName}" from MongoDB?\n\nThis action cannot be undone.`)) return;
             
             try {
-                const response = await fetch(`${API_URL}/api/users`);
-                const data = await response.json();
+                console.log('🗑️ Deleting user:', userId);
+                
+                const response = await fetch(`${API_BASE}/api/users/${userId}`, {
+                    method: 'DELETE'
+                });
                 
                 if (response.ok) {
-                    const users = data.data || data || [];
-                    log('userResult', `✅ Found ${users.length} users:\n${JSON.stringify(users, null, 2)}`);
+                    console.log('✅ User deleted');
+                    showMessage(`User "${userName}" deleted successfully!`, 'success');
+                    loadUsers();
                 } else {
-                    log('userResult', `❌ Load users failed: ${response.status} ${response.statusText}`);
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
+                
             } catch (error) {
-                log('userResult', `❌ Load users error: ${error.message}`);
+                console.error('❌ Failed to delete user:', error);
+                showMessage('Failed to delete user: ' + error.message, 'error');
             }
         }
         
-        function log(elementId, message) {
-            const element = document.getElementById(elementId);
-            const timestamp = new Date().toLocaleTimeString();
-            element.textContent = `[${timestamp}] ${message}`;
-            console.log(`[Admin Test] ${message}`);
+        function searchUsers() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const roleFilter = document.getElementById('roleFilter').value;
+            
+            filteredUsers = users.filter(user => {
+                const matchesSearch = !query || 
+                    user.name.toLowerCase().includes(query) ||
+                    (user.email && user.email.toLowerCase().includes(query));
+                
+                const matchesRole = roleFilter === 'all' || user.role === roleFilter;
+                
+                return matchesSearch && matchesRole;
+            });
+            
+            displayUsers();
         }
         
-        // Auto-test on page load
-        window.onload = function() {
-            console.log('🚀 Admin test page loaded');
-            testHealth();
-        };
+        function filterUsers() {
+            searchUsers();
+        }
+        
+        function exportUsers() {
+            if (users.length === 0) {
+                showMessage('No users to export', 'error');
+                return;
+            }
+            
+            const csv = [
+                ['Name', 'Email', 'Role', 'Active', 'Created', 'MongoDB ID'],
+                ...users.map(u => [
+                    u.name,
+                    u.email || 'No email',
+                    u.role,
+                    u.active ? 'Yes' : 'No',
+                    new Date(u.createdAt).toLocaleDateString(),
+                    u._id
+                ])
+            ].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `fleet-users-${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showMessage(`Exported ${users.length} users to CSV`, 'success');
+        }
+        
+        function showMessage(message, type) {
+            const container = document.getElementById('userMessage');
+            container.innerHTML = `<div class="message ${type}">${message}</div>`;
+            
+            if (type === 'success') {
+                setTimeout(() => container.innerHTML = '', 5000);
+            }
+        }
+        
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            loadUsers();
+        }, 30000);
+        
+        // Auto-check connection every 2 minutes
+        setInterval(checkConnection, 120000);
     </script>
 </body>
 </html>
