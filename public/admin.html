@@ -683,11 +683,11 @@
                     Quick Actions
                 </h2>
                 <div class="form-grid">
-                    <button class="btn btn-primary" onclick="switchTab('users', document.querySelector('[onclick*=\"users\"]'))">
+                    <button class="btn btn-primary" onclick="goToUsersTab()">
                         <span>👤</span>
                         Add New User
                     </button>
-                    <button class="btn btn-primary" onclick="switchTab('bulk-upload', document.querySelector('[onclick*=\"bulk-upload\"]'))">
+                    <button class="btn btn-primary" onclick="goToBulkUploadTab()">
                         <span>📤</span>
                         Bulk Upload
                     </button>
@@ -844,6 +844,17 @@
             console.log('FleetForce Enterprise Admin loaded');
             checkConnection();
         });
+        
+        // Quick Action Helper Functions
+        function goToUsersTab() {
+            const usersTabButton = document.querySelector('[onclick*="users"]');
+            switchTab('users', usersTabButton);
+        }
+        
+        function goToBulkUploadTab() {
+            const bulkUploadTabButton = document.querySelector('[onclick*="bulk-upload"]');
+            switchTab('bulk-upload', bulkUploadTabButton);
+        }
         
         // Tab Management
         function switchTab(tabName, buttonElement) {
