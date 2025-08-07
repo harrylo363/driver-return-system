@@ -1193,12 +1193,12 @@
             
             <div class="kpi-card">
                 <div class="kpi-header">
-                    <div class="kpi-icon" style="background: rgba(139, 92, 246, 0.1);">⚡</div>
-                    <div class="kpi-trend down">↓ 3%</div>
+                    <div class="kpi-icon" style="background: rgba(245, 158, 11, 0.1);">⏳</div>
+                    <div class="kpi-trend down">↓ 15%</div>
                 </div>
-                <div class="kpi-value" id="avgResponseTime">0m</div>
-                <div class="kpi-label">Avg Response Time</div>
-                <div class="kpi-sublabel">Fleet efficiency metric</div>
+                <div class="kpi-value" id="notCheckedInCount">0</div>
+                <div class="kpi-label">Pending Check-In</div>
+                <div class="kpi-sublabel">Drivers awaiting check-in</div>
             </div>
         </div>
         
@@ -1659,14 +1659,38 @@
         
         // Update Metrics
         function updateMetrics(driverNotifications) {
+            // Count drivers by status and check-in state
+            const arrivedDrivers = driverNotifications.filter(n => n.status === 'arrived');
+            const checkedInDrivers = arrivedDrivers.filter(n => n.checkedIn);
+            const notCheckedInCount = arrivedDrivers.length - checkedInDrivers.length;
+            
             // Update KPIs
             document.getElementById('activeDrivers').textContent = driverNotifications.length;
             document.getElementById('enRouteCount').textContent = 
                 driverNotifications.filter(n => n.status === 'en-route').length;
-            document.getElementById('arrivedCount').textContent = 
-                driverNotifications.filter(n => n.status === 'arrived').length;
-            document.getElementById('avgResponseTime').textContent = 
-                Math.floor(Math.random() * 30 + 15) + 'm';
+            document.getElementById('arrivedCount').textContent = arrivedDrivers.length;
+            document.getElementById('notCheckedInCount').textContent = notCheckedInCount;
+            
+            // Update trend indicator for pending check-ins
+            const pendingCard = document.querySelector('#notCheckedInCount').closest('.kpi-card');
+            const trendElement = pendingCard.querySelector('.kpi-trend');
+            
+            if (notCheckedInCount === 0) {
+                trendElement.className = 'kpi-trend up';
+                trendElement.innerHTML = '✓ All Clear';
+                trendElement.style.color = 'var(--success)';
+                trendElement.style.background = 'rgba(16, 185, 129, 0.1)';
+            } else if (notCheckedInCount > 3) {
+                trendElement.className = 'kpi-trend down';
+                trendElement.innerHTML = '⚠ High Priority';
+                trendElement.style.color = 'var(--danger)';
+                trendElement.style.background = 'rgba(239, 68, 68, 0.1)';
+            } else {
+                trendElement.className = 'kpi-trend';
+                trendElement.innerHTML = '⏳ Pending';
+                trendElement.style.color = 'var(--warning)';
+                trendElement.style.background = 'rgba(245, 158, 11, 0.1)';
+            }
             
             // Update performance metrics
             const utilization = Math.min((driverNotifications.length / 50) * 100, 95);
