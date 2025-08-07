@@ -173,6 +173,11 @@
             background: #6c757d;
         }
         
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+        
         .message {
             padding: 15px;
             border-radius: 8px;
@@ -190,6 +195,12 @@
             background: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
+        }
+        
+        .message.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
         }
         
         .users-list {
@@ -273,6 +284,170 @@
             display: inline-block;
         }
         
+        /* Bulk Upload Styles */
+        .upload-area {
+            border: 2px dashed #667eea;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            background: #f8f9ff;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+        
+        .upload-area.dragover {
+            border-color: #4a5bcc;
+            background: #e8ebff;
+            transform: scale(1.02);
+        }
+        
+        .upload-area h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .upload-area p {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+        
+        .file-info {
+            background: #e8f4fd;
+            border: 1px solid #bee5eb;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            display: none;
+        }
+        
+        .file-info.show {
+            display: block;
+        }
+        
+        .file-preview {
+            max-height: 300px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: none;
+        }
+        
+        .file-preview.show {
+            display: block;
+        }
+        
+        .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        
+        .preview-table th,
+        .preview-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #dee2e6;
+            text-align: left;
+        }
+        
+        .preview-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .validation-results {
+            margin: 15px 0;
+            display: none;
+        }
+        
+        .validation-results.show {
+            display: block;
+        }
+        
+        .validation-item {
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .validation-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .validation-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .validation-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .template-download {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+        }
+        
+        .template-download h4 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .template-download p {
+            color: #666;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 15px 0;
+            display: none;
+        }
+        
+        .progress-bar.show {
+            display: block;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            width: 0%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
@@ -288,6 +463,9 @@
             .actions {
                 width: 100%;
                 justify-content: center;
+            }
+            .upload-area {
+                padding: 20px;
             }
         }
     </style>
@@ -321,6 +499,59 @@
             </div>
         </div>
         
+        <!-- Bulk Upload Section -->
+        <div class="card">
+            <h2>📁 Bulk Upload Drivers</h2>
+            
+            <div class="template-download">
+                <h4>📋 Download Template</h4>
+                <p>Download the CSV template to ensure your data is in the correct format. Required columns: <strong>name</strong>. Optional columns: <strong>email, phoneNumber, vehicleId, password</strong></p>
+                <button class="btn btn-success" onclick="downloadTemplate()">
+                    📥 Download CSV Template
+                </button>
+            </div>
+            
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📂</div>
+                <h3>Drop your file here or click to browse</h3>
+                <p>Supports CSV, Excel (.xlsx, .xls) files<br>
+                Maximum file size: 10MB | Maximum records: 1000</p>
+                <button class="btn" onclick="document.getElementById('fileInput').click()">
+                    🔍 Browse Files
+                </button>
+            </div>
+            
+            <input type="file" id="fileInput" class="file-input" accept=".csv,.xlsx,.xls" onchange="handleFileSelect(event)">
+            
+            <div id="fileInfo" class="file-info">
+                <h4 id="fileName"></h4>
+                <p id="fileDetails"></p>
+            </div>
+            
+            <div id="filePreview" class="file-preview">
+                <h4 style="padding: 15px; margin: 0; background: #f8f9fa; border-bottom: 1px solid #dee2e6;">📋 Data Preview (First 5 rows)</h4>
+                <div id="previewContent"></div>
+            </div>
+            
+            <div id="validationResults" class="validation-results"></div>
+            
+            <div id="progressBar" class="progress-bar">
+                <div id="progressFill" class="progress-fill">0%</div>
+            </div>
+            
+            <div style="margin-top: 20px;">
+                <button class="btn btn-success" id="uploadBtn" onclick="uploadDrivers()" disabled>
+                    <span class="loading-spinner"></span>
+                    ✅ Upload Drivers
+                </button>
+                <button class="btn btn-secondary" onclick="clearUpload()">
+                    🗑️ Clear
+                </button>
+            </div>
+            
+            <div id="uploadMessage"></div>
+        </div>
+        
         <!-- Add User Form -->
         <div class="card">
             <h2>➕ Add New User</h2>
@@ -344,6 +575,17 @@
                 <div class="form-group">
                     <label for="userPassword">Password <span style="color: #999;">(optional for drivers)</span></label>
                     <input type="password" id="userPassword" placeholder="Enter password">
+                </div>
+            </div>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="userPhone">Phone Number</label>
+                    <input type="tel" id="userPhone" placeholder="+1-555-0123">
+                </div>
+                <div class="form-group">
+                    <label for="userVehicle">Vehicle ID</label>
+                    <input type="text" id="userVehicle" placeholder="T-1234">
                 </div>
             </div>
             
@@ -384,18 +626,487 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
         const API_BASE = window.location.origin;
         let users = [];
         let filteredUsers = [];
+        let uploadData = [];
+        let currentFile = null;
         
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🚀 Fleet Admin Panel loaded');
             console.log('🌐 API Base:', API_BASE);
+            setupDragAndDrop();
             checkConnection();
         });
         
+        function setupDragAndDrop() {
+            const uploadArea = document.getElementById('uploadArea');
+            
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, () => uploadArea.classList.add('dragover'), false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, () => uploadArea.classList.remove('dragover'), false);
+            });
+            
+            uploadArea.addEventListener('drop', handleDrop, false);
+            uploadArea.addEventListener('click', () => document.getElementById('fileInput').click());
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            function handleDrop(e) {
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFile(files[0]);
+                }
+            }
+        }
+        
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        }
+        
+        function handleFile(file) {
+            // Validate file type
+            const validTypes = [
+                'text/csv',
+                'application/vnd.ms-excel',
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'application/vnd.ms-excel.sheet.macroEnabled.12'
+            ];
+            
+            const validExtensions = ['.csv', '.xlsx', '.xls'];
+            const fileExtension = file.name.toLowerCase().substr(file.name.lastIndexOf('.'));
+            
+            if (!validTypes.includes(file.type) && !validExtensions.includes(fileExtension)) {
+                showUploadMessage('Please select a valid CSV or Excel file (.csv, .xlsx, .xls)', 'error');
+                return;
+            }
+            
+            // Validate file size (10MB limit)
+            if (file.size > 10 * 1024 * 1024) {
+                showUploadMessage('File size must be less than 10MB', 'error');
+                return;
+            }
+            
+            currentFile = file;
+            showFileInfo(file);
+            parseFile(file);
+        }
+        
+        function showFileInfo(file) {
+            const fileInfo = document.getElementById('fileInfo');
+            const fileName = document.getElementById('fileName');
+            const fileDetails = document.getElementById('fileDetails');
+            
+            fileName.textContent = `📄 ${file.name}`;
+            fileDetails.innerHTML = `
+                <strong>Size:</strong> ${(file.size / 1024).toFixed(1)} KB<br>
+                <strong>Type:</strong> ${file.type || 'Unknown'}<br>
+                <strong>Last Modified:</strong> ${new Date(file.lastModified).toLocaleString()}
+            `;
+            
+            fileInfo.classList.add('show');
+        }
+        
+        async function parseFile(file) {
+            try {
+                showUploadMessage('Parsing file...', 'warning');
+                
+                const data = await readFile(file);
+                let parsedData = [];
+                
+                if (file.name.toLowerCase().endsWith('.csv')) {
+                    parsedData = parseCSV(data);
+                } else {
+                    parsedData = parseExcel(data);
+                }
+                
+                if (parsedData.length === 0) {
+                    throw new Error('No data found in file');
+                }
+                
+                if (parsedData.length > 1000) {
+                    throw new Error('Too many records. Maximum 1000 records allowed.');
+                }
+                
+                uploadData = parsedData;
+                showPreview(parsedData);
+                validateData(parsedData);
+                
+                showUploadMessage('File parsed successfully!', 'success');
+                
+            } catch (error) {
+                console.error('Parse error:', error);
+                showUploadMessage(`Error parsing file: ${error.message}`, 'error');
+                clearUpload();
+            }
+        }
+        
+        function readFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = e => resolve(e.target.result);
+                reader.onerror = () => reject(new Error('Failed to read file'));
+                
+                if (file.name.toLowerCase().endsWith('.csv')) {
+                    reader.readAsText(file);
+                } else {
+                    reader.readAsArrayBuffer(file);
+                }
+            });
+        }
+        
+        function parseCSV(csvText) {
+            const lines = csvText.split('\n').filter(line => line.trim());
+            if (lines.length < 2) throw new Error('CSV must have at least a header and one data row');
+            
+            const headers = lines[0].split(',').map(h => h.trim().replace(/['"]/g, ''));
+            const data = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(',').map(v => v.trim().replace(/['"]/g, ''));
+                if (values.length > 0 && values[0]) {
+                    const row = {};
+                    headers.forEach((header, index) => {
+                        row[header.toLowerCase()] = values[index] || '';
+                    });
+                    data.push(row);
+                }
+            }
+            
+            return data;
+        }
+        
+        function parseExcel(arrayBuffer) {
+            const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+            
+            if (jsonData.length < 2) throw new Error('Excel file must have at least a header and one data row');
+            
+            const headers = jsonData[0].map(h => String(h).trim().toLowerCase());
+            const data = [];
+            
+            for (let i = 1; i < jsonData.length; i++) {
+                const values = jsonData[i];
+                if (values && values[0]) {
+                    const row = {};
+                    headers.forEach((header, index) => {
+                        row[header] = values[index] ? String(values[index]).trim() : '';
+                    });
+                    data.push(row);
+                }
+            }
+            
+            return data;
+        }
+        
+        function showPreview(data) {
+            const preview = document.getElementById('filePreview');
+            const content = document.getElementById('previewContent');
+            
+            if (data.length === 0) {
+                preview.classList.remove('show');
+                return;
+            }
+            
+            const headers = Object.keys(data[0]);
+            const previewData = data.slice(0, 5);
+            
+            let html = '<table class="preview-table"><thead><tr>';
+            headers.forEach(header => {
+                html += `<th>${header}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+            
+            previewData.forEach(row => {
+                html += '<tr>';
+                headers.forEach(header => {
+                    html += `<td>${row[header] || ''}</td>`;
+                });
+                html += '</tr>';
+            });
+            
+            html += '</tbody></table>';
+            content.innerHTML = html;
+            preview.classList.add('show');
+        }
+        
+        function validateData(data) {
+            const results = document.getElementById('validationResults');
+            const uploadBtn = document.getElementById('uploadBtn');
+            
+            let errors = [];
+            let warnings = [];
+            let validRecords = 0;
+            
+            // Check required columns
+            if (data.length === 0) {
+                errors.push('No data found in file');
+            } else {
+                const firstRow = data[0];
+                const hasName = 'name' in firstRow || 'driver_name' in firstRow || 'full_name' in firstRow;
+                
+                if (!hasName) {
+                    errors.push('Required column "name" not found. Please include a name column.');
+                }
+            }
+            
+            // Validate each record
+            data.forEach((row, index) => {
+                const rowNum = index + 2; // +2 because Excel/CSV starts at 1 and we skip header
+                
+                // Check name
+                const name = row.name || row.driver_name || row.full_name;
+                if (!name || name.trim().length === 0) {
+                    errors.push(`Row ${rowNum}: Name is required`);
+                } else if (name.trim().length < 2) {
+                    warnings.push(`Row ${rowNum}: Name "${name}" seems too short`);
+                } else {
+                    validRecords++;
+                }
+                
+                // Validate email if provided
+                const email = row.email;
+                if (email && email.trim() && !isValidEmail(email)) {
+                    warnings.push(`Row ${rowNum}: Invalid email format "${email}"`);
+                }
+                
+                // Validate phone if provided
+                const phone = row.phonenumber || row.phone_number || row.phone;
+                if (phone && phone.trim() && !isValidPhone(phone)) {
+                    warnings.push(`Row ${rowNum}: Phone "${phone}" may be invalid`);
+                }
+            });
+            
+            // Show results
+            let html = '';
+            
+            if (errors.length === 0 && validRecords > 0) {
+                html += `<div class="validation-success">✅ Validation passed! ${validRecords} valid records ready for upload.</div>`;
+                uploadBtn.disabled = false;
+            } else {
+                uploadBtn.disabled = true;
+            }
+            
+            errors.forEach(error => {
+                html += `<div class="validation-error">❌ ${error}</div>`;
+            });
+            
+            warnings.forEach(warning => {
+                html += `<div class="validation-warning">⚠️ ${warning}</div>`;
+            });
+            
+            if (data.length > validRecords) {
+                html += `<div class="validation-warning">⚠️ ${data.length - validRecords} records have issues and will be skipped.</div>`;
+            }
+            
+            results.innerHTML = html;
+            results.classList.add('show');
+        }
+        
+        function isValidEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+        
+        function isValidPhone(phone) {
+            const cleaned = phone.replace(/\D/g, '');
+            return cleaned.length >= 10 && cleaned.length <= 15;
+        }
+        
+        async function uploadDrivers() {
+            const uploadBtn = document.getElementById('uploadBtn');
+            const progressBar = document.getElementById('progressBar');
+            const progressFill = document.getElementById('progressFill');
+            
+            uploadBtn.classList.add('loading');
+            uploadBtn.disabled = true;
+            progressBar.classList.add('show');
+            
+            try {
+                // Filter out invalid records
+                const validDrivers = uploadData.filter(row => {
+                    const name = row.name || row.driver_name || row.full_name;
+                    return name && name.trim().length >= 2;
+                });
+                
+                if (validDrivers.length === 0) {
+                    throw new Error('No valid drivers found');
+                }
+                
+                let successCount = 0;
+                let errorCount = 0;
+                const errors = [];
+                
+                // Process in batches to avoid overwhelming the server
+                const batchSize = 10;
+                for (let i = 0; i < validDrivers.length; i += batchSize) {
+                    const batch = validDrivers.slice(i, i + batchSize);
+                    
+                    for (const driverData of batch) {
+                        try {
+                            const userData = {
+                                name: (driverData.name || driverData.driver_name || driverData.full_name).trim(),
+                                role: 'driver',
+                                active: true
+                            };
+                            
+                            // Map CSV columns to database fields
+                            if (driverData.email && driverData.email.trim()) {
+                                userData.email = driverData.email.trim();
+                            }
+                            
+                            const phoneField = driverData.phonenumber || driverData.phone_number || driverData.phone;
+                            if (phoneField && phoneField.trim()) {
+                                userData.phoneNumber = phoneField.trim();
+                            }
+                            
+                            const vehicleField = driverData.vehicleid || driverData.vehicle_id || driverData.vehicle;
+                            if (vehicleField && vehicleField.trim()) {
+                                userData.vehicleId = vehicleField.trim();
+                            }
+                            
+                            if (driverData.password && driverData.password.trim()) {
+                                userData.password = driverData.password.trim();
+                            }
+                            
+                            const response = await fetch(`${API_BASE}/api/users`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(userData)
+                            });
+                            
+                            if (response.ok) {
+                                successCount++;
+                            } else {
+                                const errorData = await response.json().catch(() => ({}));
+                                errors.push(`${userData.name}: ${errorData.error || `HTTP ${response.status}`}`);
+                                errorCount++;
+                            }
+                            
+                        } catch (error) {
+                            errors.push(`${driverData.name || 'Unknown'}: ${error.message}`);
+                            errorCount++;
+                        }
+                        
+                        // Update progress
+                        const progress = Math.round(((successCount + errorCount) / validDrivers.length) * 100);
+                        progressFill.style.width = `${progress}%`;
+                        progressFill.textContent = `${progress}%`;
+                    }
+                    
+                    // Small delay between batches
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+                
+                // Show results
+                let message = `✅ Upload completed! ${successCount} drivers created successfully.`;
+                if (errorCount > 0) {
+                    message += ` ${errorCount} failed.`;
+                }
+                
+                showUploadMessage(message, successCount > 0 ? 'success' : 'error');
+                
+                if (errors.length > 0 && errors.length <= 10) {
+                    showUploadMessage('Errors: ' + errors.join(', '), 'warning');
+                } else if (errors.length > 10) {
+                    showUploadMessage(`${errors.length} errors occurred. First few: ${errors.slice(0, 3).join(', ')}...`, 'warning');
+                }
+                
+                // Refresh user list
+                if (successCount > 0) {
+                    loadUsers();
+                    
+                    // Clear form after successful upload
+                    setTimeout(() => {
+                        clearUpload();
+                    }, 3000);
+                }
+                
+            } catch (error) {
+                console.error('Upload error:', error);
+                showUploadMessage(`Upload failed: ${error.message}`, 'error');
+            } finally {
+                uploadBtn.classList.remove('loading');
+                uploadBtn.disabled = true;
+                
+                setTimeout(() => {
+                    progressBar.classList.remove('show');
+                    progressFill.style.width = '0%';
+                    progressFill.textContent = '0%';
+                }, 2000);
+            }
+        }
+        
+        function clearUpload() {
+            currentFile = null;
+            uploadData = [];
+            
+            document.getElementById('fileInput').value = '';
+            document.getElementById('fileInfo').classList.remove('show');
+            document.getElementById('filePreview').classList.remove('show');
+            document.getElementById('validationResults').classList.remove('show');
+            document.getElementById('progressBar').classList.remove('show');
+            document.getElementById('uploadBtn').disabled = true;
+            
+            showUploadMessage('', '');
+        }
+        
+        function downloadTemplate() {
+            const template = [
+                ['name', 'email', 'phoneNumber', 'vehicleId', 'password'],
+                ['John Doe', 'john.doe@company.com', '+1-555-0123', 'T-1234', ''],
+                ['Jane Smith', 'jane.smith@company.com', '+1-555-0124', 'T-5678', ''],
+                ['Mike Johnson', '', '+1-555-0125', 'T-9012', '']
+            ];
+            
+            const csv = template.map(row => 
+                row.map(cell => `"${cell}"`).join(',')
+            ).join('\n');
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'driver-upload-template.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showUploadMessage('Template downloaded successfully!', 'success');
+        }
+        
+        function showUploadMessage(message, type) {
+            const container = document.getElementById('uploadMessage');
+            if (!message) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            container.innerHTML = `<div class="message ${type}">${message}</div>`;
+            
+            if (type === 'success') {
+                setTimeout(() => container.innerHTML = '', 5000);
+            }
+        }
+        
+        // Original functions (keeping all existing functionality)
         async function checkConnection() {
             try {
                 const response = await fetch(`${API_BASE}/api/health`);
@@ -474,6 +1185,8 @@
                     <div class="user-info">
                         <h3>${user.name}</h3>
                         <p>${user.email || 'No email provided'}</p>
+                        ${user.phoneNumber ? `<p>📞 ${user.phoneNumber}</p>` : ''}
+                        ${user.vehicleId ? `<p>🚗 ${user.vehicleId}</p>` : ''}
                         <span class="user-badge badge-${user.role}">${user.role}</span>
                         <p style="font-size: 0.8rem; color: #999; margin-top: 8px;">
                             Created: ${new Date(user.createdAt).toLocaleDateString()} • ID: ${user._id}
@@ -529,6 +1242,8 @@
             const email = document.getElementById('userEmail').value.trim();
             const role = document.getElementById('userRole').value;
             const password = document.getElementById('userPassword').value;
+            const phoneNumber = document.getElementById('userPhone').value.trim();
+            const vehicleId = document.getElementById('userVehicle').value.trim();
             
             if (!name) {
                 showMessage('Name is required', 'error');
@@ -552,6 +1267,8 @@
             const userData = { name, role, active: true };
             if (email) userData.email = email;
             if (password) userData.password = password;
+            if (phoneNumber) userData.phoneNumber = phoneNumber;
+            if (vehicleId) userData.vehicleId = vehicleId;
             
             try {
                 console.log('📤 Creating user:', userData);
@@ -576,6 +1293,8 @@
                     document.getElementById('userName').value = '';
                     document.getElementById('userEmail').value = '';
                     document.getElementById('userPassword').value = '';
+                    document.getElementById('userPhone').value = '';
+                    document.getElementById('userVehicle').value = '';
                     document.getElementById('userRole').value = 'driver';
                     
                     // Reload users
@@ -624,7 +1343,9 @@
             filteredUsers = users.filter(user => {
                 const matchesSearch = !query || 
                     user.name.toLowerCase().includes(query) ||
-                    (user.email && user.email.toLowerCase().includes(query));
+                    (user.email && user.email.toLowerCase().includes(query)) ||
+                    (user.phoneNumber && user.phoneNumber.includes(query)) ||
+                    (user.vehicleId && user.vehicleId.toLowerCase().includes(query));
                 
                 const matchesRole = roleFilter === 'all' || user.role === roleFilter;
                 
@@ -645,11 +1366,13 @@
             }
             
             const csv = [
-                ['Name', 'Email', 'Role', 'Active', 'Created', 'MongoDB ID'],
+                ['Name', 'Email', 'Phone', 'Role', 'Vehicle ID', 'Active', 'Created', 'MongoDB ID'],
                 ...users.map(u => [
                     u.name,
                     u.email || 'No email',
+                    u.phoneNumber || 'No phone',
                     u.role,
+                    u.vehicleId || 'No vehicle',
                     u.active ? 'Yes' : 'No',
                     new Date(u.createdAt).toLocaleDateString(),
                     u._id
