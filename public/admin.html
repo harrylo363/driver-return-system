@@ -845,6 +845,16 @@
             checkConnection();
         });
         
+        function exportAllUsers() {
+            exportUsers();
+        }
+        
+        function refreshDashboard() {
+            showMessage('Refreshing dashboard...', 'success');
+            loadUsers();
+            checkConnection();
+        }
+        
         // Quick Action Helper Functions
         function goToUsersTab() {
             const usersTabButton = document.querySelector('[onclick*="users"]');
@@ -1100,6 +1110,7 @@
         function refreshDashboard() {
             showMessage('Refreshing dashboard...', 'success');
             loadUsers();
+            checkConnection();
         }
         
         // Bulk Upload Functions
