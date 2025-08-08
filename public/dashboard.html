@@ -1507,34 +1507,19 @@
                     return n;
                 });
                 
-                // Get active drivers from admin system
+                // Get active drivers from admin system and mark them as "still out" instead of "standby"
                 const activeDriversFromAdmin = adminUsers.filter(user => 
                     user.role === 'driver' && user.active !== false
                 );
                 
-                // Merge admin drivers with notification drivers
+                // Filter to only actual notifications - no longer add admin drivers automatically
                 const driverNotifications = notifications.filter(n => n.driver && n.status);
-                const notificationDriverNames = driverNotifications.map(n => n.driver);
                 
-                // Add admin drivers who don't have active notifications as "standby"
-                const standbyDrivers = activeDriversFromAdmin
-                    .filter(driver => !notificationDriverNames.includes(driver.name))
-                    .map(driver => ({
-                        _id: `admin-${driver._id}`,
-                        driver: driver.name,
-                        status: 'standby',
-                        timestamp: new Date().toISOString(),
-                        warehouse: '5856 Tampa FDC',
-                        location: 'Location unavailable',
-                        adminData: driver // Include full admin data
-                    }));
-                
-                // Combine all driver data
-                const allDriverData = [...driverNotifications, ...standbyDrivers];
+                // Only use actual driver notifications, no synthetic "still out" drivers
+                const allDriverData = driverNotifications;
                 
                 console.log('Processed notifications:', driverNotifications.length);
                 console.log('Admin drivers:', activeDriversFromAdmin.length);
-                console.log('Standby drivers:', standbyDrivers.length);
                 console.log('Total driver data:', allDriverData.length);
                 
                 updateDisplay(allDriverData);
@@ -1595,11 +1580,12 @@
                 feedIcon = '✅';
                 countText = `${filtered.length} completed`;
             } else if (currentFilter === 'out-on-route') {
-                // Show drivers who are still out on their routes (including standby drivers who are still out)
+                // Show drivers who are still out on their routes
                 filtered = allDriverData.filter(n => 
                     n.status !== 'en-route' && 
                     n.status !== 'arrived' && 
-                    n.checkedIn !== true
+                    n.checkedIn !== true &&
+                    n.status !== 'standby'
                 );
                 emptyMessage = 'All drivers have returned or are en-route back';
                 feedTitle = 'Drivers Still Out';
@@ -1683,15 +1669,10 @@
                 let statusDisplay = notification.status;
                 let statusClass = notification.status;
                 
-                // Handle "still out" drivers differently (including standby drivers)
+                // Handle "still out" drivers differently
                 if (currentFilter === 'out-on-route') {
-                    if (notification.status === 'standby') {
-                        statusDisplay = 'on standby';
-                        statusClass = 'standby-out';
-                    } else {
-                        statusDisplay = 'out on route';
-                        statusClass = 'out-on-route';
-                    }
+                    statusDisplay = 'out on route';
+                    statusClass = 'out-on-route';
                 }
                 
                 if (notification.status === 'standby') {
@@ -1839,9 +1820,7 @@
                                 ` : currentFilter === 'out-on-route' ? `
                                     <div class="location-info">
                                         <div class="address" style="color: var(--text-muted);">
-                                            ${notification.status === 'standby' 
-                                                ? '📍 Driver on standby - Awaiting next assignment' 
-                                                : '📍 Driver out on delivery route - Location not available'}
+                                            📍 Driver out on delivery route - Location not available
                                         </div>
                                     </div>
                                 ` : notification.status === 'standby' ? `
@@ -1853,11 +1832,7 @@
                                 ` : ''}
                             </div>
                             <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                <span class="status-badge ${
-                                    currentFilter === 'out-on-route' 
-                                        ? (notification.status === 'standby' ? 'status-standby' : 'status-warning')
-                                        : 'status-' + statusClass
-                                }">
+                                <span class="status-badge ${currentFilter === 'out-on-route' ? 'status-warning' : 'status-' + statusClass}">
                                     ${statusDisplay.replace('-', ' ')}
                                 </span>
                                 ${notification.status === 'arrived' ? `
