@@ -1727,22 +1727,21 @@
             }).join('');
         }
         
-        // Update Metrics - END-OF-DAY CHECK-IN SYSTEM
+        // Update Metrics - CORRECTED PENDING CHECK-IN LOGIC
         function updateMetrics(allDriverData, adminDrivers = []) {
-            // Count drivers by status for end-of-day check-in
-            const totalRoutedDrivers = allDriverData.length; // All drivers assigned routes for the day
-            const enRouteDrivers = allDriverData.filter(n => n.status === 'en-route').length; // Coming back to FDC
-            const arrivedDrivers = allDriverData.filter(n => n.status === 'arrived').length; // At FDC but not checked in
-            const checkedInDrivers = allDriverData.filter(n => n.checkedIn === true).length; // Completed check-in
+            // Count drivers by status
+            const totalScheduledDrivers = allDriverData.length; // All drivers routed for the day
+            const enRouteDrivers = allDriverData.filter(n => n.status === 'en-route').length;
+            const arrivedDrivers = allDriverData.filter(n => n.status === 'arrived').length;
             
-            // Pending Check-In = Total routed - En Route - Arrived = Still out on routes/not returned
-            const pendingCheckInCount = totalRoutedDrivers - enRouteDrivers - arrivedDrivers;
+            // Pending Check-In = Total routed drivers - En Route - Arrived = Drivers not yet started
+            const pendingCheckInCount = totalScheduledDrivers - enRouteDrivers - arrivedDrivers;
             
             // Update KPIs
-            document.getElementById('activeDrivers').textContent = totalRoutedDrivers; // Total drivers with routes today
-            document.getElementById('enRouteCount').textContent = enRouteDrivers; // Returning to FDC
-            document.getElementById('arrivedCount').textContent = arrivedDrivers; // At FDC, need to check in
-            document.getElementById('notCheckedInCount').textContent = Math.max(0, pendingCheckInCount); // Still out/not returned
+            document.getElementById('activeDrivers').textContent = adminDrivers.length || totalScheduledDrivers;
+            document.getElementById('enRouteCount').textContent = enRouteDrivers;
+            document.getElementById('arrivedCount').textContent = arrivedDrivers;
+            document.getElementById('notCheckedInCount').textContent = Math.max(0, pendingCheckInCount);
             
             // Update trend indicator for pending check-ins
             const pendingCard = document.querySelector('#notCheckedInCount').closest('.kpi-card');
@@ -1750,24 +1749,25 @@
             
             if (pendingCheckInCount <= 0) {
                 trendElement.className = 'kpi-trend up';
-                trendElement.innerHTML = '✓ All Returned';
+                trendElement.innerHTML = '✓ All Dispatched';
                 trendElement.style.color = 'var(--success)';
                 trendElement.style.background = 'rgba(16, 185, 129, 0.1)';
             } else if (pendingCheckInCount > 5) {
                 trendElement.className = 'kpi-trend down';
-                trendElement.innerHTML = '⚠ Many Outstanding';
+                trendElement.innerHTML = '⚠ High Pending';
                 trendElement.style.color = 'var(--danger)';
                 trendElement.style.background = 'rgba(239, 68, 68, 0.1)';
             } else {
                 trendElement.className = 'kpi-trend';
-                trendElement.innerHTML = '🚛 Still Out';
+                trendElement.innerHTML = '📋 Awaiting Dispatch';
                 trendElement.style.color = 'var(--warning)';
                 trendElement.style.background = 'rgba(245, 158, 11, 0.1)';
             }
             
-            // Update performance metrics - how many completed the day
-            const completedDrivers = enRouteDrivers + arrivedDrivers; // Drivers accounted for
-            const utilization = totalRoutedDrivers > 0 ? Math.min((completedDrivers / totalRoutedDrivers) * 100, 95) : 0;
+            // Update performance metrics based on total driver pool
+            const activeDriversCount = enRouteDrivers + arrivedDrivers; // Actually moving drivers
+            
+            const utilization = totalScheduledDrivers > 0 ? Math.min((activeDriversCount / totalScheduledDrivers) * 100, 95) : 0;
             document.getElementById('fleetUtilization').textContent = Math.floor(utilization) + '%';
             document.getElementById('utilizationBar').style.width = utilization + '%';
             
@@ -1776,7 +1776,7 @@
             document.getElementById('onTimeBar').style.width = onTime + '%';
             
             document.getElementById('dailyThroughput').textContent = 
-                Math.floor(completedDrivers * 2.5);
+                Math.floor(activeDriversCount * 2.5);
         }RouteDrivers = allDriverData.filter(n => n.status === 'en-route').length;
             const arrivedDrivers = allDriverData.filter(n => n.status === 'arrived').length;
             
