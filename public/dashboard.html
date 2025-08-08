@@ -1211,11 +1211,12 @@
         <!-- Control Panel -->
         <div class="control-panel">
             <div class="filter-group">
-                <button class="filter-btn active" onclick="filterStatus('all', this)">All Activity</button>
+                <button class="filter-btn active" onclick="filterStatus('all', this)">Active Operations</button>
                 <button class="filter-btn" onclick="filterStatus('en-route', this)">En Route</button>
                 <button class="filter-btn" onclick="filterStatus('arrived', this)">Arrived</button>
                 <button class="filter-btn" onclick="filterStatus('standby', this)">Standby</button>
                 <button class="filter-btn" onclick="filterStatus('delayed', this)">Delayed</button>
+                <button class="filter-btn" onclick="filterStatus('completed', this)" style="border-left: 2px solid var(--success);">✓ Completed</button>
             </div>
             <button class="btn btn-secondary" onclick="exportData()">
                 <span>📊</span>
@@ -1234,13 +1235,16 @@
             <div class="activity-section">
                 <div class="section-header">
                     <h2 class="section-title">
-                        <span>📡</span>
-                        <span>Real-Time Activity Feed</span>
+                        <span id="activityFeedIcon">📡</span>
+                        <span id="activityFeedTitle">Real-Time Activity Feed</span>
                     </h2>
-                    <span id="lastUpdate" style="font-size: 0.875rem; color: var(--text-secondary);">
-                        <span class="loader" style="margin-right: 0.5rem;"></span>
-                        Syncing...
-                    </span>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <span id="activityCount" style="font-size: 0.875rem; color: var(--text-secondary);"></span>
+                        <span id="lastUpdate" style="font-size: 0.875rem; color: var(--text-secondary);">
+                            <span class="loader" style="margin-right: 0.5rem;"></span>
+                            Syncing...
+                        </span>
+                    </div>
                 </div>
                 <div class="activity-list" id="activityList">
                     <div class="empty-state">
@@ -1576,11 +1580,41 @@
             };
         }
         
-        // Update Display - ENHANCED VERSION WITH ADMIN INTEGRATION
+        // Update Display - ENHANCED VERSION WITH COMPLETED CHECK-INS SEPARATION
         async function updateDisplay(allDriverData) {
-            const filtered = currentFilter === 'all' 
-                ? allDriverData 
-                : allDriverData.filter(n => n.status === currentFilter);
+            let filtered;
+            let emptyMessage;
+            let feedTitle;
+            let feedIcon;
+            let countText;
+            
+            if (currentFilter === 'completed') {
+                // Show only completed check-ins
+                filtered = allDriverData.filter(n => n.checkedIn === true);
+                emptyMessage = 'No completed check-ins today';
+                feedTitle = 'Completed Check-Ins';
+                feedIcon = '✅';
+                countText = `${filtered.length} completed`;
+            } else if (currentFilter === 'all') {
+                // Show all EXCEPT completed check-ins (keep feed clean)
+                filtered = allDriverData.filter(n => n.checkedIn !== true);
+                emptyMessage = 'No active fleet movements';
+                feedTitle = 'Real-Time Activity Feed';
+                feedIcon = '📡';
+                countText = `${filtered.length} active`;
+            } else {
+                // Show specific status EXCEPT completed check-ins
+                filtered = allDriverData.filter(n => n.status === currentFilter && n.checkedIn !== true);
+                emptyMessage = `No drivers with status: ${currentFilter}`;
+                feedTitle = `${currentFilter.charAt(0).toUpperCase() + currentFilter.slice(1)} Drivers`;
+                feedIcon = '📡';
+                countText = `${filtered.length} ${currentFilter}`;
+            }
+            
+            // Update feed title and icon
+            document.getElementById('activityFeedTitle').textContent = feedTitle;
+            document.getElementById('activityFeedIcon').textContent = feedIcon;
+            document.getElementById('activityCount').textContent = countText;
             
             const activityList = document.getElementById('activityList');
             
@@ -1588,7 +1622,7 @@
                 activityList.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-icon">📭</div>
-                        <p>No active fleet movements</p>
+                        <p>${emptyMessage}</p>
                     </div>
                 `;
                 return;
@@ -1597,8 +1631,15 @@
             // Process notifications with geocoding
             const processedNotifications = await Promise.all(
                 filtered
-                    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-                    .slice(0, 20)
+                    .sort((a, b) => {
+                        // For completed check-ins, sort by check-in time (most recent first)
+                        if (currentFilter === 'completed') {
+                            return new Date(b.checkInData?.checkInTime || b.timestamp) - new Date(a.checkInData?.checkInTime || a.timestamp);
+                        }
+                        // For active operations, sort by timestamp
+                        return new Date(b.timestamp) - new Date(a.timestamp);
+                    })
+                    .slice(0, 30) // Show more for completed tab
                     .map(async (notification) => {
                         let geocodedAddress = null;
                         
@@ -1631,6 +1672,84 @@
                     statusClass = 'standby';
                 }
                 
+                // Special handling for completed check-ins
+                if (notification.checkedIn && currentFilter === 'completed') {
+                    const checkInTime = new Date(notification.checkInData.checkInTime);
+                    const checkInTimeAgo = getTimeAgo(checkInTime);
+                    
+                    return `
+                        <div class="activity-item completed" style="border-left: 3px solid var(--success);">
+                            <div class="activity-content">
+                                <div class="activity-info">
+                                    <div class="activity-driver">
+                                        ${notification.driver}
+                                        ${notification.adminData ? `
+                                            <span style="font-size: 0.75rem; color: var(--text-muted); margin-left: 0.5rem;">
+                                                ID: ${notification.adminData.vehicleId || 'No Vehicle'}
+                                            </span>
+                                        ` : ''}
+                                        <span style="font-size: 0.875rem; color: var(--success); margin-left: 1rem;">
+                                            ✓ Check-In Complete
+                                        </span>
+                                    </div>
+                                    <div class="activity-details">
+                                        <span class="activity-detail">
+                                            <span>⏱</span>
+                                            <span>Completed ${checkInTimeAgo}</span>
+                                        </span>
+                                        <span class="activity-detail">
+                                            <span>📍</span>
+                                            <span>5856 Tampa FDC</span>
+                                        </span>
+                                        ${notification.checkInData?.vehicleInfo?.truckNumber ? `
+                                            <span class="activity-detail">
+                                                <span>🚚</span>
+                                                <span>Truck: ${notification.checkInData.vehicleInfo.truckNumber}</span>
+                                            </span>
+                                        ` : ''}
+                                        ${notification.checkInData?.equipmentCheck?.totalIssues > 0 ? `
+                                            <span class="activity-detail" style="color: var(--warning);">
+                                                <span>⚠️</span>
+                                                <span>${notification.checkInData.equipmentCheck.totalIssues} issue(s) reported</span>
+                                            </span>
+                                        ` : `
+                                            <span class="activity-detail" style="color: var(--success);">
+                                                <span>✅</span>
+                                                <span>All equipment OK</span>
+                                            </span>
+                                        `}
+                                        ${notification.adminData && notification.adminData.email ? `
+                                            <span class="activity-detail">
+                                                <span>📧</span>
+                                                <span>${notification.adminData.email}</span>
+                                            </span>
+                                        ` : ''}
+                                    </div>
+                                    ${notification.checkInData?.additionalNotes ? `
+                                        <div class="location-info" style="margin-top: 0.75rem;">
+                                            <div style="color: var(--text-secondary); font-size: 0.875rem;">
+                                                <strong>Notes:</strong> ${notification.checkInData.additionalNotes}
+                                            </div>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                    <span class="status-badge" style="background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3);">
+                                        ✓ Completed
+                                    </span>
+                                    ${notification.checkInData?.equipmentCheck?.totalIssues > 0 ? `
+                                        <button class="btn btn-secondary btn-sm" onclick="viewCheckInDetails('${notification._id}')">
+                                            <span>📋</span>
+                                            <span>View Details</span>
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                // Regular active operations display
                 return `
                     <div class="activity-item ${statusClass}">
                         <div class="activity-content">
@@ -1643,11 +1762,6 @@
                                         </span>
                                     ` : ''}
                                 </div>
-                                ${notification.checkedIn && notification.checkInData ? `
-                                    <div style="font-size: 0.875rem; color: var(--success); margin-top: 0.25rem;">
-                                        <span>✓ Arrived at ${new Date(notification.checkInData.checkInTime).toLocaleTimeString()}</span>
-                                    </div>
-                                ` : ''}
                                 <div class="activity-details">
                                     <span class="activity-detail">
                                         <span>⏱</span>
@@ -1657,16 +1771,10 @@
                                         <span>📍</span>
                                         <span>5856 Tampa FDC</span>
                                     </span>
-                                    ${notification.estimatedArrival && !notification.checkedIn ? `
+                                    ${notification.estimatedArrival ? `
                                         <span class="activity-detail">
                                             <span>⏳</span>
                                             <span>ETA: ${notification.estimatedArrival}</span>
-                                        </span>
-                                    ` : ''}
-                                    ${notification.checkedIn && notification.checkInData?.equipmentCheck?.totalIssues > 0 ? `
-                                        <span class="activity-detail" style="color: var(--warning);">
-                                            <span>⚠️</span>
-                                            <span>${notification.checkInData.equipmentCheck.totalIssues} issue(s)</span>
                                         </span>
                                     ` : ''}
                                     ${notification.adminData && notification.adminData.email ? `
@@ -1710,21 +1818,14 @@
                                 ` : ''}
                             </div>
                             <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                ${!notification.checkedIn ? `
-                                    <span class="status-badge status-${statusClass}">
-                                        ${statusDisplay.replace('-', ' ')}
-                                    </span>
-                                ` : ''}
-                                ${notification.status === 'arrived' && !notification.checkedIn ? `
+                                <span class="status-badge status-${statusClass}">
+                                    ${statusDisplay.replace('-', ' ')}
+                                </span>
+                                ${notification.status === 'arrived' ? `
                                     <button class="btn btn-primary btn-sm" onclick="openCheckInModal('${notification._id}', '${notification.driver.replace(/'/g, "\\'")}'); event.stopPropagation();">
                                         <span>📋</span>
                                         <span>Check In</span>
                                     </button>
-                                ` : ''}
-                                ${notification.checkedIn ? `
-                                    <span class="status-badge" style="background: rgba(139, 92, 246, 0.1); color: #8B5CF6; border: 1px solid rgba(139, 92, 246, 0.3);">
-                                        ✓ Checked In
-                                    </span>
                                 ` : ''}
                             </div>
                         </div>
@@ -1856,6 +1957,114 @@
             // For simplicity, we'll filter from the current notifications array
             // In a real app, you'd want to store this combined data globally
             return notifications.filter(n => n.driver && n.status);
+        }
+        
+        // Function to view check-in details
+        function viewCheckInDetails(notificationId) {
+            const notification = notifications.find(n => n._id === notificationId);
+            if (!notification || !notification.checkInData) return;
+            
+            const checkInData = notification.checkInData;
+            let detailsHtml = `
+                <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; margin: 1rem 0;">
+                    <h3 style="color: var(--text-primary); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <span>📋</span>
+                        <span>Check-In Details for ${notification.driver}</span>
+                    </h3>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                        <div>
+                            <strong style="color: var(--text-secondary);">Check-In Time:</strong><br>
+                            ${new Date(checkInData.checkInTime).toLocaleString()}
+                        </div>
+                        ${checkInData.vehicleInfo?.truckNumber ? `
+                            <div>
+                                <strong style="color: var(--text-secondary);">Truck Number:</strong><br>
+                                ${checkInData.vehicleInfo.truckNumber}
+                            </div>
+                        ` : ''}
+                        ${checkInData.vehicleInfo?.trailerNumber ? `
+                            <div>
+                                <strong style="color: var(--text-secondary);">Trailer Number:</strong><br>
+                                ${checkInData.vehicleInfo.trailerNumber}
+                            </div>
+                        ` : ''}
+                        ${checkInData.vehicleInfo?.mileage ? `
+                            <div>
+                                <strong style="color: var(--text-secondary);">Mileage:</strong><br>
+                                ${checkInData.vehicleInfo.mileage}
+                            </div>
+                        ` : ''}
+                        ${checkInData.vehicleInfo?.fuelLevel ? `
+                            <div>
+                                <strong style="color: var(--text-secondary);">Fuel Level:</strong><br>
+                                ${checkInData.vehicleInfo.fuelLevel}
+                            </div>
+                        ` : ''}
+                    </div>
+                    
+                    ${checkInData.equipmentCheck?.totalIssues > 0 ? `
+                        <div style="margin-bottom: 1.5rem;">
+                            <h4 style="color: var(--danger); margin-bottom: 0.75rem;">Equipment Issues (${checkInData.equipmentCheck.totalIssues}):</h4>
+                            <div style="display: grid; gap: 0.5rem;">
+                                ${checkInData.equipmentCheck.items
+                                    .filter(item => item.status === 'issue')
+                                    .map(item => `
+                                        <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 0.75rem;">
+                                            <strong style="color: var(--danger);">${item.label}:</strong> ${item.issue || 'No details provided'}
+                                        </div>
+                                    `).join('')}
+                            </div>
+                        </div>
+                    ` : `
+                        <div style="margin-bottom: 1.5rem;">
+                            <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 0.75rem; color: var(--success);">
+                                ✅ All equipment checks passed - No issues reported
+                            </div>
+                        </div>
+                    `}
+                    
+                    ${checkInData.additionalNotes ? `
+                        <div>
+                            <h4 style="color: var(--text-secondary); margin-bottom: 0.5rem;">Additional Notes:</h4>
+                            <div style="background: var(--bg-dark); border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem; color: var(--text-primary);">
+                                ${checkInData.additionalNotes}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            // Create a temporary modal to show details
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.display = 'block';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 800px;">
+                    <div class="modal-header">
+                        <h2 class="modal-title">
+                            <span>📋</span>
+                            <span>Check-In Details</span>
+                        </h2>
+                        <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        ${detailsHtml}
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Close</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Close modal when clicking outside
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
         }
         
         // Export Functions
@@ -2269,6 +2478,13 @@
                     showToast('Check-In Complete', 
                              `${notification.driver} checked in successfully - All equipment OK`, 
                              'success');
+                }
+                
+                // Auto-switch to completed tab if we're not already there
+                if (currentFilter !== 'completed') {
+                    setTimeout(() => {
+                        showToast('View Completed', 'Click "✓ Completed" tab to see finished check-ins', 'info');
+                    }, 3000);
                 }
             }
             
