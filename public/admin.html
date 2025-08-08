@@ -986,13 +986,67 @@
         }
         
         function exportUsersFromDashboard() {
-            exportUsers();
+            if (users.length === 0) {
+                showDashboardMessage('No users to export', 'error');
+                return;
+            }
+            
+            var csvData = [
+                ['Name', 'Email', 'Phone', 'Role', 'Vehicle ID', 'Created']
+            ];
+            
+            for (var i = 0; i < users.length; i++) {
+                var user = users[i];
+                csvData.push([
+                    user.name,
+                    user.email || '',
+                    user.phoneNumber || '',
+                    user.role,
+                    user.vehicleId || '',
+                    new Date(user.createdAt).toLocaleDateString()
+                ]);
+            }
+            
+            var csv = '';
+            for (var i = 0; i < csvData.length; i++) {
+                var row = csvData[i];
+                var csvRow = '';
+                for (var j = 0; j < row.length; j++) {
+                    csvRow += '"' + row[j] + '"';
+                    if (j < row.length - 1) csvRow += ',';
+                }
+                csv += csvRow + '\n';
+            }
+            
+            var blob = new Blob([csv], { type: 'text/csv' });
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'fleetforce-users-' + new Date().toISOString().split('T')[0] + '.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showDashboardMessage('Successfully exported ' + users.length + ' user records', 'success');
         }
         
         function refreshDashboardFromQuickActions() {
             showDashboardMessage('Refreshing system data...', 'success');
-            loadUsers();
+            
+            // Show loading state
+            document.getElementById('totalUsers').textContent = '...';
+            document.getElementById('totalDrivers').textContent = '...';
+            document.getElementById('totalDispatchers').textContent = '...';
+            document.getElementById('totalAdmins').textContent = '...';
+            
+            // Refresh connection and data
             checkConnection();
+            
+            // Give visual feedback
+            setTimeout(function() {
+                showDashboardMessage('Dashboard refreshed successfully', 'success');
+            }, 1000);
         }
         
         function showDashboardMessage(message, type) {
@@ -1146,7 +1200,12 @@
             }
             
             var userData = { name: name, role: role, active: true };
-            if (email) userData.email = email;
+            
+            // Only add email if it's provided and not empty
+            if (email && email.length > 0) {
+                userData.email = email;
+            }
+            
             if (password) userData.password = password;
             if (phoneNumber) userData.phoneNumber = phoneNumber;
             if (vehicleId) userData.vehicleId = vehicleId;
@@ -1170,7 +1229,14 @@
                 loadUsers();
             })
             .catch(function(error) {
-                showMessage('Failed to create user: ' + error.message, 'error');
+                var errorMessage = error.message;
+                
+                // Handle specific duplicate email error
+                if (errorMessage.includes('duplicate key error') && errorMessage.includes('email')) {
+                    errorMessage = 'Email address already exists. Please use a different email or leave it blank.';
+                }
+                
+                showMessage('Failed to create user: ' + errorMessage, 'error');
             })
             .finally(function() {
                 button.classList.remove('loading');
