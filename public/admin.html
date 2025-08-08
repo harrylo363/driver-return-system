@@ -100,32 +100,6 @@
             font-weight: 500;
         }
         
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-        
-        .dashboard-link {
-            padding: 0.75rem 1.5rem;
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            border-radius: 12px;
-            color: var(--accent);
-            text-decoration: none;
-            font-size: 0.875rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.3s ease;
-        }
-        
-        .dashboard-link:hover {
-            background: rgba(59, 130, 246, 0.2);
-            transform: translateY(-2px);
-        }
-        
         .status-indicator {
             display: flex;
             align-items: center;
@@ -156,62 +130,6 @@
             max-width: 1400px;
             margin: 0 auto;
             padding: 2rem;
-        }
-        
-        /* Dashboard Sync Banner */
-        .sync-banner {
-            background: rgba(59, 130, 246, 0.05);
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            border-radius: 16px;
-            padding: 1rem 1.5rem;
-            margin-bottom: 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .sync-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-        
-        .sync-icon {
-            font-size: 1.5rem;
-        }
-        
-        .sync-text h3 {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 0.25rem;
-        }
-        
-        .sync-text p {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            margin: 0;
-        }
-        
-        .sync-status {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.875rem;
-            color: var(--text-muted);
-        }
-        
-        .sync-indicator {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--success);
-            animation: pulse 2s infinite;
-        }
-        
-        .sync-indicator.error {
-            background: var(--danger);
-            animation: none;
         }
         
         .nav-container {
@@ -766,9 +684,6 @@
             .search-input { min-width: auto; }
             .quick-actions { grid-template-columns: 1fr; }
             .upload-section { padding: 2rem; }
-            .header-content { flex-direction: column; gap: 1rem; }
-            .header-actions { width: 100%; justify-content: space-between; }
-            .sync-banner { flex-direction: column; align-items: flex-start; gap: 1rem; }
         }
     </style>
 </head>
@@ -779,38 +694,17 @@
                 <div class="logo">⚡</div>
                 <div class="brand-text">
                     <h1>FleetForce Enterprise</h1>
-                    <p>Admin Command Center</p>
+                    <p>Logistics Command Center</p>
                 </div>
             </div>
-            <div class="header-actions">
-                <a href="/dashboard.html" class="dashboard-link" target="_blank">
-                    <span>📊</span>
-                    <span>View Dashboard</span>
-                </a>
-                <div class="status-indicator" id="connectionStatus">
-                    <div class="pulse"></div>
-                    <span>System Operational</span>
-                </div>
+            <div class="status-indicator" id="connectionStatus">
+                <div class="pulse"></div>
+                <span>System Operational</span>
             </div>
         </div>
     </header>
     
     <div class="container">
-        <!-- Dashboard Integration Banner -->
-        <div class="sync-banner" id="syncBanner">
-            <div class="sync-info">
-                <div class="sync-icon">🔗</div>
-                <div class="sync-text">
-                    <h3>Dashboard Integration Active</h3>
-                    <p>All changes will automatically sync with the live dashboard</p>
-                </div>
-            </div>
-            <div class="sync-status" id="syncStatus">
-                <div class="sync-indicator"></div>
-                <span>Auto-sync enabled</span>
-            </div>
-        </div>
-        
         <div class="nav-container">
             <nav class="nav-tabs">
                 <button class="nav-tab active" onclick="switchTab('dashboard', this)">
@@ -876,7 +770,7 @@
                     <span>⚡</span>
                     Quick Actions
                 </h2>
-                <p class="card-subtitle">Streamlined administrative operations with real-time dashboard sync</p>
+                <p class="card-subtitle">Streamlined administrative operations</p>
                 
                 <div class="quick-actions">
                     <div class="quick-action-card" onclick="goToUsersTab()">
@@ -900,11 +794,11 @@
                         <button class="btn btn-success">Export Now</button>
                     </div>
                     
-                    <div class="quick-action-card" onclick="syncWithDashboard()">
+                    <div class="quick-action-card" onclick="refreshDashboardFromQuickActions()">
                         <div class="quick-action-icon">🔄</div>
-                        <div class="quick-action-title">Sync Dashboard</div>
-                        <div class="quick-action-description">Force synchronization with live dashboard</div>
-                        <button class="btn btn-primary">Sync Now</button>
+                        <div class="quick-action-title">Refresh Data</div>
+                        <div class="quick-action-description">Update dashboard with latest system information</div>
+                        <button class="btn btn-primary">Refresh</button>
                     </div>
                 </div>
                 
@@ -918,7 +812,7 @@
                     <span>👤</span>
                     User Account Creation
                 </h2>
-                <p class="card-subtitle">Create and configure individual user accounts with role-based access. Changes sync automatically with the dashboard.</p>
+                <p class="card-subtitle">Create and configure individual user accounts with role-based access</p>
                 
                 <div class="form-grid">
                     <div class="form-group">
@@ -969,7 +863,7 @@
                     <span>👥</span>
                     User Directory
                 </h2>
-                <p class="card-subtitle">Comprehensive user management and administration with real-time dashboard sync</p>
+                <p class="card-subtitle">Comprehensive user management and administration</p>
                 
                 <div class="search-filters">
                     <input type="text" class="search-input" id="searchInput" placeholder="Search users by name, email, or vehicle ID..." onkeyup="searchUsers()">
@@ -1015,7 +909,7 @@
                     <span>📁</span>
                     Bulk Data Import
                 </h2>
-                <p class="card-subtitle">Import multiple driver records efficiently with automated validation. All imports sync automatically with the dashboard.</p>
+                <p class="card-subtitle">Import multiple driver records efficiently with automated validation</p>
                 
                 <div class="upload-section" id="uploadArea" onclick="document.getElementById('fileInput').click()">
                     <div class="upload-icon">📂</div>
@@ -1054,328 +948,10 @@
         var currentTab = 'dashboard';
         
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('FleetForce Enterprise Admin loaded with Dashboard Integration');
+            console.log('FleetForce Enterprise Admin loaded');
             checkConnection();
-            setupDashboardCommunication();
         });
         
-        // Enhanced Dashboard Communication Setup
-        function setupDashboardCommunication() {
-            // Listen for messages from dashboard
-            window.addEventListener('message', function(event) {
-                if (event.data.type === 'DASHBOARD_REQUEST_DATA') {
-                    console.log('Dashboard requesting data sync');
-                    triggerDashboardSync();
-                }
-            });
-            
-            console.log('Dashboard communication setup complete');
-        }
-        
-        // Enhanced Dashboard Sync Functions
-        function triggerDashboardSync() {
-            try {
-                // Store data in sessionStorage for dashboard access
-                sessionStorage.setItem('fleetforce_users', JSON.stringify(users));
-                sessionStorage.setItem('fleetforce_last_sync', new Date().toISOString());
-                
-                // Try to notify dashboard windows
-                notifyDashboardWindows();
-                
-                // Update sync status
-                updateSyncStatus(true);
-                
-                console.log('Dashboard sync data updated:', users.length, 'users');
-            } catch (e) {
-                console.warn('Could not sync with dashboard:', e);
-                updateSyncStatus(false);
-            }
-        }
-        
-        function notifyDashboardWindows() {
-            // Try to communicate with any open dashboard windows
-            try {
-                // Send message to all windows (including popups/tabs opened from this page)
-                const dashboardMessage = {
-                    type: 'ADMIN_DATA_UPDATE',
-                    data: users,
-                    timestamp: new Date().toISOString()
-                };
-                
-                // If dashboard was opened as popup, try to communicate
-                if (window.dashboardWindow && !window.dashboardWindow.closed) {
-                    window.dashboardWindow.postMessage(dashboardMessage, '*');
-                }
-                
-                // Broadcast to all windows with same origin
-                if (typeof BroadcastChannel !== 'undefined') {
-                    const channel = new BroadcastChannel('fleetforce_sync');
-                    channel.postMessage(dashboardMessage);
-                    channel.close();
-                }
-                
-            } catch (e) {
-                console.log('Direct window communication not available');
-            }
-        }
-        
-        function syncWithDashboard() {
-            showDashboardMessage('Synchronizing with dashboard...', 'success');
-            triggerDashboardSync();
-            setTimeout(() => {
-                showDashboardMessage('✅ Dashboard sync completed - data updated', 'success');
-            }, 1000);
-        }
-        
-        function updateSyncStatus(success) {
-            const syncStatus = document.getElementById('syncStatus');
-            const indicator = syncStatus.querySelector('.sync-indicator');
-            const text = syncStatus.querySelector('span');
-            
-            if (success) {
-                indicator.className = 'sync-indicator';
-                text.textContent = 'Auto-sync enabled';
-            } else {
-                indicator.className = 'sync-indicator error';
-                text.textContent = 'Sync error';
-            }
-        }
-        
-        // Enhanced User Creation with Dashboard Sync
-        function createUser() {
-            var button = event.target;
-            button.classList.add('loading');
-            
-            var name = document.getElementById('userName').value.trim();
-            var email = document.getElementById('userEmail').value.trim();
-            var role = document.getElementById('userRole').value;
-            var password = document.getElementById('userPassword').value;
-            var phoneNumber = document.getElementById('userPhone').value.trim();
-            var vehicleId = document.getElementById('userVehicle').value.trim();
-            
-            if (!name) {
-                showMessage('Full name is required', 'error');
-                button.classList.remove('loading');
-                return;
-            }
-            
-            var userData = { name: name, role: role, active: true };
-            
-            if (email && email.length > 0) userData.email = email;
-            if (password) userData.password = password;
-            if (phoneNumber) userData.phoneNumber = phoneNumber;
-            if (vehicleId) userData.vehicleId = vehicleId;
-            
-            fetch(API_BASE + '/api/users', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(userData)
-            })
-            .then(function(response) {
-                if (response.ok) {
-                    return response.json();
-                }
-                return response.json().then(function(errorData) {
-                    throw new Error(errorData.error || 'HTTP ' + response.status);
-                });
-            })
-            .then(function(result) {
-                showMessage('User account "' + name + '" created successfully', 'success');
-                clearUserForm();
-                loadUsers(); // This will trigger dashboard sync
-                
-                // Show dashboard sync notification
-                showDashboardMessage('✅ New user created and synced with dashboard', 'success');
-            })
-            .catch(function(error) {
-                var errorMessage = error.message;
-                
-                if (errorMessage.includes('duplicate key error') && errorMessage.includes('email')) {
-                    errorMessage = 'Email address already exists. Please use a different email or leave it blank.';
-                }
-                
-                showMessage('Failed to create user: ' + errorMessage, 'error');
-            })
-            .finally(function() {
-                button.classList.remove('loading');
-            });
-        }
-        
-        // Enhanced Delete with Dashboard Sync
-        function deleteUser(userId, userName) {
-            if (!confirm('Delete user "' + userName + '"?\n\nThis action cannot be undone and will sync with the dashboard.')) return;
-            
-            fetch(API_BASE + '/api/users/' + userId, { method: 'DELETE' })
-                .then(function(response) {
-                    if (response.ok) {
-                        showMessage('User "' + userName + '" deleted successfully', 'success');
-                        loadUsers(); // This will trigger dashboard sync
-                        showDashboardMessage('✅ User deleted and synced with dashboard', 'success');
-                    } else {
-                        throw new Error('HTTP ' + response.status);
-                    }
-                })
-                .catch(function(error) {
-                    showMessage('Failed to delete user: ' + error.message, 'error');
-                });
-        }
-        
-        // Enhanced Load Users with Auto-Sync
-        function loadUsers() {
-            fetch(API_BASE + '/api/users')
-                .then(function(response) {
-                    if (response.ok) {
-                        return response.json();
-                    }
-                    throw new Error('HTTP ' + response.status);
-                })
-                .then(function(data) {
-                    users = data.data || data || [];
-                    filteredUsers = users.slice();
-                    console.log('Loaded ' + users.length + ' users - triggering dashboard sync');
-                    displayUsers();
-                    updateStats();
-                    
-                    // Automatically sync with dashboard after loading users
-                    triggerDashboardSync();
-                })
-                .catch(function(error) {
-                    console.error('Failed to load users:', error);
-                    showMessage('Failed to load users: ' + error.message, 'error');
-                    updateSyncStatus(false);
-                });
-        }
-        
-        // Enhanced Bulk Upload with Dashboard Sync
-        function uploadDrivers() {
-            var fileInput = document.getElementById('fileInput');
-            var file = fileInput.files[0];
-            
-            if (!file) {
-                showUploadMessage('Please select a file first', 'error');
-                return;
-            }
-            
-            var button = event.target;
-            button.classList.add('loading');
-            button.disabled = true;
-            
-            showUploadMessage('Processing file and creating driver accounts...', 'success');
-            
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                var text = e.target.result;
-                var lines = text.split('\n');
-                var validLines = [];
-                for (var i = 0; i < lines.length; i++) {
-                    if (lines[i].trim()) {
-                        validLines.push(lines[i]);
-                    }
-                }
-                
-                if (validLines.length < 2) {
-                    showUploadMessage('File must have at least a header and one data row', 'error');
-                    button.classList.remove('loading');
-                    button.disabled = true;
-                    return;
-                }
-                
-                var headers = validLines[0].split(',');
-                for (var i = 0; i < headers.length; i++) {
-                    headers[i] = headers[i].trim().replace(/"/g, '');
-                }
-                
-                var successCount = 0;
-                var errorCount = 0;
-                var errors = [];
-                var processedCount = 0;
-                
-                function processNextRow() {
-                    var lineIndex = processedCount + 1;
-                    if (lineIndex >= validLines.length) {
-                        var message = 'Import completed! ' + successCount + ' drivers created successfully';
-                        if (errorCount > 0) {
-                            message += ', ' + errorCount + ' failed';
-                        }
-                        
-                        showUploadMessage(message, successCount > 0 ? 'success' : 'error');
-                        
-                        if (errors.length > 0 && errors.length <= 5) {
-                            showUploadMessage('Errors: ' + errors.join(', '), 'warning');
-                        } else if (errors.length > 5) {
-                            showUploadMessage(errors.length + ' errors occurred. First few: ' + errors.slice(0, 3).join(', ') + '...', 'warning');
-                        }
-                        
-                        loadUsers(); // This will trigger dashboard sync
-                        clearUpload();
-                        button.classList.remove('loading');
-                        button.disabled = true;
-                        
-                        // Show dashboard sync notification
-                        if (successCount > 0) {
-                            showDashboardMessage('✅ Bulk import completed - ' + successCount + ' drivers synced with dashboard', 'success');
-                        }
-                        return;
-                    }
-                    
-                    var values = validLines[lineIndex].split(',');
-                    for (var j = 0; j < values.length; j++) {
-                        values[j] = values[j].trim().replace(/"/g, '');
-                    }
-                    
-                    if (values[0]) {
-                        var userData = {
-                            name: values[0],
-                            role: 'driver',
-                            active: true
-                        };
-                        
-                        if (values[1]) userData.email = values[1];
-                        if (values[2]) userData.phoneNumber = values[2];
-                        if (values[3]) userData.vehicleId = values[3];
-                        
-                        fetch(API_BASE + '/api/users', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(userData)
-                        })
-                        .then(function(response) {
-                            if (response.ok) {
-                                successCount++;
-                            } else {
-                                return response.json().then(function(errorData) {
-                                    errors.push(userData.name + ': ' + (errorData.error || 'Failed'));
-                                    errorCount++;
-                                });
-                            }
-                        })
-                        .catch(function(error) {
-                            errors.push(userData.name + ': ' + error.message);
-                            errorCount++;
-                        })
-                        .finally(function() {
-                            processedCount++;
-                            setTimeout(processNextRow, 100);
-                        });
-                    } else {
-                        processedCount++;
-                        setTimeout(processNextRow, 10);
-                    }
-                }
-                
-                processNextRow();
-            };
-            
-            reader.onerror = function() {
-                showUploadMessage('Failed to read file', 'error');
-                button.classList.remove('loading');
-                button.disabled = true;
-            };
-            
-            reader.readAsText(file);
-        }
-        
-        // All other functions remain the same...
         function switchTab(tabName, buttonElement) {
             var tabContents = document.querySelectorAll('.tab-content');
             for (var i = 0; i < tabContents.length; i++) {
@@ -1410,7 +986,84 @@
         }
         
         function exportUsersFromDashboard() {
-            exportUsers();
+            if (users.length === 0) {
+                showDashboardMessage('No users to export', 'error');
+                return;
+            }
+            
+            var csvData = [
+                ['Name', 'Email', 'Phone', 'Role', 'Vehicle ID', 'Created']
+            ];
+            
+            for (var i = 0; i < users.length; i++) {
+                var user = users[i];
+                csvData.push([
+                    user.name,
+                    user.email || '',
+                    user.phoneNumber || '',
+                    user.role,
+                    user.vehicleId || '',
+                    new Date(user.createdAt).toLocaleDateString()
+                ]);
+            }
+            
+            var csv = '';
+            for (var i = 0; i < csvData.length; i++) {
+                var row = csvData[i];
+                var csvRow = '';
+                for (var j = 0; j < row.length; j++) {
+                    csvRow += '"' + row[j] + '"';
+                    if (j < row.length - 1) csvRow += ',';
+                }
+                csv += csvRow + '\n';
+            }
+            
+            var blob = new Blob([csv], { type: 'text/csv' });
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'fleetforce-users-' + new Date().toISOString().split('T')[0] + '.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showDashboardMessage('Successfully exported ' + users.length + ' user records', 'success');
+        }
+        
+        function refreshDashboardFromQuickActions() {
+            showDashboardMessage('Refreshing system data...', 'success');
+            
+            // Show loading state
+            document.getElementById('totalUsers').textContent = '...';
+            document.getElementById('totalDrivers').textContent = '...';
+            document.getElementById('totalDispatchers').textContent = '...';
+            document.getElementById('totalAdmins').textContent = '...';
+            
+            // Refresh connection and data
+            checkConnection();
+            
+            // Give visual feedback
+            setTimeout(function() {
+                showDashboardMessage('Dashboard refreshed successfully', 'success');
+            }, 1000);
+        }
+        
+        function showDashboardMessage(message, type) {
+            var container = document.getElementById('dashboardMessage');
+            var icons = { success: '✅', error: '❌', warning: '⚠️' };
+            
+            var messageHtml = '<div class="message ' + type + '">';
+            messageHtml += '<span>' + (icons[type] || '') + '</span>';
+            messageHtml += '<span>' + message + '</span>';
+            messageHtml += '</div>';
+            
+            container.innerHTML = messageHtml;
+            
+            // Auto-hide all message types after 5 seconds
+            setTimeout(function() {
+                container.innerHTML = '';
+            }, 5000);
         }
         
         function checkConnection() {
@@ -1429,7 +1082,6 @@
                 .catch(function(error) {
                     console.error('Connection failed:', error);
                     updateConnectionStatus(false);
-                    updateSyncStatus(false);
                 });
         }
         
@@ -1440,6 +1092,27 @@
             } else {
                 status.innerHTML = '<div style="width: 10px; height: 10px; background: var(--danger); border-radius: 50%;"></div><span style="color: var(--danger);">Connection Failed</span>';
             }
+        }
+        
+        function loadUsers() {
+            fetch(API_BASE + '/api/users')
+                .then(function(response) {
+                    if (response.ok) {
+                        return response.json();
+                    }
+                    throw new Error('HTTP ' + response.status);
+                })
+                .then(function(data) {
+                    users = data.data || data || [];
+                    filteredUsers = users.slice();
+                    console.log('Loaded ' + users.length + ' users');
+                    displayUsers();
+                    updateStats();
+                })
+                .catch(function(error) {
+                    console.error('Failed to load users:', error);
+                    showMessage('Failed to load users: ' + error.message, 'error');
+                });
         }
         
         function displayUsers() {
@@ -1509,6 +1182,67 @@
             }, 50);
         }
         
+        function createUser() {
+            var button = event.target;
+            button.classList.add('loading');
+            
+            var name = document.getElementById('userName').value.trim();
+            var email = document.getElementById('userEmail').value.trim();
+            var role = document.getElementById('userRole').value;
+            var password = document.getElementById('userPassword').value;
+            var phoneNumber = document.getElementById('userPhone').value.trim();
+            var vehicleId = document.getElementById('userVehicle').value.trim();
+            
+            if (!name) {
+                showMessage('Full name is required', 'error');
+                button.classList.remove('loading');
+                return;
+            }
+            
+            var userData = { name: name, role: role, active: true };
+            
+            // Only add email if it's provided and not empty
+            if (email && email.length > 0) {
+                userData.email = email;
+            }
+            
+            if (password) userData.password = password;
+            if (phoneNumber) userData.phoneNumber = phoneNumber;
+            if (vehicleId) userData.vehicleId = vehicleId;
+            
+            fetch(API_BASE + '/api/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+            })
+            .then(function(response) {
+                if (response.ok) {
+                    return response.json();
+                }
+                return response.json().then(function(errorData) {
+                    throw new Error(errorData.error || 'HTTP ' + response.status);
+                });
+            })
+            .then(function(result) {
+                showMessage('User account "' + name + '" created successfully', 'success');
+                clearUserForm();
+                loadUsers();
+            })
+            .catch(function(error) {
+                var errorMessage = error.message;
+                
+                // Handle specific duplicate email error
+                if (errorMessage.includes('duplicate key error') && errorMessage.includes('email')) {
+                    errorMessage = 'Email address already exists. Please use a different email or leave it blank.';
+                }
+                
+                showMessage('Failed to create user: ' + errorMessage, 'error');
+            })
+            .finally(function() {
+                button.classList.remove('loading');
+            });
+        }
+        
         function clearUserForm() {
             document.getElementById('userName').value = '';
             document.getElementById('userEmail').value = '';
@@ -1516,6 +1250,23 @@
             document.getElementById('userPhone').value = '';
             document.getElementById('userVehicle').value = '';
             document.getElementById('userRole').value = 'driver';
+        }
+        
+        function deleteUser(userId, userName) {
+            if (!confirm('Delete user "' + userName + '"?\n\nThis action cannot be undone.')) return;
+            
+            fetch(API_BASE + '/api/users/' + userId, { method: 'DELETE' })
+                .then(function(response) {
+                    if (response.ok) {
+                        showMessage('User "' + userName + '" deleted successfully', 'success');
+                        loadUsers();
+                    } else {
+                        throw new Error('HTTP ' + response.status);
+                    }
+                })
+                .catch(function(error) {
+                    showMessage('Failed to delete user: ' + error.message, 'error');
+                });
         }
         
         function searchUsers() {
@@ -1547,11 +1298,11 @@
         
         function exportUsers() {
             if (users.length === 0) {
-                var message = 'No users to export';
+                // Show message in the appropriate location based on current tab
                 if (currentTab === 'dashboard') {
-                    showDashboardMessage(message, 'error');
+                    showDashboardMessage('No users to export', 'error');
                 } else {
-                    showMessage(message, 'error');
+                    showMessage('No users to export', 'error');
                 }
                 return;
             }
@@ -1593,6 +1344,7 @@
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
             
+            // Show success message in the appropriate location
             var successMessage = 'Exported ' + users.length + ' users to CSV';
             if (currentTab === 'dashboard') {
                 showDashboardMessage(successMessage, 'success');
@@ -1641,6 +1393,130 @@
             showUploadMessage('Template downloaded successfully!', 'success');
         }
         
+        function uploadDrivers() {
+            var fileInput = document.getElementById('fileInput');
+            var file = fileInput.files[0];
+            
+            if (!file) {
+                showUploadMessage('Please select a file first', 'error');
+                return;
+            }
+            
+            var button = event.target;
+            button.classList.add('loading');
+            button.disabled = true;
+            
+            showUploadMessage('Processing file and creating driver accounts...', 'success');
+            
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var text = e.target.result;
+                var lines = text.split('\n');
+                var validLines = [];
+                for (var i = 0; i < lines.length; i++) {
+                    if (lines[i].trim()) {
+                        validLines.push(lines[i]);
+                    }
+                }
+                
+                if (validLines.length < 2) {
+                    showUploadMessage('File must have at least a header and one data row', 'error');
+                    button.classList.remove('loading');
+                    button.disabled = true;
+                    return;
+                }
+                
+                var headers = validLines[0].split(',');
+                for (var i = 0; i < headers.length; i++) {
+                    headers[i] = headers[i].trim().replace(/"/g, '');
+                }
+                
+                var successCount = 0;
+                var errorCount = 0;
+                var errors = [];
+                var processedCount = 0;
+                
+                function processNextRow() {
+                    var lineIndex = processedCount + 1;
+                    if (lineIndex >= validLines.length) {
+                        // All done
+                        var message = 'Import completed! ' + successCount + ' drivers created successfully';
+                        if (errorCount > 0) {
+                            message += ', ' + errorCount + ' failed';
+                        }
+                        
+                        showUploadMessage(message, successCount > 0 ? 'success' : 'error');
+                        
+                        if (errors.length > 0 && errors.length <= 5) {
+                            showUploadMessage('Errors: ' + errors.join(', '), 'warning');
+                        } else if (errors.length > 5) {
+                            showUploadMessage(errors.length + ' errors occurred. First few: ' + errors.slice(0, 3).join(', ') + '...', 'warning');
+                        }
+                        
+                        loadUsers();
+                        clearUpload();
+                        button.classList.remove('loading');
+                        button.disabled = true;
+                        return;
+                    }
+                    
+                    var values = validLines[lineIndex].split(',');
+                    for (var j = 0; j < values.length; j++) {
+                        values[j] = values[j].trim().replace(/"/g, '');
+                    }
+                    
+                    if (values[0]) {
+                        var userData = {
+                            name: values[0],
+                            role: 'driver',
+                            active: true
+                        };
+                        
+                        if (values[1]) userData.email = values[1];
+                        if (values[2]) userData.phoneNumber = values[2];
+                        if (values[3]) userData.vehicleId = values[3];
+                        
+                        fetch(API_BASE + '/api/users', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(userData)
+                        })
+                        .then(function(response) {
+                            if (response.ok) {
+                                successCount++;
+                            } else {
+                                return response.json().then(function(errorData) {
+                                    errors.push(userData.name + ': ' + (errorData.error || 'Failed'));
+                                    errorCount++;
+                                });
+                            }
+                        })
+                        .catch(function(error) {
+                            errors.push(userData.name + ': ' + error.message);
+                            errorCount++;
+                        })
+                        .finally(function() {
+                            processedCount++;
+                            setTimeout(processNextRow, 100);
+                        });
+                    } else {
+                        processedCount++;
+                        setTimeout(processNextRow, 10);
+                    }
+                }
+                
+                processNextRow();
+            };
+            
+            reader.onerror = function() {
+                showUploadMessage('Failed to read file', 'error');
+                button.classList.remove('loading');
+                button.disabled = true;
+            };
+            
+            reader.readAsText(file);
+        }
+        
         function clearUpload() {
             document.getElementById('fileInput').value = '';
             document.getElementById('uploadBtn').disabled = true;
@@ -1663,6 +1539,7 @@
             
             container.innerHTML = messageHtml;
             
+            // Auto-hide all message types after 5 seconds
             setTimeout(function() {
                 container.innerHTML = '';
             }, 5000);
@@ -1679,22 +1556,7 @@
             
             container.innerHTML = messageHtml;
             
-            setTimeout(function() {
-                container.innerHTML = '';
-            }, 5000);
-        }
-        
-        function showDashboardMessage(message, type) {
-            var container = document.getElementById('dashboardMessage');
-            var icons = { success: '✅', error: '❌', warning: '⚠️' };
-            
-            var messageHtml = '<div class="message ' + type + '">';
-            messageHtml += '<span>' + (icons[type] || '') + '</span>';
-            messageHtml += '<span>' + message + '</span>';
-            messageHtml += '</div>';
-            
-            container.innerHTML = messageHtml;
-            
+            // Auto-hide all message types after 5 seconds
             setTimeout(function() {
                 container.innerHTML = '';
             }, 5000);
