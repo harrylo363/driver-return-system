@@ -3,81 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fleet Command Center | Enterprise Logistics Platform</title>
-    
-    <!-- Premium Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
+    <title>FleetForce Enterprise | Unified Command Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         :root {
             --primary: #0F172A;
-            --primary-light: #1E293B;
             --accent: #3B82F6;
-            --accent-hover: #2563EB;
             --success: #10B981;
             --warning: #F59E0B;
             --danger: #EF4444;
-            --text-primary: #F1F5F9;
+            --text-primary: #FFFFFF;
             --text-secondary: #94A3B8;
             --text-muted: #64748B;
-            --bg-dark: #0F172A;
+            --bg-dark: #0B1120;
             --bg-card: #1E293B;
-            --bg-hover: #334155;
-            --border: #334155;
-            --gradient-primary: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
-            --gradient-dark: linear-gradient(180deg, #0F172A 0%, #1E293B 100%);
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
-            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            --bg-hover: #374151;
+            --border: #374151;
+            --gradient-hero: linear-gradient(135deg, #1e3a8a 0%, #3730a3 50%, #581c87 100%);
+            --gradient-card: linear-gradient(145deg, #1E293B 0%, #2D3748 100%);
+            --shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.2);
+            --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.25);
         }
         
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Inter', system-ui, sans-serif;
             background: var(--bg-dark);
             color: var(--text-primary);
             line-height: 1.6;
-            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
         
-        /* Animated Background */
         body::before {
             content: '';
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: 
-                radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 40% 20%, rgba(16, 185, 129, 0.1) 0%, transparent 50%);
+                radial-gradient(circle at 25% 25%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+                linear-gradient(135deg, #0B1120 0%, #1E293B 100%);
             z-index: -1;
         }
         
-        /* Premium Header */
-        .header {
+        .top-header {
             background: rgba(15, 23, 42, 0.95);
             backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+            padding: 1.25rem 2rem;
             position: sticky;
             top: 0;
             z-index: 1000;
-            padding: 0;
+            box-shadow: var(--shadow-lg);
         }
         
         .header-content {
-            max-width: 1920px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -90,42 +72,22 @@
         }
         
         .logo {
-            width: 48px;
-            height: 48px;
-            background: var(--gradient-primary);
-            border-radius: 12px;
+            width: 52px; height: 52px;
+            background: var(--gradient-hero);
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
-            font-weight: 700;
+            font-size: 26px;
+            font-weight: 800;
             color: white;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .logo::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            transform: rotate(45deg);
-            animation: shine 3s infinite;
-        }
-        
-        @keyframes shine {
-            0%, 100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-            50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.4);
         }
         
         .brand-text h1 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            background: var(--gradient-primary);
+            font-size: 1.875rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 50%, #06B6D4 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin: 0;
@@ -135,6 +97,7 @@
             font-size: 0.875rem;
             color: var(--text-secondary);
             margin: 0;
+            font-weight: 500;
         }
         
         .header-actions {
@@ -146,19 +109,18 @@
         .status-indicator {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
+            gap: 0.75rem;
+            padding: 0.75rem 1.25rem;
             background: rgba(16, 185, 129, 0.1);
             border: 1px solid rgba(16, 185, 129, 0.3);
             border-radius: 100px;
             font-size: 0.875rem;
             color: var(--success);
-            font-weight: 500;
+            font-weight: 600;
         }
         
         .pulse {
-            width: 8px;
-            height: 8px;
+            width: 10px; height: 10px;
             background: var(--success);
             border-radius: 50%;
             animation: pulse 2s infinite;
@@ -166,217 +128,143 @@
         
         @keyframes pulse {
             0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.5); }
+            50% { opacity: 0.7; transform: scale(1.2); }
             100% { opacity: 1; transform: scale(1); }
         }
         
-        .header-time {
+        .current-time {
             font-size: 0.875rem;
             color: var(--text-secondary);
             font-weight: 500;
             font-variant-numeric: tabular-nums;
         }
         
-        /* Main Container */
         .container {
-            max-width: 1920px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 2rem;
         }
         
-        /* KPI Cards */
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        
-        .kpi-card {
-            background: var(--bg-card);
+        .nav-container {
+            background: var(--gradient-card);
             border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 1.5rem;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-        
-        .kpi-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-xl);
-            border-color: var(--accent);
-        }
-        
-        .kpi-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: var(--gradient-primary);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        
-        .kpi-card:hover::before {
-            opacity: 1;
-        }
-        
-        .kpi-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1rem;
-        }
-        
-        .kpi-icon {
-            width: 48px;
-            height: 48px;
-            background: rgba(59, 130, 246, 0.1);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-        }
-        
-        .kpi-trend {
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-            font-size: 0.875rem;
-            font-weight: 600;
-            padding: 0.25rem 0.75rem;
-            border-radius: 100px;
-        }
-        
-        .kpi-trend.up {
-            color: var(--success);
-            background: rgba(16, 185, 129, 0.1);
-        }
-        
-        .kpi-trend.down {
-            color: var(--danger);
-            background: rgba(239, 68, 68, 0.1);
-        }
-        
-        .kpi-value {
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: var(--text-primary);
-            line-height: 1;
-            margin-bottom: 0.5rem;
-            font-variant-numeric: tabular-nums;
-        }
-        
-        .kpi-label {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        
-        .kpi-sublabel {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-top: 0.25rem;
-        }
-        
-        /* Control Panel */
-        .control-panel {
-            display: flex;
-            gap: 1rem;
+            border-radius: 20px;
+            padding: 1rem;
             margin-bottom: 2rem;
-            flex-wrap: wrap;
+            box-shadow: var(--shadow-lg);
         }
         
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 10px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: inline-flex;
-            align-items: center;
+        .nav-tabs {
+            display: flex;
             gap: 0.5rem;
-            position: relative;
-            overflow: hidden;
+            overflow-x: auto;
         }
         
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s;
-        }
-        
-        .btn:hover::before {
-            left: 100%;
-        }
-        
-        .btn-primary {
-            background: var(--gradient-primary);
-            color: white;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
-        }
-        
-        .btn-secondary {
-            background: var(--bg-hover);
-            color: var(--text-primary);
-            border: 1px solid var(--border);
-        }
-        
-        .btn-secondary:hover {
-            background: var(--border);
-            transform: translateY(-2px);
-        }
-        
-        .filter-group {
+        .nav-tab {
             display: flex;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        
-        .filter-btn {
-            padding: 0.75rem 1.25rem;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
             border: none;
             background: transparent;
             color: var(--text-secondary);
             font-size: 0.875rem;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s ease;
-            position: relative;
+            border-radius: 14px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
         }
         
-        .filter-btn:not(:last-child) {
-            border-right: 1px solid var(--border);
-        }
-        
-        .filter-btn:hover {
+        .nav-tab:hover {
             color: var(--text-primary);
             background: var(--bg-hover);
         }
         
-        .filter-btn.active {
+        .nav-tab.active {
             color: white;
-            background: var(--accent);
+            background: var(--gradient-hero);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Dashboard-specific styles */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: var(--gradient-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-xl);
+            border-color: rgba(59, 130, 246, 0.4);
+        }
+        
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-icon {
+            width: 56px; height: 56px;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+        
+        .stat-trend {
+            padding: 0.5rem 1rem;
+            border-radius: 100px;
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--success);
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .stat-value {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1;
+            margin-bottom: 0.75rem;
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.075em;
+        }
+        
+        .stat-sublabel {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-top: 0.25rem;
         }
         
         /* Activity Feed */
@@ -417,57 +305,15 @@
             overflow-y: auto;
         }
         
-        .activity-list::-webkit-scrollbar {
-            width: 6px;
-        }
-        
-        .activity-list::-webkit-scrollbar-track {
-            background: var(--bg-dark);
-        }
-        
-        .activity-list::-webkit-scrollbar-thumb {
-            background: var(--border);
-            border-radius: 3px;
-        }
-        
-        .activity-list::-webkit-scrollbar-thumb:hover {
-            background: var(--text-muted);
-        }
-        
         .activity-item {
             padding: 1.5rem;
             border-bottom: 1px solid var(--border);
-            transition: all 0.2s ease;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .activity-item::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 3px;
-            background: transparent;
             transition: all 0.2s ease;
         }
         
         .activity-item:hover {
             background: var(--bg-hover);
-            padding-left: 2rem;
         }
-        
-        .activity-item.en-route::before { background: var(--warning); }
-        .activity-item.arrived::before { background: var(--success); }
-        .status-standby {
-            background: rgba(100, 116, 139, 0.1);
-            color: var(--text-muted);
-            border: 1px solid rgba(100, 116, 139, 0.3);
-        }
-        
-        .activity-item.standby::before { background: var(--text-muted); }
         
         .activity-content {
             display: flex;
@@ -495,84 +341,6 @@
             flex-wrap: wrap;
         }
         
-        .activity-detail {
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
-        
-        .location-info {
-            display: flex;
-            flex-direction: column;
-            gap: 0.25rem;
-            margin-top: 0.5rem;
-            padding: 0.75rem;
-            background: rgba(59, 130, 246, 0.05);
-            border: 1px solid rgba(59, 130, 246, 0.1);
-            border-radius: 8px;
-            font-size: 0.75rem;
-        }
-        
-        .coordinates {
-            color: var(--accent);
-            font-family: 'Courier New', monospace;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .address {
-            color: var(--text-secondary);
-            font-style: italic;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .location-link {
-            color: inherit;
-            text-decoration: none;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            flex: 1;
-        }
-        
-        .location-link:hover {
-            color: var(--text-primary);
-            text-decoration: underline;
-        }
-        
-        .coordinates .location-link:hover {
-            color: #60A5FA;
-        }
-        
-        .map-btn {
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            border-radius: 4px;
-            color: var(--accent);
-            cursor: pointer;
-            padding: 0.25rem 0.5rem;
-            font-size: 0.75rem;
-            transition: all 0.2s ease;
-            min-width: 28px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .map-btn:hover {
-            background: rgba(59, 130, 246, 0.2);
-            border-color: var(--accent);
-            transform: scale(1.05);
-        }
-        
-        .map-btn:active {
-            transform: scale(0.95);
-        }
-        
         .status-badge {
             padding: 0.375rem 0.875rem;
             border-radius: 100px;
@@ -582,523 +350,368 @@
             letter-spacing: 0.05em;
         }
         
-        .status-en-route {
-            background: rgba(245, 158, 11, 0.1);
-            color: var(--warning);
-            border: 1px solid rgba(245, 158, 11, 0.3);
-        }
-        
-        .status-arrived {
+        .status-active {
             background: rgba(16, 185, 129, 0.1);
             color: var(--success);
             border: 1px solid rgba(16, 185, 129, 0.3);
         }
         
-        .status-delayed {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--danger);
-            border: 1px solid rgba(239, 68, 68, 0.3);
+        .status-standby {
+            background: rgba(100, 116, 139, 0.1);
+            color: var(--text-muted);
+            border: 1px solid rgba(100, 116, 139, 0.3);
         }
         
-        /* Analytics Panel */
-        .analytics-panel {
-            background: var(--bg-card);
+        /* Admin panel styles */
+        .card {
+            background: var(--gradient-card);
             border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 1.5rem;
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: var(--shadow-xl);
+            margin-bottom: 2rem;
         }
         
-        .analytics-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(59, 130, 246, 0.3);
         }
         
-        .metric-card {
-            background: var(--bg-dark);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.25rem;
-            margin-bottom: 1rem;
-            transition: all 0.2s ease;
-        }
-        
-        .metric-card:hover {
-            border-color: var(--accent);
-            transform: translateX(4px);
-        }
-        
-        .metric-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.75rem;
-        }
-        
-        .metric-label {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-        
-        .metric-value {
-            font-size: 1.5rem;
+        .card-title {
+            font-size: 1.75rem;
             font-weight: 700;
             color: var(--text-primary);
-            font-variant-numeric: tabular-nums;
-        }
-        
-        .metric-change {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
-        
-        .metric-change.positive {
-            color: var(--success);
-        }
-        
-        .metric-change.negative {
-            color: var(--danger);
-        }
-        
-        /* Progress Bars */
-        .progress-container {
-            margin-top: 1rem;
-        }
-        
-        .progress-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
-            font-size: 0.875rem;
-        }
-        
-        .progress-bar {
-            height: 8px;
-            background: var(--bg-dark);
-            border-radius: 100px;
-            overflow: hidden;
-            position: relative;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: var(--gradient-primary);
-            border-radius: 100px;
-            transition: width 0.5s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .progress-fill::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            animation: shimmer 2s infinite;
-        }
-        
-        @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
-        
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 4rem 2rem;
-            color: var(--text-muted);
-        }
-        
-        .empty-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            opacity: 0.3;
-        }
-        
-        /* Toast Notifications */
-        .toast {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            padding: 1rem 1.5rem;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            box-shadow: var(--shadow-xl);
             display: flex;
             align-items: center;
             gap: 1rem;
-            min-width: 300px;
-            z-index: 2000;
-            animation: slideUp 0.3s ease;
+            margin: 0 0 2rem 0;
         }
         
-        @keyframes slideUp {
-            from {
-                transform: translateY(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-        
-        .toast-icon {
-            font-size: 1.5rem;
-        }
-        
-        .toast-content {
-            flex: 1;
-        }
-        
-        .toast-title {
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 0.25rem;
-        }
-        
-        .toast-message {
+        .card-subtitle {
             font-size: 0.875rem;
             color: var(--text-secondary);
+            margin-top: 0.5rem;
+            font-weight: 500;
         }
         
-        /* Loading Animation */
-        .loader {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid var(--border);
-            border-radius: 50%;
-            border-top-color: var(--accent);
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        .btn-sm {
-            padding: 0.5rem 1rem;
-            font-size: 0.75rem;
-        }
-        
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 3000;
-            backdrop-filter: blur(5px);
-        }
-        
-        .modal-content {
-            position: relative;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            width: 90%;
-            max-width: 800px;
-            max-height: 90vh;
-            margin: 2% auto;
-            overflow: hidden;
-            animation: modalSlideIn 0.3s ease;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        @keyframes modalSlideIn {
-            from {
-                transform: translateY(-50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-        
-        .modal-header {
-            background: rgba(15, 23, 42, 0.5);
-            backdrop-filter: blur(10px);
-            padding: 1.5rem;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-shrink: 0;
-        }
-        
-        .modal-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        
-        .modal-close {
-            background: var(--bg-hover);
-            border: none;
-            color: var(--text-secondary);
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 1.25rem;
-        }
-        
-        .modal-close:hover {
-            background: var(--danger);
-            color: white;
-        }
-        
-        .modal-body {
-            padding: 1.5rem;
-            flex: 1;
-            overflow-y: auto;
-            overflow-x: hidden;
-            width: 100%;
-            min-height: 0;
-        }
-        
-        .form-section {
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
             margin-bottom: 2rem;
-            width: 100%;
-            overflow: hidden;
-        }
-        
-        .form-section-title {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
         }
         
         .form-group {
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
         }
         
         .form-label {
             display: block;
             font-size: 0.875rem;
             color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .form-input, .form-select {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.875rem 1.75rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            margin-right: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .btn-primary {
+            background: var(--gradient-hero);
+            color: white;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #374151;
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+        
+        .btn-secondary:hover:not(:disabled) {
+            background: var(--bg-hover);
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+            color: white;
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+        }
+        
+        .loading-spinner {
+            display: none;
+            width: 18px; height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+        
+        .btn.loading .loading-spinner {
+            display: inline-block;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .users-list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .user-item {
+            background: var(--gradient-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.75rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        
+        .user-item:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+        
+        .user-info h3 {
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            font-weight: 700;
+            font-size: 1.125rem;
+        }
+        
+        .user-info p {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
             margin-bottom: 0.5rem;
             font-weight: 500;
         }
         
-        .form-input, .form-select, .form-textarea {
-            width: 100%;
-            padding: 0.75rem;
-            background: var(--bg-dark);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            color: var(--text-primary);
-            font-size: 0.875rem;
-            transition: all 0.2s ease;
-        }
-        
-        .form-input:focus, .form-select:focus, .form-textarea:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-        
-        .form-textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
-        
-        .checklist-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 1rem;
-            width: 100%;
-        }
-        
-        @media (max-width: 700px) {
-            .checklist-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        .checklist-item {
-            background: var(--bg-dark);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1rem;
-            display: flex;
-            align-items: flex-start;
-            gap: 0.75rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            min-height: 80px;
-            width: 100%;
-            overflow: hidden;
-        }
-        
-        .checklist-item:hover {
-            border-color: var(--accent);
-        }
-        
-        .checklist-checkbox {
-            min-width: 20px;
-            width: 20px;
-            height: 20px;
-            border: 2px solid var(--border);
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-            flex-shrink: 0;
-        }
-        
-        .checklist-checkbox span {
-            color: white;
-            font-weight: bold;
-            font-size: 14px;
-            line-height: 1;
-        }
-        
-        .checklist-item.checked .checklist-checkbox {
-            background: var(--success);
-            border-color: var(--success);
-        }
-        
-        .checklist-item.issue .checklist-checkbox {
-            background: var(--danger);
-            border-color: var(--danger);
-        }
-        
-        .checklist-item-content {
-            flex: 1;
-            min-width: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-        
-        .checklist-item-header {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            flex-wrap: nowrap;
-        }
-        
-        .checklist-label {
-            font-size: 0.875rem;
-            color: var(--text-primary);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .checklist-status {
-            display: flex;
-            gap: 0.5rem;
-            margin-left: auto;
-            flex-shrink: 0;
-        }
-        
-        .status-btn {
-            padding: 0.25rem 0.5rem;
-            border: 1px solid var(--border);
-            background: transparent;
-            border-radius: 6px;
+        .user-badge {
+            padding: 0.375rem 0.875rem;
+            border-radius: 100px;
             font-size: 0.75rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            color: var(--text-secondary);
+            font-weight: 700;
+            text-transform: uppercase;
+            display: inline-block;
+            margin-bottom: 0.5rem;
         }
         
-        .status-btn.active {
-            color: white;
+        .badge-driver { 
+            background: rgba(16, 185, 129, 0.15); 
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
         }
-        
-        .status-btn.ok.active {
-            background: var(--success);
-            border-color: var(--success);
+        .badge-dispatcher { 
+            background: rgba(245, 158, 11, 0.15); 
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.3);
         }
-        
-        .status-btn.issue.active {
-            background: var(--danger);
-            border-color: var(--danger);
-        }
-        
-        .issue-details {
-            margin-top: 0.75rem;
-            display: none;
-        }
-        
-        .issue-details.show {
-            display: block;
-        }
-        
-        .issue-input {
-            width: 100%;
-            padding: 0.5rem;
-            background: rgba(239, 68, 68, 0.1);
+        .badge-admin { 
+            background: rgba(239, 68, 68, 0.15); 
+            color: var(--danger);
             border: 1px solid rgba(239, 68, 68, 0.3);
-            border-radius: 8px;
-            color: var(--text-primary);
-            font-size: 0.75rem;
         }
         
-        .modal-footer {
-            padding: 1.5rem;
-            border-top: 1px solid var(--border);
+        .user-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        
+        .search-filters {
             display: flex;
-            justify-content: space-between;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
             align-items: center;
-            background: rgba(15, 23, 42, 0.5);
-            backdrop-filter: blur(10px);
-            gap: 1rem;
             flex-wrap: wrap;
         }
         
-        @media (max-width: 500px) {
-            .modal-footer {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .modal-footer > div {
-                width: 100%;
-            }
+        .search-input {
+            flex: 1;
+            min-width: 300px;
+            padding: 1rem 1.25rem;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            font-weight: 500;
         }
         
-        .summary-text {
-            font-size: 0.875rem;
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+        
+        .message {
+            padding: 1.25rem 1.75rem;
+            border-radius: 16px;
+            margin: 1.5rem 0;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .message.success {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .message.error {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        
+        .loading-state {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem;
+            color: var(--text-muted);
+            gap: 1.5rem;
+        }
+        
+        .spinner {
+            width: 28px; height: 28px;
+            border: 3px solid var(--border);
+            border-top: 3px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 4rem;
+            color: var(--text-muted);
+        }
+        
+        .empty-icon {
+            font-size: 5rem;
+            margin-bottom: 1.5rem;
+            opacity: 0.3;
+        }
+        
+        .empty-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
             color: var(--text-secondary);
         }
         
-        .summary-count {
-            color: var(--danger);
-            font-weight: 600;
+        .sync-status {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .sync-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+        
+        .sync-indicator.error {
+            background: var(--danger);
+            animation: none;
+        }
+        
+        /* Control Panel */
+        .control-panel {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .filter-group {
+            display: flex;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .filter-btn {
+            padding: 0.75rem 1.25rem;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        
+        .filter-btn:not(:last-child) {
+            border-right: 1px solid var(--border);
+        }
+        
+        .filter-btn:hover {
+            color: var(--text-primary);
+            background: var(--bg-hover);
+        }
+        
+        .filter-btn.active {
+            color: white;
+            background: var(--accent);
         }
         
         @media (max-width: 1400px) {
@@ -1108,753 +721,502 @@
         }
         
         @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-            
-            .header-content {
-                flex-direction: column;
-                gap: 1rem;
-                align-items: flex-start;
-            }
-            
-            .header-actions {
-                width: 100%;
-                justify-content: space-between;
-            }
-            
-            .kpi-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .control-panel {
-                flex-direction: column;
-            }
-            
-            .activity-details {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
+            .container { padding: 1rem; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .form-grid { grid-template-columns: 1fr; }
+            .header-content { flex-direction: column; gap: 1rem; }
+            .header-actions { width: 100%; justify-content: space-between; }
+            .search-filters { flex-direction: column; align-items: stretch; }
+            .search-input { min-width: auto; }
+            .control-panel { flex-direction: column; }
         }
     </style>
 </head>
 <body>
-    <!-- Premium Header -->
-    <header class="header">
+    <header class="top-header">
         <div class="header-content">
             <div class="brand">
                 <div class="logo">⚡</div>
                 <div class="brand-text">
-                    <h1>Fleet Command Center</h1>
-                    <p>Enterprise Logistics Platform</p>
+                    <h1>FleetForce Enterprise</h1>
+                    <p>Unified Command Center</p>
                 </div>
             </div>
             <div class="header-actions">
-                <div class="status-indicator">
+                <div class="status-indicator" id="connectionStatus">
                     <div class="pulse"></div>
                     <span>System Operational</span>
                 </div>
-                <div class="header-time" id="currentTime">--:--:--</div>
-                <button class="btn btn-secondary" onclick="toggleFullscreen()">
-                    <span>⛶</span>
-                    <span>Fullscreen</span>
-                </button>
+                <div class="current-time" id="currentTime">--:--:--</div>
             </div>
         </div>
     </header>
     
-    <!-- Main Container -->
     <div class="container">
-        <!-- KPI Cards -->
-        <div class="kpi-grid">
-            <div class="kpi-card">
-                <div class="kpi-header">
-                    <div class="kpi-icon">🚚</div>
-                    <div class="kpi-trend up">↑ 12%</div>
-                </div>
-                <div class="kpi-value" id="routedDrivers">0</div>
-                <div class="kpi-label">Routed Drivers</div>
-                <div class="kpi-sublabel">Total assigned for today</div>
-            </div>
-            
-            <div class="kpi-card">
-                <div class="kpi-header">
-                    <div class="kpi-icon" style="background: rgba(245, 158, 11, 0.1);">📍</div>
-                    <div class="kpi-trend up">↑ 5%</div>
-                </div>
-                <div class="kpi-value" id="enRouteCount">0</div>
-                <div class="kpi-label">En Route to FDC</div>
-            </div>
-            
-            <div class="kpi-card">
-                <div class="kpi-header">
-                    <div class="kpi-icon" style="background: rgba(16, 185, 129, 0.1);">✓</div>
-                    <div class="kpi-trend up">↑ 8%</div>
-                </div>
-                <div class="kpi-value" id="arrivedCheckedIn">0</div>
-                <div class="kpi-label">Arrived/Checked In</div>
-                <div class="kpi-sublabel">Completed today</div>
-            </div>
-            
-            <div class="kpi-card">
-                <div class="kpi-header">
-                    <div class="kpi-icon" style="background: rgba(245, 158, 11, 0.1);">⏳</div>
-                    <div class="kpi-trend down">↓ 15%</div>
-                </div>
-                <div class="kpi-value" id="pendingCheckIn">0</div>
-                <div class="kpi-label">Pending Check-In</div>
-            </div>
+        <div class="nav-container">
+            <nav class="nav-tabs">
+                <button class="nav-tab active" onclick="switchTab('dashboard', this)">
+                    <span>📊</span>
+                    <span>Live Dashboard</span>
+                </button>
+                <button class="nav-tab" onclick="switchTab('users', this)">
+                    <span>👥</span>
+                    <span>Driver Management</span>
+                </button>
+                <button class="nav-tab" onclick="switchTab('reports', this)">
+                    <span>📈</span>
+                    <span>Analytics</span>
+                </button>
+            </nav>
         </div>
         
-        <!-- Control Panel -->
-        <div class="control-panel">
-            <div class="filter-group">
-                <button class="filter-btn active" onclick="filterStatus('all', this)">All Activity</button>
-                <button class="filter-btn" onclick="filterStatus('en-route', this)">En Route</button>
-                <button class="filter-btn" onclick="filterStatus('arrived', this)">Arrived</button>
-                <button class="filter-btn" onclick="filterStatus('standby', this)">Standby</button>
-                <button class="filter-btn" onclick="filterStatus('delayed', this)">Delayed</button>
-            </div>
-            <button class="btn btn-secondary" onclick="exportData()">
-                <span>📊</span>
-                <span>Export Report</span>
-            </button>
-            <button class="btn btn-secondary" onclick="refreshDashboard()">
-                <span>🔄</span>
-                <span>Refresh</span>
-            </button>
-
-        </div>
-        
-        <!-- Dashboard Grid -->
-        <div class="dashboard-grid">
-            <!-- Activity Feed -->
-            <div class="activity-section">
-                <div class="section-header">
-                    <h2 class="section-title">
-                        <span>📡</span>
-                        <span>Real-Time Activity Feed</span>
-                    </h2>
-                    <span id="lastUpdate" style="font-size: 0.875rem; color: var(--text-secondary);">
-                        <span class="loader" style="margin-right: 0.5rem;"></span>
-                        Syncing...
-                    </span>
-                </div>
-                <div class="activity-list" id="activityList">
-                    <div class="empty-state">
-                        <div class="empty-icon">🛸</div>
-                        <p>Initializing fleet tracking system...</p>
+        <!-- DASHBOARD TAB -->
+        <div id="dashboard-tab" class="tab-content active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-trend">Live</div>
                     </div>
+                    <div class="stat-value" id="totalDrivers">0</div>
+                    <div class="stat-label">Total Drivers</div>
+                    <div class="stat-sublabel">Active in system</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon">🚚</div>
+                        <div class="stat-trend">Live</div>
+                    </div>
+                    <div class="stat-value" id="activeDrivers">0</div>
+                    <div class="stat-label">Currently Active</div>
+                    <div class="stat-sublabel">On duty today</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon">💤</div>
+                        <div class="stat-trend">Live</div>
+                    </div>
+                    <div class="stat-value" id="standbyDrivers">0</div>
+                    <div class="stat-label">On Standby</div>
+                    <div class="stat-sublabel">Available for dispatch</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon">📡</div>
+                        <div class="stat-trend">Live</div>
+                    </div>
+                    <div class="stat-value" id="lastSyncTime">--</div>
+                    <div class="stat-label">Last Sync</div>
+                    <div class="stat-sublabel">Data freshness</div>
                 </div>
             </div>
             
-            <!-- Analytics Panel -->
-            <div>
-                <div class="analytics-panel" style="margin-bottom: 1.5rem;">
-                    <h3 class="analytics-title">
-                        <span>📈</span>
-                        <span>Performance Metrics</span>
-                    </h3>
-                    
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <span class="metric-label">Fleet Utilization</span>
-                            <span class="metric-change positive">↑ 15%</span>
-                        </div>
-                        <div class="metric-value" id="fleetUtilization">0%</div>
-                        <div class="progress-container">
-                            <div class="progress-bar">
-                                <div class="progress-fill" id="utilizationBar" style="width: 0%"></div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <span class="metric-label">On-Time Delivery</span>
-                            <span class="metric-change positive">↑ 8%</span>
-                        </div>
-                        <div class="metric-value" id="onTimeRate">0%</div>
-                        <div class="progress-container">
-                            <div class="progress-bar">
-                                <div class="progress-fill" id="onTimeBar" style="width: 0%"></div>
-                            </div>
+            <!-- Control Panel -->
+            <div class="control-panel">
+                <div class="filter-group">
+                    <button class="filter-btn active" onclick="filterDrivers('all', this)">All Drivers</button>
+                    <button class="filter-btn" onclick="filterDrivers('active', this)">Active Only</button>
+                    <button class="filter-btn" onclick="filterDrivers('standby', this)">Standby</button>
+                </div>
+                <button class="btn btn-secondary" onclick="refreshAllData()">
+                    <span>🔄</span>
+                    <span>Refresh Data</span>
+                </button>
+                <button class="btn btn-secondary" onclick="exportDriverData()">
+                    <span>📊</span>
+                    <span>Export Report</span>
+                </button>
+            </div>
+            
+            <div class="dashboard-grid">
+                <!-- Driver Activity Feed -->
+                <div class="activity-section">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <span>🚛</span>
+                            <span>Driver Activity Feed</span>
+                        </h2>
+                        <div class="sync-status" id="syncStatus">
+                            <div class="sync-indicator"></div>
+                            <span>Real-time sync</span>
                         </div>
                     </div>
-                    
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <span class="metric-label">Daily Throughput</span>
-                            <span class="metric-change negative">↓ 2%</span>
+                    <div class="activity-list" id="activityList">
+                        <div class="loading-state">
+                            <div class="spinner"></div>
+                            <span>Loading driver data...</span>
                         </div>
-                        <div class="metric-value" id="dailyThroughput">0</div>
-                        <div class="metric-change" style="color: var(--text-muted);">deliveries today</div>
                     </div>
                 </div>
                 
-                <div class="analytics-panel">
-                    <h3 class="analytics-title">
-                        <span>⚡</span>
-                        <span>Quick Actions</span>
-                    </h3>
+                <!-- Quick Actions Panel -->
+                <div>
+                    <div class="card" style="margin-bottom: 1.5rem; padding: 1.5rem;">
+                        <h3 style="color: var(--text-primary); margin-bottom: 1rem; font-size: 1.125rem;">
+                            <span>⚡</span> Quick Actions
+                        </h3>
+                        
+                        <div style="display: grid; gap: 0.75rem;">
+                            <button class="btn btn-primary" onclick="switchToUsers()" style="width: 100%; justify-content: center;">
+                                <span>👤</span>
+                                <span>Add New Driver</span>
+                            </button>
+                            <button class="btn btn-secondary" onclick="refreshAllData()" style="width: 100%; justify-content: center;">
+                                <span>🔄</span>
+                                <span>Refresh Data</span>
+                            </button>
+                            <button class="btn btn-success" onclick="exportDriverData()" style="width: 100%; justify-content: center;">
+                                <span>📊</span>
+                                <span>Export Report</span>
+                            </button>
+                        </div>
+                    </div>
                     
-                    <div style="display: grid; gap: 1rem;">
-                        <button class="btn btn-primary" style="width: 100%;" onclick="dispatchAlert()">
-                            <span>📢</span>
-                            <span>Dispatch Alert</span>
-                        </button>
-                        <button class="btn btn-secondary" style="width: 100%;" onclick="viewReports()">
-                            <span>📊</span>
-                            <span>View Reports</span>
-                        </button>
-                        <button class="btn btn-secondary" style="width: 100%;" onclick="openSettings()">
-                            <span>⚙️</span>
-                            <span>System Settings</span>
-                        </button>
+                    <div class="card" style="padding: 1.5rem;">
+                        <h3 style="color: var(--text-primary); margin-bottom: 1rem; font-size: 1.125rem;">
+                            <span>📈</span> System Status
+                        </h3>
+                        
+                        <div style="display: grid; gap: 1rem; font-size: 0.875rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="color: var(--text-secondary);">Database Status</span>
+                                <span style="color: var(--success);" id="dbStatus">Connected</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="color: var(--text-secondary);">API Response</span>
+                                <span style="color: var(--success);" id="apiStatus">Healthy</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="color: var(--text-secondary);">Auto-Refresh</span>
+                                <span style="color: var(--accent);" id="refreshStatus">Active</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    
-    <!-- Check-In Modal -->
-    <div id="checkInModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">
-                    <span>📋</span>
-                    <span>Equipment Check-In</span>
+        
+        <!-- USERS TAB -->
+        <div id="users-tab" class="tab-content">
+            <div class="card">
+                <h2 class="card-title">
+                    <span>👤</span>
+                    Driver Registration
                 </h2>
-                <button class="modal-close" onclick="closeCheckInModal()">&times;</button>
+                <p class="card-subtitle">Create and manage driver accounts with role-based access</p>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label" for="driverName">Full Name *</label>
+                        <input type="text" id="driverName" class="form-input" placeholder="Enter driver's full name" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="driverEmail">Email Address</label>
+                        <input type="email" id="driverEmail" class="form-input" placeholder="driver@company.com">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="driverPhone">Phone Number</label>
+                        <input type="tel" id="driverPhone" class="form-input" placeholder="+1 (555) 123-4567">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="driverVehicle">Vehicle ID</label>
+                        <input type="text" id="driverVehicle" class="form-input" placeholder="T-1234">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="driverRole">Role</label>
+                        <select id="driverRole" class="form-select">
+                            <option value="driver">Driver</option>
+                            <option value="dispatcher">Dispatcher</option>
+                            <option value="admin">Administrator</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="driverPassword">Password</label>
+                        <input type="password" id="driverPassword" class="form-input" placeholder="Secure password">
+                    </div>
+                </div>
+                
+                <button class="btn btn-primary" onclick="createDriver()">
+                    <span class="loading-spinner"></span>
+                    <span>✅</span>
+                    <span>Create Driver Account</span>
+                </button>
+                <button class="btn btn-secondary" onclick="clearDriverForm()">
+                    <span>🗑️</span>
+                    <span>Clear Form</span>
+                </button>
+                
+                <div id="driverMessage"></div>
             </div>
-            <div class="modal-body">
-                <!-- Driver Info -->
-                <div class="form-section">
-                    <div class="form-group">
-                        <label class="form-label">Driver Name</label>
-                        <input type="text" class="form-input" id="checkInDriver" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Check-In Time</label>
-                        <input type="text" class="form-input" id="checkInTime" readonly>
-                    </div>
-                </div>
+            
+            <div class="card">
+                <h2 class="card-title">
+                    <span>👥</span>
+                    Driver Directory
+                </h2>
+                <p class="card-subtitle">Comprehensive driver management and administration</p>
                 
-                <!-- Equipment Checklist -->
-                <div class="form-section">
-                    <h3 class="form-section-title">
-                        <span>🔧</span>
-                        <span>Equipment Inspection</span>
-                    </h3>
-                    <div class="checklist-grid" id="equipmentChecklist">
-                        <!-- Checklist items will be populated by JavaScript -->
-                    </div>
-                </div>
-                
-                <!-- Vehicle Information -->
-                <div class="form-section">
-                    <h3 class="form-section-title">
-                        <span>🚚</span>
-                        <span>Vehicle Information</span>
-                    </h3>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                        <div class="form-group">
-                            <label class="form-label">Truck Number</label>
-                            <input type="text" class="form-input" id="truckNumber" placeholder="e.g., T-1234">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Trailer Number</label>
-                            <input type="text" class="form-input" id="trailerNumber" placeholder="e.g., TR-5678">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Mileage</label>
-                            <input type="number" class="form-input" id="mileage" placeholder="Current odometer reading">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Fuel Level</label>
-                            <select class="form-select" id="fuelLevel">
-                                <option value="">Select fuel level</option>
-                                <option value="full">Full</option>
-                                <option value="3/4">3/4</option>
-                                <option value="1/2">1/2</option>
-                                <option value="1/4">1/4</option>
-                                <option value="empty">Empty</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Additional Notes -->
-                <div class="form-section">
-                    <h3 class="form-section-title">
-                        <span>📝</span>
-                        <span>Additional Notes</span>
-                    </h3>
-                    <div class="form-group">
-                        <label class="form-label">Comments or Observations</label>
-                        <textarea class="form-textarea" id="additionalNotes" placeholder="Any additional information about the vehicle or equipment condition..."></textarea>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <div class="summary-text">
-                    Issues Found: <span class="summary-count" id="issueCount">0</span>
-                </div>
-                <div style="display: flex; gap: 1rem; align-items: center;">
-                    <button class="btn btn-secondary" onclick="closeCheckInModal()">Cancel</button>
-                    <button class="btn btn-primary" onclick="submitCheckIn()">
-                        <span>✓</span>
-                        <span>Complete Check-In</span>
+                <div class="search-filters">
+                    <input type="text" class="search-input" id="searchDrivers" placeholder="Search drivers by name, email, or vehicle ID..." onkeyup="searchDrivers()">
+                    <select id="roleFilter" class="form-select" style="width: auto; min-width: 180px;" onchange="filterByRole()">
+                        <option value="all">All Roles</option>
+                        <option value="driver">Drivers</option>
+                        <option value="dispatcher">Dispatchers</option>
+                        <option value="admin">Administrators</option>
+                    </select>
+                    <button class="btn btn-success" onclick="exportDriverData()">
+                        <span>📊</span>
+                        <span>Export CSV</span>
                     </button>
                 </div>
+                
+                <div id="driversList" class="users-list">
+                    <div class="loading-state">
+                        <div class="spinner"></div>
+                        <span>Loading driver directory...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- REPORTS TAB -->
+        <div id="reports-tab" class="tab-content">
+            <div class="card">
+                <h2 class="card-title">
+                    <span>📈</span>
+                    Analytics & Reports
+                </h2>
+                <p class="card-subtitle">Comprehensive fleet analytics and performance metrics</p>
+                
+                <div class="empty-state">
+                    <div class="empty-icon">📊</div>
+                    <div class="empty-title">Advanced Analytics Coming Soon</div>
+                    <p>Comprehensive reporting dashboard with real-time metrics, performance trends, and operational insights.</p>
+                </div>
             </div>
         </div>
     </div>
-    
+
     <script>
-        // Global Variables
-        let notifications = [];
+        // Global state
+        let allDrivers = [];
+        let filteredDrivers = [];
+        let currentTab = 'dashboard';
         let currentFilter = 'all';
         let refreshInterval;
-        let currentCheckInId = null;
-        let equipmentIssues = {};
         
-        // Equipment checklist items
-        const equipmentItems = [
-            { id: 'tires', label: 'Tires & Wheels', icon: '🛞' },
-            { id: 'brakes', label: 'Brakes', icon: '🛑' },
-            { id: 'lights', label: 'Lights & Signals', icon: '💡' },
-            { id: 'fluids', label: 'Fluid Levels', icon: '🛢️' },
-            { id: 'belts', label: 'Belts & Hoses', icon: '🔗' },
-            { id: 'cabin', label: 'Cabin Condition', icon: '🚪' },
-            { id: 'cargo', label: 'Cargo Area', icon: '📦' },
-            { id: 'documents', label: 'Documents', icon: '📄' },
-            { id: 'safety', label: 'Safety Equipment', icon: '🦺' },
-            { id: 'refrigeration', label: 'Refrigeration Unit', icon: '❄️' }
-        ];
+        // API configuration
+        const API_BASE = window.location.origin;
         
-        // Initialize Dashboard
+        // Initialize application
         document.addEventListener('DOMContentLoaded', function() {
-            loadNotifications();
+            console.log('FleetForce Enterprise - Unified System Initialized');
             startClock();
+            loadAllData();
             startAutoRefresh();
-            
-            // Animate KPIs on load
-            setTimeout(() => animateKPIs(), 500);
         });
         
-        // Load Notifications - ENHANCED VERSION WITH ADMIN INTEGRATION
-        async function loadNotifications() {
-            try {
-                console.log('Loading notifications and admin data...');
-                
-                // Load both notifications and admin users in parallel
-                const [notificationsResponse, usersResponse] = await Promise.all([
-                    fetch('/api/notifications'),
-                    fetch('/api/users')
-                ]);
-                
-                console.log('Notifications response status:', notificationsResponse.status);
-                console.log('Users response status:', usersResponse.status);
-                
-                // Process notifications
-                let notificationsData = [];
-                if (notificationsResponse.ok) {
-                    const data = await notificationsResponse.json();
-                    notificationsData = Array.isArray(data) ? data : (data.data || []);
-                }
-                
-                // Process admin users
-                let adminUsers = [];
-                if (usersResponse.ok) {
-                    const userData = await usersResponse.json();
-                    adminUsers = Array.isArray(userData) ? userData : (userData.data || []);
-                }
-                
-                // Process notifications to extract driver info from message if needed
-                notifications = notificationsData.map(n => {
-                    // If driver/status missing, try to extract from message
-                    if (!n.driver && n.message) {
-                        const match = n.message.match(/^(.*?)\s+is\s+(.*?)$/);
-                        if (match) {
-                            n.driver = match[1];
-                            const statusText = match[2];
-                            if (statusText.includes('30 minutes')) {
-                                n.status = 'en-route';
-                                n.estimatedArrival = '30 minutes';
-                            } else if (statusText === 'arrived') {
-                                n.status = 'arrived';
-                            }
-                        }
-                    }
-                    
-                    // Normalize warehouse name
-                    if (n.warehouse) {
-                        n.warehouse = '5856 Tampa FDC'; // Standardize all warehouse names
-                    }
-                    
-                    return n;
-                });
-                
-                // Get active drivers from admin system
-                const activeDriversFromAdmin = adminUsers.filter(user => 
-                    user.role === 'driver' && user.active !== false
-                );
-                
-                // Merge admin drivers with notification drivers
-                const driverNotifications = notifications.filter(n => n.driver && n.status);
-                const notificationDriverNames = driverNotifications.map(n => n.driver);
-                
-                // Add admin drivers who don't have active notifications as "standby"
-                const standbyDrivers = activeDriversFromAdmin
-                    .filter(driver => !notificationDriverNames.includes(driver.name))
-                    .map(driver => ({
-                        _id: `admin-${driver._id}`,
-                        driver: driver.name,
-                        status: 'standby',
-                        timestamp: new Date().toISOString(),
-                        warehouse: '5856 Tampa FDC',
-                        location: 'Location unavailable',
-                        adminData: driver // Include full admin data
-                    }));
-                
-                // Combine all driver data
-                const allDriverData = [...driverNotifications, ...standbyDrivers];
-                
-                console.log('Processed notifications:', driverNotifications.length);
-                console.log('Admin drivers:', activeDriversFromAdmin.length);
-                console.log('Standby drivers:', standbyDrivers.length);
-                console.log('Total driver data:', allDriverData.length);
-                
-                updateDisplay(allDriverData);
-                updateMetrics(allDriverData, activeDriversFromAdmin);
-                
-                // Update last sync time
-                document.getElementById('lastUpdate').innerHTML = `Last updated: ${new Date().toLocaleTimeString()}`;
-                
-            } catch (error) {
-                console.error('Error loading data:', error);
-                document.getElementById('lastUpdate').innerHTML = `<span style="color: var(--danger);">Failed to load data</span>`;
-                showToast('Connection Error', 'Unable to load fleet data', 'error');
+        // Clock management
+        function startClock() {
+            function updateTime() {
+                const now = new Date();
+                document.getElementById('currentTime').textContent = 
+                    now.toLocaleTimeString('en-US', { hour12: false });
+            }
+            updateTime();
+            setInterval(updateTime, 1000);
+        }
+        
+        // Tab management
+        function switchTab(tabName, buttonElement) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all nav tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab and activate button
+            setTimeout(() => {
+                document.getElementById(tabName + '-tab').classList.add('active');
+            }, 50);
+            
+            buttonElement.classList.add('active');
+            currentTab = tabName;
+            
+            // Load relevant data for the tab
+            if (tabName === 'dashboard' || tabName === 'users') {
+                loadAllData();
             }
         }
         
-        // Geocoding function (mock implementation - replace with real geocoding service)
-        async function reverseGeocode(lat, lng) {
+        function switchToUsers() {
+            const usersTabButton = document.querySelector('[onclick*="users"]');
+            switchTab('users', usersTabButton);
+        }
+        
+        // Data loading and management
+        async function loadAllData() {
             try {
-                // Mock geocoding - replace with real service like Google Maps, Mapbox, etc.
-                const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`);
+                updateConnectionStatus(true);
+                console.log('Loading all driver data...');
+                
+                const response = await fetch(`${API_BASE}/api/users`);
+                
                 if (response.ok) {
                     const data = await response.json();
-                    return {
-                        address: `${data.locality}, ${data.principalSubdivision}`,
-                        city: data.locality,
-                        state: data.principalSubdivision,
-                        country: data.countryName
-                    };
+                    allDrivers = Array.isArray(data) ? data : (data.data || []);
+                    
+                    console.log(`Loaded ${allDrivers.length} drivers from database`);
+                    
+                    // Update filtered drivers based on current filter
+                    applyCurrentFilter();
+                    
+                    // Update displays
+                    updateDashboardStats();
+                    updateDriversList();
+                    updateActivityFeed();
+                    
+                    // Update sync status
+                    updateSyncStatus(true);
+                    document.getElementById('lastSyncTime').textContent = 
+                        new Date().toLocaleTimeString();
+                    
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
                 }
+                
             } catch (error) {
-                console.log('Geocoding failed, using fallback');
+                console.error('Failed to load data:', error);
+                updateConnectionStatus(false);
+                updateSyncStatus(false);
+                showMessage('Failed to load driver data: ' + error.message, 'error');
             }
-            
-            // Fallback for demo purposes
-            const cities = ['Fort Myers', 'Naples', 'Cape Coral', 'Bonita Springs', 'Estero'];
-            const randomCity = cities[Math.floor(Math.random() * cities.length)];
-            return {
-                address: `${randomCity}, FL`,
-                city: randomCity,
-                state: 'Florida',
-                country: 'United States'
-            };
         }
         
-        // Update Display - ENHANCED VERSION WITH ADMIN INTEGRATION
-        async function updateDisplay(allDriverData) {
-            const filtered = currentFilter === 'all' 
-                ? allDriverData 
-                : allDriverData.filter(n => n.status === currentFilter);
+        function updateConnectionStatus(connected) {
+            const statusElement = document.getElementById('connectionStatus');
+            const dbStatus = document.getElementById('dbStatus');
+            const apiStatus = document.getElementById('apiStatus');
             
+            if (connected) {
+                statusElement.innerHTML = '<div class="pulse"></div><span>System Operational</span>';
+                if (dbStatus) dbStatus.textContent = 'Connected';
+                if (apiStatus) apiStatus.textContent = 'Healthy';
+            } else {
+                statusElement.innerHTML = '<div style="width: 10px; height: 10px; background: var(--danger); border-radius: 50%;"></div><span style="color: var(--danger);">Connection Failed</span>';
+                if (dbStatus) dbStatus.textContent = 'Error';
+                if (apiStatus) apiStatus.textContent = 'Failed';
+            }
+        }
+        
+        function updateSyncStatus(success) {
+            const syncStatus = document.getElementById('syncStatus');
+            if (syncStatus) {
+                const indicator = syncStatus.querySelector('.sync-indicator');
+                const text = syncStatus.querySelector('span');
+                
+                if (success) {
+                    indicator.className = 'sync-indicator';
+                    text.textContent = 'Real-time sync';
+                } else {
+                    indicator.className = 'sync-indicator error';
+                    text.textContent = 'Sync failed';
+                }
+            }
+        }
+        
+        // Dashboard functions
+        function updateDashboardStats() {
+            const totalDrivers = allDrivers.length;
+            const activeDrivers = allDrivers.filter(d => d.active !== false && d.role === 'driver').length;
+            const standbyDrivers = totalDrivers - activeDrivers;
+            
+            // Animate counters
+            animateCounter('totalDrivers', totalDrivers);
+            animateCounter('activeDrivers', activeDrivers);
+            animateCounter('standbyDrivers', standbyDrivers);
+        }
+        
+        function animateCounter(elementId, targetValue) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            
+            const currentValue = parseInt(element.textContent) || 0;
+            const increment = Math.ceil((targetValue - currentValue) / 20);
+            
+            if (currentValue === targetValue) return;
+            
+            const timer = setInterval(() => {
+                const current = parseInt(element.textContent);
+                const next = current + increment;
+                
+                if ((increment > 0 && next >= targetValue) || (increment < 0 && next <= targetValue)) {
+                    element.textContent = targetValue;
+                    clearInterval(timer);
+                } else {
+                    element.textContent = next;
+                }
+            }, 50);
+        }
+        
+        function updateActivityFeed() {
             const activityList = document.getElementById('activityList');
+            if (!activityList) return;
             
-            if (filtered.length === 0) {
+            if (filteredDrivers.length === 0) {
                 activityList.innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-icon">📭</div>
-                        <p>No active fleet movements</p>
+                        <div class="empty-icon">👥</div>
+                        <div class="empty-title">No Drivers Found</div>
+                        <p>Add drivers to see them in the activity feed</p>
                     </div>
                 `;
                 return;
             }
             
-            // Process notifications with geocoding
-            const processedNotifications = await Promise.all(
-                filtered
-                    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-                    .slice(0, 20)
-                    .map(async (notification) => {
-                        let geocodedAddress = null;
-                        
-                        // Parse coordinates if available
-                        if (notification.location && notification.location !== 'Location unavailable') {
-                            try {
-                                const [lat, lng] = notification.location.split(',').map(coord => parseFloat(coord.trim()));
-                                if (!isNaN(lat) && !isNaN(lng)) {
-                                    geocodedAddress = await reverseGeocode(lat, lng);
-                                }
-                            } catch (error) {
-                                console.error('Error parsing location:', error);
-                            }
-                        }
-                        
-                        return { ...notification, geocodedAddress };
-                    })
-            );
+            // Sort drivers by creation date (newest first)
+            const sortedDrivers = filteredDrivers
+                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                .slice(0, 20); // Show only latest 20
             
-            activityList.innerHTML = processedNotifications.map(notification => {
-                const time = new Date(notification.timestamp).toLocaleTimeString();
-                const timeAgo = getTimeAgo(new Date(notification.timestamp));
-                
-                // Determine status display and styling
-                let statusDisplay = notification.status;
-                let statusClass = notification.status;
-                
-                if (notification.status === 'standby') {
-                    statusDisplay = 'standby';
-                    statusClass = 'standby';
-                }
+            activityList.innerHTML = sortedDrivers.map(driver => {
+                const isActive = driver.active !== false && driver.role === 'driver';
+                const timeAgo = getTimeAgo(new Date(driver.createdAt));
                 
                 return `
-                    <div class="activity-item ${statusClass}">
+                    <div class="activity-item">
                         <div class="activity-content">
                             <div class="activity-info">
-                                <div class="activity-driver">
-                                    ${notification.driver}
-                                    ${notification.adminData ? `
-                                        <span style="font-size: 0.75rem; color: var(--text-muted); margin-left: 0.5rem;">
-                                            ID: ${notification.adminData.vehicleId || 'No Vehicle'}
-                                        </span>
-                                    ` : ''}
-                                </div>
-                                ${notification.checkedIn && notification.checkInData ? `
-                                    <div style="font-size: 0.875rem; color: var(--success); margin-top: 0.25rem;">
-                                        <span>✓ Arrived at ${new Date(notification.checkInData.checkInTime).toLocaleTimeString()}</span>
-                                    </div>
-                                ` : ''}
+                                <div class="activity-driver">${driver.name}</div>
                                 <div class="activity-details">
-                                    <span class="activity-detail">
-                                        <span>⏱</span>
-                                        <span>${timeAgo}</span>
-                                    </span>
-                                    <span class="activity-detail">
-                                        <span>📍</span>
-                                        <span>5856 Tampa FDC</span>
-                                    </span>
-                                    ${notification.estimatedArrival && !notification.checkedIn ? `
-                                        <span class="activity-detail">
-                                            <span>⏳</span>
-                                            <span>ETA: ${notification.estimatedArrival}</span>
-                                        </span>
-                                    ` : ''}
-                                    ${notification.checkedIn && notification.checkInData?.equipmentCheck?.totalIssues > 0 ? `
-                                        <span class="activity-detail" style="color: var(--warning);">
-                                            <span>⚠️</span>
-                                            <span>${notification.checkInData.equipmentCheck.totalIssues} issue(s)</span>
-                                        </span>
-                                    ` : ''}
-                                    ${notification.adminData && notification.adminData.email ? `
-                                        <span class="activity-detail">
-                                            <span>📧</span>
-                                            <span>${notification.adminData.email}</span>
-                                        </span>
-                                    ` : ''}
+                                    <span>📅 Added ${timeAgo}</span>
+                                    ${driver.email ? `<span>📧 ${driver.email}</span>` : ''}
+                                    ${driver.vehicleId ? `<span>🚛 ${driver.vehicleId}</span>` : ''}
+                                    <span>👤 ${driver.role}</span>
                                 </div>
-                                ${notification.location && notification.location !== 'Location unavailable' ? `
-                                    <div class="location-info">
-                                        <div class="coordinates">
-                                            <span>📍</span>
-                                            <a href="#" onclick="openLocationMap('${notification.location}', '${notification.driver}'); return false;" 
-                                               class="location-link" title="Click to view on map">
-                                                ${notification.location}
-                                            </a>
-                                            <button class="map-btn" onclick="openLocationMap('${notification.location}', '${notification.driver}')" 
-                                                    title="Open in external map">
-                                                🗺️
-                                            </button>
-                                        </div>
-                                        ${notification.geocodedAddress ? `
-                                            <div class="address">
-                                                <span>📍</span>
-                                                <a href="#" onclick="openLocationMap('${notification.location}', '${notification.driver}'); return false;" 
-                                                   class="location-link" title="Click to view on map">
-                                                    ${notification.geocodedAddress.address}
-                                                </a>
-                                            </div>
-                                        ` : `
-                                            <div class="address">📍 Geocoding location...</div>
-                                        `}
-                                    </div>
-                                ` : notification.status === 'standby' ? `
-                                    <div class="location-info">
-                                        <div class="address" style="color: var(--text-muted);">
-                                            📍 Driver available - Location not tracked
-                                        </div>
-                                    </div>
-                                ` : ''}
                             </div>
                             <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                ${!notification.checkedIn ? `
-                                    <span class="status-badge status-${statusClass}">
-                                        ${statusDisplay.replace('-', ' ')}
-                                    </span>
-                                ` : ''}
-                                ${notification.status === 'arrived' && !notification.checkedIn ? `
-                                    <button class="btn btn-primary btn-sm" onclick="openCheckInModal('${notification._id}', '${notification.driver.replace(/'/g, "\\'")}'); event.stopPropagation();">
-                                        <span>📋</span>
-                                        <span>Check In</span>
+                                <span class="status-badge ${isActive ? 'status-active' : 'status-standby'}">
+                                    ${isActive ? 'Active' : 'Standby'}
+                                </span>
+                                ${driver.role === 'driver' ? `
+                                    <button class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.75rem;" 
+                                            onclick="toggleDriverStatus('${driver._id}', ${!isActive})">
+                                        ${isActive ? '⏸️ Deactivate' : '▶️ Activate'}
                                     </button>
-                                ` : ''}
-                                ${notification.checkedIn ? `
-                                    <span class="status-badge" style="background: rgba(139, 92, 246, 0.1); color: #8B5CF6; border: 1px solid rgba(139, 92, 246, 0.3);">
-                                        ✓ Checked In
-                                    </span>
                                 ` : ''}
                             </div>
                         </div>
                     </div>
                 `;
             }).join('');
-        }
-        
-        // Update Metrics - SIMPLE ROUTED DRIVERS LOGIC
-        function updateMetrics(allDriverData, adminDrivers = []) {
-            // Get total routed drivers from admin panel (drivers with role = "driver")
-            const totalRoutedDrivers = adminDrivers.filter(driver => driver.role === 'driver').length;
-            
-            // Count current status from notifications
-            const enRouteDrivers = allDriverData.filter(n => n.status === 'en-route').length;
-            const arrivedAndCheckedIn = allDriverData.filter(n => n.status === 'arrived' || n.checkedIn === true).length;
-            
-            // Calculate pending: Total routed - En route - Arrived/Checked in
-            const pendingCheckIn = totalRoutedDrivers - enRouteDrivers - arrivedAndCheckedIn;
-            
-            // Update KPIs
-            document.getElementById('routedDrivers').textContent = totalRoutedDrivers;
-            document.getElementById('enRouteCount').textContent = enRouteDrivers;
-            document.getElementById('arrivedCheckedIn').textContent = arrivedAndCheckedIn;
-            document.getElementById('pendingCheckIn').textContent = Math.max(0, pendingCheckIn);
-            
-            // Update trend indicator for pending check-ins
-            const pendingCard = document.querySelector('#pendingCheckIn').closest('.kpi-card');
-            const trendElement = pendingCard.querySelector('.kpi-trend');
-            
-            if (pendingCheckIn <= 0) {
-                trendElement.className = 'kpi-trend up';
-                trendElement.innerHTML = '✓ All Accounted';
-                trendElement.style.color = 'var(--success)';
-                trendElement.style.background = 'rgba(16, 185, 129, 0.1)';
-            } else if (pendingCheckIn > 5) {
-                trendElement.className = 'kpi-trend down';
-                trendElement.innerHTML = '⚠ Many Outstanding';
-                trendElement.style.color = 'var(--danger)';
-                trendElement.style.background = 'rgba(239, 68, 68, 0.1)';
-            } else {
-                trendElement.className = 'kpi-trend';
-                trendElement.innerHTML = '🚛 Still Out';
-                trendElement.style.color = 'var(--warning)';
-                trendElement.style.background = 'rgba(245, 158, 11, 0.1)';
-            }
-            
-            // Update performance metrics
-            const accountedFor = enRouteDrivers + arrivedAndCheckedIn;
-            const utilization = totalRoutedDrivers > 0 ? Math.min((accountedFor / totalRoutedDrivers) * 100, 95) : 0;
-            document.getElementById('fleetUtilization').textContent = Math.floor(utilization) + '%';
-            document.getElementById('utilizationBar').style.width = utilization + '%';
-            
-            const onTime = Math.min(85 + Math.random() * 10, 98);
-            document.getElementById('onTimeRate').textContent = Math.floor(onTime) + '%';
-            document.getElementById('onTimeBar').style.width = onTime + '%';
-            
-            document.getElementById('dailyThroughput').textContent = 
-                Math.floor(accountedFor * 2.5);
-        }RouteDrivers = allDriverData.filter(n => n.status === 'en-route').length;
-            const arrivedDrivers = allDriverData.filter(n => n.status === 'arrived').length;
-            
-            // Calculate pending check-in: Total drivers - En Route - Arrived = Available/Standby drivers
-            const pendingCheckInCount = totalActiveDrivers - enRouteDrivers - arrivedDrivers;
-            
-            // Update KPIs with comprehensive data
-            document.getElementById('activeDrivers').textContent = totalActiveDrivers;
-            document.getElementById('enRouteCount').textContent = enRouteDrivers;
-            document.getElementById('arrivedCount').textContent = arrivedDrivers;
-            document.getElementById('notCheckedInCount').textContent = Math.max(0, pendingCheckInCount);
-            
-            // Update trend indicator for pending check-ins
-            const pendingCard = document.querySelector('#notCheckedInCount').closest('.kpi-card');
-            const trendElement = pendingCard.querySelector('.kpi-trend');
-            
-            if (pendingCheckInCount <= 0) {
-                trendElement.className = 'kpi-trend down';
-                trendElement.innerHTML = '⚠ All Deployed';
-                trendElement.style.color = 'var(--warning)';
-                trendElement.style.background = 'rgba(245, 158, 11, 0.1)';
-            } else if (pendingCheckInCount >= (totalActiveDrivers * 0.7)) {
-                trendElement.className = 'kpi-trend up';
-                trendElement.innerHTML = '✓ Available';
-                trendElement.style.color = 'var(--success)';
-                trendElement.style.background = 'rgba(16, 185, 129, 0.1)';
-            } else {
-                trendElement.className = 'kpi-trend';
-                trendElement.innerHTML = '📋 Ready';
-                trendElement.style.color = 'var(--accent)';
-                trendElement.style.background = 'rgba(59, 130, 246, 0.1)';
-            }
-            
-            // Update performance metrics based on total driver pool
-            const activeDriversCount = allDriverData.filter(n => n.status !== 'standby').length;
-            
-            const utilization = totalActiveDrivers > 0 ? Math.min((activeDriversCount / totalActiveDrivers) * 100, 95) : 0;
-            document.getElementById('fleetUtilization').textContent = Math.floor(utilization) + '%';
-            document.getElementById('utilizationBar').style.width = utilization + '%';
-            
-            const onTime = Math.min(85 + Math.random() * 10, 98);
-            document.getElementById('onTimeRate').textContent = Math.floor(onTime) + '%';
-            document.getElementById('onTimeBar').style.width = onTime + '%';
-            
-            document.getElementById('dailyThroughput').textContent = 
-                Math.floor(activeDriversCount * 2.5);
-        }
-        
-        // Animate KPIs
-        function animateKPIs() {
-            document.querySelectorAll('.kpi-value').forEach(kpi => {
-                const finalValue = kpi.textContent;
-                const isNumeric = /^\d+/.test(finalValue);
-                
-                if (isNumeric) {
-                    const numValue = parseInt(finalValue);
-                    let current = 0;
-                    const increment = Math.ceil(numValue / 20);
-                    const timer = setInterval(() => {
-                        current += increment;
-                        if (current >= numValue) {
-                            current = numValue;
-                            clearInterval(timer);
-                        }
-                        kpi.textContent = current + finalValue.replace(/^\d+/, '');
-                    }, 50);
-                }
-            });
-        }
-        
-        // Time Functions
-        function startClock() {
-            const updateTime = () => {
-                const now = new Date();
-                document.getElementById('currentTime').textContent = 
-                    now.toLocaleTimeString('en-US', { hour12: false });
-            };
-            updateTime();
-            setInterval(updateTime, 1000);
         }
         
         function getTimeAgo(date) {
@@ -1867,454 +1229,299 @@
             return `${Math.floor(hours / 24)}d ago`;
         }
         
-        // Auto Refresh
-        function startAutoRefresh() {
-            refreshInterval = setInterval(() => {
-                loadNotifications();
-            }, 10000); // Refresh every 10 seconds
+        // Driver management functions
+        async function createDriver() {
+            const button = event.target;
+            button.classList.add('loading');
+            
+            const name = document.getElementById('driverName').value.trim();
+            const email = document.getElementById('driverEmail').value.trim();
+            const phone = document.getElementById('driverPhone').value.trim();
+            const vehicleId = document.getElementById('driverVehicle').value.trim();
+            const role = document.getElementById('driverRole').value;
+            const password = document.getElementById('driverPassword').value;
+            
+            if (!name) {
+                showMessage('Driver name is required', 'error');
+                button.classList.remove('loading');
+                return;
+            }
+            
+            const driverData = {
+                name: name,
+                role: role,
+                active: true
+            };
+            
+            // Only add fields if they have values
+            if (email) driverData.email = email;
+            if (phone) driverData.phoneNumber = phone;
+            if (vehicleId) driverData.vehicleId = vehicleId;
+            if (password) driverData.password = password;
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/users`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(driverData)
+                });
+                
+                if (response.ok) {
+                    showMessage(`Driver "${name}" created successfully`, 'success');
+                    clearDriverForm();
+                    loadAllData(); // Refresh all data
+                } else {
+                    const errorData = await response.json();
+                    let errorMessage = errorData.error || 'Failed to create driver';
+                    
+                    // Handle specific errors
+                    if (errorMessage.includes('duplicate key error') && errorMessage.includes('email')) {
+                        errorMessage = 'Email address already exists. Please use a different email.';
+                    }
+                    
+                    throw new Error(errorMessage);
+                }
+                
+            } catch (error) {
+                showMessage('Failed to create driver: ' + error.message, 'error');
+            } finally {
+                button.classList.remove('loading');
+            }
         }
         
-        // Filter Functions - UPDATED WITH STANDBY FILTER
-        function filterStatus(status, button) {
-            currentFilter = status;
+        function clearDriverForm() {
+            document.getElementById('driverName').value = '';
+            document.getElementById('driverEmail').value = '';
+            document.getElementById('driverPhone').value = '';
+            document.getElementById('driverVehicle').value = '';
+            document.getElementById('driverRole').value = 'driver';
+            document.getElementById('driverPassword').value = '';
+        }
+        
+        async function deleteDriver(driverId, driverName) {
+            if (!confirm(`Delete driver "${driverName}"?\n\nThis action cannot be undone.`)) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/users/${driverId}`, { 
+                    method: 'DELETE' 
+                });
+                
+                if (response.ok) {
+                    showMessage(`Driver "${driverName}" deleted successfully`, 'success');
+                    loadAllData(); // Refresh all data
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                showMessage('Failed to delete driver: ' + error.message, 'error');
+            }
+        }
+        
+        async function toggleDriverStatus(driverId, newActiveStatus) {
+            try {
+                const response = await fetch(`${API_BASE}/api/users/${driverId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ active: newActiveStatus })
+                });
+                
+                if (response.ok) {
+                    const driver = allDrivers.find(d => d._id === driverId);
+                    if (driver) {
+                        showMessage(`Driver "${driver.name}" ${newActiveStatus ? 'activated' : 'deactivated'}`, 'success');
+                        loadAllData(); // Refresh all data
+                    }
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                showMessage('Failed to update driver status: ' + error.message, 'error');
+            }
+        }
+        
+        function updateDriversList() {
+            const driversList = document.getElementById('driversList');
+            if (!driversList) return;
+            
+            if (filteredDrivers.length === 0) {
+                driversList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">👥</div>
+                        <div class="empty-title">No Drivers Found</div>
+                        <p>Create your first driver account to get started</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            driversList.innerHTML = filteredDrivers.map(driver => `
+                <div class="user-item">
+                    <div class="user-info">
+                        <h3>${driver.name}</h3>
+                        <p>${driver.email || 'No email provided'}</p>
+                        ${driver.phoneNumber ? `<p>📞 ${driver.phoneNumber}</p>` : ''}
+                        ${driver.vehicleId ? `<p>🚗 ${driver.vehicleId}</p>` : ''}
+                        <span class="user-badge badge-${driver.role}">${driver.role}</span>
+                        <div class="user-meta">
+                            Created: ${new Date(driver.createdAt).toLocaleDateString()} • 
+                            Status: ${driver.active !== false ? 'Active' : 'Inactive'}
+                        </div>
+                    </div>
+                    <div>
+                        ${driver.role === 'driver' ? `
+                            <button class="btn ${driver.active !== false ? 'btn-secondary' : 'btn-success'}" 
+                                    onclick="toggleDriverStatus('${driver._id}', ${driver.active === false})"
+                                    style="margin-right: 0.5rem;">
+                                ${driver.active !== false ? '⏸️ Deactivate' : '▶️ Activate'}
+                            </button>
+                        ` : ''}
+                        <button class="btn btn-danger" onclick="deleteDriver('${driver._id}', '${driver.name.replace(/'/g, "\\'")}')">
+                            🗑️ Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Filter and search functions
+        function applyCurrentFilter() {
+            switch (currentFilter) {
+                case 'active':
+                    filteredDrivers = allDrivers.filter(d => d.active !== false && d.role === 'driver');
+                    break;
+                case 'standby':
+                    filteredDrivers = allDrivers.filter(d => d.active === false || d.role !== 'driver');
+                    break;
+                default:
+                    filteredDrivers = allDrivers.slice();
+            }
+        }
+        
+        function filterDrivers(filter, buttonElement) {
+            currentFilter = filter;
             
             // Update button states
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            button.classList.add('active');
+            buttonElement.classList.add('active');
             
-            // Reload display with all driver data including standby
-            const allDriverData = notifications.length > 0 ? getAllDriverData() : [];
-            updateDisplay(allDriverData);
+            // Apply filter and update displays
+            applyCurrentFilter();
+            updateDriversList();
+            updateActivityFeed();
         }
         
-        // Helper function to get all driver data (active + standby)
-        function getAllDriverData() {
-            // This should return the same combined data as in loadNotifications
-            // For simplicity, we'll filter from the current notifications array
-            // In a real app, you'd want to store this combined data globally
-            return notifications.filter(n => n.driver && n.status);
+        function searchDrivers() {
+            const query = document.getElementById('searchDrivers').value.toLowerCase();
+            const roleFilter = document.getElementById('roleFilter').value;
+            
+            filteredDrivers = allDrivers.filter(driver => {
+                const matchesSearch = !query || 
+                    driver.name.toLowerCase().includes(query) ||
+                    (driver.email && driver.email.toLowerCase().includes(query)) ||
+                    (driver.phoneNumber && driver.phoneNumber.includes(query)) ||
+                    (driver.vehicleId && driver.vehicleId.toLowerCase().includes(query));
+                
+                const matchesRole = roleFilter === 'all' || driver.role === roleFilter;
+                
+                return matchesSearch && matchesRole;
+            });
+            
+            updateDriversList();
+            updateActivityFeed();
         }
         
-
+        function filterByRole() {
+            searchDrivers(); // Reuse search logic with role filter
+        }
         
-        // Export Functions
-        function exportData() {
-            const driverNotifications = notifications.filter(n => n.driver && n.status);
+        // Utility functions
+        function refreshAllData() {
+            showMessage('Refreshing driver data...', 'success');
+            loadAllData();
+        }
+        
+        function exportDriverData() {
+            if (allDrivers.length === 0) {
+                showMessage('No drivers to export', 'error');
+                return;
+            }
             
-            const csv = [
-                ['Timestamp', 'Driver', 'Status', 'Coordinates', 'Address', 'Warehouse', 'ETA'],
-                ...driverNotifications.map(n => [
-                    new Date(n.timestamp).toLocaleString(),
-                    n.driver,
-                    n.status,
-                    n.location || 'N/A',
-                    n.geocodedAddress?.address || 'Not geocoded',
-                    n.warehouse || 'N/A',
-                    n.estimatedArrival || 'N/A'
-                ])
-            ].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+            const csvData = [
+                ['Name', 'Email', 'Phone', 'Role', 'Vehicle ID', 'Status', 'Created']
+            ];
+            
+            allDrivers.forEach(driver => {
+                csvData.push([
+                    driver.name,
+                    driver.email || '',
+                    driver.phoneNumber || '',
+                    driver.role,
+                    driver.vehicleId || '',
+                    driver.active !== false ? 'Active' : 'Inactive',
+                    new Date(driver.createdAt).toLocaleDateString()
+                ]);
+            });
+            
+            const csv = csvData.map(row => 
+                row.map(cell => `"${cell}"`).join(',')
+            ).join('\n');
             
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `fleet-report-${new Date().toISOString().split('T')[0]}.csv`;
+            a.download = `fleetforce-drivers-${new Date().toISOString().split('T')[0]}.csv`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
             
-            showToast('Export Complete', 'Fleet report with location data downloaded successfully', 'success');
+            showMessage(`Exported ${allDrivers.length} driver records`, 'success');
         }
         
-        // Map Integration Functions
-        function openLocationMap(coordinates, driverName) {
-            if (!coordinates || coordinates === 'Location unavailable') {
-                showToast('Location Unavailable', 'No coordinates available for this driver', 'error');
-                return;
-            }
+        function showMessage(message, type) {
+            const containers = ['driverMessage', 'dashboardMessage'];
+            const icons = { success: '✅', error: '❌', warning: '⚠️' };
             
-            try {
-                const [lat, lng] = coordinates.split(',').map(coord => parseFloat(coord.trim()));
-                
-                if (isNaN(lat) || isNaN(lng)) {
-                    showToast('Invalid Coordinates', 'Unable to parse location coordinates', 'error');
-                    return;
-                }
-                
-                // Show map service selection modal
-                showMapServiceModal(lat, lng, driverName);
-                
-            } catch (error) {
-                console.error('Error parsing coordinates:', error);
-                showToast('Location Error', 'Unable to process location data', 'error');
-            }
-        }
-        
-        function showMapServiceModal(lat, lng, driverName) {
-            // Remove existing modal if present
-            const existingModal = document.getElementById('mapServiceModal');
-            if (existingModal) existingModal.remove();
-            
-            // Create map service selection modal
-            const modal = document.createElement('div');
-            modal.id = 'mapServiceModal';
-            modal.className = 'modal';
-            modal.style.display = 'block';
-            
-            modal.innerHTML = `
-                <div class="modal-content" style="max-width: 500px; margin: 10% auto;">
-                    <div class="modal-header">
-                        <h2 class="modal-title">
-                            <span>🗺️</span>
-                            <span>View ${driverName}'s Location</span>
-                        </h2>
-                        <button class="modal-close" onclick="closeMapServiceModal()">&times;</button>
-                    </div>
-                    <div class="modal-body">
-                        <p style="margin-bottom: 1.5rem; color: var(--text-secondary);">
-                            Choose your preferred map service to view the driver's location:
-                        </p>
-                        <div style="display: grid; gap: 1rem;">
-                            <button class="btn btn-primary" onclick="openInGoogleMaps(${lat}, ${lng}, '${driverName}')" style="width: 100%;">
-                                <span>🌍</span>
-                                <span>Google Maps</span>
-                                <span style="font-size: 0.75rem; opacity: 0.8;">(Recommended)</span>
-                            </button>
-                            <button class="btn btn-secondary" onclick="openInAppleMaps(${lat}, ${lng}, '${driverName}')" style="width: 100%;">
-                                <span>🍎</span>
-                                <span>Apple Maps</span>
-                                <span style="font-size: 0.75rem; opacity: 0.8;">(iOS/Mac)</span>
-                            </button>
-                            <button class="btn btn-secondary" onclick="openInBingMaps(${lat}, ${lng}, '${driverName}')" style="width: 100%;">
-                                <span>🔍</span>
-                                <span>Bing Maps</span>
-                                <span style="font-size: 0.75rem; opacity: 0.8;">(Microsoft)</span>
-                            </button>
-                            <button class="btn btn-secondary" onclick="openInOpenStreetMap(${lat}, ${lng}, '${driverName}')" style="width: 100%;">
-                                <span>🗺️</span>
-                                <span>OpenStreetMap</span>
-                                <span style="font-size: 0.75rem; opacity: 0.8;">(Open Source)</span>
-                            </button>
+            containers.forEach(containerId => {
+                const container = document.getElementById(containerId);
+                if (container) {
+                    container.innerHTML = `
+                        <div class="message ${type}">
+                            <span>${icons[type] || ''}</span>
+                            <span>${message}</span>
                         </div>
-                        <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(59, 130, 246, 0.05); border-radius: 8px; font-size: 0.875rem;">
-                            <strong>Coordinates:</strong> ${lat.toFixed(6)}, ${lng.toFixed(6)}<br>
-                            <strong>Driver:</strong> ${driverName}
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" onclick="closeMapServiceModal()">Cancel</button>
-                        <button class="btn btn-primary" onclick="copyCoordinates(${lat}, ${lng})">
-                            <span>📋</span>
-                            <span>Copy Coordinates</span>
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
-            
-            // Close modal when clicking outside
-            modal.addEventListener('click', function(e) {
-                if (e.target === modal) {
-                    closeMapServiceModal();
+                    `;
+                    
+                    // Auto-hide after 5 seconds
+                    setTimeout(() => {
+                        container.innerHTML = '';
+                    }, 5000);
                 }
             });
         }
         
-        function closeMapServiceModal() {
-            const modal = document.getElementById('mapServiceModal');
-            if (modal) {
-                modal.style.animation = 'modalSlideIn 0.3s ease reverse';
-                setTimeout(() => modal.remove(), 300);
+        // Auto-refresh functionality
+        function startAutoRefresh() {
+            refreshInterval = setInterval(() => {
+                loadAllData();
+            }, 30000); // Refresh every 30 seconds
+            
+            // Update refresh status
+            const refreshStatus = document.getElementById('refreshStatus');
+            if (refreshStatus) {
+                refreshStatus.textContent = 'Active (30s)';
             }
         }
         
-        function openInGoogleMaps(lat, lng, driverName) {
-            const url = `https://www.google.com/maps?q=${lat},${lng}&z=15&t=m`;
-            window.open(url, '_blank');
-            showToast('Opening Google Maps', `Viewing ${driverName}'s location in Google Maps`, 'success');
-            closeMapServiceModal();
-        }
-        
-        function openInAppleMaps(lat, lng, driverName) {
-            const url = `https://maps.apple.com/?q=${lat},${lng}&z=15`;
-            window.open(url, '_blank');
-            showToast('Opening Apple Maps', `Viewing ${driverName}'s location in Apple Maps`, 'success');
-            closeMapServiceModal();
-        }
-        
-        function openInBingMaps(lat, lng, driverName) {
-            const url = `https://www.bing.com/maps?cp=${lat}~${lng}&lvl=15`;
-            window.open(url, '_blank');
-            showToast('Opening Bing Maps', `Viewing ${driverName}'s location in Bing Maps`, 'success');
-            closeMapServiceModal();
-        }
-        
-        function openInOpenStreetMap(lat, lng, driverName) {
-            const url = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}&zoom=15`;
-            window.open(url, '_blank');
-            showToast('Opening OpenStreetMap', `Viewing ${driverName}'s location in OpenStreetMap`, 'success');
-            closeMapServiceModal();
-        }
-        
-        function copyCoordinates(lat, lng) {
-            const coordinates = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-            
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(coordinates).then(() => {
-                    showToast('Coordinates Copied', 'Location coordinates copied to clipboard', 'success');
-                }).catch(err => {
-                    console.error('Failed to copy coordinates:', err);
-                    fallbackCopyToClipboard(coordinates);
-                });
-            } else {
-                fallbackCopyToClipboard(coordinates);
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
             }
-            
-            closeMapServiceModal();
-        }
-        
-        function fallbackCopyToClipboard(text) {
-            const textArea = document.createElement('textarea');
-            textArea.value = text;
-            textArea.style.position = 'fixed';
-            textArea.style.left = '-999999px';
-            textArea.style.top = '-999999px';
-            document.body.appendChild(textArea);
-            textArea.focus();
-            textArea.select();
-            
-            try {
-                document.execCommand('copy');
-                showToast('Coordinates Copied', 'Location coordinates copied to clipboard', 'success');
-            } catch (err) {
-                console.error('Fallback copy failed:', err);
-                showToast('Copy Failed', 'Unable to copy coordinates to clipboard', 'error');
-            }
-            
-            document.body.removeChild(textArea);
-        }
-        
-        function dispatchAlert() {
-            showToast('Feature Coming Soon', 'Dispatch alert system in development', 'info');
-        }
-        
-        function viewReports() {
-            showToast('Feature Coming Soon', 'Advanced analytics module in development', 'info');
-        }
-        
-        function openSettings() {
-            showToast('Feature Coming Soon', 'System configuration in development', 'info');
-        }
-        
-        function toggleFullscreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen();
-            } else {
-                document.exitFullscreen();
-            }
-        }
-        
-        // Toast Notification System
-        function showToast(title, message, type = 'info') {
-            const existingToast = document.querySelector('.toast');
-            if (existingToast) existingToast.remove();
-            
-            const icons = {
-                success: '✅',
-                error: '❌',
-                info: 'ℹ️',
-                warning: '⚠️'
-            };
-            
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.innerHTML = `
-                <div class="toast-icon">${icons[type]}</div>
-                <div class="toast-content">
-                    <div class="toast-title">${title}</div>
-                    <div class="toast-message">${message}</div>
-                </div>
-            `;
-            
-            document.body.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.style.animation = 'slideUp 0.3s ease reverse';
-                setTimeout(() => toast.remove(), 300);
-            }, 5000);
-        }
-        
-        // Check-In Modal Functions
-        function openCheckInModal(notificationId, driverName) {
-            currentCheckInId = notificationId;
-            equipmentIssues = {};
-            
-            // Set driver info
-            document.getElementById('checkInDriver').value = driverName;
-            document.getElementById('checkInTime').value = new Date().toLocaleString();
-            
-            // Reset form
-            document.getElementById('truckNumber').value = '';
-            document.getElementById('trailerNumber').value = '';
-            document.getElementById('mileage').value = '';
-            document.getElementById('fuelLevel').value = '';
-            document.getElementById('additionalNotes').value = '';
-            
-            // Build equipment checklist
-            const checklistContainer = document.getElementById('equipmentChecklist');
-            checklistContainer.innerHTML = equipmentItems.map(item => `
-                <div class="checklist-item" id="item-${item.id}">
-                    <div class="checklist-checkbox">
-                        <span style="display: none;">✓</span>
-                    </div>
-                    <div class="checklist-item-content">
-                        <div class="checklist-item-header">
-                            <span>${item.icon}</span>
-                            <span class="checklist-label" title="${item.label}">${item.label}</span>
-                            <div class="checklist-status">
-                                <button class="status-btn ok" onclick="setItemStatus('${item.id}', 'ok')">OK</button>
-                                <button class="status-btn issue" onclick="setItemStatus('${item.id}', 'issue')">Issue</button>
-                            </div>
-                        </div>
-                        <div class="issue-details" id="issue-${item.id}">
-                            <input type="text" class="issue-input" placeholder="Describe the issue..." 
-                                   onkeyup="updateIssueDescription('${item.id}', this.value)">
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-            
-            // Show modal
-            document.getElementById('checkInModal').style.display = 'block';
-            updateIssueCount();
-        }
-        
-        function closeCheckInModal() {
-            document.getElementById('checkInModal').style.display = 'none';
-            currentCheckInId = null;
-            equipmentIssues = {};
-        }
-        
-        function setItemStatus(itemId, status) {
-            const item = document.getElementById(`item-${itemId}`);
-            const checkbox = item.querySelector('.checklist-checkbox');
-            const checkmark = checkbox.querySelector('span');
-            const okBtn = item.querySelector('.status-btn.ok');
-            const issueBtn = item.querySelector('.status-btn.issue');
-            const issueDetails = document.getElementById(`issue-${itemId}`);
-            
-            // Reset checkbox first
-            checkbox.style.background = '';
-            checkbox.style.borderColor = '';
-            
-            // Update visual state
-            if (status === 'ok') {
-                item.classList.add('checked');
-                item.classList.remove('issue');
-                checkbox.style.background = 'var(--success)';
-                checkbox.style.borderColor = 'var(--success)';
-                checkmark.textContent = '✓';  // Always set to checkmark
-                checkmark.style.display = 'block';
-                checkmark.style.color = 'white';
-                okBtn.classList.add('active');
-                issueBtn.classList.remove('active');
-                issueDetails.classList.remove('show');
-                delete equipmentIssues[itemId];
-            } else if (status === 'issue') {
-                item.classList.add('issue');
-                item.classList.remove('checked');
-                checkbox.style.background = 'var(--danger)';
-                checkbox.style.borderColor = 'var(--danger)';
-                checkmark.textContent = '!';  // Set to exclamation
-                checkmark.style.display = 'block';
-                checkmark.style.color = 'white';
-                okBtn.classList.remove('active');
-                issueBtn.classList.add('active');
-                issueDetails.classList.add('show');
-                equipmentIssues[itemId] = { status: 'issue', description: '' };
-            }
-            
-            updateIssueCount();
-        }
-        
-        function updateIssueDescription(itemId, description) {
-            if (equipmentIssues[itemId]) {
-                equipmentIssues[itemId].description = description;
-            }
-        }
-        
-        function updateIssueCount() {
-            const count = Object.keys(equipmentIssues).length;
-            document.getElementById('issueCount').textContent = count;
-        }
-        
-        async function submitCheckIn() {
-            const checkInData = {
-                driverId: currentCheckInId,
-                checkInTime: new Date().toISOString(),
-                vehicleInfo: {
-                    truckNumber: document.getElementById('truckNumber').value,
-                    trailerNumber: document.getElementById('trailerNumber').value,
-                    mileage: document.getElementById('mileage').value,
-                    fuelLevel: document.getElementById('fuelLevel').value
-                },
-                equipmentCheck: {
-                    items: equipmentItems.map(item => {
-                        const itemElement = document.getElementById(`item-${item.id}`);
-                        const isChecked = itemElement.classList.contains('checked');
-                        const hasIssue = itemElement.classList.contains('issue');
-                        
-                        return {
-                            id: item.id,
-                            label: item.label,
-                            status: isChecked ? 'ok' : (hasIssue ? 'issue' : 'not_checked'),
-                            issue: equipmentIssues[item.id]?.description || ''
-                        };
-                    }),
-                    totalIssues: Object.keys(equipmentIssues).length
-                },
-                additionalNotes: document.getElementById('additionalNotes').value
-            };
-            
-            // Find the notification and update it
-            const notification = notifications.find(n => n._id === currentCheckInId);
-            if (notification) {
-                notification.checkedIn = true;
-                notification.checkInData = checkInData;
-                
-                // Update the notification on the server (if connected)
-                try {
-                    await fetch(`/api/notifications/${currentCheckInId}/checkin`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(checkInData)
-                    });
-                } catch (error) {
-                    console.log('Offline mode - check-in saved locally');
-                }
-                
-                // Update display
-                const driverNotifications = notifications.filter(n => n.driver && n.status);
-                updateDisplay(driverNotifications);
-                
-                // Show appropriate toast based on issues
-                if (checkInData.equipmentCheck.totalIssues > 0) {
-                    showToast('Check-In Complete', 
-                             `${notification.driver} checked in with ${checkInData.equipmentCheck.totalIssues} issue(s) reported`, 
-                             'warning');
-                } else {
-                    showToast('Check-In Complete', 
-                             `${notification.driver} checked in successfully - All equipment OK`, 
-                             'success');
-                }
-            }
-            
-            closeCheckInModal();
-        }
+        });
     </script>
 </body>
 </html>
