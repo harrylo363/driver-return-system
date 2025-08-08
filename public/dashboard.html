@@ -1445,6 +1445,12 @@
             setTimeout(() => animateKPIs(), 500);
         });
         
+        // Missing function: refreshDashboard
+        function refreshDashboard() {
+            showToast('Refreshing', 'Updating dashboard data...', 'info');
+            loadNotifications();
+        }
+        
         // Load Notifications - ENHANCED VERSION WITH ADMIN INTEGRATION
         async function loadNotifications() {
             try {
@@ -1777,52 +1783,6 @@
             
             document.getElementById('dailyThroughput').textContent = 
                 Math.floor(completedDrivers * 2.5);
-        }RouteDrivers = allDriverData.filter(n => n.status === 'en-route').length;
-            const arrivedDrivers = allDriverData.filter(n => n.status === 'arrived').length;
-            
-            // Calculate pending check-in: Total drivers - En Route - Arrived = Available/Standby drivers
-            const pendingCheckInCount = totalActiveDrivers - enRouteDrivers - arrivedDrivers;
-            
-            // Update KPIs with comprehensive data
-            document.getElementById('activeDrivers').textContent = totalActiveDrivers;
-            document.getElementById('enRouteCount').textContent = enRouteDrivers;
-            document.getElementById('arrivedCount').textContent = arrivedDrivers;
-            document.getElementById('notCheckedInCount').textContent = Math.max(0, pendingCheckInCount);
-            
-            // Update trend indicator for pending check-ins
-            const pendingCard = document.querySelector('#notCheckedInCount').closest('.kpi-card');
-            const trendElement = pendingCard.querySelector('.kpi-trend');
-            
-            if (pendingCheckInCount <= 0) {
-                trendElement.className = 'kpi-trend down';
-                trendElement.innerHTML = '⚠ All Deployed';
-                trendElement.style.color = 'var(--warning)';
-                trendElement.style.background = 'rgba(245, 158, 11, 0.1)';
-            } else if (pendingCheckInCount >= (totalActiveDrivers * 0.7)) {
-                trendElement.className = 'kpi-trend up';
-                trendElement.innerHTML = '✓ Available';
-                trendElement.style.color = 'var(--success)';
-                trendElement.style.background = 'rgba(16, 185, 129, 0.1)';
-            } else {
-                trendElement.className = 'kpi-trend';
-                trendElement.innerHTML = '📋 Ready';
-                trendElement.style.color = 'var(--accent)';
-                trendElement.style.background = 'rgba(59, 130, 246, 0.1)';
-            }
-            
-            // Update performance metrics based on total driver pool
-            const activeDriversCount = allDriverData.filter(n => n.status !== 'standby').length;
-            
-            const utilization = totalActiveDrivers > 0 ? Math.min((activeDriversCount / totalActiveDrivers) * 100, 95) : 0;
-            document.getElementById('fleetUtilization').textContent = Math.floor(utilization) + '%';
-            document.getElementById('utilizationBar').style.width = utilization + '%';
-            
-            const onTime = Math.min(85 + Math.random() * 10, 98);
-            document.getElementById('onTimeRate').textContent = Math.floor(onTime) + '%';
-            document.getElementById('onTimeBar').style.width = onTime + '%';
-            
-            document.getElementById('dailyThroughput').textContent = 
-                Math.floor(activeDriversCount * 2.5);
         }
         
         // Animate KPIs
@@ -1897,8 +1857,6 @@
             // In a real app, you'd want to store this combined data globally
             return notifications.filter(n => n.driver && n.status);
         }
-        
-
         
         // Export Functions
         function exportData() {
@@ -2314,8 +2272,6 @@
                 }
             }
             
-            closeCheckInModal();
-        }
     </script>
 </body>
 </html>
