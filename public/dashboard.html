@@ -1595,12 +1595,11 @@
                 feedIcon = '✅';
                 countText = `${filtered.length} completed`;
             } else if (currentFilter === 'out-on-route') {
-                // Show drivers who are still out on their routes (not en-route back, not arrived, not completed)
+                // Show drivers who are still out on their routes (including standby drivers who are still out)
                 filtered = allDriverData.filter(n => 
                     n.status !== 'en-route' && 
                     n.status !== 'arrived' && 
-                    n.checkedIn !== true &&
-                    n.status !== 'standby'
+                    n.checkedIn !== true
                 );
                 emptyMessage = 'All drivers have returned or are en-route back';
                 feedTitle = 'Drivers Still Out';
@@ -1684,10 +1683,15 @@
                 let statusDisplay = notification.status;
                 let statusClass = notification.status;
                 
-                // Handle "still out" drivers differently
+                // Handle "still out" drivers differently (including standby drivers)
                 if (currentFilter === 'out-on-route') {
-                    statusDisplay = 'out on route';
-                    statusClass = 'out-on-route';
+                    if (notification.status === 'standby') {
+                        statusDisplay = 'on standby';
+                        statusClass = 'standby-out';
+                    } else {
+                        statusDisplay = 'out on route';
+                        statusClass = 'out-on-route';
+                    }
                 }
                 
                 if (notification.status === 'standby') {
@@ -1835,7 +1839,9 @@
                                 ` : currentFilter === 'out-on-route' ? `
                                     <div class="location-info">
                                         <div class="address" style="color: var(--text-muted);">
-                                            📍 Driver out on delivery route - Location not available
+                                            ${notification.status === 'standby' 
+                                                ? '📍 Driver on standby - Awaiting next assignment' 
+                                                : '📍 Driver out on delivery route - Location not available'}
                                         </div>
                                     </div>
                                 ` : notification.status === 'standby' ? `
@@ -1847,7 +1853,11 @@
                                 ` : ''}
                             </div>
                             <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                <span class="status-badge ${currentFilter === 'out-on-route' ? 'status-warning' : 'status-' + statusClass}">
+                                <span class="status-badge ${
+                                    currentFilter === 'out-on-route' 
+                                        ? (notification.status === 'standby' ? 'status-standby' : 'status-warning')
+                                        : 'status-' + statusClass
+                                }">
                                     ${statusDisplay.replace('-', ' ')}
                                 </span>
                                 ${notification.status === 'arrived' ? `
