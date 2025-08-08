@@ -594,10 +594,10 @@
             border: 1px solid rgba(16, 185, 129, 0.3);
         }
         
-        .status-delayed {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--danger);
-            border: 1px solid rgba(239, 68, 68, 0.3);
+        .status-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.3);
         }
         
         /* Analytics Panel */
@@ -1214,8 +1214,7 @@
                 <button class="filter-btn active" onclick="filterStatus('all', this)">Active Operations</button>
                 <button class="filter-btn" onclick="filterStatus('en-route', this)">En Route</button>
                 <button class="filter-btn" onclick="filterStatus('arrived', this)">Arrived</button>
-                <button class="filter-btn" onclick="filterStatus('standby', this)">Standby</button>
-                <button class="filter-btn" onclick="filterStatus('delayed', this)">Delayed</button>
+                <button class="filter-btn" onclick="filterStatus('out-on-route', this)">Still Out</button>
                 <button class="filter-btn" onclick="filterStatus('completed', this)" style="border-left: 2px solid var(--success);">✓ Completed</button>
             </div>
             <button class="btn btn-secondary" onclick="exportData()">
@@ -1595,6 +1594,18 @@
                 feedTitle = 'Completed Check-Ins';
                 feedIcon = '✅';
                 countText = `${filtered.length} completed`;
+            } else if (currentFilter === 'out-on-route') {
+                // Show drivers who are still out on their routes (not en-route back, not arrived, not completed)
+                filtered = allDriverData.filter(n => 
+                    n.status !== 'en-route' && 
+                    n.status !== 'arrived' && 
+                    n.checkedIn !== true &&
+                    n.status !== 'standby'
+                );
+                emptyMessage = 'All drivers have returned or are en-route back';
+                feedTitle = 'Drivers Still Out';
+                feedIcon = '🚛';
+                countText = `${filtered.length} still out`;
             } else if (currentFilter === 'all') {
                 // Show all EXCEPT completed check-ins (keep feed clean)
                 filtered = allDriverData.filter(n => n.checkedIn !== true);
@@ -1619,9 +1630,15 @@
             const activityList = document.getElementById('activityList');
             
             if (filtered.length === 0) {
+                let emptyIcon = '📭';
+                if (currentFilter === 'out-on-route') {
+                    emptyIcon = '✅';
+                    emptyMessage = 'Great! All drivers have returned to base or are en-route back';
+                }
+                
                 activityList.innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-icon">📭</div>
+                        <div class="empty-icon">${emptyIcon}</div>
                         <p>${emptyMessage}</p>
                     </div>
                 `;
@@ -1666,6 +1683,12 @@
                 // Determine status display and styling
                 let statusDisplay = notification.status;
                 let statusClass = notification.status;
+                
+                // Handle "still out" drivers differently
+                if (currentFilter === 'out-on-route') {
+                    statusDisplay = 'out on route';
+                    statusClass = 'out-on-route';
+                }
                 
                 if (notification.status === 'standby') {
                     statusDisplay = 'standby';
@@ -1809,6 +1832,12 @@
                                             <div class="address">📍 Geocoding location...</div>
                                         `}
                                     </div>
+                                ` : currentFilter === 'out-on-route' ? `
+                                    <div class="location-info">
+                                        <div class="address" style="color: var(--text-muted);">
+                                            📍 Driver out on delivery route - Location not available
+                                        </div>
+                                    </div>
                                 ` : notification.status === 'standby' ? `
                                     <div class="location-info">
                                         <div class="address" style="color: var(--text-muted);">
@@ -1818,7 +1847,7 @@
                                 ` : ''}
                             </div>
                             <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                <span class="status-badge status-${statusClass}">
+                                <span class="status-badge ${currentFilter === 'out-on-route' ? 'status-warning' : 'status-' + statusClass}">
                                     ${statusDisplay.replace('-', ' ')}
                                 </span>
                                 ${notification.status === 'arrived' ? `
