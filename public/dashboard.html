@@ -3,63 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FleetForce Enterprise | Unified Command Center</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <title>Fleet Command Center | Enterprise Logistics Platform</title>
+    
+    <!-- Premium Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         
         :root {
             --primary: #0F172A;
+            --primary-light: #1E293B;
             --accent: #3B82F6;
+            --accent-hover: #2563EB;
             --success: #10B981;
             --warning: #F59E0B;
             --danger: #EF4444;
-            --text-primary: #FFFFFF;
+            --text-primary: #F1F5F9;
             --text-secondary: #94A3B8;
             --text-muted: #64748B;
-            --bg-dark: #0B1120;
+            --bg-dark: #0F172A;
             --bg-card: #1E293B;
-            --bg-hover: #374151;
-            --border: #374151;
-            --gradient-hero: linear-gradient(135deg, #1e3a8a 0%, #3730a3 50%, #581c87 100%);
-            --gradient-card: linear-gradient(145deg, #1E293B 0%, #2D3748 100%);
-            --shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.2);
-            --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.25);
+            --bg-hover: #334155;
+            --border: #334155;
+            --gradient-primary: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
+            --gradient-dark: linear-gradient(180deg, #0F172A 0%, #1E293B 100%);
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
         }
         
         body {
-            font-family: 'Inter', system-ui, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--bg-dark);
             color: var(--text-primary);
             line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
         }
         
+        /* Animated Background */
         body::before {
             content: '';
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background: 
-                radial-gradient(circle at 25% 25%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 75% 75%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
-                linear-gradient(135deg, #0B1120 0%, #1E293B 100%);
+                radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(16, 185, 129, 0.1) 0%, transparent 50%);
             z-index: -1;
         }
         
-        .top-header {
+        /* Premium Header */
+        .header {
             background: rgba(15, 23, 42, 0.95);
             backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(59, 130, 246, 0.2);
-            padding: 1.25rem 2rem;
+            border-bottom: 1px solid var(--border);
             position: sticky;
             top: 0;
             z-index: 1000;
-            box-shadow: var(--shadow-lg);
+            padding: 0;
         }
         
         .header-content {
-            max-width: 1400px;
+            max-width: 1920px;
             margin: 0 auto;
+            padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -72,22 +90,42 @@
         }
         
         .logo {
-            width: 52px; height: 52px;
-            background: var(--gradient-hero);
-            border-radius: 14px;
+            width: 48px;
+            height: 48px;
+            background: var(--gradient-primary);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 26px;
-            font-weight: 800;
+            font-size: 24px;
+            font-weight: 700;
             color: white;
-            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .logo::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+        
+        @keyframes shine {
+            0%, 100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
         }
         
         .brand-text h1 {
-            font-size: 1.875rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 50%, #06B6D4 100%);
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--gradient-primary);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin: 0;
@@ -97,7 +135,6 @@
             font-size: 0.875rem;
             color: var(--text-secondary);
             margin: 0;
-            font-weight: 500;
         }
         
         .header-actions {
@@ -106,21 +143,42 @@
             gap: 1.5rem;
         }
         
+        .admin-link {
+            padding: 0.75rem 1.5rem;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 12px;
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .admin-link:hover {
+            background: rgba(59, 130, 246, 0.2);
+            transform: translateY(-2px);
+        }
+        
         .status-indicator {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1.25rem;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
             background: rgba(16, 185, 129, 0.1);
             border: 1px solid rgba(16, 185, 129, 0.3);
             border-radius: 100px;
             font-size: 0.875rem;
             color: var(--success);
-            font-weight: 600;
+            font-weight: 500;
         }
         
         .pulse {
-            width: 10px; height: 10px;
+            width: 8px;
+            height: 8px;
             background: var(--success);
             border-radius: 50%;
             animation: pulse 2s infinite;
@@ -128,143 +186,279 @@
         
         @keyframes pulse {
             0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.7; transform: scale(1.2); }
+            50% { opacity: 0.5; transform: scale(1.5); }
             100% { opacity: 1; transform: scale(1); }
         }
         
-        .current-time {
+        .header-time {
             font-size: 0.875rem;
             color: var(--text-secondary);
             font-weight: 500;
             font-variant-numeric: tabular-nums;
         }
         
+        /* Main Container */
         .container {
-            max-width: 1400px;
+            max-width: 1920px;
             margin: 0 auto;
             padding: 2rem;
         }
         
-        .nav-container {
-            background: var(--gradient-card);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 1rem;
+        /* Admin Integration Banner */
+        .admin-banner {
+            background: rgba(59, 130, 246, 0.05);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 16px;
+            padding: 1rem 1.5rem;
             margin-bottom: 2rem;
-            box-shadow: var(--shadow-lg);
-        }
-        
-        .nav-tabs {
             display: flex;
-            gap: 0.5rem;
-            overflow-x: auto;
+            justify-content: space-between;
+            align-items: center;
         }
         
-        .nav-tab {
+        .banner-content {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            padding: 1rem 1.5rem;
+            gap: 1rem;
+        }
+        
+        .banner-icon {
+            font-size: 1.5rem;
+        }
+        
+        .banner-text h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+        
+        .banner-text p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+        
+        .sync-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+        
+        .sync-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+        
+        .sync-indicator.error {
+            background: var(--danger);
+            animation: none;
+        }
+        
+        /* KPI Cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .kpi-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .kpi-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--accent);
+        }
+        
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-primary);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .kpi-card:hover::before {
+            opacity: 1;
+        }
+        
+        .kpi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+        
+        .kpi-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .kpi-trend {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            padding: 0.25rem 0.75rem;
+            border-radius: 100px;
+        }
+        
+        .kpi-trend.up {
+            color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+        }
+        
+        .kpi-trend.down {
+            color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+        }
+        
+        .kpi-trend.live {
+            color: var(--accent);
+            background: rgba(59, 130, 246, 0.1);
+        }
+        
+        .kpi-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1;
+            margin-bottom: 0.5rem;
+            font-variant-numeric: tabular-nums;
+        }
+        
+        .kpi-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .kpi-sublabel {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+        
+        /* Control Panel */
+        .control-panel {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-secondary {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--border);
+            transform: translateY(-2px);
+        }
+        
+        .filter-group {
+            display: flex;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .filter-btn {
+            padding: 0.75rem 1.25rem;
             border: none;
             background: transparent;
             color: var(--text-secondary);
             font-size: 0.875rem;
-            font-weight: 600;
+            font-weight: 500;
             cursor: pointer;
-            border-radius: 14px;
-            transition: all 0.3s ease;
-            white-space: nowrap;
+            transition: all 0.2s ease;
+            position: relative;
         }
         
-        .nav-tab:hover {
+        .filter-btn:not(:last-child) {
+            border-right: 1px solid var(--border);
+        }
+        
+        .filter-btn:hover {
             color: var(--text-primary);
             background: var(--bg-hover);
         }
         
-        .nav-tab.active {
+        .filter-btn.active {
             color: white;
-            background: var(--gradient-hero);
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
-        }
-        
-        .tab-content {
-            display: none;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        /* Dashboard-specific styles */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-        
-        .stat-card {
-            background: var(--gradient-card);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 2rem;
-            transition: all 0.3s ease;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-8px);
-            box-shadow: var(--shadow-xl);
-            border-color: rgba(59, 130, 246, 0.4);
-        }
-        
-        .stat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1.5rem;
-        }
-        
-        .stat-icon {
-            width: 56px; height: 56px;
-            background: rgba(59, 130, 246, 0.1);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-        }
-        
-        .stat-trend {
-            padding: 0.5rem 1rem;
-            border-radius: 100px;
-            font-size: 0.875rem;
-            font-weight: 700;
-            color: var(--success);
-            background: rgba(16, 185, 129, 0.15);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-        
-        .stat-value {
-            font-size: 3rem;
-            font-weight: 800;
-            color: var(--text-primary);
-            line-height: 1;
-            margin-bottom: 0.75rem;
-        }
-        
-        .stat-label {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.075em;
-        }
-        
-        .stat-sublabel {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            font-weight: 500;
-            margin-top: 0.25rem;
+            background: var(--accent);
         }
         
         /* Activity Feed */
@@ -305,15 +499,51 @@
             overflow-y: auto;
         }
         
+        .activity-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .activity-list::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+        }
+        
+        .activity-list::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+        
+        .activity-list::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+        
         .activity-item {
             padding: 1.5rem;
             border-bottom: 1px solid var(--border);
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .activity-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: transparent;
             transition: all 0.2s ease;
         }
         
         .activity-item:hover {
             background: var(--bg-hover);
+            padding-left: 2rem;
         }
+        
+        .activity-item.driver::before { background: var(--success); }
+        .activity-item.dispatcher::before { background: var(--warning); }
+        .activity-item.admin::before { background: var(--danger); }
+        .activity-item.standby::before { background: var(--text-muted); }
         
         .activity-content {
             display: flex;
@@ -341,6 +571,12 @@
             flex-wrap: wrap;
         }
         
+        .activity-detail {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
         .status-badge {
             padding: 0.375rem 0.875rem;
             border-radius: 100px;
@@ -350,10 +586,22 @@
             letter-spacing: 0.05em;
         }
         
-        .status-active {
+        .status-driver {
             background: rgba(16, 185, 129, 0.1);
             color: var(--success);
             border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .status-dispatcher {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+        
+        .status-admin {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
         }
         
         .status-standby {
@@ -362,285 +610,135 @@
             border: 1px solid rgba(100, 116, 139, 0.3);
         }
         
-        /* Admin panel styles */
-        .card {
-            background: var(--gradient-card);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 2.5rem;
-            box-shadow: var(--shadow-xl);
-            margin-bottom: 2rem;
+        .status-active {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
         }
         
-        .card:hover {
-            transform: translateY(-4px);
-            border-color: rgba(59, 130, 246, 0.3);
-        }
-        
-        .card-title {
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin: 0 0 2rem 0;
-        }
-        
-        .card-subtitle {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            margin-top: 0.5rem;
-            font-weight: 500;
-        }
-        
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-        
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-        
-        .form-label {
-            display: block;
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            margin-bottom: 0.75rem;
-            font-weight: 600;
-        }
-        
-        .form-input, .form-select {
-            width: 100%;
-            padding: 1rem 1.25rem;
-            background: rgba(15, 23, 42, 0.8);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            color: var(--text-primary);
-            font-size: 0.875rem;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-        
-        .form-input:focus, .form-select:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
-        }
-        
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.875rem 1.75rem;
-            border: none;
-            border-radius: 12px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            margin-right: 0.75rem;
-            margin-bottom: 0.75rem;
-        }
-        
-        .btn-primary {
-            background: var(--gradient-hero);
-            color: white;
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
-        }
-        
-        .btn-primary:hover:not(:disabled) {
-            transform: translateY(-3px);
-            box-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
-        }
-        
-        .btn-secondary {
-            background: #374151;
-            color: var(--text-primary);
-            border: 1px solid var(--border);
-        }
-        
-        .btn-secondary:hover:not(:disabled) {
-            background: var(--bg-hover);
-            transform: translateY(-2px);
-        }
-        
-        .btn-success {
-            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-            color: white;
-            box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
-        }
-        
-        .btn-danger {
-            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
-            color: white;
-            box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
-        }
-        
-        .loading-spinner {
-            display: none;
-            width: 18px; height: 18px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s linear infinite;
-        }
-        
-        .btn.loading .loading-spinner {
-            display: inline-block;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        .users-list {
-            max-height: 600px;
-            overflow-y: auto;
-        }
-        
-        .user-item {
-            background: var(--gradient-card);
+        /* Analytics Panel */
+        .analytics-panel {
+            background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 16px;
-            padding: 1.75rem;
+            padding: 1.5rem;
+        }
+        
+        .analytics-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .metric-card {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
             margin-bottom: 1rem;
+            transition: all 0.2s ease;
+        }
+        
+        .metric-card:hover {
+            border-color: var(--accent);
+            transform: translateX(4px);
+        }
+        
+        .metric-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: all 0.3s ease;
+            margin-bottom: 0.75rem;
         }
         
-        .user-item:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-xl);
-            border-color: rgba(59, 130, 246, 0.3);
-        }
-        
-        .user-info h3 {
-            margin-bottom: 0.5rem;
-            color: var(--text-primary);
-            font-weight: 700;
-            font-size: 1.125rem;
-        }
-        
-        .user-info p {
+        .metric-label {
+            font-size: 0.875rem;
             color: var(--text-secondary);
-            font-size: 0.875rem;
-            margin-bottom: 0.5rem;
             font-weight: 500;
         }
         
-        .user-badge {
-            padding: 0.375rem 0.875rem;
-            border-radius: 100px;
-            font-size: 0.75rem;
+        .metric-value {
+            font-size: 1.5rem;
             font-weight: 700;
-            text-transform: uppercase;
-            display: inline-block;
-            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            font-variant-numeric: tabular-nums;
         }
         
-        .badge-driver { 
-            background: rgba(16, 185, 129, 0.15); 
-            color: var(--success);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-        .badge-dispatcher { 
-            background: rgba(245, 158, 11, 0.15); 
-            color: var(--warning);
-            border: 1px solid rgba(245, 158, 11, 0.3);
-        }
-        .badge-admin { 
-            background: rgba(239, 68, 68, 0.15); 
-            color: var(--danger);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-        }
-        
-        .user-meta {
+        .metric-change {
             font-size: 0.75rem;
             color: var(--text-muted);
-            font-weight: 500;
-        }
-        
-        .search-filters {
-            display: flex;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        
-        .search-input {
-            flex: 1;
-            min-width: 300px;
-            padding: 1rem 1.25rem;
-            background: rgba(15, 23, 42, 0.8);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            color: var(--text-primary);
-            font-size: 0.875rem;
-            font-weight: 500;
-        }
-        
-        .search-input:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
-        }
-        
-        .message {
-            padding: 1.25rem 1.75rem;
-            border-radius: 16px;
-            margin: 1.5rem 0;
-            font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 0.25rem;
         }
         
-        .message.success {
-            background: rgba(16, 185, 129, 0.15);
+        .metric-change.positive {
             color: var(--success);
-            border: 1px solid rgba(16, 185, 129, 0.3);
         }
         
-        .message.error {
-            background: rgba(239, 68, 68, 0.15);
+        .metric-change.negative {
             color: var(--danger);
-            border: 1px solid rgba(239, 68, 68, 0.3);
         }
         
-        .loading-state {
+        /* Progress Bars */
+        .progress-container {
+            margin-top: 1rem;
+        }
+        
+        .progress-header {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 4rem;
-            color: var(--text-muted);
-            gap: 1.5rem;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
         }
         
-        .spinner {
-            width: 28px; height: 28px;
-            border: 3px solid var(--border);
-            border-top: 3px solid var(--accent);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-dark);
+            border-radius: 100px;
+            overflow: hidden;
+            position: relative;
         }
         
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-primary);
+            border-radius: 100px;
+            transition: width 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        /* Empty State */
         .empty-state {
             text-align: center;
-            padding: 4rem;
+            padding: 4rem 2rem;
             color: var(--text-muted);
         }
         
         .empty-icon {
-            font-size: 5rem;
-            margin-bottom: 1.5rem;
+            font-size: 4rem;
+            margin-bottom: 1rem;
             opacity: 0.3;
         }
         
@@ -651,67 +749,72 @@
             color: var(--text-secondary);
         }
         
-        .sync-status {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+        .empty-description {
+            color: var(--text-muted);
+            font-size: 1rem;
         }
         
-        .sync-indicator {
-            width: 8px;
-            height: 8px;
+        /* Loading Animation */
+        .loader {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border);
             border-radius: 50%;
-            background: var(--success);
-            animation: pulse 2s infinite;
+            border-top-color: var(--accent);
+            animation: spin 1s linear infinite;
         }
         
-        .sync-indicator.error {
-            background: var(--danger);
-            animation: none;
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
         
-        /* Control Panel */
-        .control-panel {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-        }
-        
-        .filter-group {
-            display: flex;
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 10px;
-            overflow: hidden;
+            border-radius: 12px;
+            box-shadow: var(--shadow-xl);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            min-width: 300px;
+            z-index: 2000;
+            animation: slideUp 0.3s ease;
         }
         
-        .filter-btn {
-            padding: 0.75rem 1.25rem;
-            border: none;
-            background: transparent;
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            position: relative;
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
         
-        .filter-btn:not(:last-child) {
-            border-right: 1px solid var(--border);
+        .toast-icon {
+            font-size: 1.5rem;
         }
         
-        .filter-btn:hover {
+        .toast-content {
+            flex: 1;
+        }
+        
+        .toast-title {
+            font-weight: 600;
             color: var(--text-primary);
-            background: var(--bg-hover);
+            margin-bottom: 0.25rem;
         }
         
-        .filter-btn.active {
-            color: white;
-            background: var(--accent);
+        .toast-message {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
         }
         
         @media (max-width: 1400px) {
@@ -721,305 +824,262 @@
         }
         
         @media (max-width: 768px) {
-            .container { padding: 1rem; }
-            .stats-grid { grid-template-columns: 1fr; }
-            .form-grid { grid-template-columns: 1fr; }
-            .header-content { flex-direction: column; gap: 1rem; }
-            .header-actions { width: 100%; justify-content: space-between; }
-            .search-filters { flex-direction: column; align-items: stretch; }
-            .search-input { min-width: auto; }
-            .control-panel { flex-direction: column; }
+            .container {
+                padding: 1rem;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+            
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .control-panel {
+                flex-direction: column;
+            }
+            
+            .activity-details {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .admin-banner {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
         }
     </style>
 </head>
 <body>
-    <header class="top-header">
+    <!-- Premium Header -->
+    <header class="header">
         <div class="header-content">
             <div class="brand">
                 <div class="logo">⚡</div>
                 <div class="brand-text">
-                    <h1>FleetForce Enterprise</h1>
-                    <p>Unified Command Center</p>
+                    <h1>Fleet Command Center</h1>
+                    <p>Live Dashboard</p>
                 </div>
             </div>
             <div class="header-actions">
+                <a href="/admin.html" class="admin-link" target="_blank">
+                    <span>⚙️</span>
+                    <span>Admin Panel</span>
+                </a>
                 <div class="status-indicator" id="connectionStatus">
                     <div class="pulse"></div>
                     <span>System Operational</span>
                 </div>
-                <div class="current-time" id="currentTime">--:--:--</div>
+                <div class="header-time" id="currentTime">--:--:--</div>
             </div>
         </div>
     </header>
     
+    <!-- Main Container -->
     <div class="container">
-        <div class="nav-container">
-            <nav class="nav-tabs">
-                <button class="nav-tab active" onclick="switchTab('dashboard', this)">
-                    <span>📊</span>
-                    <span>Live Dashboard</span>
-                </button>
-                <button class="nav-tab" onclick="switchTab('users', this)">
-                    <span>👥</span>
-                    <span>Driver Management</span>
-                </button>
-                <button class="nav-tab" onclick="switchTab('reports', this)">
-                    <span>📈</span>
-                    <span>Analytics</span>
-                </button>
-            </nav>
+        <!-- Admin Integration Banner -->
+        <div class="admin-banner" id="adminBanner">
+            <div class="banner-content">
+                <div class="banner-icon">🔗</div>
+                <div class="banner-text">
+                    <h3>Admin Panel Integration Active</h3>
+                    <p>Dashboard synchronized with admin panel data in real-time</p>
+                </div>
+            </div>
+            <div class="sync-status" id="adminSyncStatus">
+                <div class="sync-indicator"></div>
+                <span>Auto-sync enabled</span>
+            </div>
         </div>
         
-        <!-- DASHBOARD TAB -->
-        <div id="dashboard-tab" class="tab-content active">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-icon">👥</div>
-                        <div class="stat-trend">Live</div>
-                    </div>
-                    <div class="stat-value" id="totalDrivers">0</div>
-                    <div class="stat-label">Total Drivers</div>
-                    <div class="stat-sublabel">Active in system</div>
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-icon">🚚</div>
+                    <div class="kpi-trend live">📊 Live</div>
                 </div>
-                
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-icon">🚚</div>
-                        <div class="stat-trend">Live</div>
-                    </div>
-                    <div class="stat-value" id="activeDrivers">0</div>
-                    <div class="stat-label">Currently Active</div>
-                    <div class="stat-sublabel">On duty today</div>
+                <div class="kpi-value" id="routedDrivers">0</div>
+                <div class="kpi-label">Total Drivers</div>
+                <div class="kpi-sublabel">All system drivers</div>
+            </div>
+            
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-icon" style="background: rgba(245, 158, 11, 0.1);">📍</div>
+                    <div class="kpi-trend live">📊 Live</div>
                 </div>
-                
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-icon">💤</div>
-                        <div class="stat-trend">Live</div>
-                    </div>
-                    <div class="stat-value" id="standbyDrivers">0</div>
-                    <div class="stat-label">On Standby</div>
-                    <div class="stat-sublabel">Available for dispatch</div>
+                <div class="kpi-value" id="enRouteCount">0</div>
+                <div class="kpi-label">Active Drivers</div>
+                <div class="kpi-sublabel">Currently active</div>
+            </div>
+            
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-icon" style="background: rgba(16, 185, 129, 0.1);">✓</div>
+                    <div class="kpi-trend live">📊 Live</div>
                 </div>
-                
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-icon">📡</div>
-                        <div class="stat-trend">Live</div>
+                <div class="kpi-value" id="arrivedCheckedIn">0</div>
+                <div class="kpi-label">Dispatchers</div>
+                <div class="kpi-sublabel">Operations coordinators</div>
+            </div>
+            
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-icon" style="background: rgba(245, 158, 11, 0.1);">⏳</div>
+                    <div class="kpi-trend live">📊 Live</div>
+                </div>
+                <div class="kpi-value" id="pendingCheckIn">0</div>
+                <div class="kpi-label">Administrators</div>
+                <div class="kpi-sublabel">System managers</div>
+            </div>
+        </div>
+        
+        <!-- Control Panel -->
+        <div class="control-panel">
+            <div class="filter-group">
+                <button class="filter-btn active" onclick="filterStatus('all', this)">All Users</button>
+                <button class="filter-btn" onclick="filterStatus('driver', this)">Drivers</button>
+                <button class="filter-btn" onclick="filterStatus('dispatcher', this)">Dispatchers</button>
+                <button class="filter-btn" onclick="filterStatus('admin', this)">Admins</button>
+            </div>
+            <button class="btn btn-secondary" onclick="refreshDashboard()">
+                <span>🔄</span>
+                <span>Refresh</span>
+            </button>
+            <button class="btn btn-secondary" onclick="requestAdminSync()">
+                <span>🔗</span>
+                <span>Sync with Admin</span>
+            </button>
+            <a href="/admin.html" class="btn btn-primary" target="_blank">
+                <span>⚙️</span>
+                <span>Open Admin</span>
+            </a>
+        </div>
+        
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- Activity Feed -->
+            <div class="activity-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <span>📡</span>
+                        <span>User Activity Feed</span>
+                    </h2>
+                    <span id="lastUpdate" style="font-size: 0.875rem; color: var(--text-secondary);">
+                        <span class="loader" style="margin-right: 0.5rem;"></span>
+                        Loading...
+                    </span>
+                </div>
+                <div class="activity-list" id="activityList">
+                    <div class="empty-state">
+                        <div class="empty-icon">🔄</div>
+                        <p>Loading user data from admin panel...</p>
                     </div>
-                    <div class="stat-value" id="lastSyncTime">--</div>
-                    <div class="stat-label">Last Sync</div>
-                    <div class="stat-sublabel">Data freshness</div>
                 </div>
             </div>
             
-            <!-- Control Panel -->
-            <div class="control-panel">
-                <div class="filter-group">
-                    <button class="filter-btn active" onclick="filterDrivers('all', this)">All Drivers</button>
-                    <button class="filter-btn" onclick="filterDrivers('active', this)">Active Only</button>
-                    <button class="filter-btn" onclick="filterDrivers('standby', this)">Standby</button>
-                </div>
-                <button class="btn btn-secondary" onclick="refreshAllData()">
-                    <span>🔄</span>
-                    <span>Refresh Data</span>
-                </button>
-                <button class="btn btn-secondary" onclick="exportDriverData()">
-                    <span>📊</span>
-                    <span>Export Report</span>
-                </button>
-            </div>
-            
-            <div class="dashboard-grid">
-                <!-- Driver Activity Feed -->
-                <div class="activity-section">
-                    <div class="section-header">
-                        <h2 class="section-title">
-                            <span>🚛</span>
-                            <span>Driver Activity Feed</span>
-                        </h2>
-                        <div class="sync-status" id="syncStatus">
-                            <div class="sync-indicator"></div>
-                            <span>Real-time sync</span>
+            <!-- Analytics Panel -->
+            <div>
+                <div class="analytics-panel" style="margin-bottom: 1.5rem;">
+                    <h3 class="analytics-title">
+                        <span>📈</span>
+                        <span>System Metrics</span>
+                    </h3>
+                    
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span class="metric-label">Driver Utilization</span>
+                            <span class="metric-change positive" id="utilizationTrend">📊 Live</span>
                         </div>
-                    </div>
-                    <div class="activity-list" id="activityList">
-                        <div class="loading-state">
-                            <div class="spinner"></div>
-                            <span>Loading driver data...</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Quick Actions Panel -->
-                <div>
-                    <div class="card" style="margin-bottom: 1.5rem; padding: 1.5rem;">
-                        <h3 style="color: var(--text-primary); margin-bottom: 1rem; font-size: 1.125rem;">
-                            <span>⚡</span> Quick Actions
-                        </h3>
-                        
-                        <div style="display: grid; gap: 0.75rem;">
-                            <button class="btn btn-primary" onclick="switchToUsers()" style="width: 100%; justify-content: center;">
-                                <span>👤</span>
-                                <span>Add New Driver</span>
-                            </button>
-                            <button class="btn btn-secondary" onclick="refreshAllData()" style="width: 100%; justify-content: center;">
-                                <span>🔄</span>
-                                <span>Refresh Data</span>
-                            </button>
-                            <button class="btn btn-success" onclick="exportDriverData()" style="width: 100%; justify-content: center;">
-                                <span>📊</span>
-                                <span>Export Report</span>
-                            </button>
+                        <div class="metric-value" id="fleetUtilization">0%</div>
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="utilizationBar" style="width: 0%"></div>
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="card" style="padding: 1.5rem;">
-                        <h3 style="color: var(--text-primary); margin-bottom: 1rem; font-size: 1.125rem;">
-                            <span>📈</span> System Status
-                        </h3>
-                        
-                        <div style="display: grid; gap: 1rem; font-size: 0.875rem;">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="color: var(--text-secondary);">Database Status</span>
-                                <span style="color: var(--success);" id="dbStatus">Connected</span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="color: var(--text-secondary);">API Response</span>
-                                <span style="color: var(--success);" id="apiStatus">Healthy</span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="color: var(--text-secondary);">Auto-Refresh</span>
-                                <span style="color: var(--accent);" id="refreshStatus">Active</span>
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span class="metric-label">System Health</span>
+                            <span class="metric-change positive">✓ Online</span>
+                        </div>
+                        <div class="metric-value" id="onTimeRate">100%</div>
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="onTimeBar" style="width: 100%"></div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- USERS TAB -->
-        <div id="users-tab" class="tab-content">
-            <div class="card">
-                <h2 class="card-title">
-                    <span>👤</span>
-                    Driver Registration
-                </h2>
-                <p class="card-subtitle">Create and manage driver accounts with role-based access</p>
-                
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label class="form-label" for="driverName">Full Name *</label>
-                        <input type="text" id="driverName" class="form-input" placeholder="Enter driver's full name" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="driverEmail">Email Address</label>
-                        <input type="email" id="driverEmail" class="form-input" placeholder="driver@company.com">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="driverPhone">Phone Number</label>
-                        <input type="tel" id="driverPhone" class="form-input" placeholder="+1 (555) 123-4567">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="driverVehicle">Vehicle ID</label>
-                        <input type="text" id="driverVehicle" class="form-input" placeholder="T-1234">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="driverRole">Role</label>
-                        <select id="driverRole" class="form-select">
-                            <option value="driver">Driver</option>
-                            <option value="dispatcher">Dispatcher</option>
-                            <option value="admin">Administrator</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="driverPassword">Password</label>
-                        <input type="password" id="driverPassword" class="form-input" placeholder="Secure password">
+                    
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span class="metric-label">Data Freshness</span>
+                            <span class="metric-change" id="dailyThroughput">📊 Live</span>
+                        </div>
+                        <div class="metric-value" id="dataFreshness">--</div>
+                        <div class="metric-change" style="color: var(--text-muted);">seconds ago</div>
                     </div>
                 </div>
                 
-                <button class="btn btn-primary" onclick="createDriver()">
-                    <span class="loading-spinner"></span>
-                    <span>✅</span>
-                    <span>Create Driver Account</span>
-                </button>
-                <button class="btn btn-secondary" onclick="clearDriverForm()">
-                    <span>🗑️</span>
-                    <span>Clear Form</span>
-                </button>
-                
-                <div id="driverMessage"></div>
-            </div>
-            
-            <div class="card">
-                <h2 class="card-title">
-                    <span>👥</span>
-                    Driver Directory
-                </h2>
-                <p class="card-subtitle">Comprehensive driver management and administration</p>
-                
-                <div class="search-filters">
-                    <input type="text" class="search-input" id="searchDrivers" placeholder="Search drivers by name, email, or vehicle ID..." onkeyup="searchDrivers()">
-                    <select id="roleFilter" class="form-select" style="width: auto; min-width: 180px;" onchange="filterByRole()">
-                        <option value="all">All Roles</option>
-                        <option value="driver">Drivers</option>
-                        <option value="dispatcher">Dispatchers</option>
-                        <option value="admin">Administrators</option>
-                    </select>
-                    <button class="btn btn-success" onclick="exportDriverData()">
-                        <span>📊</span>
-                        <span>Export CSV</span>
-                    </button>
-                </div>
-                
-                <div id="driversList" class="users-list">
-                    <div class="loading-state">
-                        <div class="spinner"></div>
-                        <span>Loading driver directory...</span>
+                <div class="analytics-panel">
+                    <h3 class="analytics-title">
+                        <span>⚡</span>
+                        <span>Quick Actions</span>
+                    </h3>
+                    
+                    <div style="display: grid; gap: 1rem;">
+                        <a href="/admin.html" class="btn btn-primary" target="_blank" style="width: 100%; justify-content: center;">
+                            <span>👤</span>
+                            <span>Add New User</span>
+                        </a>
+                        <button class="btn btn-secondary" style="width: 100%; justify-content: center;" onclick="refreshDashboard()">
+                            <span>🔄</span>
+                            <span>Refresh Data</span>
+                        </button>
+                        <button class="btn btn-secondary" style="width: 100%; justify-content: center;" onclick="exportData()">
+                            <span>📊</span>
+                            <span>Export Report</span>
+                        </button>
+                        <button class="btn btn-secondary" style="width: 100%; justify-content: center;" onclick="requestAdminSync()">
+                            <span>🔗</span>
+                            <span>Force Sync</span>
+                        </button>
                     </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- REPORTS TAB -->
-        <div id="reports-tab" class="tab-content">
-            <div class="card">
-                <h2 class="card-title">
-                    <span>📈</span>
-                    Analytics & Reports
-                </h2>
-                <p class="card-subtitle">Comprehensive fleet analytics and performance metrics</p>
-                
-                <div class="empty-state">
-                    <div class="empty-icon">📊</div>
-                    <div class="empty-title">Advanced Analytics Coming Soon</div>
-                    <p>Comprehensive reporting dashboard with real-time metrics, performance trends, and operational insights.</p>
                 </div>
             </div>
         </div>
     </div>
-
+    
     <script>
-        // Global state
-        let allDrivers = [];
-        let filteredDrivers = [];
-        let currentTab = 'dashboard';
+        // Global Variables
+        let allDriverData = [];
+        let filteredDriverData = [];
         let currentFilter = 'all';
         let refreshInterval;
+        let lastSyncTime = null;
         
-        // API configuration
-        const API_BASE = window.location.origin;
-        
-        // Initialize application
+        // Initialize Dashboard
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('FleetForce Enterprise - Unified System Initialized');
+            console.log('Fleet Command Center Dashboard - Enhanced Admin Integration');
             startClock();
-            loadAllData();
+            setupAdminCommunication();
+            loadNotifications();
             startAutoRefresh();
         });
         
-        // Clock management
+        // Clock Management
         function startClock() {
             function updateTime() {
                 const now = new Date();
@@ -1030,120 +1090,183 @@
             setInterval(updateTime, 1000);
         }
         
-        // Tab management
-        function switchTab(tabName, buttonElement) {
-            // Hide all tab contents
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
+        // Enhanced Admin Communication Setup
+        function setupAdminCommunication() {
+            // Listen for messages from admin panel
+            window.addEventListener('message', function(event) {
+                console.log('Received message:', event.data);
+                
+                if (event.data.type === 'ADMIN_DATA_UPDATE') {
+                    console.log('Admin panel data update received');
+                    handleAdminDataUpdate(event.data.data);
+                }
             });
             
-            // Remove active class from all nav tabs
-            document.querySelectorAll('.nav-tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
+            // Listen for BroadcastChannel messages (if supported)
+            if (typeof BroadcastChannel !== 'undefined') {
+                const channel = new BroadcastChannel('fleetforce_sync');
+                channel.addEventListener('message', function(event) {
+                    if (event.data.type === 'ADMIN_DATA_UPDATE') {
+                        console.log('BroadcastChannel data update received');
+                        handleAdminDataUpdate(event.data.data);
+                    }
+                });
+            }
             
-            // Show selected tab and activate button
-            setTimeout(() => {
-                document.getElementById(tabName + '-tab').classList.add('active');
-            }, 50);
+            // Try to load data from admin session storage on init
+            loadFromAdminSync();
             
-            buttonElement.classList.add('active');
-            currentTab = tabName;
-            
-            // Load relevant data for the tab
-            if (tabName === 'dashboard' || tabName === 'users') {
-                loadAllData();
+            console.log('Enhanced admin communication setup complete');
+        }
+        
+        function handleAdminDataUpdate(userData) {
+            if (userData && Array.isArray(userData)) {
+                allDriverData = userData;
+                lastSyncTime = new Date();
+                processUserData();
+                updateSyncStatus(true, 'Admin update');
+                showToast('Data Sync', 'Dashboard updated from admin panel', 'success');
             }
         }
         
-        function switchToUsers() {
-            const usersTabButton = document.querySelector('[onclick*="users"]');
-            switchTab('users', usersTabButton);
+        // Load data from admin panel session storage
+        function loadFromAdminSync() {
+            try {
+                const syncData = sessionStorage.getItem('fleetforce_users');
+                const syncTime = sessionStorage.getItem('fleetforce_last_sync');
+                
+                if (syncData && syncTime) {
+                    const parsedData = JSON.parse(syncData);
+                    const syncDate = new Date(syncTime);
+                    const now = new Date();
+                    const timeDiff = (now - syncDate) / 1000; // seconds
+                    
+                    if (timeDiff < 300) { // Use cached data if less than 5 minutes old
+                        console.log('Loading data from admin sync cache');
+                        allDriverData = parsedData;
+                        lastSyncTime = syncDate;
+                        processUserData();
+                        updateSyncStatus(true, 'Admin cache');
+                        return true;
+                    }
+                }
+            } catch (e) {
+                console.warn('Could not load admin sync data:', e);
+            }
+            return false;
         }
         
-        // Data loading and management
-        async function loadAllData() {
+        // Enhanced data loading with admin integration priority
+        async function loadNotifications() {
+            // First try to load from admin sync
+            if (loadFromAdminSync()) {
+                return;
+            }
+            
+            // Fallback to direct API calls - combine notifications and users
             try {
-                updateConnectionStatus(true);
-                console.log('Loading all driver data...');
+                console.log('Loading data from APIs...');
                 
-                const response = await fetch(`${API_BASE}/api/users`);
+                const [notificationsResponse, usersResponse] = await Promise.all([
+                    fetch('/api/notifications').catch(() => null),
+                    fetch('/api/users').catch(() => null)
+                ]);
                 
-                if (response.ok) {
-                    const data = await response.json();
-                    allDrivers = Array.isArray(data) ? data : (data.data || []);
-                    
-                    console.log(`Loaded ${allDrivers.length} drivers from database`);
-                    
-                    // Update filtered drivers based on current filter
-                    applyCurrentFilter();
-                    
-                    // Update displays
-                    updateDashboardStats();
-                    updateDriversList();
-                    updateActivityFeed();
-                    
-                    // Update sync status
-                    updateSyncStatus(true);
-                    document.getElementById('lastSyncTime').textContent = 
-                        new Date().toLocaleTimeString();
-                    
-                } else {
-                    throw new Error(`HTTP ${response.status}`);
+                let combinedData = [];
+                
+                // Process admin users if available
+                if (usersResponse && usersResponse.ok) {
+                    const userData = await usersResponse.json();
+                    const users = Array.isArray(userData) ? userData : (userData.data || []);
+                    combinedData = users;
+                    console.log(`Loaded ${users.length} users from API`);
                 }
+                
+                // Process notifications if available
+                if (notificationsResponse && notificationsResponse.ok) {
+                    const notificationData = await notificationsResponse.json();
+                    const notifications = Array.isArray(notificationData) ? notificationData : (notificationData.data || []);
+                    console.log(`Loaded ${notifications.length} notifications from API`);
+                    
+                    // Merge with existing user data (notifications take priority for matching users)
+                    const notificationUsers = notifications.filter(n => n.driver).map(n => ({
+                        name: n.driver,
+                        role: 'driver',
+                        status: n.status || 'active',
+                        location: n.location,
+                        timestamp: n.timestamp,
+                        active: true,
+                        _id: n._id || `notification-${Date.now()}-${Math.random()}`,
+                        createdAt: n.timestamp || new Date().toISOString()
+                    }));
+                    
+                    // Add notification-based users that don't exist in admin data
+                    const existingNames = combinedData.map(u => u.name);
+                    const newNotificationUsers = notificationUsers.filter(nu => !existingNames.includes(nu.name));
+                    combinedData = [...combinedData, ...newNotificationUsers];
+                }
+                
+                allDriverData = combinedData;
+                lastSyncTime = new Date();
+                
+                processUserData();
+                updateSyncStatus(true, 'Direct API');
                 
             } catch (error) {
                 console.error('Failed to load data:', error);
-                updateConnectionStatus(false);
-                updateSyncStatus(false);
-                showMessage('Failed to load driver data: ' + error.message, 'error');
-            }
-        }
-        
-        function updateConnectionStatus(connected) {
-            const statusElement = document.getElementById('connectionStatus');
-            const dbStatus = document.getElementById('dbStatus');
-            const apiStatus = document.getElementById('apiStatus');
-            
-            if (connected) {
-                statusElement.innerHTML = '<div class="pulse"></div><span>System Operational</span>';
-                if (dbStatus) dbStatus.textContent = 'Connected';
-                if (apiStatus) apiStatus.textContent = 'Healthy';
-            } else {
-                statusElement.innerHTML = '<div style="width: 10px; height: 10px; background: var(--danger); border-radius: 50%;"></div><span style="color: var(--danger);">Connection Failed</span>';
-                if (dbStatus) dbStatus.textContent = 'Error';
-                if (apiStatus) apiStatus.textContent = 'Failed';
-            }
-        }
-        
-        function updateSyncStatus(success) {
-            const syncStatus = document.getElementById('syncStatus');
-            if (syncStatus) {
-                const indicator = syncStatus.querySelector('.sync-indicator');
-                const text = syncStatus.querySelector('span');
+                updateSyncStatus(false, 'Connection failed');
                 
-                if (success) {
-                    indicator.className = 'sync-indicator';
-                    text.textContent = 'Real-time sync';
-                } else {
-                    indicator.className = 'sync-indicator error';
-                    text.textContent = 'Sync failed';
-                }
+                // Show error in activity feed
+                const activityList = document.getElementById('activityList');
+                activityList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">❌</div>
+                        <div class="empty-title">Connection Failed</div>
+                        <div class="empty-description">
+                            Unable to load data from admin panel or API.
+                            <br><br>
+                            <button class="btn btn-primary" onclick="loadNotifications()">
+                                🔄 Retry Connection
+                            </button>
+                        </div>
+                    </div>
+                `;
             }
         }
         
-        // Dashboard functions
-        function updateDashboardStats() {
-            const totalDrivers = allDrivers.length;
-            const activeDrivers = allDrivers.filter(d => d.active !== false && d.role === 'driver').length;
-            const standbyDrivers = totalDrivers - activeDrivers;
+        // Process and display user data
+        function processUserData() {
+            filterStatus(currentFilter);
+            updateKPIs();
+            updateActivityFeed();
+            updateDataFreshness();
+            updateLastUpdate();
+        }
+        
+        // Update KPI cards
+        function updateKPIs() {
+            const totalDrivers = allDriverData.filter(u => u.role === 'driver').length;
+            const activeDrivers = allDriverData.filter(u => u.role === 'driver' && u.active !== false).length;
+            const dispatchers = allDriverData.filter(u => u.role === 'dispatcher').length;
+            const admins = allDriverData.filter(u => u.role === 'admin').length;
             
             // Animate counters
-            animateCounter('totalDrivers', totalDrivers);
-            animateCounter('activeDrivers', activeDrivers);
-            animateCounter('standbyDrivers', standbyDrivers);
+            animateCounter('routedDrivers', totalDrivers);
+            animateCounter('enRouteCount', activeDrivers);
+            animateCounter('arrivedCheckedIn', dispatchers);
+            animateCounter('pendingCheckIn', admins);
+            
+            // Update utilization
+            const utilization = totalDrivers > 0 ? Math.min((activeDrivers / totalDrivers) * 100, 100) : 0;
+            document.getElementById('fleetUtilization').textContent = Math.floor(utilization) + '%';
+            document.getElementById('utilizationBar').style.width = utilization + '%';
+            
+            // Update other metrics
+            document.getElementById('onTimeRate').textContent = '100%';
+            document.getElementById('onTimeBar').style.width = '100%';
         }
         
+        // Animate counter values
         function animateCounter(elementId, targetValue) {
             const element = document.getElementById(elementId);
             if (!element) return;
@@ -1166,52 +1289,82 @@
             }, 50);
         }
         
+        // Update activity feed
         function updateActivityFeed() {
             const activityList = document.getElementById('activityList');
-            if (!activityList) return;
             
-            if (filteredDrivers.length === 0) {
+            if (filteredDriverData.length === 0) {
+                let emptyMessage = 'No users found';
+                if (currentFilter !== 'all') {
+                    emptyMessage = `No ${currentFilter}s found`;
+                }
+                
                 activityList.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-icon">👥</div>
-                        <div class="empty-title">No Drivers Found</div>
-                        <p>Add drivers to see them in the activity feed</p>
+                        <div class="empty-title">${emptyMessage}</div>
+                        <div class="empty-description">
+                            Users will appear here when added through the admin panel
+                            <br><br>
+                            <a href="/admin.html" class="btn btn-primary" target="_blank">
+                                ⚙️ Open Admin Panel
+                            </a>
+                        </div>
                     </div>
                 `;
                 return;
             }
             
-            // Sort drivers by creation date (newest first)
-            const sortedDrivers = filteredDrivers
-                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-                .slice(0, 20); // Show only latest 20
+            // Sort users by creation date (newest first)
+            const sortedUsers = filteredDriverData
+                .sort((a, b) => new Date(b.createdAt || Date.now()) - new Date(a.createdAt || Date.now()))
+                .slice(0, 50); // Show latest 50 users
             
-            activityList.innerHTML = sortedDrivers.map(driver => {
-                const isActive = driver.active !== false && driver.role === 'driver';
-                const timeAgo = getTimeAgo(new Date(driver.createdAt));
+            activityList.innerHTML = sortedUsers.map(user => {
+                const timeAgo = getTimeAgo(new Date(user.createdAt || Date.now()));
+                const isActive = user.active !== false;
                 
                 return `
-                    <div class="activity-item">
+                    <div class="activity-item ${user.role}">
                         <div class="activity-content">
                             <div class="activity-info">
-                                <div class="activity-driver">${driver.name}</div>
+                                <div class="activity-driver">${user.name}</div>
                                 <div class="activity-details">
-                                    <span>📅 Added ${timeAgo}</span>
-                                    ${driver.email ? `<span>📧 ${driver.email}</span>` : ''}
-                                    ${driver.vehicleId ? `<span>🚛 ${driver.vehicleId}</span>` : ''}
-                                    <span>👤 ${driver.role}</span>
+                                    <div class="activity-detail">
+                                        <span>⏱</span>
+                                        <span>Added ${timeAgo}</span>
+                                    </div>
+                                    ${user.email ? `
+                                        <div class="activity-detail">
+                                            <span>📧</span>
+                                            <span>${user.email}</span>
+                                        </div>
+                                    ` : ''}
+                                    ${user.vehicleId ? `
+                                        <div class="activity-detail">
+                                            <span>🚛</span>
+                                            <span>${user.vehicleId}</span>
+                                        </div>
+                                    ` : ''}
+                                    <div class="activity-detail">
+                                        <span>👤</span>
+                                        <span>${user.role}</span>
+                                    </div>
+                                    ${user.status ? `
+                                        <div class="activity-detail">
+                                            <span>📊</span>
+                                            <span>${user.status}</span>
+                                        </div>
+                                    ` : ''}
                                 </div>
                             </div>
                             <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                <span class="status-badge ${isActive ? 'status-active' : 'status-standby'}">
-                                    ${isActive ? 'Active' : 'Standby'}
+                                <span class="status-badge status-${user.role}">
+                                    ${user.role}
                                 </span>
-                                ${driver.role === 'driver' ? `
-                                    <button class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.75rem;" 
-                                            onclick="toggleDriverStatus('${driver._id}', ${!isActive})">
-                                        ${isActive ? '⏸️ Deactivate' : '▶️ Activate'}
-                                    </button>
-                                ` : ''}
+                                <span class="status-badge ${isActive ? 'status-active' : 'status-standby'}">
+                                    ${isActive ? 'Active' : 'Inactive'}
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -1219,6 +1372,7 @@
             }).join('');
         }
         
+        // Time utility function
         function getTimeAgo(date) {
             const seconds = Math.floor((new Date() - date) / 1000);
             if (seconds < 60) return 'just now';
@@ -1229,222 +1383,94 @@
             return `${Math.floor(hours / 24)}d ago`;
         }
         
-        // Driver management functions
-        async function createDriver() {
-            const button = event.target;
-            button.classList.add('loading');
+        // Filter functions
+        function filterStatus(role, buttonElement = null) {
+            currentFilter = role;
             
-            const name = document.getElementById('driverName').value.trim();
-            const email = document.getElementById('driverEmail').value.trim();
-            const phone = document.getElementById('driverPhone').value.trim();
-            const vehicleId = document.getElementById('driverVehicle').value.trim();
-            const role = document.getElementById('driverRole').value;
-            const password = document.getElementById('driverPassword').value;
-            
-            if (!name) {
-                showMessage('Driver name is required', 'error');
-                button.classList.remove('loading');
-                return;
-            }
-            
-            const driverData = {
-                name: name,
-                role: role,
-                active: true
-            };
-            
-            // Only add fields if they have values
-            if (email) driverData.email = email;
-            if (phone) driverData.phoneNumber = phone;
-            if (vehicleId) driverData.vehicleId = vehicleId;
-            if (password) driverData.password = password;
-            
-            try {
-                const response = await fetch(`${API_BASE}/api/users`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(driverData)
+            // Update button states if called from UI
+            if (buttonElement) {
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.classList.remove('active');
                 });
-                
-                if (response.ok) {
-                    showMessage(`Driver "${name}" created successfully`, 'success');
-                    clearDriverForm();
-                    loadAllData(); // Refresh all data
-                } else {
-                    const errorData = await response.json();
-                    let errorMessage = errorData.error || 'Failed to create driver';
-                    
-                    // Handle specific errors
-                    if (errorMessage.includes('duplicate key error') && errorMessage.includes('email')) {
-                        errorMessage = 'Email address already exists. Please use a different email.';
-                    }
-                    
-                    throw new Error(errorMessage);
-                }
-                
-            } catch (error) {
-                showMessage('Failed to create driver: ' + error.message, 'error');
-            } finally {
-                button.classList.remove('loading');
-            }
-        }
-        
-        function clearDriverForm() {
-            document.getElementById('driverName').value = '';
-            document.getElementById('driverEmail').value = '';
-            document.getElementById('driverPhone').value = '';
-            document.getElementById('driverVehicle').value = '';
-            document.getElementById('driverRole').value = 'driver';
-            document.getElementById('driverPassword').value = '';
-        }
-        
-        async function deleteDriver(driverId, driverName) {
-            if (!confirm(`Delete driver "${driverName}"?\n\nThis action cannot be undone.`)) return;
-            
-            try {
-                const response = await fetch(`${API_BASE}/api/users/${driverId}`, { 
-                    method: 'DELETE' 
-                });
-                
-                if (response.ok) {
-                    showMessage(`Driver "${driverName}" deleted successfully`, 'success');
-                    loadAllData(); // Refresh all data
-                } else {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-            } catch (error) {
-                showMessage('Failed to delete driver: ' + error.message, 'error');
-            }
-        }
-        
-        async function toggleDriverStatus(driverId, newActiveStatus) {
-            try {
-                const response = await fetch(`${API_BASE}/api/users/${driverId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ active: newActiveStatus })
-                });
-                
-                if (response.ok) {
-                    const driver = allDrivers.find(d => d._id === driverId);
-                    if (driver) {
-                        showMessage(`Driver "${driver.name}" ${newActiveStatus ? 'activated' : 'deactivated'}`, 'success');
-                        loadAllData(); // Refresh all data
-                    }
-                } else {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-            } catch (error) {
-                showMessage('Failed to update driver status: ' + error.message, 'error');
-            }
-        }
-        
-        function updateDriversList() {
-            const driversList = document.getElementById('driversList');
-            if (!driversList) return;
-            
-            if (filteredDrivers.length === 0) {
-                driversList.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">👥</div>
-                        <div class="empty-title">No Drivers Found</div>
-                        <p>Create your first driver account to get started</p>
-                    </div>
-                `;
-                return;
+                buttonElement.classList.add('active');
             }
             
-            driversList.innerHTML = filteredDrivers.map(driver => `
-                <div class="user-item">
-                    <div class="user-info">
-                        <h3>${driver.name}</h3>
-                        <p>${driver.email || 'No email provided'}</p>
-                        ${driver.phoneNumber ? `<p>📞 ${driver.phoneNumber}</p>` : ''}
-                        ${driver.vehicleId ? `<p>🚗 ${driver.vehicleId}</p>` : ''}
-                        <span class="user-badge badge-${driver.role}">${driver.role}</span>
-                        <div class="user-meta">
-                            Created: ${new Date(driver.createdAt).toLocaleDateString()} • 
-                            Status: ${driver.active !== false ? 'Active' : 'Inactive'}
-                        </div>
-                    </div>
-                    <div>
-                        ${driver.role === 'driver' ? `
-                            <button class="btn ${driver.active !== false ? 'btn-secondary' : 'btn-success'}" 
-                                    onclick="toggleDriverStatus('${driver._id}', ${driver.active === false})"
-                                    style="margin-right: 0.5rem;">
-                                ${driver.active !== false ? '⏸️ Deactivate' : '▶️ Activate'}
-                            </button>
-                        ` : ''}
-                        <button class="btn btn-danger" onclick="deleteDriver('${driver._id}', '${driver.name.replace(/'/g, "\\'")}')">
-                            🗑️ Delete
-                        </button>
-                    </div>
-                </div>
-            `).join('');
-        }
-        
-        // Filter and search functions
-        function applyCurrentFilter() {
-            switch (currentFilter) {
-                case 'active':
-                    filteredDrivers = allDrivers.filter(d => d.active !== false && d.role === 'driver');
-                    break;
-                case 'standby':
-                    filteredDrivers = allDrivers.filter(d => d.active === false || d.role !== 'driver');
-                    break;
-                default:
-                    filteredDrivers = allDrivers.slice();
+            // Apply filter
+            if (role === 'all') {
+                filteredDriverData = allDriverData.slice();
+            } else {
+                filteredDriverData = allDriverData.filter(user => user.role === role);
             }
-        }
-        
-        function filterDrivers(filter, buttonElement) {
-            currentFilter = filter;
             
-            // Update button states
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            buttonElement.classList.add('active');
-            
-            // Apply filter and update displays
-            applyCurrentFilter();
-            updateDriversList();
             updateActivityFeed();
         }
         
-        function searchDrivers() {
-            const query = document.getElementById('searchDrivers').value.toLowerCase();
-            const roleFilter = document.getElementById('roleFilter').value;
+        // Status update functions
+        function updateSyncStatus(success, source = '') {
+            const syncStatus = document.getElementById('adminSyncStatus');
+            const indicator = syncStatus.querySelector('.sync-indicator');
+            const text = syncStatus.querySelector('span');
             
-            filteredDrivers = allDrivers.filter(driver => {
-                const matchesSearch = !query || 
-                    driver.name.toLowerCase().includes(query) ||
-                    (driver.email && driver.email.toLowerCase().includes(query)) ||
-                    (driver.phoneNumber && driver.phoneNumber.includes(query)) ||
-                    (driver.vehicleId && driver.vehicleId.toLowerCase().includes(query));
-                
-                const matchesRole = roleFilter === 'all' || driver.role === roleFilter;
-                
-                return matchesSearch && matchesRole;
-            });
+            if (success) {
+                indicator.className = 'sync-indicator';
+                text.textContent = source ? `Synced via ${source}` : 'Auto-sync enabled';
+            } else {
+                indicator.className = 'sync-indicator error';
+                text.textContent = 'Sync error';
+            }
+        }
+        
+        function updateDataFreshness() {
+            if (lastSyncTime) {
+                const seconds = Math.floor((new Date() - lastSyncTime) / 1000);
+                document.getElementById('dataFreshness').textContent = seconds;
+            }
+        }
+        
+        function updateLastUpdate() {
+            const lastUpdateElement = document.getElementById('lastUpdate');
+            if (lastSyncTime) {
+                lastUpdateElement.innerHTML = `Last updated: ${lastSyncTime.toLocaleTimeString()}`;
+            } else {
+                lastUpdateElement.innerHTML = 'Never updated';
+            }
+        }
+        
+        // Action functions
+        function refreshDashboard() {
+            showToast('Refreshing', 'Loading latest data...', 'info');
+            loadNotifications();
+        }
+        
+        function requestAdminSync() {
+            showToast('Sync Request', 'Requesting data from admin panel...', 'info');
             
-            updateDriversList();
-            updateActivityFeed();
+            // Try to request fresh data from admin panel
+            try {
+                // Send message to admin panel
+                window.postMessage({
+                    type: 'DASHBOARD_REQUEST_DATA'
+                }, '*');
+                
+                // Also try to load from session storage
+                setTimeout(() => {
+                    if (loadFromAdminSync()) {
+                        showToast('Sync Complete', 'Data synchronized with admin panel', 'success');
+                    } else {
+                        // Fallback to API
+                        loadNotifications();
+                    }
+                }, 1000);
+                
+            } catch (e) {
+                console.warn('Could not communicate with admin panel:', e);
+                loadNotifications();
+            }
         }
         
-        function filterByRole() {
-            searchDrivers(); // Reuse search logic with role filter
-        }
-        
-        // Utility functions
-        function refreshAllData() {
-            showMessage('Refreshing driver data...', 'success');
-            loadAllData();
-        }
-        
-        function exportDriverData() {
-            if (allDrivers.length === 0) {
-                showMessage('No drivers to export', 'error');
+        function exportData() {
+            if (allDriverData.length === 0) {
+                showToast('Export Error', 'No data to export', 'error');
                 return;
             }
             
@@ -1452,15 +1478,15 @@
                 ['Name', 'Email', 'Phone', 'Role', 'Vehicle ID', 'Status', 'Created']
             ];
             
-            allDrivers.forEach(driver => {
+            allDriverData.forEach(user => {
                 csvData.push([
-                    driver.name,
-                    driver.email || '',
-                    driver.phoneNumber || '',
-                    driver.role,
-                    driver.vehicleId || '',
-                    driver.active !== false ? 'Active' : 'Inactive',
-                    new Date(driver.createdAt).toLocaleDateString()
+                    user.name,
+                    user.email || '',
+                    user.phoneNumber || '',
+                    user.role,
+                    user.vehicleId || '',
+                    user.active !== false ? 'Active' : 'Inactive',
+                    new Date(user.createdAt || Date.now()).toLocaleDateString()
                 ]);
             });
             
@@ -1472,48 +1498,54 @@
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `fleetforce-drivers-${new Date().toISOString().split('T')[0]}.csv`;
+            a.download = `fleet-dashboard-${new Date().toISOString().split('T')[0]}.csv`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
             
-            showMessage(`Exported ${allDrivers.length} driver records`, 'success');
-        }
-        
-        function showMessage(message, type) {
-            const containers = ['driverMessage', 'dashboardMessage'];
-            const icons = { success: '✅', error: '❌', warning: '⚠️' };
-            
-            containers.forEach(containerId => {
-                const container = document.getElementById(containerId);
-                if (container) {
-                    container.innerHTML = `
-                        <div class="message ${type}">
-                            <span>${icons[type] || ''}</span>
-                            <span>${message}</span>
-                        </div>
-                    `;
-                    
-                    // Auto-hide after 5 seconds
-                    setTimeout(() => {
-                        container.innerHTML = '';
-                    }, 5000);
-                }
-            });
+            showToast('Export Complete', `Exported ${allDriverData.length} records`, 'success');
         }
         
         // Auto-refresh functionality
         function startAutoRefresh() {
             refreshInterval = setInterval(() => {
-                loadAllData();
-            }, 30000); // Refresh every 30 seconds
+                // Update data freshness counter
+                updateDataFreshness();
+                
+                // Refresh data every 30 seconds
+                loadNotifications();
+            }, 30000);
+        }
+        
+        // Toast notification system
+        function showToast(title, message, type = 'info') {
+            const existingToast = document.querySelector('.toast');
+            if (existingToast) existingToast.remove();
             
-            // Update refresh status
-            const refreshStatus = document.getElementById('refreshStatus');
-            if (refreshStatus) {
-                refreshStatus.textContent = 'Active (30s)';
-            }
+            const icons = {
+                success: '✅',
+                error: '❌',
+                info: 'ℹ️',
+                warning: '⚠️'
+            };
+            
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `
+                <div class="toast-icon">${icons[type]}</div>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideUp 0.3s ease reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
         }
         
         // Cleanup on page unload
