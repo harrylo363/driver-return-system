@@ -1214,7 +1214,7 @@
                 <button class="filter-btn active" onclick="filterStatus('all', this)">Active Operations</button>
                 <button class="filter-btn" onclick="filterStatus('en-route', this)">En Route</button>
                 <button class="filter-btn" onclick="filterStatus('arrived', this)">Arrived</button>
-                <button class="filter-btn" onclick="filterStatus('out-on-route', this)">Still Out</button>
+                <button class="filter-btn" onclick="filterStatus('pending-checkin', this)">Pending Check-In</button>
                 <button class="filter-btn" onclick="filterStatus('completed', this)" style="border-left: 2px solid var(--success);">✓ Completed</button>
             </div>
             <button class="btn btn-secondary" onclick="exportData()">
@@ -1507,19 +1507,35 @@
                     return n;
                 });
                 
-                // Get active drivers from admin system and mark them as "still out" instead of "standby"
+                // Get active drivers from admin system
                 const activeDriversFromAdmin = adminUsers.filter(user => 
                     user.role === 'driver' && user.active !== false
                 );
                 
-                // Filter to only actual notifications - no longer add admin drivers automatically
+                // Get actual driver notifications
                 const driverNotifications = notifications.filter(n => n.driver && n.status);
+                const notificationDriverNames = driverNotifications.map(n => n.driver);
                 
-                // Only use actual driver notifications, no synthetic "still out" drivers
-                const allDriverData = driverNotifications;
+                // Add admin drivers who don't have active notifications as "pending-checkin" 
+                // (these are drivers who are still out and haven't checked in)
+                const pendingCheckInDrivers = activeDriversFromAdmin
+                    .filter(driver => !notificationDriverNames.includes(driver.name))
+                    .map(driver => ({
+                        _id: `admin-${driver._id}`,
+                        driver: driver.name,
+                        status: 'pending-checkin',
+                        timestamp: new Date().toISOString(),
+                        warehouse: '5856 Tampa FDC',
+                        location: 'Location unavailable',
+                        adminData: driver // Include full admin data
+                    }));
+                
+                // Combine all driver data
+                const allDriverData = [...driverNotifications, ...pendingCheckInDrivers];
                 
                 console.log('Processed notifications:', driverNotifications.length);
                 console.log('Admin drivers:', activeDriversFromAdmin.length);
+                console.log('Pending check-in drivers:', pendingCheckInDrivers.length);
                 console.log('Total driver data:', allDriverData.length);
                 
                 updateDisplay(allDriverData);
@@ -1579,21 +1595,16 @@
                 feedTitle = 'Completed Check-Ins';
                 feedIcon = '✅';
                 countText = `${filtered.length} completed`;
-            } else if (currentFilter === 'out-on-route') {
-                // Show drivers who are still out on their routes
-                filtered = allDriverData.filter(n => 
-                    n.status !== 'en-route' && 
-                    n.status !== 'arrived' && 
-                    n.checkedIn !== true &&
-                    n.status !== 'standby'
-                );
+            } else if (currentFilter === 'pending-checkin') {
+                // Show drivers who are pending check-in (still out and haven't returned)
+                filtered = allDriverData.filter(n => n.status === 'pending-checkin');
                 emptyMessage = 'All drivers have returned or are en-route back';
-                feedTitle = 'Drivers Still Out';
-                feedIcon = '🚛';
-                countText = `${filtered.length} still out`;
+                feedTitle = 'Pending Check-In';
+                feedIcon = '⏳';
+                countText = `${filtered.length} pending`;
             } else if (currentFilter === 'all') {
-                // Show all EXCEPT completed check-ins (keep feed clean)
-                filtered = allDriverData.filter(n => n.checkedIn !== true);
+                // Show all EXCEPT completed check-ins and pending check-ins (keep feed clean)
+                filtered = allDriverData.filter(n => n.checkedIn !== true && n.status !== 'pending-checkin');
                 emptyMessage = 'No active fleet movements';
                 feedTitle = 'Real-Time Activity Feed';
                 feedIcon = '📡';
@@ -1669,10 +1680,15 @@
                 let statusDisplay = notification.status;
                 let statusClass = notification.status;
                 
-                // Handle "still out" drivers differently
-                if (currentFilter === 'out-on-route') {
-                    statusDisplay = 'out on route';
-                    statusClass = 'out-on-route';
+                // Handle "pending check-in" drivers differently
+                if (currentFilter === 'pending-checkin') {
+                    statusDisplay = 'pending check-in';
+                    statusClass = 'pending-checkin';
+                }
+                
+                if (notification.status === 'pending-checkin') {
+                    statusDisplay = 'pending check-in';
+                    statusClass = 'pending-checkin';
                 }
                 
                 if (notification.status === 'standby') {
@@ -1817,10 +1833,10 @@
                                             <div class="address">📍 Geocoding location...</div>
                                         `}
                                     </div>
-                                ` : currentFilter === 'out-on-route' ? `
+                                ` : currentFilter === 'pending-checkin' || notification.status === 'pending-checkin' ? `
                                     <div class="location-info">
                                         <div class="address" style="color: var(--text-muted);">
-                                            📍 Driver out on delivery route - Location not available
+                                            📍 Driver still out - Pending return and check-in
                                         </div>
                                     </div>
                                 ` : notification.status === 'standby' ? `
