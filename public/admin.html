@@ -3,81 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fleet Command Center | Enterprise Logistics Platform</title>
-    
-    <!-- Premium Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
+    <title>FleetForce Enterprise | Command Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         :root {
             --primary: #0F172A;
-            --primary-light: #1E293B;
             --accent: #3B82F6;
-            --accent-hover: #2563EB;
             --success: #10B981;
             --warning: #F59E0B;
             --danger: #EF4444;
-            --text-primary: #F1F5F9;
+            --text-primary: #FFFFFF;
             --text-secondary: #94A3B8;
             --text-muted: #64748B;
-            --bg-dark: #0F172A;
+            --bg-dark: #0B1120;
             --bg-card: #1E293B;
-            --bg-hover: #334155;
-            --border: #334155;
-            --gradient-primary: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
-            --gradient-dark: linear-gradient(180deg, #0F172A 0%, #1E293B 100%);
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
-            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            --bg-hover: #374151;
+            --border: #374151;
+            --gradient-hero: linear-gradient(135deg, #1e3a8a 0%, #3730a3 50%, #581c87 100%);
+            --gradient-card: linear-gradient(145deg, #1E293B 0%, #2D3748 100%);
+            --shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.2);
+            --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.25);
         }
         
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Inter', system-ui, sans-serif;
             background: var(--bg-dark);
             color: var(--text-primary);
             line-height: 1.6;
-            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
         
-        /* Animated Background */
         body::before {
             content: '';
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: 
-                radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 40% 20%, rgba(16, 185, 129, 0.1) 0%, transparent 50%);
+                radial-gradient(circle at 25% 25%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+                linear-gradient(135deg, #0B1120 0%, #1E293B 100%);
             z-index: -1;
         }
         
-        /* Premium Header */
-        .header {
+        .top-header {
             background: rgba(15, 23, 42, 0.95);
             backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+            padding: 1.25rem 2rem;
             position: sticky;
             top: 0;
             z-index: 1000;
-            padding: 0;
+            box-shadow: var(--shadow-lg);
         }
         
         .header-content {
-            max-width: 1920px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -90,42 +72,22 @@
         }
         
         .logo {
-            width: 48px;
-            height: 48px;
-            background: var(--gradient-primary);
-            border-radius: 12px;
+            width: 52px; height: 52px;
+            background: var(--gradient-hero);
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
-            font-weight: 700;
+            font-size: 26px;
+            font-weight: 800;
             color: white;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .logo::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            transform: rotate(45deg);
-            animation: shine 3s infinite;
-        }
-        
-        @keyframes shine {
-            0%, 100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-            50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.4);
         }
         
         .brand-text h1 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            background: var(--gradient-primary);
+            font-size: 1.875rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 50%, #06B6D4 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin: 0;
@@ -135,50 +97,24 @@
             font-size: 0.875rem;
             color: var(--text-secondary);
             margin: 0;
-        }
-        
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-        
-        .admin-link {
-            padding: 0.75rem 1.5rem;
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            border-radius: 12px;
-            color: var(--accent);
-            text-decoration: none;
-            font-size: 0.875rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.3s ease;
-        }
-        
-        .admin-link:hover {
-            background: rgba(59, 130, 246, 0.2);
-            transform: translateY(-2px);
+            font-weight: 500;
         }
         
         .status-indicator {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
+            gap: 0.75rem;
+            padding: 0.75rem 1.25rem;
             background: rgba(16, 185, 129, 0.1);
             border: 1px solid rgba(16, 185, 129, 0.3);
             border-radius: 100px;
             font-size: 0.875rem;
             color: var(--success);
-            font-weight: 500;
+            font-weight: 600;
         }
         
         .pulse {
-            width: 8px;
-            height: 8px;
+            width: 10px; height: 10px;
             background: var(--success);
             border-radius: 50%;
             animation: pulse 2s infinite;
@@ -186,559 +122,519 @@
         
         @keyframes pulse {
             0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.5); }
+            50% { opacity: 0.7; transform: scale(1.2); }
             100% { opacity: 1; transform: scale(1); }
         }
         
-        .header-time {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-            font-variant-numeric: tabular-nums;
-        }
-        
-        /* Main Container */
         .container {
-            max-width: 1920px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 2rem;
         }
         
-        /* Admin Integration Banner */
-        .admin-banner {
-            background: rgba(59, 130, 246, 0.05);
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            border-radius: 16px;
+        .nav-container {
+            background: var(--gradient-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .nav-tabs {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+        }
+        
+        .nav-tab {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
             padding: 1rem 1.5rem;
-            margin-bottom: 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .banner-content {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-        
-        .banner-icon {
-            font-size: 1.5rem;
-        }
-        
-        .banner-text h3 {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 0.25rem;
-        }
-        
-        .banner-text p {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            margin: 0;
-        }
-        
-        .sync-status {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.875rem;
-            color: var(--text-muted);
-        }
-        
-        .sync-indicator {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--success);
-            animation: pulse 2s infinite;
-        }
-        
-        .sync-indicator.error {
-            background: var(--danger);
-            animation: none;
-        }
-        
-        /* KPI Cards */
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        
-        .kpi-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 1.5rem;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-        
-        .kpi-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-xl);
-            border-color: var(--accent);
-        }
-        
-        .kpi-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: var(--gradient-primary);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        
-        .kpi-card:hover::before {
-            opacity: 1;
-        }
-        
-        .kpi-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1rem;
-        }
-        
-        .kpi-icon {
-            width: 48px;
-            height: 48px;
-            background: rgba(59, 130, 246, 0.1);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-        }
-        
-        .kpi-trend {
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-            font-size: 0.875rem;
-            font-weight: 600;
-            padding: 0.25rem 0.75rem;
-            border-radius: 100px;
-        }
-        
-        .kpi-trend.up {
-            color: var(--success);
-            background: rgba(16, 185, 129, 0.1);
-        }
-        
-        .kpi-trend.down {
-            color: var(--danger);
-            background: rgba(239, 68, 68, 0.1);
-        }
-        
-        .kpi-trend.live {
-            color: var(--accent);
-            background: rgba(59, 130, 246, 0.1);
-        }
-        
-        .kpi-value {
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: var(--text-primary);
-            line-height: 1;
-            margin-bottom: 0.5rem;
-            font-variant-numeric: tabular-nums;
-        }
-        
-        .kpi-label {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        
-        .kpi-sublabel {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-top: 0.25rem;
-        }
-        
-        /* Control Panel */
-        .control-panel {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-        }
-        
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 10px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            position: relative;
-            overflow: hidden;
-            text-decoration: none;
-        }
-        
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s;
-        }
-        
-        .btn:hover::before {
-            left: 100%;
-        }
-        
-        .btn-primary {
-            background: var(--gradient-primary);
-            color: white;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
-        }
-        
-        .btn-secondary {
-            background: var(--bg-hover);
-            color: var(--text-primary);
-            border: 1px solid var(--border);
-        }
-        
-        .btn-secondary:hover {
-            background: var(--border);
-            transform: translateY(-2px);
-        }
-        
-        .filter-group {
-            display: flex;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        
-        .filter-btn {
-            padding: 0.75rem 1.25rem;
             border: none;
             background: transparent;
             color: var(--text-secondary);
             font-size: 0.875rem;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s ease;
-            position: relative;
+            border-radius: 14px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
         }
         
-        .filter-btn:not(:last-child) {
-            border-right: 1px solid var(--border);
-        }
-        
-        .filter-btn:hover {
+        .nav-tab:hover {
             color: var(--text-primary);
             background: var(--bg-hover);
         }
         
-        .filter-btn.active {
+        .nav-tab.active {
             color: white;
-            background: var(--accent);
+            background: var(--gradient-hero);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
         }
         
-        /* Activity Feed */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 2rem;
+        .tab-content {
+            display: none;
         }
         
-        .activity-section {
-            background: var(--bg-card);
+        .tab-content.active {
+            display: block;
+        }
+        
+        .card {
+            background: var(--gradient-card);
             border: 1px solid var(--border);
-            border-radius: 16px;
-            overflow: hidden;
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: var(--shadow-xl);
+            margin-bottom: 2rem;
         }
         
-        .section-header {
-            padding: 1.5rem;
-            background: rgba(15, 23, 42, 0.5);
-            backdrop-filter: blur(10px);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(59, 130, 246, 0.3);
         }
         
-        .section-title {
-            font-size: 1.125rem;
-            font-weight: 600;
+        .card-title {
+            font-size: 1.75rem;
+            font-weight: 700;
             color: var(--text-primary);
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 1rem;
+            margin: 0 0 2rem 0;
         }
         
-        .activity-list {
+        .card-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: var(--gradient-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-xl);
+            border-color: rgba(59, 130, 246, 0.4);
+        }
+        
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-icon {
+            width: 56px; height: 56px;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+        
+        .stat-trend {
+            padding: 0.5rem 1rem;
+            border-radius: 100px;
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--success);
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .stat-value {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1;
+            margin-bottom: 0.75rem;
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.075em;
+        }
+        
+        .stat-sublabel {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-top: 0.25rem;
+        }
+        
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .quick-action-card {
+            background: var(--gradient-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .quick-action-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+        
+        .quick-action-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .quick-action-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .quick-action-description {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .form-input, .form-select {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.875rem 1.75rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            margin-right: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .btn-primary {
+            background: var(--gradient-hero);
+            color: white;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #374151;
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+        
+        .btn-secondary:hover:not(:disabled) {
+            background: var(--bg-hover);
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-success:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.4);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+            color: white;
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+        }
+        
+        .btn-danger:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.4);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        .loading-spinner {
+            display: none;
+            width: 18px; height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+        
+        .btn.loading .loading-spinner {
+            display: inline-block;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .users-list {
             max-height: 600px;
             overflow-y: auto;
         }
         
-        .activity-list::-webkit-scrollbar {
-            width: 6px;
-        }
-        
-        .activity-list::-webkit-scrollbar-track {
-            background: var(--bg-dark);
-        }
-        
-        .activity-list::-webkit-scrollbar-thumb {
-            background: var(--border);
-            border-radius: 3px;
-        }
-        
-        .activity-list::-webkit-scrollbar-thumb:hover {
-            background: var(--text-muted);
-        }
-        
-        .activity-item {
-            padding: 1.5rem;
-            border-bottom: 1px solid var(--border);
-            transition: all 0.2s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .activity-item::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 3px;
-            background: transparent;
-            transition: all 0.2s ease;
-        }
-        
-        .activity-item:hover {
-            background: var(--bg-hover);
-            padding-left: 2rem;
-        }
-        
-        .activity-item.driver::before { background: var(--success); }
-        .activity-item.dispatcher::before { background: var(--warning); }
-        .activity-item.admin::before { background: var(--danger); }
-        .activity-item.standby::before { background: var(--text-muted); }
-        
-        .activity-content {
+        .user-item {
+            background: var(--gradient-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.75rem;
+            margin-bottom: 1rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 1rem;
+            transition: all 0.3s ease;
         }
         
-        .activity-info {
-            flex: 1;
+        .user-item:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+            border-color: rgba(59, 130, 246, 0.3);
         }
         
-        .activity-driver {
-            font-weight: 600;
+        .user-info h3 {
+            margin-bottom: 0.5rem;
             color: var(--text-primary);
-            margin-bottom: 0.25rem;
-            font-size: 1rem;
+            font-weight: 700;
+            font-size: 1.125rem;
         }
         
-        .activity-details {
-            display: flex;
-            gap: 1rem;
-            font-size: 0.875rem;
+        .user-info p {
             color: var(--text-secondary);
-            flex-wrap: wrap;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
         }
         
-        .activity-detail {
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
-        
-        .status-badge {
+        .user-badge {
             padding: 0.375rem 0.875rem;
             border-radius: 100px;
             font-size: 0.75rem;
-            font-weight: 600;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            display: inline-block;
+            margin-bottom: 0.5rem;
         }
         
-        .status-driver {
-            background: rgba(16, 185, 129, 0.1);
+        .badge-driver { 
+            background: rgba(16, 185, 129, 0.15); 
             color: var(--success);
             border: 1px solid rgba(16, 185, 129, 0.3);
         }
-        
-        .status-dispatcher {
-            background: rgba(245, 158, 11, 0.1);
+        .badge-dispatcher { 
+            background: rgba(245, 158, 11, 0.15); 
             color: var(--warning);
             border: 1px solid rgba(245, 158, 11, 0.3);
         }
-        
-        .status-admin {
-            background: rgba(239, 68, 68, 0.1);
+        .badge-admin { 
+            background: rgba(239, 68, 68, 0.15); 
             color: var(--danger);
             border: 1px solid rgba(239, 68, 68, 0.3);
         }
         
-        .status-standby {
-            background: rgba(100, 116, 139, 0.1);
+        .user-meta {
+            font-size: 0.75rem;
             color: var(--text-muted);
-            border: 1px solid rgba(100, 116, 139, 0.3);
+            font-weight: 500;
         }
         
-        .status-active {
-            background: rgba(16, 185, 129, 0.1);
+        .search-filters {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .search-input {
+            flex: 1;
+            min-width: 300px;
+            padding: 1rem 1.25rem;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+        
+        .upload-section {
+            background: rgba(59, 130, 246, 0.05);
+            border: 2px dashed rgba(59, 130, 246, 0.3);
+            border-radius: 20px;
+            padding: 3rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            margin-bottom: 2rem;
+            cursor: pointer;
+        }
+        
+        .upload-section:hover {
+            border-color: var(--accent);
+            background: rgba(59, 130, 246, 0.1);
+            transform: scale(1.02);
+        }
+        
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            color: var(--accent);
+            opacity: 0.8;
+        }
+        
+        .upload-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+        }
+        
+        .upload-subtitle {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .message {
+            padding: 1.25rem 1.75rem;
+            border-radius: 16px;
+            margin: 1.5rem 0;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .message.success {
+            background: rgba(16, 185, 129, 0.15);
             color: var(--success);
             border: 1px solid rgba(16, 185, 129, 0.3);
         }
         
-        /* Analytics Panel */
-        .analytics-panel {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 1.5rem;
-        }
-        
-        .analytics-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        
-        .metric-card {
-            background: var(--bg-dark);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.25rem;
-            margin-bottom: 1rem;
-            transition: all 0.2s ease;
-        }
-        
-        .metric-card:hover {
-            border-color: var(--accent);
-            transform: translateX(4px);
-        }
-        
-        .metric-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.75rem;
-        }
-        
-        .metric-label {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-        
-        .metric-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            font-variant-numeric: tabular-nums;
-        }
-        
-        .metric-change {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
-        
-        .metric-change.positive {
-            color: var(--success);
-        }
-        
-        .metric-change.negative {
+        .message.error {
+            background: rgba(239, 68, 68, 0.15);
             color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
         }
         
-        /* Progress Bars */
-        .progress-container {
-            margin-top: 1rem;
+        .message.warning {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.3);
         }
         
-        .progress-header {
+        .loading-state {
             display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
-            font-size: 0.875rem;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem;
+            color: var(--text-muted);
+            gap: 1.5rem;
         }
         
-        .progress-bar {
-            height: 8px;
-            background: var(--bg-dark);
-            border-radius: 100px;
-            overflow: hidden;
-            position: relative;
+        .spinner {
+            width: 28px; height: 28px;
+            border: 3px solid var(--border);
+            border-top: 3px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
         
-        .progress-fill {
-            height: 100%;
-            background: var(--gradient-primary);
-            border-radius: 100px;
-            transition: width 0.5s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .progress-fill::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            animation: shimmer 2s infinite;
-        }
-        
-        @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
-        
-        /* Empty State */
         .empty-state {
             text-align: center;
-            padding: 4rem 2rem;
+            padding: 4rem;
             color: var(--text-muted);
         }
         
         .empty-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
+            font-size: 5rem;
+            margin-bottom: 1.5rem;
             opacity: 0.3;
         }
         
@@ -754,531 +650,476 @@
             font-size: 1rem;
         }
         
-        /* Loading Animation */
-        .loader {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid var(--border);
-            border-radius: 50%;
-            border-top-color: var(--accent);
-            animation: spin 1s linear infinite;
+        .template-section {
+            background: rgba(16, 185, 129, 0.05);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
         }
         
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        /* Toast Notifications */
-        .toast {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            padding: 1rem 1.5rem;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            box-shadow: var(--shadow-xl);
+        .template-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
             display: flex;
             align-items: center;
-            gap: 1rem;
-            min-width: 300px;
-            z-index: 2000;
-            animation: slideUp 0.3s ease;
+            gap: 0.75rem;
         }
         
-        @keyframes slideUp {
-            from {
-                transform: translateY(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-        
-        .toast-icon {
-            font-size: 1.5rem;
-        }
-        
-        .toast-content {
-            flex: 1;
-        }
-        
-        .toast-title {
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 0.25rem;
-        }
-        
-        .toast-message {
-            font-size: 0.875rem;
+        .template-description {
             color: var(--text-secondary);
-        }
-        
-        @media (max-width: 1400px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            font-weight: 500;
         }
         
         @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-            
-            .header-content {
-                flex-direction: column;
-                gap: 1rem;
-                align-items: flex-start;
-            }
-            
-            .header-actions {
-                width: 100%;
-                justify-content: space-between;
-            }
-            
-            .kpi-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .control-panel {
-                flex-direction: column;
-            }
-            
-            .activity-details {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-            
-            .admin-banner {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 1rem;
-            }
+            .container { padding: 1rem; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .form-grid { grid-template-columns: 1fr; }
+            .user-item { flex-direction: column; align-items: flex-start; gap: 1rem; }
+            .search-filters { flex-direction: column; align-items: stretch; }
+            .search-input { min-width: auto; }
+            .quick-actions { grid-template-columns: 1fr; }
+            .upload-section { padding: 2rem; }
         }
     </style>
 </head>
 <body>
-    <!-- Premium Header -->
-    <header class="header">
+    <header class="top-header">
         <div class="header-content">
             <div class="brand">
                 <div class="logo">⚡</div>
                 <div class="brand-text">
-                    <h1>Fleet Command Center</h1>
-                    <p>Live Dashboard</p>
+                    <h1>FleetForce Enterprise</h1>
+                    <p>Logistics Command Center</p>
                 </div>
             </div>
-            <div class="header-actions">
-                <a href="/admin.html" class="admin-link" target="_blank">
-                    <span>⚙️</span>
-                    <span>Admin Panel</span>
-                </a>
-                <div class="status-indicator" id="connectionStatus">
-                    <div class="pulse"></div>
-                    <span>System Operational</span>
-                </div>
-                <div class="header-time" id="currentTime">--:--:--</div>
+            <div class="status-indicator" id="connectionStatus">
+                <div class="pulse"></div>
+                <span>System Operational</span>
             </div>
         </div>
     </header>
     
-    <!-- Main Container -->
     <div class="container">
-        <!-- Admin Integration Banner -->
-        <div class="admin-banner" id="adminBanner">
-            <div class="banner-content">
-                <div class="banner-icon">🔗</div>
-                <div class="banner-text">
-                    <h3>Admin Panel Integration Active</h3>
-                    <p>Dashboard synchronized with admin panel data in real-time</p>
-                </div>
-            </div>
-            <div class="sync-status" id="adminSyncStatus">
-                <div class="sync-indicator"></div>
-                <span>Auto-sync enabled</span>
-            </div>
+        <div class="nav-container">
+            <nav class="nav-tabs">
+                <button class="nav-tab active" onclick="switchTab('dashboard', this)">
+                    <span>📊</span>
+                    <span>Executive Dashboard</span>
+                </button>
+                <button class="nav-tab" onclick="switchTab('users', this)">
+                    <span>👥</span>
+                    <span>User Management</span>
+                </button>
+                <button class="nav-tab" onclick="switchTab('bulk-upload', this)">
+                    <span>📁</span>
+                    <span>Bulk Operations</span>
+                </button>
+            </nav>
         </div>
         
-        <!-- KPI Cards -->
-        <div class="kpi-grid">
-            <div class="kpi-card">
-                <div class="kpi-header">
-                    <div class="kpi-icon">🚚</div>
-                    <div class="kpi-trend live">📊 Live</div>
-                </div>
-                <div class="kpi-value" id="routedDrivers">0</div>
-                <div class="kpi-label">Total Drivers</div>
-                <div class="kpi-sublabel">All system drivers</div>
-            </div>
-            
-            <div class="kpi-card">
-                <div class="kpi-header">
-                    <div class="kpi-icon" style="background: rgba(245, 158, 11, 0.1);">📍</div>
-                    <div class="kpi-trend live">📊 Live</div>
-                </div>
-                <div class="kpi-value" id="enRouteCount">0</div>
-                <div class="kpi-label">Active Drivers</div>
-                <div class="kpi-sublabel">Currently active</div>
-            </div>
-            
-            <div class="kpi-card">
-                <div class="kpi-header">
-                    <div class="kpi-icon" style="background: rgba(16, 185, 129, 0.1);">✓</div>
-                    <div class="kpi-trend live">📊 Live</div>
-                </div>
-                <div class="kpi-value" id="arrivedCheckedIn">0</div>
-                <div class="kpi-label">Dispatchers</div>
-                <div class="kpi-sublabel">Operations coordinators</div>
-            </div>
-            
-            <div class="kpi-card">
-                <div class="kpi-header">
-                    <div class="kpi-icon" style="background: rgba(245, 158, 11, 0.1);">⏳</div>
-                    <div class="kpi-trend live">📊 Live</div>
-                </div>
-                <div class="kpi-value" id="pendingCheckIn">0</div>
-                <div class="kpi-label">Administrators</div>
-                <div class="kpi-sublabel">System managers</div>
-            </div>
-        </div>
-        
-        <!-- Control Panel -->
-        <div class="control-panel">
-            <div class="filter-group">
-                <button class="filter-btn active" onclick="filterStatus('all', this)">All Users</button>
-                <button class="filter-btn" onclick="filterStatus('driver', this)">Drivers</button>
-                <button class="filter-btn" onclick="filterStatus('dispatcher', this)">Dispatchers</button>
-                <button class="filter-btn" onclick="filterStatus('admin', this)">Admins</button>
-            </div>
-            <button class="btn btn-secondary" onclick="refreshDashboard()">
-                <span>🔄</span>
-                <span>Refresh</span>
-            </button>
-            <button class="btn btn-secondary" onclick="requestAdminSync()">
-                <span>🔗</span>
-                <span>Sync with Admin</span>
-            </button>
-            <a href="/admin.html" class="btn btn-primary" target="_blank">
-                <span>⚙️</span>
-                <span>Open Admin</span>
-            </a>
-        </div>
-        
-        <!-- Dashboard Grid -->
-        <div class="dashboard-grid">
-            <!-- Activity Feed -->
-            <div class="activity-section">
-                <div class="section-header">
-                    <h2 class="section-title">
-                        <span>📡</span>
-                        <span>User Activity Feed</span>
-                    </h2>
-                    <span id="lastUpdate" style="font-size: 0.875rem; color: var(--text-secondary);">
-                        <span class="loader" style="margin-right: 0.5rem;"></span>
-                        Loading...
-                    </span>
-                </div>
-                <div class="activity-list" id="activityList">
-                    <div class="empty-state">
-                        <div class="empty-icon">🔄</div>
-                        <p>Loading user data from admin panel...</p>
+        <div id="dashboard-tab" class="tab-content active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-trend">↑ 12%</div>
                     </div>
+                    <div class="stat-value" id="totalUsers">0</div>
+                    <div class="stat-label">Total Users</div>
+                    <div class="stat-sublabel">Active system accounts</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon">🚚</div>
+                        <div class="stat-trend">↑ 8%</div>
+                    </div>
+                    <div class="stat-value" id="totalDrivers">0</div>
+                    <div class="stat-label">Active Drivers</div>
+                    <div class="stat-sublabel">Ready for dispatch</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon">📡</div>
+                        <div class="stat-trend">↑ 15%</div>
+                    </div>
+                    <div class="stat-value" id="totalDispatchers">0</div>
+                    <div class="stat-label">Dispatchers</div>
+                    <div class="stat-sublabel">Operations coordinators</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon">🛡️</div>
+                        <div class="stat-trend">↓ 2%</div>
+                    </div>
+                    <div class="stat-value" id="totalAdmins">0</div>
+                    <div class="stat-label">Administrators</div>
+                    <div class="stat-sublabel">System managers</div>
                 </div>
             </div>
             
-            <!-- Analytics Panel -->
-            <div>
-                <div class="analytics-panel" style="margin-bottom: 1.5rem;">
-                    <h3 class="analytics-title">
-                        <span>📈</span>
-                        <span>System Metrics</span>
-                    </h3>
-                    
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <span class="metric-label">Driver Utilization</span>
-                            <span class="metric-change positive" id="utilizationTrend">📊 Live</span>
-                        </div>
-                        <div class="metric-value" id="fleetUtilization">0%</div>
-                        <div class="progress-container">
-                            <div class="progress-bar">
-                                <div class="progress-fill" id="utilizationBar" style="width: 0%"></div>
-                            </div>
-                        </div>
+            <div class="card">
+                <h2 class="card-title">
+                    <span>⚡</span>
+                    Quick Actions
+                </h2>
+                <p class="card-subtitle">Streamlined administrative operations</p>
+                
+                <div class="quick-actions">
+                    <div class="quick-action-card" onclick="goToUsersTab()">
+                        <div class="quick-action-icon">👤</div>
+                        <div class="quick-action-title">Add New User</div>
+                        <div class="quick-action-description">Create individual user accounts with role-based permissions</div>
+                        <button class="btn btn-primary">Get Started</button>
                     </div>
                     
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <span class="metric-label">System Health</span>
-                            <span class="metric-change positive">✓ Online</span>
-                        </div>
-                        <div class="metric-value" id="onTimeRate">100%</div>
-                        <div class="progress-container">
-                            <div class="progress-bar">
-                                <div class="progress-fill" id="onTimeBar" style="width: 100%"></div>
-                            </div>
-                        </div>
+                    <div class="quick-action-card" onclick="goToBulkUploadTab()">
+                        <div class="quick-action-icon">📤</div>
+                        <div class="quick-action-title">Bulk Upload</div>
+                        <div class="quick-action-description">Import multiple driver records from CSV or Excel files</div>
+                        <button class="btn btn-primary">Upload Data</button>
                     </div>
                     
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <span class="metric-label">Data Freshness</span>
-                            <span class="metric-change" id="dailyThroughput">📊 Live</span>
-                        </div>
-                        <div class="metric-value" id="dataFreshness">--</div>
-                        <div class="metric-change" style="color: var(--text-muted);">seconds ago</div>
+                    <div class="quick-action-card" onclick="exportUsersFromDashboard()">
+                        <div class="quick-action-icon">📊</div>
+                        <div class="quick-action-title">Export Data</div>
+                        <div class="quick-action-description">Generate comprehensive reports and data exports</div>
+                        <button class="btn btn-success">Export Now</button>
+                    </div>
+                    
+                    <div class="quick-action-card" onclick="refreshDashboardFromQuickActions()">
+                        <div class="quick-action-icon">🔄</div>
+                        <div class="quick-action-title">Refresh Data</div>
+                        <div class="quick-action-description">Update dashboard with latest system information</div>
+                        <button class="btn btn-primary">Refresh</button>
                     </div>
                 </div>
                 
-                <div class="analytics-panel">
-                    <h3 class="analytics-title">
-                        <span>⚡</span>
-                        <span>Quick Actions</span>
-                    </h3>
-                    
-                    <div style="display: grid; gap: 1rem;">
-                        <a href="/admin.html" class="btn btn-primary" target="_blank" style="width: 100%; justify-content: center;">
-                            <span>👤</span>
-                            <span>Add New User</span>
-                        </a>
-                        <button class="btn btn-secondary" style="width: 100%; justify-content: center;" onclick="refreshDashboard()">
-                            <span>🔄</span>
-                            <span>Refresh Data</span>
-                        </button>
-                        <button class="btn btn-secondary" style="width: 100%; justify-content: center;" onclick="exportData()">
-                            <span>📊</span>
-                            <span>Export Report</span>
-                        </button>
-                        <button class="btn btn-secondary" style="width: 100%; justify-content: center;" onclick="requestAdminSync()">
-                            <span>🔗</span>
-                            <span>Force Sync</span>
-                        </button>
+                <div id="dashboardMessage"></div>
+            </div>
+        </div>
+        
+        <div id="users-tab" class="tab-content">
+            <div class="card">
+                <h2 class="card-title">
+                    <span>👤</span>
+                    User Account Creation
+                </h2>
+                <p class="card-subtitle">Create and configure individual user accounts with role-based access</p>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label" for="userName">Full Name *</label>
+                        <input type="text" id="userName" class="form-input" placeholder="Enter user's full name" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="userEmail">Email Address</label>
+                        <input type="email" id="userEmail" class="form-input" placeholder="user@company.com">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="userRole">System Role *</label>
+                        <select id="userRole" class="form-select" required>
+                            <option value="driver">Driver</option>
+                            <option value="dispatcher">Dispatcher</option>
+                            <option value="admin">Administrator</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="userPassword">Password</label>
+                        <input type="password" id="userPassword" class="form-input" placeholder="Enter secure password">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="userPhone">Phone Number</label>
+                        <input type="tel" id="userPhone" class="form-input" placeholder="+1 (555) 123-4567">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="userVehicle">Vehicle ID</label>
+                        <input type="text" id="userVehicle" class="form-input" placeholder="T-1234">
                     </div>
                 </div>
+                
+                <button class="btn btn-primary" onclick="createUser()">
+                    <span class="loading-spinner"></span>
+                    <span>✅</span>
+                    <span>Create User Account</span>
+                </button>
+                <button class="btn btn-secondary" onclick="clearUserForm()">
+                    <span>🗑️</span>
+                    <span>Clear Form</span>
+                </button>
+                
+                <div id="userMessage"></div>
+            </div>
+            
+            <div class="card">
+                <h2 class="card-title">
+                    <span>👥</span>
+                    User Directory
+                </h2>
+                <p class="card-subtitle">Comprehensive user management and administration</p>
+                
+                <div class="search-filters">
+                    <input type="text" class="search-input" id="searchInput" placeholder="Search users by name, email, or vehicle ID..." onkeyup="searchUsers()">
+                    <select id="roleFilter" class="form-select" style="width: auto; min-width: 180px;" onchange="filterUsers()">
+                        <option value="all">All Roles</option>
+                        <option value="driver">Drivers</option>
+                        <option value="dispatcher">Dispatchers</option>
+                        <option value="admin">Administrators</option>
+                    </select>
+                    <button class="btn btn-success" onclick="exportUsers()">
+                        <span>📊</span>
+                        <span>Export CSV</span>
+                    </button>
+                </div>
+                
+                <div id="usersList" class="users-list">
+                    <div class="loading-state">
+                        <div class="spinner"></div>
+                        <span>Loading user directory...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="bulk-upload-tab" class="tab-content">
+            <div class="template-section">
+                <h3 class="template-title">
+                    <span>📋</span>
+                    Download Import Template
+                </h3>
+                <p class="template-description">
+                    Download the standardized CSV template to ensure your data conforms to system requirements. 
+                    Required fields: <strong>name</strong>. Optional fields: <strong>email, phoneNumber, vehicleId</strong>
+                </p>
+                <button class="btn btn-success" onclick="downloadTemplate()">
+                    <span>📥</span>
+                    <span>Download CSV Template</span>
+                </button>
+            </div>
+            
+            <div class="card">
+                <h2 class="card-title">
+                    <span>📁</span>
+                    Bulk Data Import
+                </h2>
+                <p class="card-subtitle">Import multiple driver records efficiently with automated validation</p>
+                
+                <div class="upload-section" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                    <div class="upload-icon">📂</div>
+                    <h3 class="upload-title">Drop your file here or click to browse</h3>
+                    <p class="upload-subtitle">
+                        Supports CSV and Excel formats (.csv, .xlsx, .xls)<br>
+                        Maximum file size: 10MB | Maximum records: 1,000
+                    </p>
+                    <button class="btn btn-primary">
+                        <span>🔍</span>
+                        <span>Select File</span>
+                    </button>
+                </div>
+                
+                <input type="file" id="fileInput" class="file-input" accept=".csv,.xlsx,.xls" onchange="handleFileSelect(event)">
+                
+                <div id="uploadMessage"></div>
+                
+                <button class="btn btn-success" id="uploadBtn" onclick="uploadDrivers()" disabled>
+                    <span class="loading-spinner"></span>
+                    <span>✅</span>
+                    <span>Process Import</span>
+                </button>
+                <button class="btn btn-secondary" onclick="clearUpload()">
+                    <span>🗑️</span>
+                    <span>Clear Upload</span>
+                </button>
             </div>
         </div>
     </div>
-    
+
     <script>
-        // Global Variables
-        let allDriverData = [];
-        let filteredDriverData = [];
-        let currentFilter = 'all';
-        let refreshInterval;
-        let lastSyncTime = null;
+        var API_BASE = window.location.origin;
+        var users = [];
+        var filteredUsers = [];
+        var currentTab = 'dashboard';
         
-        // Initialize Dashboard
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Fleet Command Center Dashboard - Enhanced Admin Integration');
-            startClock();
-            setupAdminCommunication();
-            loadNotifications();
-            startAutoRefresh();
+            console.log('FleetForce Enterprise Admin loaded');
+            checkConnection();
         });
         
-        // Clock Management
-        function startClock() {
-            function updateTime() {
-                const now = new Date();
-                document.getElementById('currentTime').textContent = 
-                    now.toLocaleTimeString('en-US', { hour12: false });
+        function switchTab(tabName, buttonElement) {
+            var tabContents = document.querySelectorAll('.tab-content');
+            for (var i = 0; i < tabContents.length; i++) {
+                tabContents[i].classList.remove('active');
             }
-            updateTime();
-            setInterval(updateTime, 1000);
+            
+            var navTabs = document.querySelectorAll('.nav-tab');
+            for (var i = 0; i < navTabs.length; i++) {
+                navTabs[i].classList.remove('active');
+            }
+            
+            setTimeout(function() {
+                document.getElementById(tabName + '-tab').classList.add('active');
+            }, 50);
+            
+            buttonElement.classList.add('active');
+            currentTab = tabName;
+            
+            if (tabName === 'dashboard' || tabName === 'users') {
+                loadUsers();
+            }
         }
         
-        // Enhanced Admin Communication Setup
-        function setupAdminCommunication() {
-            // Listen for messages from admin panel
-            window.addEventListener('message', function(event) {
-                console.log('Received message:', event.data);
-                
-                if (event.data.type === 'ADMIN_DATA_UPDATE') {
-                    console.log('Admin panel data update received');
-                    handleAdminDataUpdate(event.data.data);
-                }
-            });
+        function goToUsersTab() {
+            var usersTabButton = document.querySelector('[onclick*="users"]');
+            switchTab('users', usersTabButton);
+        }
+        
+        function goToBulkUploadTab() {
+            var bulkUploadTabButton = document.querySelector('[onclick*="bulk-upload"]');
+            switchTab('bulk-upload', bulkUploadTabButton);
+        }
+        
+        function exportUsersFromDashboard() {
+            exportUsers();
+            showDashboardMessage('Successfully exported ' + users.length + ' user records', 'success');
+        }
+        
+        function refreshDashboardFromQuickActions() {
+            showDashboardMessage('Refreshing system data...', 'success');
+            loadUsers();
+            checkConnection();
+        }
+        
+        function showDashboardMessage(message, type) {
+            var container = document.getElementById('dashboardMessage');
+            var icons = { success: '✅', error: '❌', warning: '⚠️' };
             
-            // Listen for BroadcastChannel messages (if supported)
-            if (typeof BroadcastChannel !== 'undefined') {
-                const channel = new BroadcastChannel('fleetforce_sync');
-                channel.addEventListener('message', function(event) {
-                    if (event.data.type === 'ADMIN_DATA_UPDATE') {
-                        console.log('BroadcastChannel data update received');
-                        handleAdminDataUpdate(event.data.data);
+            var messageHtml = '<div class="message ' + type + '">';
+            messageHtml += '<span>' + (icons[type] || '') + '</span>';
+            messageHtml += '<span>' + message + '</span>';
+            messageHtml += '</div>';
+            
+            container.innerHTML = messageHtml;
+            
+            if (type === 'success') {
+                setTimeout(function() {
+                    container.innerHTML = '';
+                }, 5000);
+            }
+        }
+        
+        function checkConnection() {
+            fetch(API_BASE + '/api/health')
+                .then(function(response) {
+                    if (response.ok) {
+                        return response.json();
                     }
+                    throw new Error('HTTP ' + response.status);
+                })
+                .then(function(data) {
+                    console.log('Health check passed:', data);
+                    updateConnectionStatus(true);
+                    loadUsers();
+                })
+                .catch(function(error) {
+                    console.error('Connection failed:', error);
+                    updateConnectionStatus(false);
                 });
-            }
-            
-            // Try to load data from admin session storage on init
-            loadFromAdminSync();
-            
-            console.log('Enhanced admin communication setup complete');
         }
         
-        function handleAdminDataUpdate(userData) {
-            if (userData && Array.isArray(userData)) {
-                allDriverData = userData;
-                lastSyncTime = new Date();
-                processUserData();
-                updateSyncStatus(true, 'Admin update');
-                showToast('Data Sync', 'Dashboard updated from admin panel', 'success');
+        function updateConnectionStatus(connected) {
+            var status = document.getElementById('connectionStatus');
+            if (connected) {
+                status.innerHTML = '<div class="pulse"></div><span>System Operational</span>';
+            } else {
+                status.innerHTML = '<div style="width: 10px; height: 10px; background: var(--danger); border-radius: 50%;"></div><span style="color: var(--danger);">Connection Failed</span>';
             }
         }
         
-        // Load data from admin panel session storage
-        function loadFromAdminSync() {
-            try {
-                const syncData = sessionStorage.getItem('fleetforce_users');
-                const syncTime = sessionStorage.getItem('fleetforce_last_sync');
-                
-                if (syncData && syncTime) {
-                    const parsedData = JSON.parse(syncData);
-                    const syncDate = new Date(syncTime);
-                    const now = new Date();
-                    const timeDiff = (now - syncDate) / 1000; // seconds
-                    
-                    if (timeDiff < 300) { // Use cached data if less than 5 minutes old
-                        console.log('Loading data from admin sync cache');
-                        allDriverData = parsedData;
-                        lastSyncTime = syncDate;
-                        processUserData();
-                        updateSyncStatus(true, 'Admin cache');
-                        return true;
+        function loadUsers() {
+            fetch(API_BASE + '/api/users')
+                .then(function(response) {
+                    if (response.ok) {
+                        return response.json();
                     }
-                }
-            } catch (e) {
-                console.warn('Could not load admin sync data:', e);
-            }
-            return false;
+                    throw new Error('HTTP ' + response.status);
+                })
+                .then(function(data) {
+                    users = data.data || data || [];
+                    filteredUsers = users.slice();
+                    console.log('Loaded ' + users.length + ' users');
+                    displayUsers();
+                    updateStats();
+                })
+                .catch(function(error) {
+                    console.error('Failed to load users:', error);
+                    showMessage('Failed to load users: ' + error.message, 'error');
+                });
         }
         
-        // Enhanced data loading with admin integration priority
-        async function loadNotifications() {
-            // First try to load from admin sync
-            if (loadFromAdminSync()) {
+        function displayUsers() {
+            var container = document.getElementById('usersList');
+            
+            if (filteredUsers.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-icon">👥</div><div class="empty-title">No Users Found</div><div class="empty-description">Create your first user account to get started</div></div>';
                 return;
             }
             
-            // Fallback to direct API calls - combine notifications and users
-            try {
-                console.log('Loading data from APIs...');
-                
-                const [notificationsResponse, usersResponse] = await Promise.all([
-                    fetch('/api/notifications').catch(() => null),
-                    fetch('/api/users').catch(() => null)
-                ]);
-                
-                let combinedData = [];
-                
-                // Process admin users if available
-                if (usersResponse && usersResponse.ok) {
-                    const userData = await usersResponse.json();
-                    const users = Array.isArray(userData) ? userData : (userData.data || []);
-                    combinedData = users;
-                    console.log(`Loaded ${users.length} users from API`);
+            var html = '';
+            for (var i = 0; i < filteredUsers.length; i++) {
+                var user = filteredUsers[i];
+                html += '<div class="user-item">';
+                html += '<div class="user-info">';
+                html += '<h3>' + user.name + '</h3>';
+                html += '<p>' + (user.email || 'No email provided') + '</p>';
+                if (user.phoneNumber) {
+                    html += '<p>📞 ' + user.phoneNumber + '</p>';
                 }
-                
-                // Process notifications if available
-                if (notificationsResponse && notificationsResponse.ok) {
-                    const notificationData = await notificationsResponse.json();
-                    const notifications = Array.isArray(notificationData) ? notificationData : (notificationData.data || []);
-                    console.log(`Loaded ${notifications.length} notifications from API`);
-                    
-                    // Merge with existing user data (notifications take priority for matching users)
-                    const notificationUsers = notifications.filter(n => n.driver).map(n => ({
-                        name: n.driver,
-                        role: 'driver',
-                        status: n.status || 'active',
-                        location: n.location,
-                        timestamp: n.timestamp,
-                        active: true,
-                        _id: n._id || `notification-${Date.now()}-${Math.random()}`,
-                        createdAt: n.timestamp || new Date().toISOString()
-                    }));
-                    
-                    // Add notification-based users that don't exist in admin data
-                    const existingNames = combinedData.map(u => u.name);
-                    const newNotificationUsers = notificationUsers.filter(nu => !existingNames.includes(nu.name));
-                    combinedData = [...combinedData, ...newNotificationUsers];
+                if (user.vehicleId) {
+                    html += '<p>🚗 ' + user.vehicleId + '</p>';
                 }
-                
-                allDriverData = combinedData;
-                lastSyncTime = new Date();
-                
-                processUserData();
-                updateSyncStatus(true, 'Direct API');
-                
-            } catch (error) {
-                console.error('Failed to load data:', error);
-                updateSyncStatus(false, 'Connection failed');
-                
-                // Show error in activity feed
-                const activityList = document.getElementById('activityList');
-                activityList.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">❌</div>
-                        <div class="empty-title">Connection Failed</div>
-                        <div class="empty-description">
-                            Unable to load data from admin panel or API.
-                            <br><br>
-                            <button class="btn btn-primary" onclick="loadNotifications()">
-                                🔄 Retry Connection
-                            </button>
-                        </div>
-                    </div>
-                `;
+                html += '<span class="user-badge badge-' + user.role + '">' + user.role + '</span>';
+                html += '<div class="user-meta">Created: ' + new Date(user.createdAt).toLocaleDateString() + ' • ID: ' + user._id + '</div>';
+                html += '</div>';
+                html += '<div>';
+                html += '<button class="btn btn-danger" onclick="deleteUser(\'' + user._id + '\', \'' + user.name.replace(/'/g, "\\'") + '\')">🗑️ Delete</button>';
+                html += '</div>';
+                html += '</div>';
             }
+            
+            container.innerHTML = html;
         }
         
-        // Process and display user data
-        function processUserData() {
-            filterStatus(currentFilter);
-            updateKPIs();
-            updateActivityFeed();
-            updateDataFreshness();
-            updateLastUpdate();
+        function updateStats() {
+            var drivers = 0, dispatchers = 0, admins = 0;
+            for (var i = 0; i < users.length; i++) {
+                if (users[i].role === 'driver') drivers++;
+                else if (users[i].role === 'dispatcher') dispatchers++;
+                else if (users[i].role === 'admin') admins++;
+            }
+            
+            animateCounter('totalUsers', users.length);
+            animateCounter('totalDrivers', drivers);
+            animateCounter('totalDispatchers', dispatchers);
+            animateCounter('totalAdmins', admins);
         }
         
-        // Update KPI cards
-        function updateKPIs() {
-            const totalDrivers = allDriverData.filter(u => u.role === 'driver').length;
-            const activeDrivers = allDriverData.filter(u => u.role === 'driver' && u.active !== false).length;
-            const dispatchers = allDriverData.filter(u => u.role === 'dispatcher').length;
-            const admins = allDriverData.filter(u => u.role === 'admin').length;
-            
-            // Animate counters
-            animateCounter('routedDrivers', totalDrivers);
-            animateCounter('enRouteCount', activeDrivers);
-            animateCounter('arrivedCheckedIn', dispatchers);
-            animateCounter('pendingCheckIn', admins);
-            
-            // Update utilization
-            const utilization = totalDrivers > 0 ? Math.min((activeDrivers / totalDrivers) * 100, 100) : 0;
-            document.getElementById('fleetUtilization').textContent = Math.floor(utilization) + '%';
-            document.getElementById('utilizationBar').style.width = utilization + '%';
-            
-            // Update other metrics
-            document.getElementById('onTimeRate').textContent = '100%';
-            document.getElementById('onTimeBar').style.width = '100%';
-        }
-        
-        // Animate counter values
         function animateCounter(elementId, targetValue) {
-            const element = document.getElementById(elementId);
-            if (!element) return;
-            
-            const currentValue = parseInt(element.textContent) || 0;
-            const increment = Math.ceil((targetValue - currentValue) / 20);
+            var element = document.getElementById(elementId);
+            var currentValue = parseInt(element.textContent) || 0;
+            var increment = Math.ceil((targetValue - currentValue) / 20);
             
             if (currentValue === targetValue) return;
             
-            const timer = setInterval(() => {
-                const current = parseInt(element.textContent);
-                const next = current + increment;
+            var timer = setInterval(function() {
+                var current = parseInt(element.textContent);
+                var next = current + increment;
                 
                 if ((increment > 0 && next >= targetValue) || (increment < 0 && next <= targetValue)) {
                     element.textContent = targetValue;
@@ -1289,271 +1130,372 @@
             }, 50);
         }
         
-        // Update activity feed
-        function updateActivityFeed() {
-            const activityList = document.getElementById('activityList');
+        function createUser() {
+            var button = event.target;
+            button.classList.add('loading');
             
-            if (filteredDriverData.length === 0) {
-                let emptyMessage = 'No users found';
-                if (currentFilter !== 'all') {
-                    emptyMessage = `No ${currentFilter}s found`;
+            var name = document.getElementById('userName').value.trim();
+            var email = document.getElementById('userEmail').value.trim();
+            var role = document.getElementById('userRole').value;
+            var password = document.getElementById('userPassword').value;
+            var phoneNumber = document.getElementById('userPhone').value.trim();
+            var vehicleId = document.getElementById('userVehicle').value.trim();
+            
+            if (!name) {
+                showMessage('Full name is required', 'error');
+                button.classList.remove('loading');
+                return;
+            }
+            
+            var userData = { name: name, role: role, active: true };
+            if (email) userData.email = email;
+            if (password) userData.password = password;
+            if (phoneNumber) userData.phoneNumber = phoneNumber;
+            if (vehicleId) userData.vehicleId = vehicleId;
+            
+            fetch(API_BASE + '/api/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+            })
+            .then(function(response) {
+                if (response.ok) {
+                    return response.json();
                 }
-                
-                activityList.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">👥</div>
-                        <div class="empty-title">${emptyMessage}</div>
-                        <div class="empty-description">
-                            Users will appear here when added through the admin panel
-                            <br><br>
-                            <a href="/admin.html" class="btn btn-primary" target="_blank">
-                                ⚙️ Open Admin Panel
-                            </a>
-                        </div>
-                    </div>
-                `;
-                return;
-            }
-            
-            // Sort users by creation date (newest first)
-            const sortedUsers = filteredDriverData
-                .sort((a, b) => new Date(b.createdAt || Date.now()) - new Date(a.createdAt || Date.now()))
-                .slice(0, 50); // Show latest 50 users
-            
-            activityList.innerHTML = sortedUsers.map(user => {
-                const timeAgo = getTimeAgo(new Date(user.createdAt || Date.now()));
-                const isActive = user.active !== false;
-                
-                return `
-                    <div class="activity-item ${user.role}">
-                        <div class="activity-content">
-                            <div class="activity-info">
-                                <div class="activity-driver">${user.name}</div>
-                                <div class="activity-details">
-                                    <div class="activity-detail">
-                                        <span>⏱</span>
-                                        <span>Added ${timeAgo}</span>
-                                    </div>
-                                    ${user.email ? `
-                                        <div class="activity-detail">
-                                            <span>📧</span>
-                                            <span>${user.email}</span>
-                                        </div>
-                                    ` : ''}
-                                    ${user.vehicleId ? `
-                                        <div class="activity-detail">
-                                            <span>🚛</span>
-                                            <span>${user.vehicleId}</span>
-                                        </div>
-                                    ` : ''}
-                                    <div class="activity-detail">
-                                        <span>👤</span>
-                                        <span>${user.role}</span>
-                                    </div>
-                                    ${user.status ? `
-                                        <div class="activity-detail">
-                                            <span>📊</span>
-                                            <span>${user.status}</span>
-                                        </div>
-                                    ` : ''}
-                                </div>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                <span class="status-badge status-${user.role}">
-                                    ${user.role}
-                                </span>
-                                <span class="status-badge ${isActive ? 'status-active' : 'status-standby'}">
-                                    ${isActive ? 'Active' : 'Inactive'}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-        
-        // Time utility function
-        function getTimeAgo(date) {
-            const seconds = Math.floor((new Date() - date) / 1000);
-            if (seconds < 60) return 'just now';
-            const minutes = Math.floor(seconds / 60);
-            if (minutes < 60) return `${minutes}m ago`;
-            const hours = Math.floor(minutes / 60);
-            if (hours < 24) return `${hours}h ago`;
-            return `${Math.floor(hours / 24)}d ago`;
-        }
-        
-        // Filter functions
-        function filterStatus(role, buttonElement = null) {
-            currentFilter = role;
-            
-            // Update button states if called from UI
-            if (buttonElement) {
-                document.querySelectorAll('.filter-btn').forEach(btn => {
-                    btn.classList.remove('active');
+                return response.json().then(function(errorData) {
+                    throw new Error(errorData.error || 'HTTP ' + response.status);
                 });
-                buttonElement.classList.add('active');
-            }
+            })
+            .then(function(result) {
+                showMessage('User account "' + name + '" created successfully', 'success');
+                clearUserForm();
+                loadUsers();
+            })
+            .catch(function(error) {
+                showMessage('Failed to create user: ' + error.message, 'error');
+            })
+            .finally(function() {
+                button.classList.remove('loading');
+            });
+        }
+        
+        function clearUserForm() {
+            document.getElementById('userName').value = '';
+            document.getElementById('userEmail').value = '';
+            document.getElementById('userPassword').value = '';
+            document.getElementById('userPhone').value = '';
+            document.getElementById('userVehicle').value = '';
+            document.getElementById('userRole').value = 'driver';
+        }
+        
+        function deleteUser(userId, userName) {
+            if (!confirm('Delete user "' + userName + '"?\n\nThis action cannot be undone.')) return;
             
-            // Apply filter
-            if (role === 'all') {
-                filteredDriverData = allDriverData.slice();
-            } else {
-                filteredDriverData = allDriverData.filter(user => user.role === role);
-            }
-            
-            updateActivityFeed();
-        }
-        
-        // Status update functions
-        function updateSyncStatus(success, source = '') {
-            const syncStatus = document.getElementById('adminSyncStatus');
-            const indicator = syncStatus.querySelector('.sync-indicator');
-            const text = syncStatus.querySelector('span');
-            
-            if (success) {
-                indicator.className = 'sync-indicator';
-                text.textContent = source ? `Synced via ${source}` : 'Auto-sync enabled';
-            } else {
-                indicator.className = 'sync-indicator error';
-                text.textContent = 'Sync error';
-            }
-        }
-        
-        function updateDataFreshness() {
-            if (lastSyncTime) {
-                const seconds = Math.floor((new Date() - lastSyncTime) / 1000);
-                document.getElementById('dataFreshness').textContent = seconds;
-            }
-        }
-        
-        function updateLastUpdate() {
-            const lastUpdateElement = document.getElementById('lastUpdate');
-            if (lastSyncTime) {
-                lastUpdateElement.innerHTML = `Last updated: ${lastSyncTime.toLocaleTimeString()}`;
-            } else {
-                lastUpdateElement.innerHTML = 'Never updated';
-            }
-        }
-        
-        // Action functions
-        function refreshDashboard() {
-            showToast('Refreshing', 'Loading latest data...', 'info');
-            loadNotifications();
-        }
-        
-        function requestAdminSync() {
-            showToast('Sync Request', 'Requesting data from admin panel...', 'info');
-            
-            // Try to request fresh data from admin panel
-            try {
-                // Send message to admin panel
-                window.postMessage({
-                    type: 'DASHBOARD_REQUEST_DATA'
-                }, '*');
-                
-                // Also try to load from session storage
-                setTimeout(() => {
-                    if (loadFromAdminSync()) {
-                        showToast('Sync Complete', 'Data synchronized with admin panel', 'success');
+            fetch(API_BASE + '/api/users/' + userId, { method: 'DELETE' })
+                .then(function(response) {
+                    if (response.ok) {
+                        showMessage('User "' + userName + '" deleted successfully', 'success');
+                        loadUsers();
                     } else {
-                        // Fallback to API
-                        loadNotifications();
+                        throw new Error('HTTP ' + response.status);
                     }
-                }, 1000);
-                
-            } catch (e) {
-                console.warn('Could not communicate with admin panel:', e);
-                loadNotifications();
-            }
+                })
+                .catch(function(error) {
+                    showMessage('Failed to delete user: ' + error.message, 'error');
+                });
         }
         
-        function exportData() {
-            if (allDriverData.length === 0) {
-                showToast('Export Error', 'No data to export', 'error');
+        function searchUsers() {
+            var query = document.getElementById('searchInput').value.toLowerCase();
+            var roleFilter = document.getElementById('roleFilter').value;
+            
+            filteredUsers = [];
+            for (var i = 0; i < users.length; i++) {
+                var user = users[i];
+                var matchesSearch = !query || 
+                    user.name.toLowerCase().indexOf(query) !== -1 ||
+                    (user.email && user.email.toLowerCase().indexOf(query) !== -1) ||
+                    (user.phoneNumber && user.phoneNumber.indexOf(query) !== -1) ||
+                    (user.vehicleId && user.vehicleId.toLowerCase().indexOf(query) !== -1);
+                
+                var matchesRole = roleFilter === 'all' || user.role === roleFilter;
+                
+                if (matchesSearch && matchesRole) {
+                    filteredUsers.push(user);
+                }
+            }
+            
+            displayUsers();
+        }
+        
+        function filterUsers() {
+            searchUsers();
+        }
+        
+        function exportUsers() {
+            if (users.length === 0) {
+                showMessage('No users to export', 'error');
                 return;
             }
             
-            const csvData = [
-                ['Name', 'Email', 'Phone', 'Role', 'Vehicle ID', 'Status', 'Created']
+            var csvData = [
+                ['Name', 'Email', 'Phone', 'Role', 'Vehicle ID', 'Created']
             ];
             
-            allDriverData.forEach(user => {
+            for (var i = 0; i < users.length; i++) {
+                var user = users[i];
                 csvData.push([
                     user.name,
                     user.email || '',
                     user.phoneNumber || '',
                     user.role,
                     user.vehicleId || '',
-                    user.active !== false ? 'Active' : 'Inactive',
-                    new Date(user.createdAt || Date.now()).toLocaleDateString()
+                    new Date(user.createdAt).toLocaleDateString()
                 ]);
-            });
+            }
             
-            const csv = csvData.map(row => 
-                row.map(cell => `"${cell}"`).join(',')
-            ).join('\n');
+            var csv = '';
+            for (var i = 0; i < csvData.length; i++) {
+                var row = csvData[i];
+                var csvRow = '';
+                for (var j = 0; j < row.length; j++) {
+                    csvRow += '"' + row[j] + '"';
+                    if (j < row.length - 1) csvRow += ',';
+                }
+                csv += csvRow + '\n';
+            }
             
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
+            var blob = new Blob([csv], { type: 'text/csv' });
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement('a');
             a.href = url;
-            a.download = `fleet-dashboard-${new Date().toISOString().split('T')[0]}.csv`;
+            a.download = 'fleetforce-users-' + new Date().toISOString().split('T')[0] + '.csv';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
             
-            showToast('Export Complete', `Exported ${allDriverData.length} records`, 'success');
+            showMessage('Exported ' + users.length + ' users to CSV', 'success');
         }
         
-        // Auto-refresh functionality
-        function startAutoRefresh() {
-            refreshInterval = setInterval(() => {
-                // Update data freshness counter
-                updateDataFreshness();
-                
-                // Refresh data every 30 seconds
-                loadNotifications();
-            }, 30000);
+        function handleFileSelect(event) {
+            var file = event.target.files[0];
+            if (file) {
+                showUploadMessage('File selected: ' + file.name + '. Ready for processing...', 'success');
+                document.getElementById('uploadBtn').disabled = false;
+            }
         }
         
-        // Toast notification system
-        function showToast(title, message, type = 'info') {
-            const existingToast = document.querySelector('.toast');
-            if (existingToast) existingToast.remove();
+        function downloadTemplate() {
+            var template = [
+                ['name', 'email', 'phoneNumber', 'vehicleId'],
+                ['John Doe', 'john@company.com', '+1-555-0123', 'T-1234'],
+                ['Jane Smith', 'jane@company.com', '+1-555-0124', 'T-5678'],
+                ['Mike Johnson', '', '+1-555-0125', 'T-9012']
+            ];
             
-            const icons = {
-                success: '✅',
-                error: '❌',
-                info: 'ℹ️',
-                warning: '⚠️'
+            var csv = '';
+            for (var i = 0; i < template.length; i++) {
+                var row = template[i];
+                var csvRow = '';
+                for (var j = 0; j < row.length; j++) {
+                    csvRow += '"' + row[j] + '"';
+                    if (j < row.length - 1) csvRow += ',';
+                }
+                csv += csvRow + '\n';
+            }
+            
+            var blob = new Blob([csv], { type: 'text/csv' });
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'fleetforce-driver-template.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showUploadMessage('Template downloaded successfully!', 'success');
+        }
+        
+        function uploadDrivers() {
+            var fileInput = document.getElementById('fileInput');
+            var file = fileInput.files[0];
+            
+            if (!file) {
+                showUploadMessage('Please select a file first', 'error');
+                return;
+            }
+            
+            var button = event.target;
+            button.classList.add('loading');
+            button.disabled = true;
+            
+            showUploadMessage('Processing file and creating driver accounts...', 'success');
+            
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var text = e.target.result;
+                var lines = text.split('\n');
+                var validLines = [];
+                for (var i = 0; i < lines.length; i++) {
+                    if (lines[i].trim()) {
+                        validLines.push(lines[i]);
+                    }
+                }
+                
+                if (validLines.length < 2) {
+                    showUploadMessage('File must have at least a header and one data row', 'error');
+                    button.classList.remove('loading');
+                    button.disabled = true;
+                    return;
+                }
+                
+                var headers = validLines[0].split(',');
+                for (var i = 0; i < headers.length; i++) {
+                    headers[i] = headers[i].trim().replace(/"/g, '');
+                }
+                
+                var successCount = 0;
+                var errorCount = 0;
+                var errors = [];
+                var processedCount = 0;
+                
+                function processNextRow() {
+                    var lineIndex = processedCount + 1;
+                    if (lineIndex >= validLines.length) {
+                        // All done
+                        var message = 'Import completed! ' + successCount + ' drivers created successfully';
+                        if (errorCount > 0) {
+                            message += ', ' + errorCount + ' failed';
+                        }
+                        
+                        showUploadMessage(message, successCount > 0 ? 'success' : 'error');
+                        
+                        if (errors.length > 0 && errors.length <= 5) {
+                            showUploadMessage('Errors: ' + errors.join(', '), 'warning');
+                        } else if (errors.length > 5) {
+                            showUploadMessage(errors.length + ' errors occurred. First few: ' + errors.slice(0, 3).join(', ') + '...', 'warning');
+                        }
+                        
+                        loadUsers();
+                        clearUpload();
+                        button.classList.remove('loading');
+                        button.disabled = true;
+                        return;
+                    }
+                    
+                    var values = validLines[lineIndex].split(',');
+                    for (var j = 0; j < values.length; j++) {
+                        values[j] = values[j].trim().replace(/"/g, '');
+                    }
+                    
+                    if (values[0]) {
+                        var userData = {
+                            name: values[0],
+                            role: 'driver',
+                            active: true
+                        };
+                        
+                        if (values[1]) userData.email = values[1];
+                        if (values[2]) userData.phoneNumber = values[2];
+                        if (values[3]) userData.vehicleId = values[3];
+                        
+                        fetch(API_BASE + '/api/users', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(userData)
+                        })
+                        .then(function(response) {
+                            if (response.ok) {
+                                successCount++;
+                            } else {
+                                return response.json().then(function(errorData) {
+                                    errors.push(userData.name + ': ' + (errorData.error || 'Failed'));
+                                    errorCount++;
+                                });
+                            }
+                        })
+                        .catch(function(error) {
+                            errors.push(userData.name + ': ' + error.message);
+                            errorCount++;
+                        })
+                        .finally(function() {
+                            processedCount++;
+                            setTimeout(processNextRow, 100);
+                        });
+                    } else {
+                        processedCount++;
+                        setTimeout(processNextRow, 10);
+                    }
+                }
+                
+                processNextRow();
             };
             
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.innerHTML = `
-                <div class="toast-icon">${icons[type]}</div>
-                <div class="toast-content">
-                    <div class="toast-title">${title}</div>
-                    <div class="toast-message">${message}</div>
-                </div>
-            `;
+            reader.onerror = function() {
+                showUploadMessage('Failed to read file', 'error');
+                button.classList.remove('loading');
+                button.disabled = true;
+            };
             
-            document.body.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.style.animation = 'slideUp 0.3s ease reverse';
-                setTimeout(() => toast.remove(), 300);
-            }, 4000);
+            reader.readAsText(file);
         }
         
-        // Cleanup on page unload
-        window.addEventListener('beforeunload', () => {
-            if (refreshInterval) {
-                clearInterval(refreshInterval);
+        function clearUpload() {
+            document.getElementById('fileInput').value = '';
+            document.getElementById('uploadBtn').disabled = true;
+            showUploadMessage('', '');
+        }
+        
+        function showUploadMessage(message, type) {
+            var container = document.getElementById('uploadMessage');
+            if (!message) {
+                container.innerHTML = '';
+                return;
             }
-        });
+            
+            var icons = { success: '✅', error: '❌', warning: '⚠️' };
+            
+            var messageHtml = '<div class="message ' + type + '">';
+            messageHtml += '<span>' + (icons[type] || '') + '</span>';
+            messageHtml += '<span>' + message + '</span>';
+            messageHtml += '</div>';
+            
+            container.innerHTML = messageHtml;
+            
+            if (type === 'success') {
+                setTimeout(function() {
+                    container.innerHTML = '';
+                }, 5000);
+            }
+        }
+        
+        function showMessage(message, type) {
+            var container = document.getElementById('userMessage');
+            var icons = { success: '✅', error: '❌', warning: '⚠️' };
+            
+            var messageHtml = '<div class="message ' + type + '">';
+            messageHtml += '<span>' + (icons[type] || '') + '</span>';
+            messageHtml += '<span>' + message + '</span>';
+            messageHtml += '</div>';
+            
+            container.innerHTML = messageHtml;
+            
+            if (type === 'success') {
+                setTimeout(function() {
+                    container.innerHTML = '';
+                }, 5000);
+            }
+        }
+        
+        setInterval(function() {
+            if (currentTab === 'dashboard' || currentTab === 'users') {
+                loadUsers();
+            }
+        }, 30000);
+        
+        setInterval(checkConnection, 60000);
     </script>
 </body>
 </html>
