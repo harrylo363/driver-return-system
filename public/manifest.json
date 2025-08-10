@@ -1,13 +1,28 @@
 {
-  "name": "Driver Return System",
-  "short_name": "Driver Portal",
-  "description": "Fleet management and driver tracking system",
-  "start_url": "/driver.html",
+  "name": "Fleet Management System",
+  "short_name": "FleetForce",
+  "description": "Enterprise Fleet Management Platform",
+  "start_url": "/dashboard.html",
   "display": "standalone",
-  "background_color": "#1e3c72",
-  "theme_color": "#2a5298",
   "orientation": "portrait",
+  "background_color": "#0F172A",
+  "theme_color": "#3B82F6",
   "icons": [
+    {
+      "src": "https://img.icons8.com/color/72/truck.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "https://img.icons8.com/color/96/truck.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "https://img.icons8.com/color/144/truck.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
     {
       "src": "https://img.icons8.com/color/192/truck.png",
       "sizes": "192x192",
@@ -18,5 +33,6 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ]
+  ],
+  "categories": ["business", "productivity"]
 }
