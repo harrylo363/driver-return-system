@@ -2,368 +2,360 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Driver Check-In System</title>
-    <link rel="manifest" href="/manifest.json">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Status Portal</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
         }
-
+        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            min-height: 100vh;
-            color: #333;
-            overflow-x: hidden;
-        }
-
-        .container {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
-            flex-direction: column;
-            padding: 20px;
-            max-width: 500px;
-            margin: 0 auto;
-        }
-
-        /* Login Screen */
-        .login-screen {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            text-align: center;
+            padding: 20px;
         }
-
-        .logo-section {
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 100%;
+            padding: 40px;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Login Screen */
+        .login-screen {
+            display: block;
+        }
+        
+        .login-screen.hidden {
+            display: none;
+        }
+        
+        /* Main Screen */
+        .main-screen {
+            display: none;
+        }
+        
+        .main-screen.visible {
+            display: block;
+        }
+        
+        .header {
+            text-align: center;
             margin-bottom: 40px;
         }
-
+        
         .logo {
             width: 80px;
             height: 80px;
-            background: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 40px;
             margin: 0 auto 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-
-        .app-title {
             color: white;
+        }
+        
+        h1 {
+            color: #1a202c;
             font-size: 28px;
             font-weight: 700;
             margin-bottom: 10px;
         }
-
-        .app-subtitle {
-            color: rgba(255,255,255,0.8);
+        
+        .subtitle {
+            color: #718096;
             font-size: 16px;
         }
-
-        .login-card {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            width: 100%;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-        }
-
-        .login-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: #333;
+        
+        /* Login Form */
+        .form-group {
             margin-bottom: 25px;
         }
-
-        .form-group {
-            margin-bottom: 20px;
-            text-align: left;
-        }
-
+        
         .form-label {
             display: block;
+            color: #4a5568;
             font-size: 14px;
-            color: #666;
-            margin-bottom: 8px;
-            font-weight: 500;
+            font-weight: 600;
+            margin-bottom: 10px;
         }
-
+        
         .driver-select {
             width: 100%;
             padding: 15px;
             font-size: 16px;
-            border: 2px solid #e1e5e9;
+            border: 2px solid #e2e8f0;
             border-radius: 12px;
-            background: #f8f9fa;
-            color: #333;
+            background: #f7fafc;
+            color: #2d3748;
+            cursor: pointer;
+            transition: all 0.3s ease;
             appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234a5568' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
             background-repeat: no-repeat;
             background-position: right 15px center;
             background-size: 20px;
-            cursor: pointer;
         }
-
+        
         .driver-select:focus {
             outline: none;
-            border-color: #2a5298;
+            border-color: #667eea;
             background-color: white;
         }
-
+        
+        .driver-select:hover {
+            border-color: #667eea;
+        }
+        
         .login-btn {
             width: 100%;
             padding: 16px;
-            font-size: 18px;
-            font-weight: 600;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
             border: none;
             border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(42, 82, 152, 0.3);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
-
+        
         .login-btn:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(42, 82, 152, 0.4);
+            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
         }
-
+        
         .login-btn:active {
             transform: translateY(0);
         }
-
+        
         .login-btn:disabled {
-            opacity: 0.6;
+            opacity: 0.5;
             cursor: not-allowed;
         }
-
-        /* Main Screen */
-        .main-screen {
-            display: none;
-            flex-direction: column;
-            flex: 1;
-        }
-
-        .header {
-            background: rgba(255,255,255,0.1);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .welcome-text {
-            color: white;
-            font-size: 18px;
-            margin-bottom: 5px;
-        }
-
-        .driver-name-display {
-            color: white;
-            font-size: 24px;
-            font-weight: 700;
-        }
-
+        
+        /* Driver Info */
         .driver-info {
-            color: rgba(255,255,255,0.8);
-            font-size: 14px;
-            margin-top: 5px;
-        }
-
-        .connection-status {
-            margin-top: 10px;
-            padding: 8px 15px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 20px;
-            font-size: 14px;
-            display: inline-block;
-        }
-
-        .status-connected {
-            color: #2ecc71;
-        }
-
-        .status-disconnected {
-            color: #e74c3c;
-        }
-
-        .status-card {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-        }
-
-        .status-title {
-            font-size: 22px;
-            font-weight: 600;
-            color: #333;
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 20px;
             margin-bottom: 30px;
             text-align: center;
         }
-
-        .status-buttons {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            justify-content: center;
-        }
-
-        .status-btn {
-            padding: 25px;
-            border: none;
-            border-radius: 15px;
+        
+        .driver-name {
             font-size: 20px;
             font-weight: 600;
-            color: white;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+        
+        .vehicle-id {
+            color: #718096;
+            font-size: 14px;
+        }
+        
+        /* Status Section */
+        .status-section {
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            color: #4a5568;
+            font-size: 16px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .status-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .status-btn {
+            padding: 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
-            min-height: 80px;
+            color: white;
             position: relative;
             overflow: hidden;
         }
-
+        
+        .status-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+        
         .status-btn:active {
-            transform: scale(0.98);
+            transform: translateY(0);
         }
-
+        
+        .status-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        
         .btn-30min {
-            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
-            box-shadow: 0 8px 20px rgba(243, 156, 18, 0.3);
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
         }
-
+        
+        .btn-30min:hover:not(:disabled) {
+            box-shadow: 0 6px 25px rgba(245, 158, 11, 0.4);
+        }
+        
         .btn-arrived {
-            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
-            box-shadow: 0 8px 20px rgba(39, 174, 96, 0.3);
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
         }
-
-        .btn-icon {
-            font-size: 30px;
+        
+        .btn-arrived:hover:not(:disabled) {
+            box-shadow: 0 6px 25px rgba(16, 185, 129, 0.4);
         }
-
-        .loading-spinner {
+        
+        /* Loading Spinner */
+        .loading {
             display: none;
-            width: 24px;
-            height: 24px;
+            width: 20px;
+            height: 20px;
             border: 3px solid rgba(255,255,255,0.3);
             border-radius: 50%;
             border-top-color: white;
             animation: spin 1s ease-in-out infinite;
         }
-
+        
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-
-        .status-history {
+        
+        .status-btn.sending .btn-text {
+            display: none;
+        }
+        
+        .status-btn.sending .loading {
+            display: inline-block;
+        }
+        
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            color: #1a202c;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 9999;
+            animation: slideIn 0.3s ease;
+            min-width: 250px;
+            border-left: 4px solid #10b981;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+        
+        /* Recent Updates */
+        .recent-updates {
             margin-top: 30px;
             padding-top: 20px;
-            border-top: 1px solid #e1e5e9;
+            border-top: 1px solid #e2e8f0;
         }
-
-        .history-title {
-            font-size: 16px;
+        
+        .updates-title {
+            font-size: 14px;
             font-weight: 600;
-            color: #666;
+            color: #718096;
             margin-bottom: 15px;
         }
-
-        .history-item {
-            background: #f8f9fa;
+        
+        .update-item {
+            background: #f7fafc;
             padding: 12px;
             border-radius: 8px;
             margin-bottom: 10px;
-            font-size: 14px;
-            color: #666;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            font-size: 14px;
+            color: #4a5568;
         }
-
-        .logout-section {
-            margin-top: 20px;
+        
+        /* Sign Out */
+        .signout-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
             text-align: center;
         }
-
-        .logout-btn {
+        
+        .signout-btn {
             background: transparent;
-            border: 2px solid #dc3545;
-            color: #dc3545;
-            padding: 12px 30px;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 10px 30px;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
         }
-
-        .logout-btn:hover {
-            background: #dc3545;
+        
+        .signout-btn:hover {
+            background: #667eea;
             color: white;
-        }
-
-        /* Messages */
-        .message {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 15px 25px;
-            border-radius: 10px;
-            font-weight: 600;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            z-index: 1000;
-            animation: slideIn 0.3s ease;
-            max-width: 90%;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(-50%) translateY(-100px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(-50%) translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .message.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .message.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .message.info {
-            background: #cce5ff;
-            color: #004085;
-            border: 1px solid #b8daff;
         }
     </style>
 </head>
@@ -371,421 +363,253 @@
     <div class="container">
         <!-- Login Screen -->
         <div class="login-screen" id="loginScreen">
-            <div class="logo-section">
+            <div class="header">
                 <div class="logo">🚚</div>
-                <h1 class="app-title">Driver Portal</h1>
-                <p class="app-subtitle">Quick Status Updates</p>
+                <h1>Driver Portal</h1>
+                <p class="subtitle">Warehouse Status Updates</p>
             </div>
             
-            <div class="login-card">
-                <h2 class="login-title">Select Your Name</h2>
-                
-                <div class="form-group">
-                    <label class="form-label" for="driverSelect">Driver Name</label>
-                    <select id="driverSelect" class="driver-select">
-                        <option value="">-- Loading drivers... --</option>
-                    </select>
-                </div>
-                
-                <button class="login-btn" onclick="login()" disabled id="loginBtn">
-                    Login to Continue
-                </button>
+            <div class="form-group">
+                <label class="form-label" for="driverSelect">Select Your Name</label>
+                <select class="driver-select" id="driverSelect">
+                    <option value="">-- Choose your name --</option>
+                    <option value="John Smith|TRUCK-001">John Smith</option>
+                    <option value="Sarah Johnson|TRUCK-002">Sarah Johnson</option>
+                    <option value="Mike Wilson|TRUCK-003">Mike Wilson</option>
+                    <option value="Emily Davis|TRUCK-004">Emily Davis</option>
+                    <option value="David Brown|TRUCK-005">David Brown</option>
+                    <option value="Lisa Anderson|TRUCK-006">Lisa Anderson</option>
+                    <option value="James Taylor|TRUCK-007">James Taylor</option>
+                    <option value="Maria Garcia|TRUCK-008">Maria Garcia</option>
+                    <option value="Robert Martinez|TRUCK-009">Robert Martinez</option>
+                    <option value="Jennifer Lee|TRUCK-010">Jennifer Lee</option>
+                </select>
             </div>
+            
+            <button class="login-btn" onclick="login()" disabled id="loginBtn">
+                Continue
+            </button>
         </div>
-
+        
         <!-- Main Screen -->
         <div class="main-screen" id="mainScreen">
             <div class="header">
-                <p class="welcome-text">Welcome back,</p>
-                <p class="driver-name-display" id="driverNameDisplay">Driver Name</p>
-                <p class="driver-info" id="driverInfo"></p>
-                <div class="connection-status" id="connectionStatus">
-                    <span class="status-connected">🟢 Connected to Database</span>
+                <div class="logo">🚚</div>
+                <h1>Status Update</h1>
+                <p class="subtitle">Send Warehouse Notifications</p>
+            </div>
+            
+            <div class="driver-info">
+                <div class="driver-name" id="driverName">Driver Name</div>
+                <div class="vehicle-id" id="vehicleId">Vehicle: TRUCK-001</div>
+            </div>
+            
+            <div class="status-section">
+                <div class="section-title">Select Your Status</div>
+                <div class="status-buttons">
+                    <button class="status-btn btn-30min" onclick="sendUpdate('30min')" id="btn30min">
+                        <span class="btn-text">
+                            <span>🕐</span>
+                            <span>30 Minutes Away</span>
+                        </span>
+                        <span class="loading"></span>
+                    </button>
+                    
+                    <button class="status-btn btn-arrived" onclick="sendUpdate('arrived')" id="btnArrived">
+                        <span class="btn-text">
+                            <span>✅</span>
+                            <span>Arrived at Warehouse</span>
+                        </span>
+                        <span class="loading"></span>
+                    </button>
                 </div>
             </div>
             
-            <div class="status-card">
-                <h2 class="status-title">Update Your Status</h2>
-                
-                <div class="status-buttons">
-                    <button class="status-btn btn-30min" onclick="sendStatus('30 minutes away', this)">
-                        <span class="btn-icon">🕐</span>
-                        <span class="btn-text">30 Minutes Away</span>
-                        <span class="loading-spinner"></span>
-                    </button>
-                    
-                    <button class="status-btn btn-arrived" onclick="sendStatus('arrived', this)">
-                        <span class="btn-icon">✅</span>
-                        <span class="btn-text">Arrived at Warehouse</span>
-                        <span class="loading-spinner"></span>
-                    </button>
+            <div class="recent-updates">
+                <div class="updates-title">Today's Updates</div>
+                <div id="updatesList">
+                    <div class="update-item">No updates yet today</div>
                 </div>
-                
-                <div class="status-history">
-                    <h3 class="history-title">Recent Updates</h3>
-                    <div id="historyList">
-                        <div class="history-item">No updates yet today</div>
-                    </div>
-                </div>
-                
-                <div class="logout-section">
-                    <button class="logout-btn" onclick="logout()">Sign Out</button>
-                </div>
+            </div>
+            
+            <div class="signout-section">
+                <button class="signout-btn" onclick="signOut()">Sign Out</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Initialize all global variables to prevent undefined errors
-        window.utils = window.utils || { js: {} };
-        window.tabutils = window.tabutils || { js: {} };
-        window.contextmenu = window.contextmenu || { js: { 124: { 21: {} } } };
-        window.download = window.download || { js: {} };
-        window.content = window.content || { js: {} };
-        window.background = window.background || { js: { 2: { 1118846: {} } } };
-        window['feature_extension-pl_ge-plugin-view'] = { js: { 1: {} } };
-        
         let currentDriver = null;
-        let currentDriverData = null;
-        let updateHistory = [];
-
+        let currentVehicle = null;
+        let todaysUpdates = [];
+        
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            loadDriverList();
-            
             // Check if already logged in
-            const savedDriver = localStorage.getItem('currentDriver');
+            const savedDriver = localStorage.getItem('currentDriverSession');
             if (savedDriver) {
-                verifyAndLoginDriver(savedDriver);
+                const [name, vehicle] = savedDriver.split('|');
+                currentDriver = name;
+                currentVehicle = vehicle;
+                showMainScreen();
+                loadTodaysUpdates();
             }
-
+            
             // Enable login button when driver selected
             document.getElementById('driverSelect').addEventListener('change', function() {
-                const loginBtn = document.getElementById('loginBtn');
-                loginBtn.disabled = this.value === '';
+                document.getElementById('loginBtn').disabled = !this.value;
             });
-
-            checkDatabaseConnection();
         });
-
-        async function loadDriverList() {
-            try {
-                showMessage('Loading drivers...', 'info');
-                
-                const response = await fetch('/api/users?role=driver');
-                
-                if (response.ok) {
-                    const result = await response.json();
-                    let drivers = result.data || result || [];
-                    
-                    drivers = drivers.filter(user => 
-                        user.role === 'driver' && 
-                        user.active !== false &&
-                        user.name && user.name.trim() !== ''
-                    );
-                    
-                    const select = document.getElementById('driverSelect');
-                    
-                    if (drivers.length === 0) {
-                        select.innerHTML = '<option value="">-- No drivers found --</option>';
-                        showMessage('No drivers found. Contact admin.', 'error');
-                        return;
-                    }
-                    
-                    select.innerHTML = '<option value="">-- Choose your name --</option>';
-                    
-                    drivers.forEach(driver => {
-                        const option = document.createElement('option');
-                        option.value = driver._id;
-                        option.textContent = driver.name;
-                        option.setAttribute('data-driver', JSON.stringify(driver));
-                        select.appendChild(option);
-                    });
-                    
-                    showMessage('Drivers loaded', 'success');
-                    
-                } else {
-                    throw new Error(`Failed to load drivers`);
-                }
-                
-            } catch (error) {
-                console.error('Error loading drivers:', error);
-                showMessage('Error loading drivers', 'error');
-                
-                // Fallback demo driver
-                const select = document.getElementById('driverSelect');
-                select.innerHTML = `
-                    <option value="">-- Error loading --</option>
-                    <option value="demo1" data-driver='{"_id":"demo1","name":"Demo Driver","role":"driver"}'>Demo Driver</option>
-                `;
-            }
-        }
-
-        async function verifyAndLoginDriver(savedDriverName) {
-            try {
-                const savedDriverData = localStorage.getItem('currentDriverData');
-                
-                if (savedDriverData) {
-                    const driverData = JSON.parse(savedDriverData);
-                    
-                    const response = await fetch(`/api/users/${driverData._id}`);
-                    
-                    if (response.ok) {
-                        const result = await response.json();
-                        const driverExists = result.data || result;
-                        
-                        if (driverExists && driverExists.role === 'driver' && driverExists.active !== false) {
-                            currentDriver = driverExists.name;
-                            currentDriverData = driverExists;
-                            showMainScreen();
-                            loadHistory();
-                            return;
-                        }
-                    }
-                }
-                
-                localStorage.removeItem('currentDriver');
-                localStorage.removeItem('currentDriverData');
-            } catch (error) {
-                console.error('Error verifying driver:', error);
-            }
-        }
-
-        async function checkDatabaseConnection() {
-            try {
-                const response = await fetch('/api/health');
-                const statusEl = document.getElementById('connectionStatus');
-                
-                if (response.ok) {
-                    if (statusEl) {
-                        statusEl.innerHTML = '<span class="status-connected">🟢 Connected to Database</span>';
-                    }
-                } else {
-                    if (statusEl) {
-                        statusEl.innerHTML = '<span class="status-disconnected">🔴 Database Offline</span>';
-                    }
-                }
-            } catch (error) {
-                const statusEl = document.getElementById('connectionStatus');
-                if (statusEl) {
-                    statusEl.innerHTML = '<span class="status-disconnected">🔴 No Connection</span>';
-                }
-            }
-        }
-
+        
+        // Login function
         function login() {
             const select = document.getElementById('driverSelect');
             const selectedValue = select.value;
             
             if (!selectedValue) {
-                showMessage('Please select your name', 'error');
+                alert('Please select your name');
                 return;
             }
             
-            const selectedOption = select.querySelector(`option[value="${selectedValue}"]`);
-            const driverData = JSON.parse(selectedOption.getAttribute('data-driver'));
+            const [name, vehicle] = selectedValue.split('|');
+            currentDriver = name;
+            currentVehicle = vehicle;
             
-            currentDriver = driverData.name;
-            currentDriverData = driverData;
-            
-            localStorage.setItem('currentDriver', currentDriver);
-            localStorage.setItem('currentDriverData', JSON.stringify(currentDriverData));
+            // Save session
+            localStorage.setItem('currentDriverSession', selectedValue);
             
             showMainScreen();
-            loadHistory();
-            showMessage(`Welcome, ${currentDriver}!`, 'success');
+            loadTodaysUpdates();
         }
-
+        
+        // Show main screen
         function showMainScreen() {
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('mainScreen').style.display = 'flex';
-            document.getElementById('driverNameDisplay').textContent = currentDriver;
-            
-            const driverInfoEl = document.getElementById('driverInfo');
-            if (currentDriverData) {
-                let infoText = `ID: ${currentDriverData._id}`;
-                if (currentDriverData.vehicleId) {
-                    infoText += ` • Vehicle: ${currentDriverData.vehicleId}`;
-                }
-                driverInfoEl.textContent = infoText;
-            }
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainScreen').classList.add('visible');
+            document.getElementById('driverName').textContent = currentDriver;
+            document.getElementById('vehicleId').textContent = `Vehicle: ${currentVehicle}`;
         }
-
-        function showLoginScreen() {
-            document.getElementById('mainScreen').style.display = 'none';
-            document.getElementById('loginScreen').style.display = 'flex';
+        
+        // Sign out
+        function signOut() {
+            localStorage.removeItem('currentDriverSession');
+            currentDriver = null;
+            currentVehicle = null;
+            todaysUpdates = [];
+            
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('mainScreen').classList.remove('visible');
             document.getElementById('driverSelect').value = '';
             document.getElementById('loginBtn').disabled = true;
         }
-
-        async function sendStatus(status, button) {
-            const btnText = button.querySelector('.btn-text');
-            const spinner = button.querySelector('.loading-spinner');
-            
-            btnText.style.display = 'none';
-            spinner.style.display = 'block';
-            button.disabled = true;
-
-            try {
-                const location = await getCurrentLocation();
-                
-                const notificationData = {
-                    message: `${currentDriver} is ${status}`,
-                    driver: currentDriver,
-                    driverId: currentDriverData._id,
-                    driverEmail: currentDriverData.email || null,
-                    status: status === '30 minutes away' ? 'en-route' : 'arrived',
-                    location: location,
-                    warehouse: '5856 Tampa FDC',
-                    estimatedArrival: status === '30 minutes away' ? '30 minutes' : null,
-                    timestamp: new Date().toISOString()
-                };
-
-                const response = await fetch('/api/notifications', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(notificationData)
-                });
-
-                if (response.ok) {
-                    showMessage(`✅ Status updated: ${status}`, 'success');
-                    addToHistory(status);
-                } else {
-                    throw new Error('Failed to update status');
-                }
-
-            } catch (error) {
-                console.error('Error sending status:', error);
-                showMessage(`⚠️ Error updating status`, 'error');
-                addToHistory(status);
-            } finally {
-                setTimeout(() => {
-                    btnText.style.display = 'inline';
-                    spinner.style.display = 'none';
-                    button.disabled = false;
-                }, 1000);
-                
-                checkDatabaseConnection();
-            }
+        
+        // Load today's updates
+        function loadTodaysUpdates() {
+            const today = new Date().toDateString();
+            const storageKey = `updates_${currentDriver}_${today}`;
+            todaysUpdates = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            displayUpdates();
         }
-
-        function getCurrentLocation() {
-            return new Promise((resolve) => {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(
-                        (position) => {
-                            const lat = position.coords.latitude.toFixed(6);
-                            const lng = position.coords.longitude.toFixed(6);
-                            resolve(`${lat}, ${lng}`);
-                        },
-                        () => resolve('Location unavailable'),
-                        { timeout: 5000, enableHighAccuracy: false }
-                    );
-                } else {
-                    resolve('Location unavailable');
-                }
-            });
-        }
-
-        function addToHistory(status) {
-            const now = new Date();
-            const historyItem = {
-                status: status,
-                time: now.toLocaleTimeString('en-US', { 
-                    hour: 'numeric', 
-                    minute: '2-digit',
-                    hour12: true 
-                })
-            };
+        
+        // Display updates
+        function displayUpdates() {
+            const updatesList = document.getElementById('updatesList');
             
-            updateHistory.unshift(historyItem);
-            if (updateHistory.length > 5) {
-                updateHistory = updateHistory.slice(0, 5);
-            }
-            
-            saveHistory();
-            displayHistory();
-        }
-
-        function displayHistory() {
-            const historyList = document.getElementById('historyList');
-            
-            if (updateHistory.length === 0) {
-                historyList.innerHTML = '<div class="history-item">No updates yet today</div>';
+            if (todaysUpdates.length === 0) {
+                updatesList.innerHTML = '<div class="update-item">No updates yet today</div>';
                 return;
             }
             
-            historyList.innerHTML = updateHistory.map(item => {
-                const icon = item.status === 'arrived' ? '✅' : '🕐';
-                return `
-                    <div class="history-item">
-                        <span>${icon} ${item.status}</span>
-                        <span>${item.time}</span>
-                    </div>
-                `;
-            }).join('');
+            updatesList.innerHTML = todaysUpdates.slice(0, 5).map(update => `
+                <div class="update-item">
+                    <span>${update.icon} ${update.status}</span>
+                    <span>${update.time}</span>
+                </div>
+            `).join('');
         }
-
-        function saveHistory() {
-            if (!currentDriverData) return;
+        
+        // Send update
+        function sendUpdate(type) {
+            const button = type === '30min' ? document.getElementById('btn30min') : document.getElementById('btnArrived');
             
-            const today = new Date().toDateString();
-            const historyKey = `history_${currentDriverData._id}_${today}`;
-            localStorage.setItem(historyKey, JSON.stringify(updateHistory));
-        }
-
-        function loadHistory() {
-            if (!currentDriverData) return;
+            // Show loading
+            button.classList.add('sending');
+            button.disabled = true;
             
-            const today = new Date().toDateString();
-            const historyKey = `history_${currentDriverData._id}_${today}`;
-            const saved = localStorage.getItem(historyKey);
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', { 
+                hour: 'numeric', 
+                minute: '2-digit',
+                hour12: true 
+            });
             
-            if (saved) {
-                updateHistory = JSON.parse(saved);
-                displayHistory();
+            let status, message, icon;
+            
+            if (type === '30min') {
+                status = '30 minutes away';
+                message = `${currentDriver} is 30 minutes away from warehouse`;
+                icon = '🕐';
             } else {
-                updateHistory = [];
-                displayHistory();
-            }
-        }
-
-        function logout() {
-            if (confirm('Are you sure you want to sign out?')) {
-                currentDriver = null;
-                currentDriverData = null;
-                localStorage.removeItem('currentDriver');
-                localStorage.removeItem('currentDriverData');
-                showLoginScreen();
-                showMessage('Signed out successfully', 'info');
-            }
-        }
-
-        function showMessage(text, type) {
-            const existingMessage = document.querySelector('.message');
-            if (existingMessage) {
-                existingMessage.remove();
+                status = 'Arrived';
+                message = `${currentDriver} has arrived at warehouse`;
+                icon = '✅';
             }
             
-            const message = document.createElement('div');
-            message.className = `message ${type}`;
-            message.textContent = text;
-            document.body.appendChild(message);
+            // Create update data
+            const updateData = {
+                driverName: currentDriver,
+                vehicleId: currentVehicle,
+                status: status,
+                message: message,
+                timestamp: now.toISOString(),
+                time: timeString,
+                icon: icon,
+                type: type
+            };
+            
+            // Save to today's updates
+            todaysUpdates.unshift(updateData);
+            const today = new Date().toDateString();
+            const storageKey = `updates_${currentDriver}_${today}`;
+            localStorage.setItem(storageKey, JSON.stringify(todaysUpdates));
+            
+            // Save for dashboard
+            let allUpdates = JSON.parse(localStorage.getItem('statusUpdates') || '[]');
+            allUpdates.unshift(updateData);
+            allUpdates = allUpdates.slice(0, 50);
+            localStorage.setItem('statusUpdates', JSON.stringify(allUpdates));
+            
+            // Update driver status
+            localStorage.setItem('driverStatus', type === '30min' ? 'returning' : 'arrived');
+            localStorage.setItem('lastUpdate', now.toISOString());
+            
+            // Simulate sending delay
+            setTimeout(() => {
+                button.classList.remove('sending');
+                button.disabled = false;
+                showNotification(message);
+                displayUpdates();
+            }, 1000);
+        }
+        
+        // Show notification
+        function showNotification(message) {
+            const existing = document.querySelector('.notification');
+            if (existing) existing.remove();
+            
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.innerHTML = `
+                <div style="font-weight: bold; margin-bottom: 4px;">✅ Status Sent</div>
+                <div style="font-size: 14px;">${message}</div>
+            `;
+            document.body.appendChild(notification);
             
             setTimeout(() => {
-                message.remove();
-            }, 4000);
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
         }
-
-        // Refresh driver list periodically
-        setInterval(() => {
-            if (document.getElementById('loginScreen').style.display !== 'none') {
-                loadDriverList();
-            }
-        }, 30000);
-
-        // Check connection status periodically
-        setInterval(checkDatabaseConnection, 30000);
     </script>
 </body>
 </html>
