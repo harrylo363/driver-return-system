@@ -1,4 +1,4 @@
-// server.js - Complete Fleet Management Backend for Railway + MongoDB Atlas with Real Push Notifications
+// server.js - Complete Fleet Management Backend
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -9,11 +9,11 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Real push notification setup with your VAPID keys
+// VAPID keys for push notifications
 webpush.setVapidDetails(
   'mailto:admin@fleetforce.com',
   'BN3-pI2_z9rnLgHR2NowqM4yawWFlF-9wP2Gx8QzG9PnV1kdw0IkK3JWptNO8fn23bkb0O7Uo1d0cdlgVx-I4Ak',
-  'jiLvhykOZUbG7b5QmxV5WGhodqQN5db3fxP8dRKdJd0'
+  process.env.VAPID_PRIVATE_KEY || 'jiLvhykOZUbG7b5QmxV5WGhodqQN5db3fxP8dRKdJd0'
 );
 
 // Middleware
@@ -24,54 +24,45 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files from public directory
+// IMPORTANT: Set JSON headers for API routes
+app.use('/api/*', (req, res, next) => {
+    res.setHeader('Content-Type', 'application/json');
+    next();
+});
+
+// Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 
-// MongoDB Atlas Connection
-const MONGODB_URI = process.env.MONGODB_URI || process.env.DATABASE_URL;
+// MongoDB Connection
+const MONGODB_URI = process.env.MONGODB_URI || process.env.DATABASE_URL || 'mongodb://localhost:27017/fleetmanagement';
 
-if (!MONGODB_URI) {
-    console.error('❌ MONGODB_URI environment variable is required');
-    console.error('Please set MONGODB_URI in Railway environment variables');
-    process.exit(1);
-}
-
-console.log('🔄 Connecting to MongoDB Atlas...');
+console.log('🔄 Connecting to MongoDB...');
 
 mongoose.connect(MONGODB_URI)
 .then(() => {
-    console.log('✅ Connected to MongoDB Atlas');
+    console.log('✅ Connected to MongoDB');
 })
-.catch((error) => {
-    console.error('❌ MongoDB connection error:', error);
-    process.exit(1);
+.catch(err => {
+    console.error('❌ MongoDB connection error:', err);
+    // Don't exit, allow app to run with limited functionality
 });
 
-// MongoDB Schemas
+// Schemas
 const userSchema = new mongoose.Schema({
-    name: { type: String, required: true, trim: true },
-    email: { type: String, trim: true },
+    name: { type: String, required: true },
+    email: { type: String, sparse: true },
     role: { 
         type: String, 
-        required: true, 
+        required: true,
         enum: ['driver', 'dispatcher', 'admin'],
         default: 'driver'
     },
-    password: { type: String },
     active: { type: Boolean, default: true },
-    vehicleId: { type: String },
-    phoneNumber: { type: String },
-    permissions: [String],
-    // Push notification settings
+    vehicleId: String,
+    phoneNumber: String,
     notifications: {
         enabled: { type: Boolean, default: false },
-        subscription: {
-            endpoint: String,
-            keys: {
-                p256dh: String,
-                auth: String
-            }
-        }
+        subscription: mongoose.Schema.Types.Mixed
     },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
@@ -80,16 +71,16 @@ const userSchema = new mongoose.Schema({
 const notificationSchema = new mongoose.Schema({
     message: { type: String, required: true },
     driver: { type: String, required: true },
-    driverId: { type: String },
-    driverEmail: { type: String },
+    driverId: String,
+    driverEmail: String,
     status: { 
         type: String, 
         required: true,
-        enum: ['en-route', 'arrived', 'delayed', 'departed']
+        enum: ['en-route', 'arrived', 'delayed', 'departed', 'pending-checkin']
     },
-    location: { type: String },
+    location: String,
     warehouse: { type: String, default: '5856 Tampa FDC' },
-    estimatedArrival: { type: String },
+    estimatedArrival: String,
     priority: { 
         type: String, 
         enum: ['low', 'normal', 'high'],
@@ -97,150 +88,34 @@ const notificationSchema = new mongoose.Schema({
     },
     timestamp: { type: Date, default: Date.now },
     read: { type: Boolean, default: false },
-    checkedIn: { type: Boolean, default: false },
-    checkInData: {
-        checkInTime: Date,
-        vehicleInfo: {
-            truckNumber: String,
-            trailerNumber: String,
-            mileage: Number,
-            fuelLevel: String
-        },
-        equipmentCheck: {
-            items: [{
-                id: String,
-                label: String,
-                status: String,
-                issue: String
-            }],
-            totalIssues: { type: Number, default: 0 }
-        },
-        additionalNotes: String
-    }
+    checkedIn: { type: Boolean, default: false }
 });
 
-const inspectionSchema = new mongoose.Schema({
-    driver: { type: String, required: true },
-    driverId: { type: String },
-    tractorNumber: { type: String },
-    trailerNumber: { type: String },
-    fuelLevel: { type: String },
-    mileage: { type: Number },
-    equipmentCheck: {
-        items: [{
-            id: String,
-            label: String,
-            status: String,
-            issue: String
-        }],
-        totalIssues: { type: Number, default: 0 }
+const checkInSchema = new mongoose.Schema({
+    driverName: String,
+    driverId: String,
+    timestamp: { type: Date, default: Date.now },
+    tractorNumber: String,
+    trailerNumber: String,
+    mileage: Number,
+    fuelLevel: String,
+    tractorIssue: String,
+    trailerIssue: String,
+    moffettIssue: String,
+    equipmentIssues: {
+        tractor: [String],
+        trailer: [String],
+        moffett: [String]
     },
-    urgencyLevel: { 
-        type: String, 
-        enum: ['low', 'medium', 'high'],
-        default: 'low'
-    },
-    additionalNotes: { type: String },
-    submittedAt: { type: Date, default: Date.now },
-    checkInTime: { type: Date, default: Date.now }
+    notes: String
 });
 
 // Models
 const User = mongoose.model('User', userSchema);
 const Notification = mongoose.model('Notification', notificationSchema);
-const Inspection = mongoose.model('Inspection', inspectionSchema);
+const CheckIn = mongoose.model('CheckIn', checkInSchema);
 
-// Real push notification function
-async function sendNotificationToUsers(title, message, driverName) {
-    try {
-        console.log(`📢 Sending notification: ${title}`);
-        
-        // Find users who have notifications enabled
-        const notificationUsers = await User.find({
-            'notifications.enabled': true,
-            role: { $in: ['dispatcher', 'admin'] },
-            active: true
-        });
-        
-        console.log(`Found ${notificationUsers.length} users with notifications enabled`);
-        
-        if (notificationUsers.length === 0) {
-            console.log('📝 No users have notifications enabled - logging to console');
-            console.log(`📢 DRIVER UPDATE: ${title}`);
-            console.log(`📝 Message: ${message}`);
-            console.log(`👤 Driver: ${driverName}`);
-            console.log(`⏰ Time: ${new Date().toLocaleString()}`);
-            return;
-        }
-        
-        // Send to each user with notifications enabled
-        let sentCount = 0;
-        for (const user of notificationUsers) {
-            if (user.notifications.subscription && user.notifications.subscription.endpoint) {
-                try {
-                    const payload = JSON.stringify({
-                        title: title,
-                        body: message,
-                        icon: 'https://img.icons8.com/color/192/truck.png',
-                        badge: 'https://img.icons8.com/color/72/truck.png',
-                        data: {
-                            driver: driverName,
-                            timestamp: new Date().toISOString(),
-                            url: '/dashboard.html'
-                        },
-                        actions: [
-                            {
-                                action: 'view',
-                                title: 'View Dashboard'
-                            }
-                        ]
-                    });
-                    
-                    await webpush.sendNotification(user.notifications.subscription, payload);
-                    console.log(`✅ Push notification sent to ${user.name}`);
-                    sentCount++;
-                } catch (error) {
-                    console.error(`❌ Failed to send push to ${user.name}:`, error.message);
-                    
-                    // If subscription is invalid, disable notifications for this user
-                    if (error.statusCode === 410 || error.statusCode === 404) {
-                        await User.findByIdAndUpdate(user._id, {
-                            'notifications.enabled': false,
-                            'notifications.subscription': null
-                        });
-                        console.log(`🔕 Disabled invalid subscription for ${user.name}`);
-                    }
-                }
-            } else {
-                console.log(`⚠️ ${user.name} has notifications enabled but no subscription`);
-            }
-        }
-        
-        if (sentCount === 0) {
-            // Fallback to console logging
-            console.log('📝 No valid push subscriptions - logging to console');
-            console.log(`📢 DRIVER UPDATE: ${title}`);
-            console.log(`📝 Message: ${message}`);
-            console.log(`👤 Driver: ${driverName}`);
-            console.log(`⏰ Time: ${new Date().toLocaleString()}`);
-        } else {
-            console.log(`📨 Successfully sent ${sentCount} push notifications`);
-        }
-        
-    } catch (error) {
-        console.error('Notification error:', error);
-        // Fallback to console logging
-        console.log(`📢 DRIVER UPDATE: ${title}`);
-        console.log(`📝 Message: ${message}`);
-        console.log(`👤 Driver: ${driverName}`);
-    }
-}
-
-// Utility Functions
-const handleAsync = (fn) => (req, res, next) => {
-    Promise.resolve(fn(req, res, next)).catch(next);
-};
-
+// Helper functions
 const sendResponse = (res, data, message = 'Success', statusCode = 200) => {
     res.status(statusCode).json({
         success: true,
@@ -259,441 +134,288 @@ const sendError = (res, error, statusCode = 500) => {
     });
 };
 
-// Health Check Endpoint
+// API Routes
+
+// Health check
 app.get('/api/health', (req, res) => {
     const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
-    
     sendResponse(res, {
-        status: 'operational',
+        status: 'healthy',
         database: dbStatus,
         uptime: process.uptime(),
-        memory: process.memoryUsage(),
-        environment: process.env.NODE_ENV || 'development',
-        mongoConnection: mongoose.connection.readyState,
-        pushNotifications: 'enabled',
         timestamp: new Date().toISOString()
     });
 });
 
-// PUSH NOTIFICATION ENDPOINTS
-
-// Subscribe user to push notifications
-app.post('/api/notifications/subscribe', handleAsync(async (req, res) => {
-    const { userId, subscription } = req.body;
-    
-    if (!userId || !subscription) {
-        return sendError(res, new Error('User ID and subscription are required'), 400);
+// Users endpoints
+app.get('/api/users', async (req, res) => {
+    try {
+        const { role, active } = req.query;
+        const query = {};
+        if (role) query.role = role;
+        if (active !== undefined) query.active = active === 'true';
+        
+        const users = await User.find(query).select('-notifications.subscription').sort({ createdAt: -1 });
+        sendResponse(res, users);
+    } catch (error) {
+        sendError(res, error);
     }
-    
-    const user = await User.findByIdAndUpdate(
-        userId,
-        {
-            'notifications.enabled': true,
-            'notifications.subscription': subscription,
-            updatedAt: new Date()
-        },
-        { new: true }
-    );
-    
-    if (!user) {
-        return sendError(res, new Error('User not found'), 404);
-    }
-    
-    console.log(`✅ ${user.name} subscribed to push notifications`);
-    sendResponse(res, user, 'Push notifications enabled successfully');
-}));
-
-// Send test notification
-app.post('/api/notifications/test', handleAsync(async (req, res) => {
-    await sendNotificationToUsers(
-        'FleetForce Test Notification',
-        'This is a test notification from your admin panel! Push notifications are working correctly.',
-        'Test Driver'
-    );
-    
-    sendResponse(res, {}, 'Test notification sent');
-}));
-
-// Get VAPID public key for frontend
-app.get('/api/notifications/vapid-key', (req, res) => {
-    sendResponse(res, {
-        publicKey: 'BN3-pI2_z9rnLgHR2NowqM4yawWFlF-9wP2Gx8QzG9PnV1kdw0IkK3JWptNO8fn23bkb0O7Uo1d0cdlgVx-I4Ak'
-    });
 });
 
-// USER MANAGEMENT ENDPOINTS
+app.get('/api/users/:id', async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id).select('-notifications.subscription');
+        if (!user) return sendError(res, new Error('User not found'), 404);
+        sendResponse(res, user);
+    } catch (error) {
+        sendError(res, error);
+    }
+});
 
-// Get all users or filter by role
-app.get('/api/users', handleAsync(async (req, res) => {
-    const { role, active } = req.query;
-    const query = {};
-    
-    if (role) query.role = role;
-    if (active !== undefined) query.active = active === 'true';
-    
-    const users = await User.find(query)
-        .select('-password')
-        .sort({ createdAt: -1 });
-    
-    sendResponse(res, users, `Found ${users.length} users`);
-}));
-
-// Get single user
-app.get('/api/users/:id', handleAsync(async (req, res) => {
-    const user = await User.findById(req.params.id).select('-password');
-    
-    if (!user) {
-        return sendError(res, new Error('User not found'), 404);
-    }
-    
-    sendResponse(res, user);
-}));
-
-// Create new user
-app.post('/api/users', handleAsync(async (req, res) => {
-    const { name, email, role, password, vehicleId, phoneNumber } = req.body;
-    
-    // Validation
-    if (!name || !name.trim()) {
-        return sendError(res, new Error('Name is required'), 400);
-    }
-    
-    if (role !== 'driver' && !email) {
-        return sendError(res, new Error('Email is required for dispatchers and admins'), 400);
-    }
-    
-    if (role !== 'driver' && !password) {
-        return sendError(res, new Error('Password is required for dispatchers and admins'), 400);
-    }
-    
-    // Check for duplicate email if provided
-    if (email) {
-        const existingUser = await User.findOne({ email: email.toLowerCase() });
-        if (existingUser) {
-            return sendError(res, new Error('Email already exists'), 400);
+app.post('/api/users', async (req, res) => {
+    try {
+        // Validate required fields
+        if (!req.body.name || !req.body.role) {
+            return sendError(res, new Error('Name and role are required'), 400);
         }
-    }
-    
-    const userData = {
-        name: name.trim(),
-        role: role || 'driver',
-        active: true,
-        createdAt: new Date(),
-        notifications: {
-            enabled: false
-        }
-    };
-    
-    if (email) userData.email = email.toLowerCase().trim();
-    if (password) userData.password = password;
-    if (vehicleId) userData.vehicleId = vehicleId;
-    if (phoneNumber) userData.phoneNumber = phoneNumber;
-    
-    const user = new User(userData);
-    await user.save();
-    
-    // Return user without password
-    const userResponse = user.toObject();
-    delete userResponse.password;
-    
-    sendResponse(res, userResponse, 'User created successfully', 201);
-}));
-
-// Bulk create users
-app.post('/api/users/bulk', handleAsync(async (req, res) => {
-    const { users } = req.body;
-    
-    if (!Array.isArray(users) || users.length === 0) {
-        return sendError(res, new Error('Users array is required'), 400);
-    }
-    
-    const created = [];
-    const errors = [];
-    
-    for (let i = 0; i < users.length; i++) {
-        try {
-            const userData = users[i];
-            
-            if (!userData.name || !userData.name.trim()) {
-                errors.push({ index: i, error: 'Name is required' });
-                continue;
-            }
-            
-            const userDoc = {
-                name: userData.name.trim(),
-                role: userData.role || 'driver',
-                active: true,
-                createdAt: new Date(),
-                notifications: {
-                    enabled: false
-                }
-            };
-            
-            if (userData.email) userDoc.email = userData.email.toLowerCase().trim();
-            if (userData.password) userDoc.password = userData.password;
-            
-            const user = new User(userDoc);
-            await user.save();
-            
-            const userResponse = user.toObject();
-            delete userResponse.password;
-            created.push(userResponse);
-            
-        } catch (error) {
-            errors.push({ index: i, error: error.message });
-        }
-    }
-    
-    sendResponse(res, { created, errors }, `Created ${created.length} users with ${errors.length} errors`);
-}));
-
-// Update user
-app.put('/api/users/:id', handleAsync(async (req, res) => {
-    const updates = req.body;
-    delete updates._id;
-    
-    updates.updatedAt = new Date();
-    
-    const user = await User.findByIdAndUpdate(
-        req.params.id, 
-        updates, 
-        { new: true, runValidators: true }
-    ).select('-password');
-    
-    if (!user) {
-        return sendError(res, new Error('User not found'), 404);
-    }
-    
-    sendResponse(res, user, 'User updated successfully');
-}));
-
-// Delete user
-app.delete('/api/users/:id', handleAsync(async (req, res) => {
-    const user = await User.findByIdAndDelete(req.params.id);
-    
-    if (!user) {
-        return sendError(res, new Error('User not found'), 404);
-    }
-    
-    sendResponse(res, { _id: req.params.id }, 'User deleted successfully');
-}));
-
-// NOTIFICATION ENDPOINTS
-
-// Get all notifications
-app.get('/api/notifications', handleAsync(async (req, res) => {
-    const { status, driver, limit = 100 } = req.query;
-    const query = {};
-    
-    if (status) query.status = status;
-    if (driver) query.driver = new RegExp(driver, 'i');
-    
-    const notifications = await Notification.find(query)
-        .sort({ timestamp: -1 })
-        .limit(parseInt(limit));
-    
-    sendResponse(res, notifications, `Found ${notifications.length} notifications`);
-}));
-
-// Create notification with REAL PUSH NOTIFICATIONS
-app.post('/api/notifications', handleAsync(async (req, res) => {
-    const notificationData = {
-        ...req.body,
-        timestamp: new Date()
-    };
-    
-    if (!notificationData.message) {
-        return sendError(res, new Error('Message is required'), 400);
-    }
-    
-    if (!notificationData.driver) {
-        return sendError(res, new Error('Driver is required'), 400);
-    }
-    
-    if (!notificationData.status) {
-        return sendError(res, new Error('Status is required'), 400);
-    }
-    
-    const notification = new Notification(notificationData);
-    await notification.save();
-    
-    // Send REAL push notification to subscribed users
-    await sendNotificationToUsers(
-        `Driver Update: ${notificationData.driver}`,
-        `Status: ${notificationData.status} - ${notificationData.message}`,
-        notificationData.driver
-    );
-    
-    sendResponse(res, notification, 'Notification created and push notifications sent', 201);
-}));
-
-// Update notification with check-in data
-app.put('/api/notifications/:id/checkin', handleAsync(async (req, res) => {
-    const checkInData = req.body;
-    
-    const notification = await Notification.findByIdAndUpdate(
-        req.params.id,
-        {
-            checkedIn: true,
-            checkInData: checkInData,
+        
+        const userData = {
+            ...req.body,
+            createdAt: new Date(),
             updatedAt: new Date()
-        },
-        { new: true }
-    );
-    
-    if (!notification) {
-        return sendError(res, new Error('Notification not found'), 404);
+        };
+        
+        const user = new User(userData);
+        await user.save();
+        
+        const userResponse = user.toObject();
+        delete userResponse.notifications?.subscription;
+        
+        sendResponse(res, userResponse, 'User created', 201);
+    } catch (error) {
+        sendError(res, error, 400);
     }
-    
-    // Create inspection record
-    const inspection = new Inspection({
-        driver: notification.driver,
-        driverId: notification.driverId,
-        tractorNumber: checkInData.vehicleInfo?.truckNumber,
-        trailerNumber: checkInData.vehicleInfo?.trailerNumber,
-        fuelLevel: checkInData.vehicleInfo?.fuelLevel,
-        mileage: checkInData.vehicleInfo?.mileage,
-        equipmentCheck: checkInData.equipmentCheck,
-        urgencyLevel: checkInData.equipmentCheck?.totalIssues > 0 ? 'high' : 'low',
-        additionalNotes: checkInData.additionalNotes,
-        submittedAt: new Date(),
-        checkInTime: new Date(checkInData.checkInTime)
-    });
-    
-    await inspection.save();
-    
-    // Send push notification for check-in
-    await sendNotificationToUsers(
-        `Driver Check-in: ${notification.driver}`,
-        `Driver has completed check-in at ${new Date(checkInData.checkInTime).toLocaleTimeString()}`,
-        notification.driver
-    );
-    
-    sendResponse(res, { notification, inspection }, 'Check-in completed successfully');
-}));
+});
 
-// Delete notification
-app.delete('/api/notifications/:id', handleAsync(async (req, res) => {
-    const notification = await Notification.findByIdAndDelete(req.params.id);
-    
-    if (!notification) {
-        return sendError(res, new Error('Notification not found'), 404);
+app.put('/api/users/:id', async (req, res) => {
+    try {
+        const updates = { ...req.body, updatedAt: new Date() };
+        delete updates._id;
+        
+        const user = await User.findByIdAndUpdate(
+            req.params.id,
+            updates,
+            { new: true, runValidators: true }
+        ).select('-notifications.subscription');
+        
+        if (!user) return sendError(res, new Error('User not found'), 404);
+        sendResponse(res, user, 'User updated');
+    } catch (error) {
+        sendError(res, error);
     }
-    
-    sendResponse(res, { _id: req.params.id }, 'Notification deleted successfully');
-}));
+});
 
-// INSPECTION ENDPOINTS
+app.delete('/api/users/:id', async (req, res) => {
+    try {
+        const user = await User.findByIdAndDelete(req.params.id);
+        if (!user) return sendError(res, new Error('User not found'), 404);
+        sendResponse(res, { _id: req.params.id }, 'User deleted');
+    } catch (error) {
+        sendError(res, error);
+    }
+});
 
-// Get all inspections
-app.get('/api/inspections', handleAsync(async (req, res) => {
-    const { driver, urgency, limit = 100 } = req.query;
-    const query = {};
-    
-    if (driver) query.driver = new RegExp(driver, 'i');
-    if (urgency) query.urgencyLevel = urgency;
-    
-    const inspections = await Inspection.find(query)
-        .sort({ submittedAt: -1 })
-        .limit(parseInt(limit));
-    
-    sendResponse(res, inspections, `Found ${inspections.length} inspections`);
-}));
+// Notifications endpoints
+app.get('/api/notifications', async (req, res) => {
+    try {
+        const { status, driver, limit = 100 } = req.query;
+        const query = {};
+        if (status) query.status = status;
+        if (driver) query.driver = new RegExp(driver, 'i');
+        
+        const notifications = await Notification.find(query)
+            .sort({ timestamp: -1 })
+            .limit(parseInt(limit));
+        
+        sendResponse(res, notifications);
+    } catch (error) {
+        sendError(res, error);
+    }
+});
 
-// Create inspection
-app.post('/api/inspections', handleAsync(async (req, res) => {
-    const inspection = new Inspection({
-        ...req.body,
-        submittedAt: new Date()
-    });
-    
-    await inspection.save();
-    
-    sendResponse(res, inspection, 'Inspection created successfully', 201);
-}));
+app.post('/api/notifications', async (req, res) => {
+    try {
+        const notificationData = {
+            ...req.body,
+            timestamp: new Date()
+        };
+        
+        const notification = new Notification(notificationData);
+        await notification.save();
+        
+        // Try to send push notifications
+        try {
+            const admins = await User.find({
+                role: { $in: ['admin', 'dispatcher'] },
+                'notifications.enabled': true
+            });
+            
+            for (const admin of admins) {
+                if (admin.notifications?.subscription) {
+                    try {
+                        await webpush.sendNotification(
+                            admin.notifications.subscription,
+                            JSON.stringify({
+                                title: `Driver Update: ${req.body.driver}`,
+                                body: req.body.message,
+                                icon: '/icon-192.png',
+                                badge: '/icon-72.png',
+                                data: {
+                                    url: '/dashboard.html'
+                                }
+                            })
+                        );
+                    } catch (err) {
+                        console.error('Push failed for', admin.name, err.message);
+                    }
+                }
+            }
+        } catch (err) {
+            console.error('Push notification error:', err);
+        }
+        
+        sendResponse(res, notification, 'Notification created', 201);
+    } catch (error) {
+        sendError(res, error, 400);
+    }
+});
 
-// STATISTICS ENDPOINT
-app.get('/api/stats', handleAsync(async (req, res) => {
-    const [totalUsers, totalNotifications, totalInspections, activeDrivers] = await Promise.all([
-        User.countDocuments(),
-        Notification.countDocuments(),
-        Inspection.countDocuments(),
-        User.countDocuments({ role: 'driver', active: true })
-    ]);
-    
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const todayNotifications = await Notification.countDocuments({
-        timestamp: { $gte: today }
-    });
-    
-    const statusBreakdown = await Notification.aggregate([
-        { $group: { _id: '$status', count: { $sum: 1 } } }
-    ]);
-    
-    const stats = {
-        overview: {
-            totalUsers,
-            totalNotifications,
-            totalInspections,
-            activeDrivers,
-            todayActivity: todayNotifications
-        },
-        statusBreakdown: statusBreakdown.reduce((acc, item) => {
-            acc[item._id] = item.count;
-            return acc;
-        }, {}),
-        lastUpdated: new Date().toISOString()
-    };
-    
-    sendResponse(res, stats);
-}));
+// Check-ins endpoints
+app.get('/api/checkins', async (req, res) => {
+    try {
+        const checkins = await CheckIn.find()
+            .sort({ timestamp: -1 })
+            .limit(100);
+        sendResponse(res, checkins);
+    } catch (error) {
+        sendError(res, error);
+    }
+});
 
-// Route all other requests to index.html
+app.post('/api/checkins', async (req, res) => {
+    try {
+        const checkin = new CheckIn(req.body);
+        await checkin.save();
+        sendResponse(res, checkin, 'Check-in created', 201);
+    } catch (error) {
+        sendError(res, error, 400);
+    }
+});
+
+// Push notification subscription
+app.post('/api/notifications/subscribe', async (req, res) => {
+    try {
+        const { userId, subscription } = req.body;
+        
+        if (!userId || !subscription) {
+            return sendError(res, new Error('User ID and subscription are required'), 400);
+        }
+        
+        const user = await User.findByIdAndUpdate(
+            userId,
+            {
+                'notifications.enabled': true,
+                'notifications.subscription': subscription,
+                updatedAt: new Date()
+            },
+            { new: true }
+        );
+        
+        if (!user) {
+            return sendError(res, new Error('User not found'), 404);
+        }
+        
+        sendResponse(res, { userId: user._id }, 'Subscription saved');
+    } catch (error) {
+        sendError(res, error);
+    }
+});
+
+// Test notification
+app.post('/api/notifications/test', async (req, res) => {
+    try {
+        const { userId } = req.body;
+        
+        if (userId) {
+            const user = await User.findById(userId);
+            if (user && user.notifications?.subscription) {
+                await webpush.sendNotification(
+                    user.notifications.subscription,
+                    JSON.stringify({
+                        title: 'Test Notification',
+                        body: 'This is a test notification from FleetForce!',
+                        icon: '/icon-192.png'
+                    })
+                );
+            }
+        }
+        
+        sendResponse(res, {}, 'Test notification sent');
+    } catch (error) {
+        sendError(res, error);
+    }
+});
+
+// Serve HTML files for all other routes
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+});
+
+app.get('/dashboard', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+});
+
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+app.get('/driver', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'driver.html'));
+});
+
+// Catch all other routes
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    // Check if it's an API route that wasn't handled
+    if (req.path.startsWith('/api/')) {
+        return sendError(res, new Error('API endpoint not found'), 404);
+    }
+    // Otherwise serve the dashboard
+    res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
 // Error handling middleware
-app.use((error, req, res, next) => {
-    console.error('Unhandled error:', error);
-    sendError(res, error);
+app.use((err, req, res, next) => {
+    console.error('Unhandled error:', err);
+    sendError(res, err);
 });
 
 // Start server
 app.listen(PORT, () => {
-    console.log(`🚀 Fleet Management Server running on port ${PORT}`);
-    console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`🌐 API Base URL: http://localhost:${PORT}`);
-    console.log(`📁 Static files served from: ${path.join(__dirname, 'public')}`);
-    console.log(`🔔 Real push notifications enabled with VAPID keys`);
-    console.log(`📱 Users can subscribe to notifications via admin panel`);
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`📊 Dashboard: http://localhost:${PORT}/dashboard.html`);
+    console.log(`👤 Admin: http://localhost:${PORT}/admin.html`);
+    console.log(`🚚 Driver: http://localhost:${PORT}/driver.html`);
 });
 
-// FIXED: Graceful shutdown without callback
+// Graceful shutdown
 process.on('SIGTERM', async () => {
-    console.log('🛑 SIGTERM received, shutting down gracefully');
-    try {
-        await mongoose.connection.close();
-        console.log('📄 MongoDB connection closed');
-        process.exit(0);
-    } catch (error) {
-        console.error('Error closing MongoDB connection:', error);
-        process.exit(1);
-    }
+    console.log('SIGTERM received, shutting down gracefully');
+    await mongoose.connection.close();
+    process.exit(0);
 });
 
-// Also handle SIGINT (Ctrl+C)
 process.on('SIGINT', async () => {
-    console.log('🛑 SIGINT received, shutting down gracefully');
-    try {
-        await mongoose.connection.close();
-        console.log('📄 MongoDB connection closed');
-        process.exit(0);
-    } catch (error) {
-        console.error('Error closing MongoDB connection:', error);
-        process.exit(1);
-    }
+    console.log('SIGINT received, shutting down gracefully');
+    await mongoose.connection.close();
+    process.exit(0);
 });
-
-module.exports = app;
