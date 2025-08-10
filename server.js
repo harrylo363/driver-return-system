@@ -30,10 +30,7 @@ if (!MONGODB_URI) {
 
 console.log('🔄 Connecting to MongoDB Atlas...');
 
-mongoose.connect(MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-})
+mongoose.connect(MONGODB_URI)
 .then(() => {
     console.log('✅ Connected to MongoDB Atlas');
 })
