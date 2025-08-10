@@ -794,313 +794,6 @@
             font-size: 0.75rem;
         }
         
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 3000;
-            backdrop-filter: blur(5px);
-        }
-        
-        .modal-content {
-            position: relative;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            width: 90%;
-            max-width: 800px;
-            max-height: 90vh;
-            margin: 2% auto;
-            overflow: hidden;
-            animation: modalSlideIn 0.3s ease;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        @keyframes modalSlideIn {
-            from {
-                transform: translateY(-50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-        
-        .modal-header {
-            background: rgba(15, 23, 42, 0.5);
-            backdrop-filter: blur(10px);
-            padding: 1.5rem;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-shrink: 0;
-        }
-        
-        .modal-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        
-        .modal-close {
-            background: var(--bg-hover);
-            border: none;
-            color: var(--text-secondary);
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 1.25rem;
-        }
-        
-        .modal-close:hover {
-            background: var(--danger);
-            color: white;
-        }
-        
-        .modal-body {
-            padding: 1.5rem;
-            flex: 1;
-            overflow-y: auto;
-            overflow-x: hidden;
-            width: 100%;
-            min-height: 0;
-        }
-        
-        .form-section {
-            margin-bottom: 2rem;
-            width: 100%;
-            overflow: hidden;
-        }
-        
-        .form-section-title {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .form-group {
-            margin-bottom: 1rem;
-        }
-        
-        .form-label {
-            display: block;
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-        }
-        
-        .form-input, .form-select, .form-textarea {
-            width: 100%;
-            padding: 0.75rem;
-            background: var(--bg-dark);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            color: var(--text-primary);
-            font-size: 0.875rem;
-            transition: all 0.2s ease;
-        }
-        
-        .form-input:focus, .form-select:focus, .form-textarea:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-        
-        .form-textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
-        
-        .checklist-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 1rem;
-            width: 100%;
-        }
-        
-        @media (max-width: 700px) {
-            .checklist-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        .checklist-item {
-            background: var(--bg-dark);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1rem;
-            display: flex;
-            align-items: flex-start;
-            gap: 0.75rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            min-height: 80px;
-            width: 100%;
-            overflow: hidden;
-        }
-        
-        .checklist-item:hover {
-            border-color: var(--accent);
-        }
-        
-        .checklist-checkbox {
-            min-width: 20px;
-            width: 20px;
-            height: 20px;
-            border: 2px solid var(--border);
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-            flex-shrink: 0;
-        }
-        
-        .checklist-checkbox span {
-            color: white;
-            font-weight: bold;
-            font-size: 14px;
-            line-height: 1;
-        }
-        
-        .checklist-item.checked .checklist-checkbox {
-            background: var(--success);
-            border-color: var(--success);
-        }
-        
-        .checklist-item.issue .checklist-checkbox {
-            background: var(--danger);
-            border-color: var(--danger);
-        }
-        
-        .checklist-item-content {
-            flex: 1;
-            min-width: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-        
-        .checklist-item-header {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            flex-wrap: nowrap;
-        }
-        
-        .checklist-label {
-            font-size: 0.875rem;
-            color: var(--text-primary);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .checklist-status {
-            display: flex;
-            gap: 0.5rem;
-            margin-left: auto;
-            flex-shrink: 0;
-        }
-        
-        .status-btn {
-            padding: 0.25rem 0.5rem;
-            border: 1px solid var(--border);
-            background: transparent;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            color: var(--text-secondary);
-        }
-        
-        .status-btn.active {
-            color: white;
-        }
-        
-        .status-btn.ok.active {
-            background: var(--success);
-            border-color: var(--success);
-        }
-        
-        .status-btn.issue.active {
-            background: var(--danger);
-            border-color: var(--danger);
-        }
-        
-        .issue-details {
-            margin-top: 0.75rem;
-            display: none;
-        }
-        
-        .issue-details.show {
-            display: block;
-        }
-        
-        .issue-input {
-            width: 100%;
-            padding: 0.5rem;
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            border-radius: 8px;
-            color: var(--text-primary);
-            font-size: 0.75rem;
-        }
-        
-        .modal-footer {
-            padding: 1.5rem;
-            border-top: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(15, 23, 42, 0.5);
-            backdrop-filter: blur(10px);
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-        
-        @media (max-width: 500px) {
-            .modal-footer {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .modal-footer > div {
-                width: 100%;
-            }
-        }
-        
-        .summary-text {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-        }
-        
-        .summary-count {
-            color: var(--danger);
-            font-weight: 600;
-        }
-        
         @media (max-width: 1400px) {
             .dashboard-grid {
                 grid-template-columns: 1fr;
@@ -1225,7 +918,6 @@
                 <span>🔄</span>
                 <span>Refresh</span>
             </button>
-
         </div>
         
         <!-- Dashboard Grid -->
@@ -1322,121 +1014,12 @@
         </div>
     </div>
     
-    <!-- Check-In Modal -->
-    <div id="checkInModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">
-                    <span>📋</span>
-                    <span>Equipment Check-In</span>
-                </h2>
-                <button class="modal-close" onclick="closeCheckInModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <!-- Driver Info -->
-                <div class="form-section">
-                    <div class="form-group">
-                        <label class="form-label">Driver Name</label>
-                        <input type="text" class="form-input" id="checkInDriver" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Check-In Time</label>
-                        <input type="text" class="form-input" id="checkInTime" readonly>
-                    </div>
-                </div>
-                
-                <!-- Equipment Checklist -->
-                <div class="form-section">
-                    <h3 class="form-section-title">
-                        <span>🔧</span>
-                        <span>Equipment Inspection</span>
-                    </h3>
-                    <div class="checklist-grid" id="equipmentChecklist">
-                        <!-- Checklist items will be populated by JavaScript -->
-                    </div>
-                </div>
-                
-                <!-- Vehicle Information -->
-                <div class="form-section">
-                    <h3 class="form-section-title">
-                        <span>🚚</span>
-                        <span>Vehicle Information</span>
-                    </h3>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                        <div class="form-group">
-                            <label class="form-label">Truck Number</label>
-                            <input type="text" class="form-input" id="truckNumber" placeholder="e.g., T-1234">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Trailer Number</label>
-                            <input type="text" class="form-input" id="trailerNumber" placeholder="e.g., TR-5678">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Mileage</label>
-                            <input type="number" class="form-input" id="mileage" placeholder="Current odometer reading">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Fuel Level</label>
-                            <select class="form-select" id="fuelLevel">
-                                <option value="">Select fuel level</option>
-                                <option value="full">Full</option>
-                                <option value="3/4">3/4</option>
-                                <option value="1/2">1/2</option>
-                                <option value="1/4">1/4</option>
-                                <option value="empty">Empty</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Additional Notes -->
-                <div class="form-section">
-                    <h3 class="form-section-title">
-                        <span>📝</span>
-                        <span>Additional Notes</span>
-                    </h3>
-                    <div class="form-group">
-                        <label class="form-label">Comments or Observations</label>
-                        <textarea class="form-textarea" id="additionalNotes" placeholder="Any additional information about the vehicle or equipment condition..."></textarea>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <div class="summary-text">
-                    Issues Found: <span class="summary-count" id="issueCount">0</span>
-                </div>
-                <div style="display: flex; gap: 1rem; align-items: center;">
-                    <button class="btn btn-secondary" onclick="closeCheckInModal()">Cancel</button>
-                    <button class="btn btn-primary" onclick="submitCheckIn()">
-                        <span>✓</span>
-                        <span>Complete Check-In</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
     <script>
         // Global Variables
         let notifications = [];
+        let driverStatuses = new Map(); // Track latest status per driver
         let currentFilter = 'all';
         let refreshInterval;
-        let currentCheckInId = null;
-        let equipmentIssues = {};
-        
-        // Equipment checklist items
-        const equipmentItems = [
-            { id: 'tires', label: 'Tires & Wheels', icon: '🛞' },
-            { id: 'brakes', label: 'Brakes', icon: '🛑' },
-            { id: 'lights', label: 'Lights & Signals', icon: '💡' },
-            { id: 'fluids', label: 'Fluid Levels', icon: '🛢️' },
-            { id: 'belts', label: 'Belts & Hoses', icon: '🔗' },
-            { id: 'cabin', label: 'Cabin Condition', icon: '🚪' },
-            { id: 'cargo', label: 'Cargo Area', icon: '📦' },
-            { id: 'documents', label: 'Documents', icon: '📄' },
-            { id: 'safety', label: 'Safety Equipment', icon: '🦺' },
-            { id: 'refrigeration', label: 'Refrigeration Unit', icon: '❄️' }
-        ];
         
         // Initialize Dashboard
         document.addEventListener('DOMContentLoaded', function() {
@@ -1448,13 +1031,12 @@
             setTimeout(() => animateKPIs(), 500);
         });
         
-        // Missing function: refreshDashboard
         function refreshDashboard() {
             showToast('Refreshing', 'Updating dashboard data...', 'info');
             loadNotifications();
         }
         
-        // Load Notifications - ENHANCED VERSION WITH ADMIN INTEGRATION
+        // Enhanced Load Notifications - CONSOLIDATES DRIVER STATUSES
         async function loadNotifications() {
             try {
                 console.log('Loading notifications and admin data...');
@@ -1482,9 +1064,17 @@
                     adminUsers = Array.isArray(userData) ? userData : (userData.data || []);
                 }
                 
-                // Process notifications to extract driver info from message if needed
-                notifications = notificationsData.map(n => {
-                    // If driver/status missing, try to extract from message
+                // Get active drivers from admin system
+                const activeDriversFromAdmin = adminUsers.filter(user => 
+                    user.role === 'driver' && user.active !== false
+                );
+                
+                // Clear previous driver statuses
+                driverStatuses.clear();
+                
+                // Process notifications and consolidate by driver
+                notificationsData.forEach(n => {
+                    // Extract driver info from message if needed
                     if (!n.driver && n.message) {
                         const match = n.message.match(/^(.*?)\s+is\s+(.*?)$/);
                         if (match) {
@@ -1501,23 +1091,27 @@
                     
                     // Normalize warehouse name
                     if (n.warehouse) {
-                        n.warehouse = '5856 Tampa FDC'; // Standardize all warehouse names
+                        n.warehouse = '5856 Tampa FDC';
                     }
                     
-                    return n;
+                    // Only process notifications with driver and status
+                    if (n.driver && n.status) {
+                        const notificationTime = new Date(n.timestamp).getTime();
+                        const driverName = n.driver;
+                        
+                        // Keep only the latest status per driver
+                        if (!driverStatuses.has(driverName) || 
+                            notificationTime > new Date(driverStatuses.get(driverName).timestamp).getTime()) {
+                            driverStatuses.set(driverName, n);
+                        }
+                    }
                 });
                 
-                // Get active drivers from admin system
-                const activeDriversFromAdmin = adminUsers.filter(user => 
-                    user.role === 'driver' && user.active !== false
-                );
+                // Convert Map to Array for display
+                const consolidatedNotifications = Array.from(driverStatuses.values());
                 
-                // Get actual driver notifications
-                const driverNotifications = notifications.filter(n => n.driver && n.status);
-                const notificationDriverNames = driverNotifications.map(n => n.driver);
-                
-                // Add admin drivers who don't have active notifications as "pending-checkin" 
-                // (these are drivers who are still out and haven't checked in)
+                // Add admin drivers who don't have any notifications as "pending-checkin"
+                const notificationDriverNames = consolidatedNotifications.map(n => n.driver);
                 const pendingCheckInDrivers = activeDriversFromAdmin
                     .filter(driver => !notificationDriverNames.includes(driver.name))
                     .map(driver => ({
@@ -1527,16 +1121,19 @@
                         timestamp: new Date().toISOString(),
                         warehouse: '5856 Tampa FDC',
                         location: 'Location unavailable',
-                        adminData: driver // Include full admin data
+                        adminData: driver
                     }));
                 
-                // Combine all driver data
-                const allDriverData = [...driverNotifications, ...pendingCheckInDrivers];
+                // Combine consolidated notifications with pending drivers
+                const allDriverData = [...consolidatedNotifications, ...pendingCheckInDrivers];
                 
-                console.log('Processed notifications:', driverNotifications.length);
+                console.log('Consolidated driver statuses:', consolidatedNotifications.length);
                 console.log('Admin drivers:', activeDriversFromAdmin.length);
                 console.log('Pending check-in drivers:', pendingCheckInDrivers.length);
-                console.log('Total driver data:', allDriverData.length);
+                console.log('Total unique drivers:', allDriverData.length);
+                
+                // Store for global access
+                notifications = allDriverData;
                 
                 updateDisplay(allDriverData);
                 updateMetrics(allDriverData, activeDriversFromAdmin);
@@ -1551,10 +1148,9 @@
             }
         }
         
-        // Geocoding function (mock implementation - replace with real geocoding service)
+        // Geocoding function (mock implementation)
         async function reverseGeocode(lat, lng) {
             try {
-                // Mock geocoding - replace with real service like Google Maps, Mapbox, etc.
                 const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`);
                 if (response.ok) {
                     const data = await response.json();
@@ -1569,7 +1165,6 @@
                 console.log('Geocoding failed, using fallback');
             }
             
-            // Fallback for demo purposes
             const cities = ['Fort Myers', 'Naples', 'Cape Coral', 'Bonita Springs', 'Estero'];
             const randomCity = cities[Math.floor(Math.random() * cities.length)];
             return {
@@ -1580,7 +1175,7 @@
             };
         }
         
-        // Update Display - ENHANCED VERSION WITH COMPLETED CHECK-INS SEPARATION
+        // Enhanced Update Display - Shows Only Latest Status Per Driver
         async function updateDisplay(allDriverData) {
             let filtered;
             let emptyMessage;
@@ -1589,28 +1184,24 @@
             let countText;
             
             if (currentFilter === 'completed') {
-                // Show only completed check-ins
                 filtered = allDriverData.filter(n => n.checkedIn === true);
                 emptyMessage = 'No completed check-ins today';
                 feedTitle = 'Completed Check-Ins';
                 feedIcon = '✅';
                 countText = `${filtered.length} completed`;
             } else if (currentFilter === 'pending-checkin') {
-                // Show drivers who are pending check-in (still out and haven't returned)
                 filtered = allDriverData.filter(n => n.status === 'pending-checkin');
                 emptyMessage = 'All drivers have returned or are en-route back';
                 feedTitle = 'Pending Check-In';
                 feedIcon = '⏳';
                 countText = `${filtered.length} pending`;
             } else if (currentFilter === 'all') {
-                // Show all EXCEPT completed check-ins and pending check-ins (keep feed clean)
                 filtered = allDriverData.filter(n => n.checkedIn !== true && n.status !== 'pending-checkin');
                 emptyMessage = 'No active fleet movements';
                 feedTitle = 'Real-Time Activity Feed';
                 feedIcon = '📡';
                 countText = `${filtered.length} active`;
             } else {
-                // Show specific status EXCEPT completed check-ins
                 filtered = allDriverData.filter(n => n.status === currentFilter && n.checkedIn !== true);
                 emptyMessage = `No drivers with status: ${currentFilter}`;
                 feedTitle = `${currentFilter.charAt(0).toUpperCase() + currentFilter.slice(1)} Drivers`;
@@ -1626,15 +1217,9 @@
             const activityList = document.getElementById('activityList');
             
             if (filtered.length === 0) {
-                let emptyIcon = '📭';
-                if (currentFilter === 'out-on-route') {
-                    emptyIcon = '✅';
-                    emptyMessage = 'Great! All drivers have returned to base or are en-route back';
-                }
-                
                 activityList.innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-icon">${emptyIcon}</div>
+                        <div class="empty-icon">📭</div>
                         <p>${emptyMessage}</p>
                     </div>
                 `;
@@ -1644,19 +1229,11 @@
             // Process notifications with geocoding
             const processedNotifications = await Promise.all(
                 filtered
-                    .sort((a, b) => {
-                        // For completed check-ins, sort by check-in time (most recent first)
-                        if (currentFilter === 'completed') {
-                            return new Date(b.checkInData?.checkInTime || b.timestamp) - new Date(a.checkInData?.checkInTime || a.timestamp);
-                        }
-                        // For active operations, sort by timestamp
-                        return new Date(b.timestamp) - new Date(a.timestamp);
-                    })
-                    .slice(0, 30) // Show more for completed tab
+                    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+                    .slice(0, 30)
                     .map(async (notification) => {
                         let geocodedAddress = null;
                         
-                        // Parse coordinates if available
                         if (notification.location && notification.location !== 'Location unavailable') {
                             try {
                                 const [lat, lng] = notification.location.split(',').map(coord => parseFloat(coord.trim()));
@@ -1676,104 +1253,14 @@
                 const time = new Date(notification.timestamp).toLocaleTimeString();
                 const timeAgo = getTimeAgo(new Date(notification.timestamp));
                 
-                // Determine status display and styling
                 let statusDisplay = notification.status;
                 let statusClass = notification.status;
-                
-                // Handle "pending check-in" drivers differently
-                if (currentFilter === 'pending-checkin') {
-                    statusDisplay = 'pending check-in';
-                    statusClass = 'pending-checkin';
-                }
                 
                 if (notification.status === 'pending-checkin') {
                     statusDisplay = 'pending check-in';
                     statusClass = 'pending-checkin';
                 }
                 
-                if (notification.status === 'standby') {
-                    statusDisplay = 'standby';
-                    statusClass = 'standby';
-                }
-                
-                // Special handling for completed check-ins
-                if (notification.checkedIn && currentFilter === 'completed') {
-                    const checkInTime = new Date(notification.checkInData.checkInTime);
-                    const checkInTimeAgo = getTimeAgo(checkInTime);
-                    
-                    return `
-                        <div class="activity-item completed" style="border-left: 3px solid var(--success);">
-                            <div class="activity-content">
-                                <div class="activity-info">
-                                    <div class="activity-driver">
-                                        ${notification.driver}
-                                        ${notification.adminData ? `
-                                            <span style="font-size: 0.75rem; color: var(--text-muted); margin-left: 0.5rem;">
-                                                ID: ${notification.adminData.vehicleId || 'No Vehicle'}
-                                            </span>
-                                        ` : ''}
-                                        <span style="font-size: 0.875rem; color: var(--success); margin-left: 1rem;">
-                                            ✓ Check-In Complete
-                                        </span>
-                                    </div>
-                                    <div class="activity-details">
-                                        <span class="activity-detail">
-                                            <span>⏱</span>
-                                            <span>Completed ${checkInTimeAgo}</span>
-                                        </span>
-                                        <span class="activity-detail">
-                                            <span>📍</span>
-                                            <span>5856 Tampa FDC</span>
-                                        </span>
-                                        ${notification.checkInData?.vehicleInfo?.truckNumber ? `
-                                            <span class="activity-detail">
-                                                <span>🚚</span>
-                                                <span>Truck: ${notification.checkInData.vehicleInfo.truckNumber}</span>
-                                            </span>
-                                        ` : ''}
-                                        ${notification.checkInData?.equipmentCheck?.totalIssues > 0 ? `
-                                            <span class="activity-detail" style="color: var(--warning);">
-                                                <span>⚠️</span>
-                                                <span>${notification.checkInData.equipmentCheck.totalIssues} issue(s) reported</span>
-                                            </span>
-                                        ` : `
-                                            <span class="activity-detail" style="color: var(--success);">
-                                                <span>✅</span>
-                                                <span>All equipment OK</span>
-                                            </span>
-                                        `}
-                                        ${notification.adminData && notification.adminData.email ? `
-                                            <span class="activity-detail">
-                                                <span>📧</span>
-                                                <span>${notification.adminData.email}</span>
-                                            </span>
-                                        ` : ''}
-                                    </div>
-                                    ${notification.checkInData?.additionalNotes ? `
-                                        <div class="location-info" style="margin-top: 0.75rem;">
-                                            <div style="color: var(--text-secondary); font-size: 0.875rem;">
-                                                <strong>Notes:</strong> ${notification.checkInData.additionalNotes}
-                                            </div>
-                                        </div>
-                                    ` : ''}
-                                </div>
-                                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                    <span class="status-badge" style="background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3);">
-                                        ✓ Completed
-                                    </span>
-                                    ${notification.checkInData?.equipmentCheck?.totalIssues > 0 ? `
-                                        <button class="btn btn-secondary btn-sm" onclick="viewCheckInDetails('${notification._id}')">
-                                            <span>📋</span>
-                                            <span>View Details</span>
-                                        </button>
-                                    ` : ''}
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }
-                
-                // Regular active operations display
                 return `
                     <div class="activity-item ${statusClass}">
                         <div class="activity-content">
@@ -1785,6 +1272,9 @@
                                             ID: ${notification.adminData.vehicleId || 'No Vehicle'}
                                         </span>
                                     ` : ''}
+                                    <span style="font-size: 0.75rem; color: var(--accent); margin-left: 1rem;">
+                                        Latest Status
+                                    </span>
                                 </div>
                                 <div class="activity-details">
                                     <span class="activity-detail">
@@ -1839,20 +1329,14 @@
                                             📍 Driver still out - Pending return and check-in
                                         </div>
                                     </div>
-                                ` : notification.status === 'standby' ? `
-                                    <div class="location-info">
-                                        <div class="address" style="color: var(--text-muted);">
-                                            📍 Driver available - Location not tracked
-                                        </div>
-                                    </div>
                                 ` : ''}
                             </div>
                             <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                <span class="status-badge ${currentFilter === 'out-on-route' ? 'status-warning' : 'status-' + statusClass}">
+                                <span class="status-badge status-${statusClass}">
                                     ${statusDisplay.replace('-', ' ')}
                                 </span>
                                 ${notification.status === 'arrived' ? `
-                                    <button class="btn btn-primary btn-sm" onclick="openCheckInModal('${notification._id}', '${notification.driver.replace(/'/g, "\\'")}'); event.stopPropagation();">
+                                    <button class="btn btn-primary btn-sm" onclick="checkInDriver('${notification._id}', '${notification.driver.replace(/'/g, "\\'")}'); event.stopPropagation();">
                                         <span>📋</span>
                                         <span>Check In</span>
                                     </button>
@@ -1864,46 +1348,35 @@
             }).join('');
         }
         
-        // Update Metrics - END-OF-DAY CHECK-IN SYSTEM
-        function updateMetrics(allDriverData, adminDrivers = []) {
-            // Count drivers by status for end-of-day check-in
-            const totalRoutedDrivers = allDriverData.length; // All drivers assigned routes for the day
-            const enRouteDrivers = allDriverData.filter(n => n.status === 'en-route').length; // Coming back to FDC
-            const arrivedDrivers = allDriverData.filter(n => n.status === 'arrived').length; // At FDC but not checked in
-            const checkedInDrivers = allDriverData.filter(n => n.checkedIn === true).length; // Completed check-in
+        function checkInDriver(notificationId, driverName) {
+            showToast('Check-In', `${driverName} checked in successfully`, 'success');
             
-            // Pending Check-In = Total routed - En Route - Arrived = Still out on routes/not returned
-            const pendingCheckInCount = totalRoutedDrivers - enRouteDrivers - arrivedDrivers;
-            
-            // Update KPIs
-            document.getElementById('activeDrivers').textContent = totalRoutedDrivers; // Total drivers with routes today
-            document.getElementById('enRouteCount').textContent = enRouteDrivers; // Returning to FDC
-            document.getElementById('arrivedCount').textContent = arrivedDrivers; // At FDC, need to check in
-            document.getElementById('notCheckedInCount').textContent = Math.max(0, pendingCheckInCount); // Still out/not returned
-            
-            // Update trend indicator for pending check-ins
-            const pendingCard = document.querySelector('#notCheckedInCount').closest('.kpi-card');
-            const trendElement = pendingCard.querySelector('.kpi-trend');
-            
-            if (pendingCheckInCount <= 0) {
-                trendElement.className = 'kpi-trend up';
-                trendElement.innerHTML = '✓ All Returned';
-                trendElement.style.color = 'var(--success)';
-                trendElement.style.background = 'rgba(16, 185, 129, 0.1)';
-            } else if (pendingCheckInCount > 5) {
-                trendElement.className = 'kpi-trend down';
-                trendElement.innerHTML = '⚠ Many Outstanding';
-                trendElement.style.color = 'var(--danger)';
-                trendElement.style.background = 'rgba(239, 68, 68, 0.1)';
-            } else {
-                trendElement.className = 'kpi-trend';
-                trendElement.innerHTML = '🚛 Still Out';
-                trendElement.style.color = 'var(--warning)';
-                trendElement.style.background = 'rgba(245, 158, 11, 0.1)';
+            // Update the driver's status to checked in
+            const driverIndex = notifications.findIndex(n => n._id === notificationId);
+            if (driverIndex !== -1) {
+                notifications[driverIndex].checkedIn = true;
+                notifications[driverIndex].checkInTime = new Date().toISOString();
+                
+                // Refresh display
+                updateDisplay(notifications);
+                updateMetrics(notifications);
             }
+        }
+        
+        // Update Metrics
+        function updateMetrics(allDriverData, adminDrivers = []) {
+            const totalRoutedDrivers = allDriverData.length;
+            const enRouteDrivers = allDriverData.filter(n => n.status === 'en-route').length;
+            const arrivedDrivers = allDriverData.filter(n => n.status === 'arrived').length;
+            const checkedInDrivers = allDriverData.filter(n => n.checkedIn === true).length;
+            const pendingCheckInCount = allDriverData.filter(n => n.status === 'pending-checkin').length;
             
-            // Update performance metrics - how many completed the day
-            const completedDrivers = enRouteDrivers + arrivedDrivers; // Drivers accounted for
+            document.getElementById('activeDrivers').textContent = totalRoutedDrivers;
+            document.getElementById('enRouteCount').textContent = enRouteDrivers;
+            document.getElementById('arrivedCount').textContent = arrivedDrivers;
+            document.getElementById('notCheckedInCount').textContent = pendingCheckInCount;
+            
+            const completedDrivers = enRouteDrivers + arrivedDrivers;
             const utilization = totalRoutedDrivers > 0 ? Math.min((completedDrivers / totalRoutedDrivers) * 100, 95) : 0;
             document.getElementById('fleetUtilization').textContent = Math.floor(utilization) + '%';
             document.getElementById('utilizationBar').style.width = utilization + '%';
@@ -1912,11 +1385,9 @@
             document.getElementById('onTimeRate').textContent = Math.floor(onTime) + '%';
             document.getElementById('onTimeBar').style.width = onTime + '%';
             
-            document.getElementById('dailyThroughput').textContent = 
-                Math.floor(completedDrivers * 2.5);
+            document.getElementById('dailyThroughput').textContent = Math.floor(completedDrivers * 2.5);
         }
         
-        // Animate KPIs
         function animateKPIs() {
             document.querySelectorAll('.kpi-value').forEach(kpi => {
                 const finalValue = kpi.textContent;
@@ -1938,7 +1409,6 @@
             });
         }
         
-        // Time Functions
         function startClock() {
             const updateTime = () => {
                 const now = new Date();
@@ -1959,156 +1429,36 @@
             return `${Math.floor(hours / 24)}d ago`;
         }
         
-        // Auto Refresh
         function startAutoRefresh() {
             refreshInterval = setInterval(() => {
                 loadNotifications();
-            }, 10000); // Refresh every 10 seconds
+            }, 10000);
         }
         
-        // Filter Functions - UPDATED WITH STANDBY FILTER
         function filterStatus(status, button) {
             currentFilter = status;
             
-            // Update button states
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
             button.classList.add('active');
             
-            // Reload display with all driver data including standby
-            const allDriverData = notifications.length > 0 ? getAllDriverData() : [];
-            updateDisplay(allDriverData);
+            updateDisplay(notifications);
         }
         
-        // Helper function to get all driver data (active + standby)
-        function getAllDriverData() {
-            // This should return the same combined data as in loadNotifications
-            // For simplicity, we'll filter from the current notifications array
-            // In a real app, you'd want to store this combined data globally
-            return notifications.filter(n => n.driver && n.status);
-        }
-        
-        // Function to view check-in details
-        function viewCheckInDetails(notificationId) {
-            const notification = notifications.find(n => n._id === notificationId);
-            if (!notification || !notification.checkInData) return;
-            
-            const checkInData = notification.checkInData;
-            let detailsHtml = `
-                <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; margin: 1rem 0;">
-                    <h3 style="color: var(--text-primary); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
-                        <span>📋</span>
-                        <span>Check-In Details for ${notification.driver}</span>
-                    </h3>
-                    
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
-                        <div>
-                            <strong style="color: var(--text-secondary);">Check-In Time:</strong><br>
-                            ${new Date(checkInData.checkInTime).toLocaleString()}
-                        </div>
-                        ${checkInData.vehicleInfo?.truckNumber ? `
-                            <div>
-                                <strong style="color: var(--text-secondary);">Truck Number:</strong><br>
-                                ${checkInData.vehicleInfo.truckNumber}
-                            </div>
-                        ` : ''}
-                        ${checkInData.vehicleInfo?.trailerNumber ? `
-                            <div>
-                                <strong style="color: var(--text-secondary);">Trailer Number:</strong><br>
-                                ${checkInData.vehicleInfo.trailerNumber}
-                            </div>
-                        ` : ''}
-                        ${checkInData.vehicleInfo?.mileage ? `
-                            <div>
-                                <strong style="color: var(--text-secondary);">Mileage:</strong><br>
-                                ${checkInData.vehicleInfo.mileage}
-                            </div>
-                        ` : ''}
-                        ${checkInData.vehicleInfo?.fuelLevel ? `
-                            <div>
-                                <strong style="color: var(--text-secondary);">Fuel Level:</strong><br>
-                                ${checkInData.vehicleInfo.fuelLevel}
-                            </div>
-                        ` : ''}
-                    </div>
-                    
-                    ${checkInData.equipmentCheck?.totalIssues > 0 ? `
-                        <div style="margin-bottom: 1.5rem;">
-                            <h4 style="color: var(--danger); margin-bottom: 0.75rem;">Equipment Issues (${checkInData.equipmentCheck.totalIssues}):</h4>
-                            <div style="display: grid; gap: 0.5rem;">
-                                ${checkInData.equipmentCheck.items
-                                    .filter(item => item.status === 'issue')
-                                    .map(item => `
-                                        <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 0.75rem;">
-                                            <strong style="color: var(--danger);">${item.label}:</strong> ${item.issue || 'No details provided'}
-                                        </div>
-                                    `).join('')}
-                            </div>
-                        </div>
-                    ` : `
-                        <div style="margin-bottom: 1.5rem;">
-                            <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 0.75rem; color: var(--success);">
-                                ✅ All equipment checks passed - No issues reported
-                            </div>
-                        </div>
-                    `}
-                    
-                    ${checkInData.additionalNotes ? `
-                        <div>
-                            <h4 style="color: var(--text-secondary); margin-bottom: 0.5rem;">Additional Notes:</h4>
-                            <div style="background: var(--bg-dark); border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem; color: var(--text-primary);">
-                                ${checkInData.additionalNotes}
-                            </div>
-                        </div>
-                    ` : ''}
-                </div>
-            `;
-            
-            // Create a temporary modal to show details
-            const modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.style.display = 'block';
-            modal.innerHTML = `
-                <div class="modal-content" style="max-width: 800px;">
-                    <div class="modal-header">
-                        <h2 class="modal-title">
-                            <span>📋</span>
-                            <span>Check-In Details</span>
-                        </h2>
-                        <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
-                    </div>
-                    <div class="modal-body">
-                        ${detailsHtml}
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Close</button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
-            
-            // Close modal when clicking outside
-            modal.addEventListener('click', function(e) {
-                if (e.target === modal) {
-                    modal.remove();
-                }
-            });
-        }
-        
-        // Export Functions
         function exportData() {
-            const driverNotifications = notifications.filter(n => n.driver && n.status);
+            if (notifications.length === 0) {
+                showToast('No Data', 'No data to export', 'error');
+                return;
+            }
             
             const csv = [
-                ['Timestamp', 'Driver', 'Status', 'Coordinates', 'Address', 'Warehouse', 'ETA'],
-                ...driverNotifications.map(n => [
+                ['Timestamp', 'Driver', 'Status', 'Coordinates', 'Warehouse', 'ETA'],
+                ...notifications.map(n => [
                     new Date(n.timestamp).toLocaleString(),
                     n.driver,
                     n.status,
                     n.location || 'N/A',
-                    n.geocodedAddress?.address || 'Not geocoded',
                     n.warehouse || 'N/A',
                     n.estimatedArrival || 'N/A'
                 ])
@@ -2124,176 +1474,24 @@
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
             
-            showToast('Export Complete', 'Fleet report with location data downloaded successfully', 'success');
+            showToast('Export Complete', 'Fleet report downloaded successfully', 'success');
         }
         
-        // Map Integration Functions
         function openLocationMap(coordinates, driverName) {
             if (!coordinates || coordinates === 'Location unavailable') {
                 showToast('Location Unavailable', 'No coordinates available for this driver', 'error');
                 return;
             }
             
-            try {
-                const [lat, lng] = coordinates.split(',').map(coord => parseFloat(coord.trim()));
-                
-                if (isNaN(lat) || isNaN(lng)) {
-                    showToast('Invalid Coordinates', 'Unable to parse location coordinates', 'error');
-                    return;
-                }
-                
-                // Show map service selection modal
-                showMapServiceModal(lat, lng, driverName);
-                
-            } catch (error) {
-                console.error('Error parsing coordinates:', error);
-                showToast('Location Error', 'Unable to process location data', 'error');
+            const [lat, lng] = coordinates.split(',').map(coord => parseFloat(coord.trim()));
+            if (isNaN(lat) || isNaN(lng)) {
+                showToast('Invalid Coordinates', 'Unable to parse location coordinates', 'error');
+                return;
             }
-        }
-        
-        function showMapServiceModal(lat, lng, driverName) {
-            // Remove existing modal if present
-            const existingModal = document.getElementById('mapServiceModal');
-            if (existingModal) existingModal.remove();
             
-            // Create map service selection modal
-            const modal = document.createElement('div');
-            modal.id = 'mapServiceModal';
-            modal.className = 'modal';
-            modal.style.display = 'block';
-            
-            modal.innerHTML = `
-                <div class="modal-content" style="max-width: 500px; margin: 10% auto;">
-                    <div class="modal-header">
-                        <h2 class="modal-title">
-                            <span>🗺️</span>
-                            <span>View ${driverName}'s Location</span>
-                        </h2>
-                        <button class="modal-close" onclick="closeMapServiceModal()">&times;</button>
-                    </div>
-                    <div class="modal-body">
-                        <p style="margin-bottom: 1.5rem; color: var(--text-secondary);">
-                            Choose your preferred map service to view the driver's location:
-                        </p>
-                        <div style="display: grid; gap: 1rem;">
-                            <button class="btn btn-primary" onclick="openInGoogleMaps(${lat}, ${lng}, '${driverName}')" style="width: 100%;">
-                                <span>🌍</span>
-                                <span>Google Maps</span>
-                                <span style="font-size: 0.75rem; opacity: 0.8;">(Recommended)</span>
-                            </button>
-                            <button class="btn btn-secondary" onclick="openInAppleMaps(${lat}, ${lng}, '${driverName}')" style="width: 100%;">
-                                <span>🍎</span>
-                                <span>Apple Maps</span>
-                                <span style="font-size: 0.75rem; opacity: 0.8;">(iOS/Mac)</span>
-                            </button>
-                            <button class="btn btn-secondary" onclick="openInBingMaps(${lat}, ${lng}, '${driverName}')" style="width: 100%;">
-                                <span>🔍</span>
-                                <span>Bing Maps</span>
-                                <span style="font-size: 0.75rem; opacity: 0.8;">(Microsoft)</span>
-                            </button>
-                            <button class="btn btn-secondary" onclick="openInOpenStreetMap(${lat}, ${lng}, '${driverName}')" style="width: 100%;">
-                                <span>🗺️</span>
-                                <span>OpenStreetMap</span>
-                                <span style="font-size: 0.75rem; opacity: 0.8;">(Open Source)</span>
-                            </button>
-                        </div>
-                        <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(59, 130, 246, 0.05); border-radius: 8px; font-size: 0.875rem;">
-                            <strong>Coordinates:</strong> ${lat.toFixed(6)}, ${lng.toFixed(6)}<br>
-                            <strong>Driver:</strong> ${driverName}
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" onclick="closeMapServiceModal()">Cancel</button>
-                        <button class="btn btn-primary" onclick="copyCoordinates(${lat}, ${lng})">
-                            <span>📋</span>
-                            <span>Copy Coordinates</span>
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
-            
-            // Close modal when clicking outside
-            modal.addEventListener('click', function(e) {
-                if (e.target === modal) {
-                    closeMapServiceModal();
-                }
-            });
-        }
-        
-        function closeMapServiceModal() {
-            const modal = document.getElementById('mapServiceModal');
-            if (modal) {
-                modal.style.animation = 'modalSlideIn 0.3s ease reverse';
-                setTimeout(() => modal.remove(), 300);
-            }
-        }
-        
-        function openInGoogleMaps(lat, lng, driverName) {
             const url = `https://www.google.com/maps?q=${lat},${lng}&z=15&t=m`;
             window.open(url, '_blank');
-            showToast('Opening Google Maps', `Viewing ${driverName}'s location in Google Maps`, 'success');
-            closeMapServiceModal();
-        }
-        
-        function openInAppleMaps(lat, lng, driverName) {
-            const url = `https://maps.apple.com/?q=${lat},${lng}&z=15`;
-            window.open(url, '_blank');
-            showToast('Opening Apple Maps', `Viewing ${driverName}'s location in Apple Maps`, 'success');
-            closeMapServiceModal();
-        }
-        
-        function openInBingMaps(lat, lng, driverName) {
-            const url = `https://www.bing.com/maps?cp=${lat}~${lng}&lvl=15`;
-            window.open(url, '_blank');
-            showToast('Opening Bing Maps', `Viewing ${driverName}'s location in Bing Maps`, 'success');
-            closeMapServiceModal();
-        }
-        
-        function openInOpenStreetMap(lat, lng, driverName) {
-            const url = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}&zoom=15`;
-            window.open(url, '_blank');
-            showToast('Opening OpenStreetMap', `Viewing ${driverName}'s location in OpenStreetMap`, 'success');
-            closeMapServiceModal();
-        }
-        
-        function copyCoordinates(lat, lng) {
-            const coordinates = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-            
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(coordinates).then(() => {
-                    showToast('Coordinates Copied', 'Location coordinates copied to clipboard', 'success');
-                }).catch(err => {
-                    console.error('Failed to copy coordinates:', err);
-                    fallbackCopyToClipboard(coordinates);
-                });
-            } else {
-                fallbackCopyToClipboard(coordinates);
-            }
-            
-            closeMapServiceModal();
-        }
-        
-        function fallbackCopyToClipboard(text) {
-            const textArea = document.createElement('textarea');
-            textArea.value = text;
-            textArea.style.position = 'fixed';
-            textArea.style.left = '-999999px';
-            textArea.style.top = '-999999px';
-            document.body.appendChild(textArea);
-            textArea.focus();
-            textArea.select();
-            
-            try {
-                document.execCommand('copy');
-                showToast('Coordinates Copied', 'Location coordinates copied to clipboard', 'success');
-            } catch (err) {
-                console.error('Fallback copy failed:', err);
-                showToast('Copy Failed', 'Unable to copy coordinates to clipboard', 'error');
-            }
-            
-            document.body.removeChild(textArea);
+            showToast('Opening Map', `Viewing ${driverName}'s location`, 'success');
         }
         
         function dispatchAlert() {
@@ -2316,7 +1514,6 @@
             }
         }
         
-        // Toast Notification System
         function showToast(title, message, type = 'info') {
             const existingToast = document.querySelector('.toast');
             if (existingToast) existingToast.remove();
@@ -2344,181 +1541,6 @@
                 toast.style.animation = 'slideUp 0.3s ease reverse';
                 setTimeout(() => toast.remove(), 300);
             }, 5000);
-        }
-        
-        // Check-In Modal Functions
-        function openCheckInModal(notificationId, driverName) {
-            currentCheckInId = notificationId;
-            equipmentIssues = {};
-            
-            // Set driver info
-            document.getElementById('checkInDriver').value = driverName;
-            document.getElementById('checkInTime').value = new Date().toLocaleString();
-            
-            // Reset form
-            document.getElementById('truckNumber').value = '';
-            document.getElementById('trailerNumber').value = '';
-            document.getElementById('mileage').value = '';
-            document.getElementById('fuelLevel').value = '';
-            document.getElementById('additionalNotes').value = '';
-            
-            // Build equipment checklist
-            const checklistContainer = document.getElementById('equipmentChecklist');
-            checklistContainer.innerHTML = equipmentItems.map(item => `
-                <div class="checklist-item" id="item-${item.id}">
-                    <div class="checklist-checkbox">
-                        <span style="display: none;">✓</span>
-                    </div>
-                    <div class="checklist-item-content">
-                        <div class="checklist-item-header">
-                            <span>${item.icon}</span>
-                            <span class="checklist-label" title="${item.label}">${item.label}</span>
-                            <div class="checklist-status">
-                                <button class="status-btn ok" onclick="setItemStatus('${item.id}', 'ok')">OK</button>
-                                <button class="status-btn issue" onclick="setItemStatus('${item.id}', 'issue')">Issue</button>
-                            </div>
-                        </div>
-                        <div class="issue-details" id="issue-${item.id}">
-                            <input type="text" class="issue-input" placeholder="Describe the issue..." 
-                                   onkeyup="updateIssueDescription('${item.id}', this.value)">
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-            
-            // Show modal
-            document.getElementById('checkInModal').style.display = 'block';
-            updateIssueCount();
-        }
-        
-        function closeCheckInModal() {
-            document.getElementById('checkInModal').style.display = 'none';
-            currentCheckInId = null;
-            equipmentIssues = {};
-        }
-        
-        function setItemStatus(itemId, status) {
-            const item = document.getElementById(`item-${itemId}`);
-            const checkbox = item.querySelector('.checklist-checkbox');
-            const checkmark = checkbox.querySelector('span');
-            const okBtn = item.querySelector('.status-btn.ok');
-            const issueBtn = item.querySelector('.status-btn.issue');
-            const issueDetails = document.getElementById(`issue-${itemId}`);
-            
-            // Reset checkbox first
-            checkbox.style.background = '';
-            checkbox.style.borderColor = '';
-            
-            // Update visual state
-            if (status === 'ok') {
-                item.classList.add('checked');
-                item.classList.remove('issue');
-                checkbox.style.background = 'var(--success)';
-                checkbox.style.borderColor = 'var(--success)';
-                checkmark.textContent = '✓';  // Always set to checkmark
-                checkmark.style.display = 'block';
-                checkmark.style.color = 'white';
-                okBtn.classList.add('active');
-                issueBtn.classList.remove('active');
-                issueDetails.classList.remove('show');
-                delete equipmentIssues[itemId];
-            } else if (status === 'issue') {
-                item.classList.add('issue');
-                item.classList.remove('checked');
-                checkbox.style.background = 'var(--danger)';
-                checkbox.style.borderColor = 'var(--danger)';
-                checkmark.textContent = '!';  // Set to exclamation
-                checkmark.style.display = 'block';
-                checkmark.style.color = 'white';
-                okBtn.classList.remove('active');
-                issueBtn.classList.add('active');
-                issueDetails.classList.add('show');
-                equipmentIssues[itemId] = { status: 'issue', description: '' };
-            }
-            
-            updateIssueCount();
-        }
-        
-        function updateIssueDescription(itemId, description) {
-            if (equipmentIssues[itemId]) {
-                equipmentIssues[itemId].description = description;
-            }
-        }
-        
-        function updateIssueCount() {
-            const count = Object.keys(equipmentIssues).length;
-            document.getElementById('issueCount').textContent = count;
-        }
-        
-        async function submitCheckIn() {
-            const checkInData = {
-                driverId: currentCheckInId,
-                checkInTime: new Date().toISOString(),
-                vehicleInfo: {
-                    truckNumber: document.getElementById('truckNumber').value,
-                    trailerNumber: document.getElementById('trailerNumber').value,
-                    mileage: document.getElementById('mileage').value,
-                    fuelLevel: document.getElementById('fuelLevel').value
-                },
-                equipmentCheck: {
-                    items: equipmentItems.map(item => {
-                        const itemElement = document.getElementById(`item-${item.id}`);
-                        const isChecked = itemElement.classList.contains('checked');
-                        const hasIssue = itemElement.classList.contains('issue');
-                        
-                        return {
-                            id: item.id,
-                            label: item.label,
-                            status: isChecked ? 'ok' : (hasIssue ? 'issue' : 'not_checked'),
-                            issue: equipmentIssues[item.id]?.description || ''
-                        };
-                    }),
-                    totalIssues: Object.keys(equipmentIssues).length
-                },
-                additionalNotes: document.getElementById('additionalNotes').value
-            };
-            
-            // Find the notification and update it
-            const notification = notifications.find(n => n._id === currentCheckInId);
-            if (notification) {
-                notification.checkedIn = true;
-                notification.checkInData = checkInData;
-                
-                // Update the notification on the server (if connected)
-                try {
-                    await fetch(`/api/notifications/${currentCheckInId}/checkin`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(checkInData)
-                    });
-                } catch (error) {
-                    console.log('Offline mode - check-in saved locally');
-                }
-                
-                // Update display
-                const driverNotifications = notifications.filter(n => n.driver && n.status);
-                updateDisplay(driverNotifications);
-                
-                // Show appropriate toast based on issues
-                if (checkInData.equipmentCheck.totalIssues > 0) {
-                    showToast('Check-In Complete', 
-                             `${notification.driver} checked in with ${checkInData.equipmentCheck.totalIssues} issue(s) reported`, 
-                             'warning');
-                } else {
-                    showToast('Check-In Complete', 
-                             `${notification.driver} checked in successfully - All equipment OK`, 
-                             'success');
-                }
-                
-                // Auto-switch to completed tab if we're not already there
-                if (currentFilter !== 'completed') {
-                    setTimeout(() => {
-                        showToast('View Completed', 'Click "✓ Completed" tab to see finished check-ins', 'info');
-                    }, 3000);
-                }
-            }
-            
-            closeCheckInModal();
         }
     </script>
 </body>
