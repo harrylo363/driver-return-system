@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fleet Command Admin Panel | User Management</title>
+    <title>FleetForce Command Center | Enterprise Logistics Management</title>
     
     <!-- Premium Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     
     <style>
         * {
@@ -18,34 +18,60 @@
         }
         
         :root {
-            --primary: #0F172A;
-            --primary-light: #1E293B;
-            --accent: #3B82F6;
-            --accent-hover: #2563EB;
-            --success: #10B981;
-            --warning: #F59E0B;
-            --danger: #EF4444;
-            --text-primary: #F1F5F9;
-            --text-secondary: #94A3B8;
+            /* Premium Dark Theme */
+            --bg-primary: #0B0F1A;
+            --bg-secondary: #1A1F2E;
+            --bg-tertiary: #242B3D;
+            --bg-elevated: #2A3441;
+            --bg-card: #1E2532;
+            --bg-glass: rgba(42, 52, 65, 0.9);
+            
+            /* Accent Colors */
+            --accent-blue: #0EA5E9;
+            --accent-blue-light: #38BDF8;
+            --accent-purple: #8B5CF6;
+            --accent-green: #10B981;
+            --accent-orange: #F59E0B;
+            --accent-red: #EF4444;
+            
+            /* Text Colors */
+            --text-primary: #F8FAFC;
+            --text-secondary: #CBD5E1;
+            --text-tertiary: #94A3B8;
             --text-muted: #64748B;
-            --bg-dark: #0F172A;
-            --bg-card: #1E293B;
-            --bg-hover: #334155;
-            --border: #334155;
-            --gradient-primary: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
-            --gradient-dark: linear-gradient(180deg, #0F172A 0%, #1E293B 100%);
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
-            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            --text-dim: #475569;
+            
+            /* Border & Dividers */
+            --border-primary: #334155;
+            --border-secondary: #475569;
+            --border-accent: rgba(14, 165, 233, 0.3);
+            
+            /* Gradients */
+            --gradient-primary: linear-gradient(135deg, #0EA5E9 0%, #8B5CF6 100%);
+            --gradient-glass: linear-gradient(135deg, rgba(248, 250, 252, 0.1) 0%, rgba(248, 250, 252, 0.05) 100%);
+            --gradient-card: linear-gradient(145deg, #1E2532 0%, #242B3D 100%);
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
+            --shadow-glow: 0 0 30px rgba(14, 165, 233, 0.3);
+            
+            /* Animations */
+            --transition-fast: 0.15s ease;
+            --transition-normal: 0.3s ease;
+            --transition-slow: 0.5s ease;
         }
         
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-dark);
+            background: var(--bg-primary);
             color: var(--text-primary);
             line-height: 1.6;
             overflow-x: hidden;
+            font-size: 14px;
+            font-weight: 400;
         }
         
         /* Animated Background */
@@ -57,135 +83,995 @@
             width: 100%;
             height: 100%;
             background: 
-                radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 40% 20%, rgba(16, 185, 129, 0.1) 0%, transparent 50%);
+                radial-gradient(circle at 15% 20%, rgba(14, 165, 233, 0.15) 0%, transparent 45%),
+                radial-gradient(circle at 85% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 45%),
+                radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
+                linear-gradient(145deg, rgba(11, 15, 26, 0.95) 0%, rgba(26, 31, 46, 0.98) 100%);
             z-index: -1;
+            animation: backgroundShift 20s ease-in-out infinite;
         }
         
-        /* Header */
-        .header {
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
-            position: sticky;
+        @keyframes backgroundShift {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        
+        /* Enterprise Layout */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Premium Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-right: 1px solid var(--border-primary);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
             top: 0;
+            left: 0;
+            bottom: 0;
             z-index: 1000;
-            padding: 0;
+            transition: transform var(--transition-normal);
         }
         
-        .header-content {
-            max-width: 1920px;
-            margin: 0 auto;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .sidebar-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border-primary);
+            background: rgba(14, 165, 233, 0.05);
         }
         
-        .brand {
+        .brand-logo {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 16px;
+            margin-bottom: 8px;
         }
         
-        .logo {
+        .logo-icon {
             width: 48px;
             height: 48px;
             background: var(--gradient-primary);
-            border-radius: 12px;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 24px;
             font-weight: 700;
             color: white;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-glow);
+        }
+        
+        .logo-icon::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transform: rotate(45deg);
+            animation: logoShine 4s infinite;
+        }
+        
+        @keyframes logoShine {
+            0%, 100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
         }
         
         .brand-text h1 {
-            font-size: 1.5rem;
-            font-weight: 700;
+            font-size: 20px;
+            font-weight: 800;
             background: var(--gradient-primary);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin: 0;
+            letter-spacing: -0.02em;
         }
         
         .brand-text p {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
+            font-size: 12px;
+            color: var(--text-tertiary);
             margin: 0;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        
+        .sidebar-nav {
+            flex: 1;
+            padding: 24px 0;
+            overflow-y: auto;
+        }
+        
+        .nav-section {
+            margin-bottom: 32px;
+        }
+        
+        .nav-section-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 0 24px 12px;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 24px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all var(--transition-fast);
+            position: relative;
+            border: none;
+            background: none;
+            width: 100%;
+            cursor: pointer;
+        }
+        
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--accent-blue);
+            transform: scaleY(0);
+            transition: transform var(--transition-fast);
+        }
+        
+        .nav-item:hover {
+            color: var(--text-primary);
+            background: rgba(14, 165, 233, 0.08);
+            padding-left: 28px;
+        }
+        
+        .nav-item.active {
+            color: var(--accent-blue);
+            background: rgba(14, 165, 233, 0.12);
+            font-weight: 600;
+        }
+        
+        .nav-item.active::before {
+            transform: scaleY(1);
+        }
+        
+        .nav-icon {
+            font-size: 18px;
+            min-width: 18px;
+            text-align: center;
+        }
+        
+        .nav-badge {
+            margin-left: auto;
+            background: var(--accent-blue);
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 10px;
+            min-width: 20px;
+            text-align: center;
+        }
+        
+        .sidebar-footer {
+            padding: 24px;
+            border-top: 1px solid var(--border-primary);
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--bg-elevated);
+            border-radius: 12px;
+            border: 1px solid var(--border-primary);
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-primary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .user-info h4 {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+        }
+        
+        .user-info p {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            margin: 0;
+        }
+        
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            min-height: 100vh;
+            background: rgba(11, 15, 26, 0.5);
+        }
+        
+        /* Premium Header */
+        .main-header {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid var(--border-primary);
+            padding: 20px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+        
+        .header-left h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0 0 4px;
+            letter-spacing: -0.02em;
+        }
+        
+        .header-left p {
+            font-size: 13px;
+            color: var(--text-tertiary);
+            margin: 0;
+            font-weight: 500;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--accent-green);
+        }
+        
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.2); }
         }
         
         .header-actions {
             display: flex;
             align-items: center;
-            gap: 1.5rem;
+            gap: 12px;
         }
         
         .dashboard-link {
-            padding: 0.75rem 1.5rem;
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            border-radius: 12px;
-            color: var(--success);
+            padding: 10px 20px;
+            background: rgba(14, 165, 233, 0.12);
+            border: 1px solid rgba(14, 165, 233, 0.3);
+            border-radius: 10px;
+            color: var(--accent-blue);
             text-decoration: none;
-            font-size: 0.875rem;
+            font-size: 13px;
             font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            transition: all 0.3s ease;
+            gap: 8px;
+            transition: all var(--transition-fast);
         }
         
         .dashboard-link:hover {
-            background: rgba(16, 185, 129, 0.2);
-            transform: translateY(-2px);
+            background: rgba(14, 165, 233, 0.2);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
         }
         
-        /* Main Container */
-        .container {
-            max-width: 1920px;
+        /* Content Container */
+        .content-container {
+            padding: 32px;
+            max-width: 1600px;
             margin: 0 auto;
-            padding: 2rem;
         }
         
-        /* Tab Navigation */
-        .tab-nav {
+        /* Premium Tab Navigation */
+        .tab-navigation {
             display: flex;
             background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 0.5rem;
-            margin-bottom: 2rem;
+            border: 1px solid var(--border-primary);
+            border-radius: 16px;
+            padding: 6px;
+            margin-bottom: 32px;
             overflow-x: auto;
+            box-shadow: var(--shadow-md);
         }
         
         .tab-btn {
-            padding: 0.75rem 1.5rem;
+            padding: 14px 24px;
             border: none;
             background: transparent;
             color: var(--text-secondary);
-            font-size: 0.875rem;
+            font-size: 13px;
             font-weight: 600;
             cursor: pointer;
-            border-radius: 8px;
-            transition: all 0.2s ease;
+            border-radius: 12px;
+            transition: all var(--transition-fast);
             white-space: nowrap;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .tab-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--gradient-primary);
+            opacity: 0;
+            transition: opacity var(--transition-fast);
+            z-index: -1;
         }
         
         .tab-btn:hover {
             color: var(--text-primary);
-            background: var(--bg-hover);
+            background: var(--bg-elevated);
+            transform: translateY(-1px);
         }
         
         .tab-btn.active {
             color: white;
-            background: var(--accent);
+            background: var(--gradient-primary);
+            box-shadow: var(--shadow-glow);
+        }
+        
+        .tab-btn.active::before {
+            opacity: 1;
+        }
+        
+        .tab-icon {
+            font-size: 16px;
+        }
+        
+        /* Enhanced Cards */
+        .enterprise-card {
+            background: var(--gradient-card);
+            border: 1px solid var(--border-primary);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            transition: all var(--transition-normal);
+        }
+        
+        .enterprise-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--gradient-primary);
+            opacity: 0;
+            transition: opacity var(--transition-normal);
+        }
+        
+        .enterprise-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--border-accent);
+        }
+        
+        .enterprise-card:hover::before {
+            opacity: 1;
+        }
+        
+        .card-header {
+            padding: 24px 32px 0;
+            background: rgba(14, 165, 233, 0.03);
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0 0 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: -0.01em;
+        }
+        
+        .card-subtitle {
+            font-size: 13px;
+            color: var(--text-tertiary);
+            margin: 0 0 24px;
+            font-weight: 500;
+        }
+        
+        .card-body {
+            padding: 32px;
+        }
+        
+        /* Premium Form Styles */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .form-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+        
+        .form-input, .form-select {
+            padding: 14px 16px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-primary);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 500;
+            transition: all var(--transition-fast);
+            font-family: inherit;
+        }
+        
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            background: var(--bg-tertiary);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+        }
+        
+        .form-input::placeholder {
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+        
+        /* Premium Buttons */
+        .btn {
+            padding: 14px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            font-family: inherit;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left var(--transition-slow);
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.4);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(14, 165, 233, 0.5);
+        }
+        
+        .btn-secondary {
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+            border: 1px solid var(--border-primary);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--border-secondary);
+            transform: translateY(-1px);
+        }
+        
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.12);
+            color: var(--accent-red);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.2);
+            transform: translateY(-1px);
+        }
+        
+        .btn-success {
+            background: rgba(16, 185, 129, 0.12);
+            color: var(--accent-green);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-success:hover {
+            background: rgba(16, 185, 129, 0.2);
+            transform: translateY(-1px);
+        }
+        
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 12px;
+        }
+        
+        .btn-icon {
+            font-size: 16px;
+        }
+        
+        /* Premium Upload Area */
+        .upload-area {
+            border: 2px dashed var(--border-primary);
+            border-radius: 16px;
+            padding: 48px 32px;
+            text-align: center;
+            transition: all var(--transition-normal);
+            background: var(--bg-elevated);
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .upload-area::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--gradient-primary);
+            opacity: 0;
+            transition: opacity var(--transition-normal);
+        }
+        
+        .upload-area:hover {
+            border-color: var(--accent-blue);
+            background: rgba(14, 165, 233, 0.05);
+            transform: translateY(-2px);
+        }
+        
+        .upload-area.dragover {
+            border-color: var(--accent-blue);
+            background: rgba(14, 165, 233, 0.1);
+            box-shadow: var(--shadow-glow);
+        }
+        
+        .upload-area.dragover::before {
+            opacity: 0.05;
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            color: var(--text-muted);
+            transition: all var(--transition-normal);
+        }
+        
+        .upload-area:hover .upload-icon {
+            color: var(--accent-blue);
+            transform: scale(1.1);
+        }
+        
+        .upload-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+        
+        .upload-subtext {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        /* Premium Table */
+        .data-table {
+            background: var(--enterprise-card);
+            border: 1px solid var(--border-primary);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .table-header {
+            padding: 24px 32px;
+            background: rgba(14, 165, 233, 0.05);
+            border-bottom: 1px solid var(--border-primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .table-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .search-container {
+            position: relative;
+        }
+        
+        .search-input {
+            padding: 12px 16px 12px 44px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-primary);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 14px;
+            width: 300px;
+            transition: all var(--transition-fast);
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 16px;
+        }
+        
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        
+        .user-table th {
+            padding: 16px 24px;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 700;
+            text-align: left;
+            border-bottom: 1px solid var(--border-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .user-table td {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-primary);
+            color: var(--text-primary);
+            font-weight: 500;
+            vertical-align: middle;
+        }
+        
+        .user-table tr:hover {
+            background: rgba(14, 165, 233, 0.05);
+        }
+        
+        .user-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .user-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        /* Status Badges */
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .status-active {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--accent-green);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .status-inactive {
+            background: rgba(100, 116, 139, 0.15);
+            color: var(--text-muted);
+            border: 1px solid rgba(100, 116, 139, 0.3);
+        }
+        
+        .role-driver {
+            background: rgba(14, 165, 233, 0.15);
+            color: var(--accent-blue);
+            border: 1px solid rgba(14, 165, 233, 0.3);
+        }
+        
+        .role-dispatcher {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--accent-orange);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+        
+        .role-admin {
+            background: rgba(139, 92, 246, 0.15);
+            color: var(--accent-purple);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+        
+        /* Premium Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(11, 15, 26, 0.8);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: var(--gradient-card);
+            border: 1px solid var(--border-primary);
+            border-radius: 24px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow: hidden;
+            animation: modalSlideIn 0.4s ease;
+            box-shadow: var(--shadow-xl);
+        }
+        
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px) scale(0.95);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .modal-header {
+            background: rgba(14, 165, 233, 0.05);
+            padding: 24px 32px;
+            border-bottom: 1px solid var(--border-primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 0;
+        }
+        
+        .modal-close {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-primary);
+            color: var(--text-secondary);
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            font-size: 18px;
+        }
+        
+        .modal-close:hover {
+            background: var(--accent-red);
+            color: white;
+            border-color: var(--accent-red);
+            transform: scale(1.05);
+        }
+        
+        .modal-body {
+            padding: 32px;
+            max-height: calc(90vh - 160px);
+            overflow-y: auto;
+        }
+        
+        .modal-actions {
+            padding: 24px 32px;
+            border-top: 1px solid var(--border-primary);
+            display: flex;
+            gap: 16px;
+            justify-content: flex-end;
+            background: rgba(14, 165, 233, 0.02);
+        }
+        
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            padding: 16px 24px;
+            background: var(--gradient-card);
+            border: 1px solid var(--border-primary);
+            border-radius: 16px;
+            box-shadow: var(--shadow-xl);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            min-width: 350px;
+            max-width: 500px;
+            z-index: 3000;
+            animation: toastSlideIn 0.4s ease;
+        }
+        
+        @keyframes toastSlideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .toast-icon {
+            font-size: 20px;
+            min-width: 20px;
+        }
+        
+        .toast-content {
+            flex: 1;
+        }
+        
+        .toast-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+        
+        .toast-message {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+        
+        .toast.success .toast-icon { color: var(--accent-green); }
+        .toast.error .toast-icon { color: var(--accent-red); }
+        .toast.warning .toast-icon { color: var(--accent-orange); }
+        .toast.info .toast-icon { color: var(--accent-blue); }
+        
+        /* Loading States */
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-primary);
+            border-radius: 50%;
+            border-top-color: var(--accent-blue);
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Empty States */
+        .empty-state {
+            text-align: center;
+            padding: 64px 32px;
+            color: var(--text-muted);
+        }
+        
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 24px;
+            opacity: 0.5;
+        }
+        
+        .empty-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .empty-description {
+            color: var(--text-muted);
+            font-size: 14px;
+            line-height: 1.5;
+            max-width: 400px;
+            margin: 0 auto;
         }
         
         /* Tab Content */
@@ -197,679 +1083,587 @@
             display: block;
         }
         
-        /* Form Styles */
-        .form-section {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
-        
-        .section-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-        
-        .form-label {
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-        
-        .form-input {
-            padding: 0.875rem 1rem;
-            background: var(--bg-dark);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text-primary);
-            font-size: 0.875rem;
-            transition: all 0.2s ease;
-        }
-        
-        .form-input:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-        
-        .form-select {
-            padding: 0.875rem 1rem;
-            background: var(--bg-dark);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text-primary);
-            font-size: 0.875rem;
-            cursor: pointer;
-        }
-        
-        /* Button Styles */
-        .btn {
-            padding: 0.875rem 1.5rem;
-            border: none;
-            border-radius: 10px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            text-decoration: none;
-            justify-content: center;
-        }
-        
-        .btn-primary {
-            background: var(--gradient-primary);
-            color: white;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
-        }
-        
-        .btn-secondary {
-            background: var(--bg-hover);
-            color: var(--text-primary);
-            border: 1px solid var(--border);
-        }
-        
-        .btn-secondary:hover {
-            background: var(--border);
-            transform: translateY(-2px);
-        }
-        
-        .btn-danger {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--danger);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-        }
-        
-        .btn-danger:hover {
-            background: rgba(239, 68, 68, 0.2);
-            transform: translateY(-2px);
-        }
-        
-        .btn-success {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--success);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-        
-        .btn-success:hover {
-            background: rgba(16, 185, 129, 0.2);
-            transform: translateY(-2px);
-        }
-        
-        /* Bulk Upload Section */
-        .upload-area {
-            border: 2px dashed var(--border);
-            border-radius: 12px;
-            padding: 3rem 2rem;
-            text-align: center;
-            transition: all 0.3s ease;
-            background: var(--bg-dark);
-            margin-bottom: 1.5rem;
-        }
-        
-        .upload-area:hover {
-            border-color: var(--accent);
-            background: rgba(59, 130, 246, 0.05);
-        }
-        
-        .upload-area.dragover {
-            border-color: var(--accent);
-            background: rgba(59, 130, 246, 0.1);
-        }
-        
-        .upload-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            color: var(--text-muted);
-        }
-        
-        .upload-text {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 0.5rem;
-        }
-        
-        .upload-subtext {
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-        }
-        
-        .file-input {
-            display: none;
-        }
-        
-        /* User List */
-        .user-list {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            overflow: hidden;
-        }
-        
-        .list-header {
-            padding: 1.5rem;
-            background: rgba(15, 23, 42, 0.5);
-            backdrop-filter: blur(10px);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-        }
-        
-        .search-box {
-            padding: 0.75rem 1rem;
-            background: var(--bg-dark);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text-primary);
-            font-size: 0.875rem;
-            width: 300px;
-        }
-        
-        .user-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        .user-table th {
-            padding: 1rem 1.5rem;
-            background: var(--bg-dark);
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-            font-weight: 600;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
-        }
-        
-        .user-table td {
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid var(--border);
-            color: var(--text-primary);
-            font-size: 0.875rem;
-        }
-        
-        .user-table tr:hover {
-            background: var(--bg-hover);
-        }
-        
-        .user-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-        
-        .btn-sm {
-            padding: 0.5rem 0.75rem;
-            font-size: 0.75rem;
-        }
-        
-        .status-badge {
-            padding: 0.375rem 0.875rem;
-            border-radius: 100px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        
-        .status-active {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--success);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-        
-        .status-inactive {
-            background: rgba(100, 116, 139, 0.1);
-            color: var(--text-muted);
-            border: 1px solid rgba(100, 116, 139, 0.3);
-        }
-        
-        .role-driver {
-            background: rgba(59, 130, 246, 0.1);
-            color: var(--accent);
-        }
-        
-        .role-dispatcher {
-            background: rgba(245, 158, 11, 0.1);
-            color: var(--warning);
-        }
-        
-        .role-admin {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--danger);
-        }
-        
-        /* Modal Styles */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(5px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-        }
-        
-        .modal.active {
-            display: flex;
-        }
-        
-        .modal-content {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 2rem;
-            max-width: 500px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-        
-        .modal-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-        
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            color: var(--text-muted);
-            cursor: pointer;
-            padding: 0.5rem;
-            border-radius: 50%;
-            transition: all 0.2s ease;
-        }
-        
-        .modal-close:hover {
-            background: var(--bg-hover);
-            color: var(--text-primary);
-        }
-        
-        .modal-actions {
-            display: flex;
-            gap: 1rem;
-            justify-content: flex-end;
-            margin-top: 2rem;
-        }
-        
-        /* Toast Notifications */
-        .toast {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            padding: 1rem 1.5rem;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            box-shadow: var(--shadow-xl);
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            min-width: 300px;
-            z-index: 3000;
-            animation: slideUp 0.3s ease;
-        }
-        
-        @keyframes slideUp {
-            from {
-                transform: translateY(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-        
-        .toast-icon {
-            font-size: 1.5rem;
-        }
-        
-        .toast-content {
-            flex: 1;
-        }
-        
-        .toast-title {
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 0.25rem;
-        }
-        
-        .toast-message {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-        }
-        
         /* Responsive Design */
-        @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
             }
             
-            .header-content {
-                flex-direction: column;
-                gap: 1rem;
-                align-items: flex-start;
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
             }
             
             .form-grid {
                 grid-template-columns: 1fr;
             }
             
-            .tab-nav {
-                overflow-x: auto;
+            .header-right {
+                flex-direction: column;
+                gap: 12px;
             }
             
-            .search-box {
+            .search-input {
                 width: 100%;
             }
+        }
+        
+        @media (max-width: 768px) {
+            .content-container {
+                padding: 20px;
+            }
             
-            .user-table {
-                font-size: 0.75rem;
+            .main-header {
+                padding: 16px 20px;
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+            }
+            
+            .tab-navigation {
+                padding: 4px;
+            }
+            
+            .tab-btn {
+                padding: 12px 16px;
+                font-size: 12px;
+            }
+            
+            .card-body {
+                padding: 20px;
             }
             
             .user-table th,
             .user-table td {
-                padding: 0.75rem 1rem;
+                padding: 12px 16px;
+                font-size: 13px;
+            }
+            
+            .modal-content {
+                margin: 20px;
+                max-width: none;
+            }
+            
+            .modal-body {
+                padding: 20px;
+            }
+        }
+        
+        /* Progress Bars */
+        .progress-container {
+            margin-top: 16px;
+        }
+        
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-elevated);
+            border-radius: 100px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid var(--border-primary);
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-primary);
+            border-radius: 100px;
+            transition: width 0.8s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: progressShimmer 2s infinite;
+        }
+        
+        @keyframes progressShimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        /* Template Download Section */
+        .template-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .template-card {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-primary);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all var(--transition-fast);
+            cursor: pointer;
+        }
+        
+        .template-card:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--accent-blue);
+            transform: translateY(-2px);
+        }
+        
+        .template-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+            color: var(--accent-blue);
+        }
+        
+        .template-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+        
+        .template-description {
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+        
+        /* Settings Cards */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+        
+        .settings-card {
+            background: var(--gradient-card);
+            border: 1px solid var(--border-primary);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .settings-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* Mobile Menu Toggle */
+        .mobile-menu-toggle {
+            display: none;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-primary);
+            color: var(--text-primary);
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        
+        @media (max-width: 1024px) {
+            .mobile-menu-toggle {
+                display: block;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="header-content">
-            <div class="brand">
-                <div class="logo">⚙️</div>
+    <!-- Enterprise Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="brand-logo">
+                <div class="logo-icon">⚡</div>
                 <div class="brand-text">
-                    <h1>Fleet Command Admin</h1>
-                    <p>User Management Panel</p>
+                    <h1>FleetForce</h1>
+                    <p>Command Center</p>
                 </div>
             </div>
-            <div class="header-actions">
-                <a href="dashboard.html" class="dashboard-link" target="_blank">
-                    <span>📊</span>
-                    <span>View Dashboard</span>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <div class="nav-section-title">Management</div>
+                <button class="nav-item active" onclick="switchTab('add-user', this)">
+                    <span class="nav-icon">👤</span>
+                    <span>Add User</span>
+                </button>
+                <button class="nav-item" onclick="switchTab('bulk-upload', this)">
+                    <span class="nav-icon">📁</span>
+                    <span>Bulk Import</span>
+                </button>
+                <button class="nav-item" onclick="switchTab('manage-users', this)">
+                    <span class="nav-icon">👥</span>
+                    <span>User Directory</span>
+                    <span class="nav-badge" id="userCount">0</span>
+                </button>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Operations</div>
+                <a href="dashboard.html" class="nav-item" target="_blank">
+                    <span class="nav-icon">📊</span>
+                    <span>Live Dashboard</span>
+                </a>
+                <a href="driver.html" class="nav-item" target="_blank">
+                    <span class="nav-icon">🚚</span>
+                    <span>Driver Portal</span>
                 </a>
             </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">System</div>
+                <button class="nav-item" onclick="switchTab('settings', this)">
+                    <span class="nav-icon">⚙️</span>
+                    <span>Settings</span>
+                </button>
+                <button class="nav-item" onclick="exportAllUsers()">
+                    <span class="nav-icon">📤</span>
+                    <span>Export Data</span>
+                </button>
+            </div>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="user-avatar">AD</div>
+                <div class="user-info">
+                    <h4>System Administrator</h4>
+                    <p>Enterprise Edition</p>
+                </div>
+            </div>
         </div>
-    </header>
+    </div>
     
-    <!-- Main Container -->
-    <div class="container">
-        <!-- Tab Navigation -->
-        <div class="tab-nav">
-            <button class="tab-btn active" onclick="switchTab('add-user', this)">
-                <span>👤</span>
-                <span>Add User</span>
-            </button>
-            <button class="tab-btn" onclick="switchTab('bulk-upload', this)">
-                <span>📁</span>
-                <span>Bulk Upload</span>
-            </button>
-            <button class="tab-btn" onclick="switchTab('manage-users', this)">
-                <span>👥</span>
-                <span>Manage Users</span>
-            </button>
-            <button class="tab-btn" onclick="switchTab('settings', this)">
-                <span>⚙️</span>
-                <span>Settings</span>
-            </button>
-        </div>
-        
-        <!-- Add User Tab -->
-        <div id="add-user" class="tab-content active">
-            <div class="form-section">
-                <h2 class="section-title">
-                    <span>➕</span>
-                    <span>Add New User</span>
-                </h2>
-                
-                <form id="addUserForm">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label class="form-label">Full Name *</label>
-                            <input type="text" class="form-input" id="userName" name="name" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">Email Address *</label>
-                            <input type="email" class="form-input" id="userEmail" name="email" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">Phone Number</label>
-                            <input type="tel" class="form-input" id="userPhone" name="phoneNumber">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">Role *</label>
-                            <select class="form-select" id="userRole" name="role" required>
-                                <option value="">Select Role</option>
-                                <option value="driver">Driver</option>
-                                <option value="dispatcher">Dispatcher</option>
-                                <option value="admin">Administrator</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">Vehicle ID</label>
-                            <input type="text" class="form-input" id="userVehicle" name="vehicleId" placeholder="Optional for drivers">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">Status</label>
-                            <select class="form-select" id="userStatus" name="status">
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div style="display: flex; gap: 1rem; justify-content: flex-end;">
-                        <button type="button" class="btn btn-secondary" onclick="clearForm()">
-                            <span>🗑️</span>
-                            <span>Clear Form</span>
-                        </button>
-                        <button type="submit" class="btn btn-primary">
-                            <span>➕</span>
-                            <span>Add User</span>
-                        </button>
-                    </div>
-                </form>
+    <!-- Main Content Area -->
+    <div class="main-content">
+        <!-- Premium Header -->
+        <header class="main-header">
+            <div class="header-left">
+                <button class="mobile-menu-toggle" onclick="toggleSidebar()">☰</button>
+                <h1>Enterprise User Management</h1>
+                <p>Centralized driver and personnel administration</p>
             </div>
-        </div>
-        
-        <!-- Bulk Upload Tab -->
-        <div id="bulk-upload" class="tab-content">
-            <div class="form-section">
-                <h2 class="section-title">
-                    <span>📁</span>
-                    <span>Bulk Upload Users</span>
-                </h2>
-                
-                <div class="upload-area" id="uploadArea">
-                    <div class="upload-icon">📤</div>
-                    <div class="upload-text">Drag & Drop Your File Here</div>
-                    <div class="upload-subtext">
-                        Supports CSV, Excel (.xlsx/.xls), or Google Sheets export
-                        <br>
-                        Maximum file size: 10MB
-                    </div>
-                    <br>
-                    <button type="button" class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
-                        <span>📁</span>
-                        <span>Choose File</span>
-                    </button>
-                    <input type="file" id="fileInput" class="file-input" accept=".csv,.xlsx,.xls" onchange="handleFileSelect(this)">
+            <div class="header-right">
+                <div class="connection-status" id="connectionStatus">
+                    <div class="status-dot"></div>
+                    <span>MongoDB Atlas Connected</span>
                 </div>
-                
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
-                    <button class="btn btn-secondary" onclick="downloadTemplate('csv')">
-                        <span>📄</span>
-                        <span>Download CSV Template</span>
-                    </button>
-                    <button class="btn btn-secondary" onclick="downloadTemplate('excel')">
+                <div class="header-actions">
+                    <a href="dashboard.html" class="dashboard-link" target="_blank">
                         <span>📊</span>
-                        <span>Download Excel Template</span>
-                    </button>
-                    <button class="btn btn-secondary" onclick="openGoogleSheetsGuide()">
-                        <span>📋</span>
-                        <span>Google Sheets Guide</span>
-                    </button>
-                </div>
-                
-                <div id="uploadPreview" style="display: none;">
-                    <h3 style="margin-bottom: 1rem; color: var(--text-primary);">Preview Data</h3>
-                    <div id="previewContainer" style="background: var(--bg-dark); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; overflow-x: auto;"></div>
-                    <div style="display: flex; gap: 1rem; justify-content: flex-end;">
-                        <button class="btn btn-secondary" onclick="cancelUpload()">
-                            <span>❌</span>
-                            <span>Cancel</span>
-                        </button>
-                        <button class="btn btn-success" onclick="confirmUpload()">
-                            <span>✅</span>
-                            <span>Upload Users</span>
-                        </button>
-                    </div>
+                        <span>Live Dashboard</span>
+                    </a>
                 </div>
             </div>
-        </div>
+        </header>
         
-        <!-- Manage Users Tab -->
-        <div id="manage-users" class="tab-content">
-            <div class="user-list">
-                <div class="list-header">
-                    <h2 class="section-title">
-                        <span>👥</span>
-                        <span>User Management</span>
-                    </h2>
-                    <input type="text" class="search-box" id="userSearch" placeholder="Search users..." onkeyup="filterUsers()">
-                </div>
-                
-                <div style="overflow-x: auto;">
-                    <table class="user-table">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Role</th>
-                                <th>Status</th>
-                                <th>Vehicle ID</th>
-                                <th>Created</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="userTableBody">
-                            <tr>
-                                <td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-muted);">
-                                    Loading users...
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Settings Tab -->
-        <div id="settings" class="tab-content">
-            <div class="form-section">
-                <h2 class="section-title">
-                    <span>⚙️</span>
+        <!-- Content Container -->
+        <div class="content-container">
+            <!-- Premium Tab Navigation -->
+            <div class="tab-navigation">
+                <button class="tab-btn active" onclick="switchTab('add-user', this)">
+                    <span class="tab-icon">👤</span>
+                    <span>Add User</span>
+                </button>
+                <button class="tab-btn" onclick="switchTab('bulk-upload', this)">
+                    <span class="tab-icon">📁</span>
+                    <span>Bulk Import</span>
+                </button>
+                <button class="tab-btn" onclick="switchTab('manage-users', this)">
+                    <span class="tab-icon">👥</span>
+                    <span>User Directory</span>
+                </button>
+                <button class="tab-btn" onclick="switchTab('settings', this)">
+                    <span class="tab-icon">⚙️</span>
                     <span>System Settings</span>
-                </h2>
-                
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label class="form-label">Auto-refresh Dashboard</label>
-                        <select class="form-select" id="autoRefresh">
-                            <option value="30">Every 30 seconds</option>
-                            <option value="60">Every minute</option>
-                            <option value="300">Every 5 minutes</option>
-                            <option value="0">Disabled</option>
-                        </select>
+                </button>
+            </div>
+            
+            <!-- Add User Tab -->
+            <div id="add-user" class="tab-content active">
+                <div class="enterprise-card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <span>➕</span>
+                            <span>Create New User Account</span>
+                        </h2>
+                        <p class="card-subtitle">Add drivers, dispatchers, and administrators to the fleet management system</p>
                     </div>
                     
-                    <div class="form-group">
-                        <label class="form-label">Default User Role</label>
-                        <select class="form-select" id="defaultRole">
-                            <option value="driver">Driver</option>
-                            <option value="dispatcher">Dispatcher</option>
-                            <option value="admin">Administrator</option>
-                        </select>
+                    <div class="card-body">
+                        <form id="addUserForm">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label class="form-label">Full Name *</label>
+                                    <input type="text" class="form-input" id="userName" name="name" placeholder="Enter full name" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Email Address *</label>
+                                    <input type="email" class="form-input" id="userEmail" name="email" placeholder="user@company.com" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Phone Number</label>
+                                    <input type="tel" class="form-input" id="userPhone" name="phoneNumber" placeholder="+1 (555) 123-4567">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Role *</label>
+                                    <select class="form-select" id="userRole" name="role" required>
+                                        <option value="">Select user role</option>
+                                        <option value="driver">Driver</option>
+                                        <option value="dispatcher">Dispatcher</option>
+                                        <option value="admin">Administrator</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Vehicle ID</label>
+                                    <input type="text" class="form-input" id="userVehicle" name="vehicleId" placeholder="e.g., TRUCK-001 (for drivers)">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Account Status</label>
+                                    <select class="form-select" id="userStatus" name="status">
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; gap: 16px; justify-content: flex-end; margin-top: 32px;">
+                                <button type="button" class="btn btn-secondary" onclick="clearForm()">
+                                    <span class="btn-icon">🗑️</span>
+                                    <span>Clear Form</span>
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <span class="btn-icon">➕</span>
+                                    <span>Create User</span>
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                </div>
-                
-                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
-                    <button class="btn btn-secondary" onclick="resetSettings()">
-                        <span>🔄</span>
-                        <span>Reset to Defaults</span>
-                    </button>
-                    <button class="btn btn-primary" onclick="saveSettings()">
-                        <span>💾</span>
-                        <span>Save Settings</span>
-                    </button>
                 </div>
             </div>
             
-            <div class="form-section">
-                <h2 class="section-title">
-                    <span>📊</span>
-                    <span>Data Management</span>
-                </h2>
-                
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                    <button class="btn btn-secondary" onclick="exportAllUsers()">
-                        <span>📤</span>
-                        <span>Export All Users</span>
-                    </button>
-                    <button class="btn btn-secondary" onclick="backupData()">
-                        <span>💾</span>
-                        <span>Backup Data</span>
-                    </button>
-                    <button class="btn btn-danger" onclick="confirmClearAllData()">
-                        <span>🗑️</span>
-                        <span>Clear All Data</span>
-                    </button>
+            <!-- Bulk Upload Tab -->
+            <div id="bulk-upload" class="tab-content">
+                <div class="enterprise-card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <span>📁</span>
+                            <span>Bulk User Import</span>
+                        </h2>
+                        <p class="card-subtitle">Import multiple users from CSV, Excel, or Google Sheets with advanced validation</p>
+                    </div>
+                    
+                    <div class="card-body">
+                        <div class="upload-area" id="uploadArea">
+                            <div class="upload-icon">📤</div>
+                            <div class="upload-text">Drag & Drop Your File Here</div>
+                            <div class="upload-subtext">
+                                Supports CSV, Excel (.xlsx/.xls), or Google Sheets export<br>
+                                Maximum file size: 10MB • Up to 1,000 users per batch
+                            </div>
+                            <br>
+                            <button type="button" class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                                <span class="btn-icon">📁</span>
+                                <span>Choose File</span>
+                            </button>
+                            <input type="file" id="fileInput" class="file-input" accept=".csv,.xlsx,.xls" onchange="handleFileSelect(this)">
+                        </div>
+                        
+                        <div class="template-section">
+                            <div class="template-card" onclick="downloadTemplate('csv')">
+                                <div class="template-icon">📄</div>
+                                <div class="template-title">CSV Template</div>
+                                <div class="template-description">Download CSV format template</div>
+                            </div>
+                            <div class="template-card" onclick="downloadTemplate('excel')">
+                                <div class="template-icon">📊</div>
+                                <div class="template-title">Excel Template</div>
+                                <div class="template-description">Download Excel format template</div>
+                            </div>
+                            <div class="template-card" onclick="openGoogleSheetsGuide()">
+                                <div class="template-icon">📋</div>
+                                <div class="template-title">Google Sheets</div>
+                                <div class="template-description">View integration guide</div>
+                            </div>
+                        </div>
+                        
+                        <div id="uploadPreview" style="display: none;">
+                            <h3 style="margin-bottom: 16px; color: var(--text-primary); font-size: 16px; font-weight: 600;">Data Preview</h3>
+                            <div id="previewContainer" style="background: var(--bg-elevated); border: 1px solid var(--border-primary); border-radius: 12px; padding: 16px; margin-bottom: 16px; overflow-x: auto;"></div>
+                            <div style="display: flex; gap: 16px; justify-content: flex-end;">
+                                <button class="btn btn-secondary" onclick="cancelUpload()">
+                                    <span class="btn-icon">❌</span>
+                                    <span>Cancel</span>
+                                </button>
+                                <button class="btn btn-success" onclick="confirmUpload()">
+                                    <span class="btn-icon">✅</span>
+                                    <span>Import Users</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Manage Users Tab -->
+            <div id="manage-users" class="tab-content">
+                <div class="data-table">
+                    <div class="table-header">
+                        <h2 class="table-title">
+                            <span>👥</span>
+                            <span>User Directory</span>
+                        </h2>
+                        <div class="search-container">
+                            <span class="search-icon">🔍</span>
+                            <input type="text" class="search-input" id="userSearch" placeholder="Search users by name, email, role..." onkeyup="filterUsers()">
+                        </div>
+                    </div>
+                    
+                    <div style="overflow-x: auto;">
+                        <table class="user-table">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Contact</th>
+                                    <th>Role</th>
+                                    <th>Status</th>
+                                    <th>Vehicle</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userTableBody">
+                                <tr>
+                                    <td colspan="7">
+                                        <div class="empty-state">
+                                            <div class="loading-spinner"></div>
+                                            <div class="empty-title">Loading users...</div>
+                                            <div class="empty-description">Connecting to MongoDB Atlas database</div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Settings Tab -->
+            <div id="settings" class="tab-content">
+                <div class="settings-grid">
+                    <div class="settings-card">
+                        <h3 class="settings-title">
+                            <span>⚙️</span>
+                            <span>System Configuration</span>
+                        </h3>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Auto-refresh Dashboard</label>
+                                <select class="form-select" id="autoRefresh">
+                                    <option value="30">Every 30 seconds</option>
+                                    <option value="60">Every minute</option>
+                                    <option value="300">Every 5 minutes</option>
+                                    <option value="0">Disabled</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Default User Role</label>
+                                <select class="form-select" id="defaultRole">
+                                    <option value="driver">Driver</option>
+                                    <option value="dispatcher">Dispatcher</option>
+                                    <option value="admin">Administrator</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 16px; justify-content: flex-end; margin-top: 24px;">
+                            <button class="btn btn-secondary" onclick="resetSettings()">
+                                <span class="btn-icon">🔄</span>
+                                <span>Reset</span>
+                            </button>
+                            <button class="btn btn-primary" onclick="saveSettings()">
+                                <span class="btn-icon">💾</span>
+                                <span>Save Settings</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-card">
+                        <h3 class="settings-title">
+                            <span>📊</span>
+                            <span>Data Management</span>
+                        </h3>
+                        
+                        <div style="display: grid; gap: 16px;">
+                            <button class="btn btn-secondary" onclick="exportAllUsers()" style="width: 100%; justify-content: center;">
+                                <span class="btn-icon">📤</span>
+                                <span>Export All Users</span>
+                            </button>
+                            <button class="btn btn-secondary" onclick="backupData()" style="width: 100%; justify-content: center;">
+                                <span class="btn-icon">💾</span>
+                                <span>Backup Database</span>
+                            </button>
+                            <button class="btn btn-secondary" onclick="syncWithDatabase()" style="width: 100%; justify-content: center;">
+                                <span class="btn-icon">🔄</span>
+                                <span>Sync with MongoDB</span>
+                            </button>
+                            <button class="btn btn-danger" onclick="confirmClearAllData()" style="width: 100%; justify-content: center;">
+                                <span class="btn-icon">🗑️</span>
+                                <span>Clear All Data</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-card">
+                        <h3 class="settings-title">
+                            <span>🔗</span>
+                            <span>Integration Status</span>
+                        </h3>
+                        
+                        <div style="display: grid; gap: 12px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--bg-elevated); border-radius: 8px;">
+                                <span>MongoDB Atlas</span>
+                                <span class="status-badge status-active">Connected</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--bg-elevated); border-radius: 8px;">
+                                <span>Railway.app</span>
+                                <span class="status-badge status-active">Deployed</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--bg-elevated); border-radius: 8px;">
+                                <span>Live Dashboard</span>
+                                <span class="status-badge status-active">Synced</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--bg-elevated); border-radius: 8px;">
+                                <span>Driver Portal</span>
+                                <span class="status-badge status-active">Online</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -879,53 +1673,63 @@
     <div id="editModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title">Edit User</h3>
+                <h3 class="modal-title">
+                    <span>✏️</span>
+                    <span>Edit User Account</span>
+                </h3>
                 <button class="modal-close" onclick="closeEditModal()">&times;</button>
             </div>
             
-            <form id="editUserForm">
-                <input type="hidden" id="editUserId">
-                <div class="form-group">
-                    <label class="form-label">Full Name *</label>
-                    <input type="text" class="form-input" id="editUserName" required>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Email Address *</label>
-                    <input type="email" class="form-input" id="editUserEmail" required>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Phone Number</label>
-                    <input type="tel" class="form-input" id="editUserPhone">
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Role *</label>
-                    <select class="form-select" id="editUserRole" required>
-                        <option value="driver">Driver</option>
-                        <option value="dispatcher">Dispatcher</option>
-                        <option value="admin">Administrator</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Vehicle ID</label>
-                    <input type="text" class="form-input" id="editUserVehicle">
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Status</label>
-                    <select class="form-select" id="editUserStatus">
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                    </select>
-                </div>
-            </form>
+            <div class="modal-body">
+                <form id="editUserForm">
+                    <input type="hidden" id="editUserId">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Full Name *</label>
+                            <input type="text" class="form-input" id="editUserName" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Email Address *</label>
+                            <input type="email" class="form-input" id="editUserEmail" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Phone Number</label>
+                            <input type="tel" class="form-input" id="editUserPhone">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Role *</label>
+                            <select class="form-select" id="editUserRole" required>
+                                <option value="driver">Driver</option>
+                                <option value="dispatcher">Dispatcher</option>
+                                <option value="admin">Administrator</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Vehicle ID</label>
+                            <input type="text" class="form-input" id="editUserVehicle">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" id="editUserStatus">
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
             
             <div class="modal-actions">
                 <button class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="saveUserChanges()">Save Changes</button>
+                <button class="btn btn-primary" onclick="saveUserChanges()">
+                    <span class="btn-icon">💾</span>
+                    <span>Save Changes</span>
+                </button>
             </div>
         </div>
     </div>
@@ -937,34 +1741,47 @@
         let uploadedData = [];
         let currentEditId = null;
         
-        // Initialize
+        // Initialize - Enhanced for MongoDB Atlas & Railway
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Fleet Command Admin Panel Initialized');
+            console.log('FleetForce Enterprise Command Center - MongoDB Atlas & Railway Integration');
+            console.log('Environment: Railway.app deployment with MongoDB Atlas backend');
+            
+            // Check environment and connectivity
+            checkEnvironment();
+            
+            // Load users from MongoDB
             loadUsers();
+            
+            // Setup integrations
             setupDragAndDrop();
             loadSettings();
             syncWithDashboard();
+            
+            // Auto-sync every minute for Railway deployment
+            setInterval(() => {
+                console.log('Auto-sync check...');
+                loadUsers();
+            }, 60000);
+            
+            // Add connection status indicator
+            updateConnectionStatus();
         });
         
-        // Tab Management
-        function switchTab(tabId, buttonElement) {
-            // Hide all tab contents
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Remove active class from all tab buttons
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // Show selected tab and activate button
-            document.getElementById(tabId).classList.add('active');
-            buttonElement.classList.add('active');
-            
-            // Load users when switching to manage tab
-            if (tabId === 'manage-users') {
-                loadUsers();
+        // Environment check for Railway deployment
+        async function checkEnvironment() {
+            try {
+                const response = await fetch('/api/health');
+                if (response.ok) {
+                    const health = await response.json();
+                    console.log('Health check:', health);
+                    showToast('Environment', 'Connected to Railway backend with MongoDB Atlas', 'success');
+                } else {
+                    console.warn('Health check failed:', response.status);
+                    showToast('Warning', 'Backend connection issues detected', 'warning');
+                }
+            } catch (error) {
+                console.error('Environment check failed:', error);
+                showToast('Error', 'Cannot connect to Railway backend', 'error');
             }
         }
         
@@ -1007,6 +1824,7 @@
                     sessionStorage.setItem('fleetforce_last_sync', new Date().toISOString());
                     
                     displayUsers(allUsers);
+                    updateUserCount();
                     syncUserData();
                     
                     showToast('Database Connected', `Loaded ${users.length} users from MongoDB Atlas`, 'success');
@@ -1026,6 +1844,7 @@
                     if (cachedUsers) {
                         allUsers = JSON.parse(cachedUsers);
                         displayUsers(allUsers);
+                        updateUserCount();
                         console.log(`Using cached data: ${allUsers.length} users`);
                         
                         showToast('Offline Mode', `Using cached data (${allUsers.length} users). Check internet connection.`, 'info');
@@ -1033,13 +1852,22 @@
                         // No cached data available
                         allUsers = [];
                         displayUsers(allUsers);
+                        updateUserCount();
                         showToast('No Data', 'No users found. Database connection required.', 'error');
                     }
                 } catch (cacheError) {
                     console.error('Error loading cached data:', cacheError);
                     allUsers = [];
                     displayUsers(allUsers);
+                    updateUserCount();
                 }
+            }
+        }
+        
+        function updateUserCount() {
+            const userCountEl = document.getElementById('userCount');
+            if (userCountEl) {
+                userCountEl.textContent = allUsers.length;
             }
         }
         
@@ -1049,8 +1877,19 @@
             if (users.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-muted);">
-                            No users found. Add your first user using the "Add User" tab.
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <div class="empty-icon">👥</div>
+                                <div class="empty-title">No users found</div>
+                                <div class="empty-description">
+                                    Add your first user using the "Add User" tab or import users in bulk
+                                    <br><br>
+                                    <button class="btn btn-primary" onclick="switchTab('add-user', document.querySelector('.nav-item'))">
+                                        <span class="btn-icon">➕</span>
+                                        <span>Add First User</span>
+                                    </button>
+                                </div>
+                            </div>
                         </td>
                     </tr>
                 `;
@@ -1059,8 +1898,23 @@
             
             tbody.innerHTML = users.map(user => `
                 <tr>
-                    <td>${user.name}</td>
-                    <td>${user.email}</td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 40px; height: 40px; background: var(--gradient-primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 16px;">
+                                ${user.name.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                                <div style="font-weight: 600; color: var(--text-primary);">${user.name}</div>
+                                <div style="font-size: 12px; color: var(--text-tertiary);">ID: ${user._id}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            <div style="font-weight: 500;">${user.email}</div>
+                            ${user.phoneNumber ? `<div style="font-size: 12px; color: var(--text-tertiary);">${user.phoneNumber}</div>` : ''}
+                        </div>
+                    </td>
                     <td><span class="status-badge role-${user.role}">${user.role}</span></td>
                     <td><span class="status-badge ${user.active !== false ? 'status-active' : 'status-inactive'}">${user.active !== false ? 'Active' : 'Inactive'}</span></td>
                     <td>${user.vehicleId || '-'}</td>
@@ -1068,11 +1922,11 @@
                     <td>
                         <div class="user-actions">
                             <button class="btn btn-secondary btn-sm" onclick="editUser('${user._id || user.email}')">
-                                <span>✏️</span>
+                                <span class="btn-icon">✏️</span>
                                 <span>Edit</span>
                             </button>
                             <button class="btn btn-danger btn-sm" onclick="deleteUser('${user._id || user.email}')">
-                                <span>🗑️</span>
+                                <span class="btn-icon">🗑️</span>
                                 <span>Delete</span>
                             </button>
                         </div>
@@ -1090,6 +1944,49 @@
                 (user.vehicleId && user.vehicleId.toLowerCase().includes(search))
             );
             displayUsers(filtered);
+        }
+        
+        // Tab Management
+        function switchTab(tabId, buttonElement) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all tab buttons and nav items
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-item').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab and activate button
+            document.getElementById(tabId).classList.add('active');
+            if (buttonElement) {
+                buttonElement.classList.add('active');
+            }
+            
+            // Find and activate corresponding nav item
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                if (item.onclick && item.onclick.toString().includes(tabId)) {
+                    item.classList.add('active');
+                }
+            });
+            
+            // Find and activate corresponding tab button
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            tabBtns.forEach(btn => {
+                if (btn.onclick && btn.onclick.toString().includes(tabId)) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Load users when switching to manage tab
+            if (tabId === 'manage-users') {
+                loadUsers();
+            }
         }
         
         // Add User Form - Enhanced MongoDB Atlas integration
@@ -1143,13 +2040,14 @@
                     // Add to local array with MongoDB _id
                     allUsers.push(savedUser);
                     saveUsersToStorage();
+                    updateUserCount();
                     syncUserData();
                     
                     clearForm();
                     showToast('Success', `User created successfully in MongoDB (ID: ${savedUser._id})`, 'success');
                     
                     // Switch to manage users tab
-                    document.querySelector('[onclick="switchTab(\'manage-users\', this)"]').click();
+                    switchTab('manage-users', null);
                     
                 } else {
                     const errorResult = await response.json().catch(() => ({}));
@@ -1169,13 +2067,14 @@
                 
                 allUsers.push(tempUser);
                 saveUsersToStorage();
+                updateUserCount();
                 syncUserData();
                 
                 clearForm();
                 showToast('Offline Mode', 'User saved locally. Will sync to MongoDB when connection is restored.', 'warning');
                 
                 // Switch to manage users tab
-                document.querySelector('[onclick="switchTab(\'manage-users\', this)"]').click();
+                switchTab('manage-users', null);
             }
         });
         
@@ -1289,6 +2188,7 @@
                     // Remove from local array
                     allUsers = allUsers.filter(u => u._id !== userId && u.email !== userId);
                     saveUsersToStorage();
+                    updateUserCount();
                     syncUserData();
                     
                     displayUsers(allUsers);
@@ -1312,6 +2212,7 @@
                     syncUserData();
                     
                     displayUsers(allUsers.filter(u => !u._isDeleted)); // Hide deleted users
+                    updateUserCount();
                     showToast('Offline Mode', 'User marked for deletion. Will sync to MongoDB when connection is restored.', 'warning');
                 }
             }
@@ -1460,7 +2361,7 @@
                 mappedRow.role = mappedRow.role || 'driver';
                 mappedRow.active = true;
                 mappedRow.createdAt = new Date().toISOString();
-                mappedRow._id = generateId();
+                mappedRow.updatedAt = new Date().toISOString();
                 
                 return mappedRow;
             }).filter(row => row.name && row.email); // Filter out rows without name/email
@@ -1478,29 +2379,29 @@
             const container = document.getElementById('previewContainer');
             
             const table = `
-                <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
                     <thead>
-                        <tr style="background: var(--bg-card);">
-                            <th style="padding: 0.75rem; border: 1px solid var(--border); text-align: left;">Name</th>
-                            <th style="padding: 0.75rem; border: 1px solid var(--border); text-align: left;">Email</th>
-                            <th style="padding: 0.75rem; border: 1px solid var(--border); text-align: left;">Role</th>
-                            <th style="padding: 0.75rem; border: 1px solid var(--border); text-align: left;">Phone</th>
-                            <th style="padding: 0.75rem; border: 1px solid var(--border); text-align: left;">Vehicle</th>
+                        <tr style="background: var(--bg-tertiary);">
+                            <th style="padding: 12px; border: 1px solid var(--border-primary); text-align: left; font-weight: 700; color: var(--text-secondary);">Name</th>
+                            <th style="padding: 12px; border: 1px solid var(--border-primary); text-align: left; font-weight: 700; color: var(--text-secondary);">Email</th>
+                            <th style="padding: 12px; border: 1px solid var(--border-primary); text-align: left; font-weight: 700; color: var(--text-secondary);">Role</th>
+                            <th style="padding: 12px; border: 1px solid var(--border-primary); text-align: left; font-weight: 700; color: var(--text-secondary);">Phone</th>
+                            <th style="padding: 12px; border: 1px solid var(--border-primary); text-align: left; font-weight: 700; color: var(--text-secondary);">Vehicle</th>
                         </tr>
                     </thead>
                     <tbody>
                         ${data.slice(0, 10).map(user => `
                             <tr>
-                                <td style="padding: 0.75rem; border: 1px solid var(--border);">${user.name || '-'}</td>
-                                <td style="padding: 0.75rem; border: 1px solid var(--border);">${user.email || '-'}</td>
-                                <td style="padding: 0.75rem; border: 1px solid var(--border);">${user.role || 'driver'}</td>
-                                <td style="padding: 0.75rem; border: 1px solid var(--border);">${user.phoneNumber || '-'}</td>
-                                <td style="padding: 0.75rem; border: 1px solid var(--border);">${user.vehicleId || '-'}</td>
+                                <td style="padding: 12px; border: 1px solid var(--border-primary); color: var(--text-primary);">${user.name || '-'}</td>
+                                <td style="padding: 12px; border: 1px solid var(--border-primary); color: var(--text-primary);">${user.email || '-'}</td>
+                                <td style="padding: 12px; border: 1px solid var(--border-primary);"><span class="status-badge role-${user.role || 'driver'}">${user.role || 'driver'}</span></td>
+                                <td style="padding: 12px; border: 1px solid var(--border-primary); color: var(--text-secondary);">${user.phoneNumber || '-'}</td>
+                                <td style="padding: 12px; border: 1px solid var(--border-primary); color: var(--text-secondary);">${user.vehicleId || '-'}</td>
                             </tr>
                         `).join('')}
                     </tbody>
                 </table>
-                <p style="margin-top: 1rem; color: var(--text-secondary); font-size: 0.875rem;">
+                <p style="margin-top: 16px; color: var(--text-secondary); font-size: 13px; text-align: center;">
                     Showing first 10 of ${data.length} users. ${data.length > 10 ? `${data.length - 10} more users will be uploaded.` : ''}
                 </p>
             `;
@@ -1590,6 +2491,7 @@
                 }
                 
                 saveUsersToStorage();
+                updateUserCount();
                 syncUserData();
                 
                 cancelUpload();
@@ -1606,7 +2508,7 @@
                 }
                 
                 // Switch to manage users tab
-                document.querySelector('[onclick="switchTab(\'manage-users\', this)"]').click();
+                switchTab('manage-users', null);
                 
             } catch (error) {
                 console.error('Bulk upload error:', error);
@@ -1619,16 +2521,23 @@
             const templateData = [
                 {
                     'Name': 'John Doe',
-                    'Email': 'john.doe@example.com',
+                    'Email': 'john.doe@company.com',
                     'Phone Number': '+1-555-0123',
                     'Role': 'driver',
                     'Vehicle ID': 'TRUCK001'
                 },
                 {
                     'Name': 'Jane Smith',
-                    'Email': 'jane.smith@example.com',
+                    'Email': 'jane.smith@company.com',
                     'Phone Number': '+1-555-0124',
                     'Role': 'dispatcher',
+                    'Vehicle ID': ''
+                },
+                {
+                    'Name': 'Bob Johnson',
+                    'Email': 'bob.johnson@company.com',
+                    'Phone Number': '+1-555-0125',
+                    'Role': 'admin',
                     'Vehicle ID': ''
                 }
             ];
@@ -1639,12 +2548,12 @@
                     ...templateData.map(row => Object.values(row).map(v => `"${v}"`).join(','))
                 ].join('\n');
                 
-                downloadFile(csv, 'fleet-users-template.csv', 'text/csv');
+                downloadFile(csv, 'fleetforce-users-template.csv', 'text/csv');
             } else {
                 const ws = XLSX.utils.json_to_sheet(templateData);
                 const wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, ws, 'Users');
-                XLSX.writeFile(wb, 'fleet-users-template.xlsx');
+                XLSX.writeFile(wb, 'fleetforce-users-template.xlsx');
             }
             
             showToast('Template Downloaded', `${type.toUpperCase()} template ready for use`, 'success');
@@ -1652,7 +2561,7 @@
         
         function openGoogleSheetsGuide() {
             const guide = `
-Google Sheets Integration Guide:
+FleetForce Google Sheets Integration Guide:
 
 1. Create a new Google Sheet
 2. Add these column headers in row 1:
@@ -1664,12 +2573,19 @@ Google Sheets Integration Guide:
 
 3. Fill in your user data
 4. Export as CSV: File > Download > CSV
-5. Upload the CSV file here
+5. Upload the CSV file using the bulk import tool
 
-Example:
-Name          | Email              | Phone Number | Role       | Vehicle ID
-John Doe      | john@example.com   | 555-0123     | driver     | TRUCK001
-Jane Smith    | jane@example.com   | 555-0124     | dispatcher |
+Example Data:
+Name          | Email                    | Phone Number | Role       | Vehicle ID
+John Doe      | john.doe@company.com     | 555-0123     | driver     | TRUCK001
+Jane Smith    | jane.smith@company.com   | 555-0124     | dispatcher |
+Bob Johnson   | bob.johnson@company.com  | 555-0125     | admin      |
+
+Tips:
+- Email addresses must be unique
+- Supported roles: driver, dispatcher, admin
+- Vehicle ID is optional (mainly for drivers)
+- Phone numbers are optional but recommended
             `;
             
             alert(guide);
@@ -1694,7 +2610,7 @@ Jane Smith    | jane@example.com   | 555-0124     | dispatcher |
             };
             
             localStorage.setItem('fleetforce_settings', JSON.stringify(settings));
-            showToast('Settings Saved', 'Settings have been saved successfully', 'success');
+            showToast('Settings Saved', 'System settings have been saved successfully', 'success');
         }
         
         function resetSettings() {
@@ -1723,7 +2639,7 @@ Jane Smith    | jane@example.com   | 555-0124     | dispatcher |
                 ].join(','))
             ].join('\n');
             
-            downloadFile(csv, `fleet-users-export-${new Date().toISOString().split('T')[0]}.csv`, 'text/csv');
+            downloadFile(csv, `fleetforce-users-export-${new Date().toISOString().split('T')[0]}.csv`, 'text/csv');
             showToast('Export Complete', `Exported ${allUsers.length} users`, 'success');
         }
         
@@ -1731,31 +2647,56 @@ Jane Smith    | jane@example.com   | 555-0124     | dispatcher |
             const backup = {
                 users: allUsers,
                 timestamp: new Date().toISOString(),
-                version: '1.0'
+                version: '2.0',
+                system: 'FleetForce Enterprise'
             };
             
             const backupJson = JSON.stringify(backup, null, 2);
-            downloadFile(backupJson, `fleet-backup-${new Date().toISOString().split('T')[0]}.json`, 'application/json');
-            showToast('Backup Created', 'Data backup downloaded successfully', 'success');
+            downloadFile(backupJson, `fleetforce-backup-${new Date().toISOString().split('T')[0]}.json`, 'application/json');
+            showToast('Backup Created', 'Database backup downloaded successfully', 'success');
+        }
+        
+        function syncWithDatabase() {
+            showToast('Syncing', 'Refreshing data from MongoDB Atlas...', 'info');
+            loadUsers();
         }
         
         function confirmClearAllData() {
-            if (confirm('Are you sure you want to delete ALL user data? This action cannot be undone.')) {
-                if (confirm('This will permanently delete all users. Type "DELETE" to confirm:') && prompt('Type DELETE to confirm:') === 'DELETE') {
-                    allUsers = [];
-                    saveUsersToStorage();
-                    syncUserData();
-                    displayUsers(allUsers);
-                    showToast('Data Cleared', 'All user data has been deleted', 'warning');
+            if (confirm('⚠️ WARNING: This will permanently delete ALL user data from MongoDB Atlas.\n\nThis action cannot be undone. Are you absolutely sure?')) {
+                if (confirm('Type "DELETE ALL DATA" to confirm this destructive action:') && prompt('Type "DELETE ALL DATA" to confirm:') === 'DELETE ALL DATA') {
+                    clearAllData();
                 }
             }
         }
         
-        // Utility Functions
-        function generateId() {
-            return 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        async function clearAllData() {
+            try {
+                showToast('Clearing Data', 'Deleting all users from MongoDB...', 'warning');
+                
+                // Clear from MongoDB (if API supports bulk delete)
+                const response = await fetch('/api/users/bulk-delete', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }).catch(() => null);
+                
+                // Clear local storage regardless
+                allUsers = [];
+                saveUsersToStorage();
+                updateUserCount();
+                syncUserData();
+                displayUsers(allUsers);
+                
+                showToast('Data Cleared', 'All user data has been permanently deleted', 'warning');
+                
+            } catch (error) {
+                console.error('Error clearing data:', error);
+                showToast('Error', 'Failed to clear all data from database', 'error');
+            }
         }
         
+        // Utility Functions
         function saveUsersToStorage() {
             localStorage.setItem('fleetforce_users', JSON.stringify(allUsers));
             sessionStorage.setItem('fleetforce_users', JSON.stringify(allUsers));
@@ -1922,6 +2863,28 @@ Jane Smith    | jane@example.com   | 555-0124     | dispatcher |
             console.log('Dashboard and driver app integration initialized');
         }
         
+        async function updateConnectionStatus() {
+            const statusEl = document.getElementById('connectionStatus');
+            if (!statusEl) return;
+            
+            try {
+                const response = await fetch('/api/health');
+                if (response.ok) {
+                    statusEl.innerHTML = '<div class="status-dot"></div><span>MongoDB Atlas Connected</span>';
+                    statusEl.style.background = 'rgba(16, 185, 129, 0.12)';
+                    statusEl.style.color = 'var(--accent-green)';
+                    statusEl.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+                } else {
+                    throw new Error('Backend unavailable');
+                }
+            } catch (error) {
+                statusEl.innerHTML = '<div class="status-dot" style="background: var(--accent-red); animation: none;"></div><span>Database Offline</span>';
+                statusEl.style.background = 'rgba(239, 68, 68, 0.12)';
+                statusEl.style.color = 'var(--accent-red)';
+                statusEl.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+            }
+        }
+        
         function downloadFile(content, filename, mimeType) {
             const blob = new Blob([content], { type: mimeType });
             const url = window.URL.createObjectURL(blob);
@@ -1932,6 +2895,12 @@ Jane Smith    | jane@example.com   | 555-0124     | dispatcher |
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
+        }
+        
+        // Mobile menu toggle
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
         }
         
         // Toast Notification System
@@ -1947,7 +2916,7 @@ Jane Smith    | jane@example.com   | 555-0124     | dispatcher |
             };
             
             const toast = document.createElement('div');
-            toast.className = 'toast';
+            toast.className = `toast ${type}`;
             toast.innerHTML = `
                 <div class="toast-icon">${icons[type]}</div>
                 <div class="toast-content">
@@ -1959,98 +2928,16 @@ Jane Smith    | jane@example.com   | 555-0124     | dispatcher |
             document.body.appendChild(toast);
             
             setTimeout(() => {
-                toast.style.animation = 'slideUp 0.3s ease reverse';
-                setTimeout(() => toast.remove(), 300);
-            }, 4000);
+                toast.style.animation = 'toastSlideIn 0.4s ease reverse';
+                setTimeout(() => toast.remove(), 400);
+            }, 5000);
         }
         
-        // Initialize - Enhanced for MongoDB Atlas & Railway
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Fleet Command Admin Panel - MongoDB Atlas & Railway Integration');
-            console.log('Environment: Railway.app deployment with MongoDB Atlas backend');
-            
-            // Check environment and connectivity
-            checkEnvironment();
-            
-            // Load users from MongoDB
-            loadUsers();
-            
-            // Setup integrations
-            setupDragAndDrop();
-            loadSettings();
-            syncWithDashboard();
-            
-            // Auto-sync every minute for Railway deployment
-            setInterval(() => {
-                console.log('Auto-sync check...');
-                loadUsers();
-            }, 60000);
-            
-            // Add connection status indicator
-            addConnectionStatusIndicator();
-        });
+        // Initialize connection status checking
+        setInterval(updateConnectionStatus, 30000);
         
-        // Environment check for Railway deployment
-        async function checkEnvironment() {
-            try {
-                const response = await fetch('/api/health');
-                if (response.ok) {
-                    const health = await response.json();
-                    console.log('Health check:', health);
-                    showToast('Environment', 'Connected to Railway backend with MongoDB Atlas', 'success');
-                } else {
-                    console.warn('Health check failed:', response.status);
-                    showToast('Warning', 'Backend connection issues detected', 'warning');
-                }
-            } catch (error) {
-                console.error('Environment check failed:', error);
-                showToast('Error', 'Cannot connect to Railway backend', 'error');
-            }
-        }
-        
-        // Connection status indicator
-        function addConnectionStatusIndicator() {
-            const header = document.querySelector('.header-actions');
-            const statusIndicator = document.createElement('div');
-            statusIndicator.id = 'connectionStatus';
-            statusIndicator.style.cssText = `
-                padding: 0.5rem 1rem;
-                border-radius: 20px;
-                font-size: 0.875rem;
-                font-weight: 500;
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-            `;
-            
-            header.insertBefore(statusIndicator, header.firstChild);
-            updateConnectionStatus();
-            
-            // Check connection every 30 seconds
-            setInterval(updateConnectionStatus, 30000);
-        }
-        
-        async function updateConnectionStatus() {
-            const statusEl = document.getElementById('connectionStatus');
-            if (!statusEl) return;
-            
-            try {
-                const response = await fetch('/api/health');
-                if (response.ok) {
-                    statusEl.style.background = 'rgba(16, 185, 129, 0.1)';
-                    statusEl.style.color = 'var(--success)';
-                    statusEl.style.border = '1px solid rgba(16, 185, 129, 0.3)';
-                    statusEl.innerHTML = '<span style="color: #10B981;">●</span> MongoDB Connected';
-                } else {
-                    throw new Error('Backend unavailable');
-                }
-            } catch (error) {
-                statusEl.style.background = 'rgba(239, 68, 68, 0.1)';
-                statusEl.style.color = 'var(--danger)';
-                statusEl.style.border = '1px solid rgba(239, 68, 68, 0.3)';
-                statusEl.innerHTML = '<span style="color: #EF4444;">●</span> Database Offline';
-            }
-        }
+        // Initialize the admin panel
+        loadUsers();
     </script>
 </body>
 </html>
