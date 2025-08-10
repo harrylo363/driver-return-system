@@ -2167,7 +2167,7 @@
             }
         };
         
-        // Disable notifications
+        // Disable notifications - SIMPLIFIED VERSION
         window.disablePushNotifications = async function() {
             console.log('🔕 Disable notifications clicked!');
             
@@ -2176,43 +2176,41 @@
             const disableBtn = document.getElementById('disableBtn');
             const statusEl = document.getElementById('notificationStatus');
             
-            try {
-                disableBtn.disabled = true;
-                disableBtn.innerHTML = '<span class="loading-spinner"></span><span>Disabling...</span>';
-                
-                // Try to unsubscribe from service worker
+            // Immediately update UI - don't wait for anything
+            console.log('📝 Updating UI immediately...');
+            
+            // Update status
+            statusEl.textContent = 'Not Enabled';
+            statusEl.className = 'status-badge status-inactive';
+            
+            // Show enable button
+            enableBtn.style.display = 'block';
+            enableBtn.disabled = false;
+            enableBtn.innerHTML = '<span class="btn-icon">🔔</span><span>Enable Push Notifications</span>';
+            
+            // Hide other buttons
+            testBtn.style.display = 'none';
+            disableBtn.style.display = 'none';
+            
+            console.log('✅ UI updated - notifications disabled');
+            alert('✅ Notifications disabled successfully!');
+            
+            // Optional cleanup in background (don't wait for this)
+            setTimeout(async () => {
                 try {
+                    console.log('📝 Background cleanup...');
                     if ('serviceWorker' in navigator) {
                         const registration = await navigator.serviceWorker.ready;
                         const subscription = await registration.pushManager.getSubscription();
                         if (subscription) {
                             await subscription.unsubscribe();
-                            console.log('✅ Unsubscribed from push');
+                            console.log('✅ Background cleanup completed');
                         }
                     }
-                } catch (swError) {
-                    console.warn('Service worker cleanup failed:', swError);
+                } catch (error) {
+                    console.warn('Background cleanup failed (not critical):', error);
                 }
-                
-                console.log('✅ Disable completed');
-                alert('✅ Notifications disabled');
-                
-                // Update UI immediately
-                statusEl.textContent = 'Not Enabled';
-                statusEl.className = 'status-badge status-inactive';
-                enableBtn.style.display = 'block';
-                enableBtn.disabled = false;
-                enableBtn.innerHTML = '<span class="btn-icon">🔔</span><span>Enable Push Notifications</span>';
-                testBtn.style.display = 'none';
-                disableBtn.style.display = 'none';
-                
-            } catch (error) {
-                console.error('❌ Disable failed:', error);
-                alert('❌ Disable failed: ' + error.message);
-            } finally {
-                disableBtn.disabled = false;
-                disableBtn.innerHTML = '<span class="btn-icon">🔕</span><span>Disable Notifications</span>';
-            }
+            }, 100);
         };
         
         // Update notification status
