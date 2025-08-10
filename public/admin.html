@@ -738,7 +738,7 @@
         
         /* Premium Table */
         .data-table {
-            background: var(--enterprise-card);
+            background: var(--gradient-card);
             border: 1px solid var(--border-primary);
             border-radius: 16px;
             overflow: hidden;
@@ -2055,43 +2055,54 @@
         
         // Enable push notifications for current user
         async function enablePushNotifications() {
+            console.log('🔔 Enable notifications button clicked!');
+            
             try {
                 // Check browser support
                 if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-                    showToast('Not Supported', 'Push notifications are not supported in this browser', 'error');
+                    alert('Push notifications are not supported in this browser');
+                    console.error('Browser does not support push notifications');
                     return;
                 }
                 
+                console.log('✅ Browser supports push notifications');
+                
                 // Update button state
-                document.getElementById('enableBtn').disabled = true;
-                document.getElementById('enableBtn').innerHTML = '<span class="loading-spinner"></span><span>Setting up...</span>';
+                const enableBtn = document.getElementById('enableBtn');
+                enableBtn.disabled = true;
+                enableBtn.innerHTML = '<span class="loading-spinner"></span><span>Setting up...</span>';
                 
-                // Register service worker
-                console.log('Registering service worker...');
-                const registration = await navigator.serviceWorker.register('/sw.js');
-                console.log('Service Worker registered:', registration);
-                
-                // Request notification permission
-                console.log('Requesting notification permission...');
+                // Request notification permission FIRST
+                console.log('📝 Requesting notification permission...');
                 const permission = await Notification.requestPermission();
+                console.log('📝 Permission result:', permission);
+                
                 if (permission !== 'granted') {
                     throw new Error('Notification permission denied');
                 }
                 
+                console.log('✅ Notification permission granted!');
+                alert('Great! Notification permission granted. Now setting up push notifications...');
+                
+                // Register service worker
+                console.log('📝 Registering service worker...');
+                const registration = await navigator.serviceWorker.register('/sw.js');
+                console.log('✅ Service Worker registered:', registration);
+                
                 // Subscribe to push notifications
-                console.log('Subscribing to push notifications...');
+                console.log('📝 Subscribing to push notifications...');
                 const subscription = await registration.pushManager.subscribe({
                     userVisibleOnly: true,
                     applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
                 });
                 
-                console.log('Push subscription successful:', subscription);
+                console.log('✅ Push subscription successful:', subscription);
                 
                 // Get current user ID
                 const currentUserId = getCurrentUserId();
                 
                 // Send subscription to server
-                console.log('Sending subscription to server...');
+                console.log('📝 Sending subscription to server...');
                 const response = await fetch('/api/notifications/subscribe', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -2111,25 +2122,31 @@
                     throw new Error('Failed to save subscription to server');
                 }
                 
+                console.log('✅ Subscription saved to server!');
+                
                 // Update UI
                 updateNotificationStatus();
                 showToast('Notifications Enabled!', 'You will now receive push notifications when drivers update their status', 'success');
                 
             } catch (error) {
-                console.error('Failed to enable push notifications:', error);
-                showToast('Setup Failed', `Error: ${error.message}`, 'error');
+                console.error('❌ Failed to enable push notifications:', error);
+                alert('Error: ' + error.message);
                 
                 // Reset button
-                document.getElementById('enableBtn').disabled = false;
-                document.getElementById('enableBtn').innerHTML = '<span class="btn-icon">🔔</span><span>Enable Push Notifications</span>';
+                const enableBtn = document.getElementById('enableBtn');
+                enableBtn.disabled = false;
+                enableBtn.innerHTML = '<span class="btn-icon">🔔</span><span>Enable Push Notifications</span>';
             }
         }
         
         // Send test push notification
         async function testPushNotification() {
+            console.log('🧪 Test notification button clicked!');
+            
             try {
-                document.getElementById('testBtn').disabled = true;
-                document.getElementById('testBtn').innerHTML = '<span class="loading-spinner"></span><span>Sending...</span>';
+                const testBtn = document.getElementById('testBtn');
+                testBtn.disabled = true;
+                testBtn.innerHTML = '<span class="loading-spinner"></span><span>Sending...</span>';
                 
                 const response = await fetch('/api/notifications/test', {
                     method: 'POST',
@@ -2137,25 +2154,29 @@
                 });
                 
                 if (response.ok) {
+                    console.log('✅ Test notification sent!');
                     showToast('Test Sent!', 'Check for the notification popup!', 'success');
                 } else {
                     throw new Error('Failed to send test notification');
                 }
                 
             } catch (error) {
-                console.error('Test notification failed:', error);
+                console.error('❌ Test notification failed:', error);
                 showToast('Test Failed', `Error: ${error.message}`, 'error');
             } finally {
                 // Reset button
                 setTimeout(() => {
-                    document.getElementById('testBtn').disabled = false;
-                    document.getElementById('testBtn').innerHTML = '<span class="btn-icon">🧪</span><span>Send Test Notification</span>';
+                    const testBtn = document.getElementById('testBtn');
+                    testBtn.disabled = false;
+                    testBtn.innerHTML = '<span class="btn-icon">🧪</span><span>Send Test Notification</span>';
                 }, 2000);
             }
         }
         
         // Disable push notifications
         async function disablePushNotifications() {
+            console.log('🔕 Disable notifications button clicked!');
+            
             try {
                 const registration = await navigator.serviceWorker.ready;
                 const subscription = await registration.pushManager.getSubscription();
@@ -2164,12 +2185,11 @@
                     await subscription.unsubscribe();
                 }
                 
-                // You could also call your server to remove the subscription
                 updateNotificationStatus();
                 showToast('Notifications Disabled', 'Push notifications have been turned off', 'info');
                 
             } catch (error) {
-                console.error('Failed to disable notifications:', error);
+                console.error('❌ Failed to disable notifications:', error);
                 showToast('Error', 'Failed to disable notifications', 'error');
             }
         }
@@ -3423,217 +3443,6 @@ Tips:
         
         // Initialize the admin panel
         loadUsers();
-    <script>
-// Push notification functions - Add this to your admin.html
-window.enablePushNotifications = async function() {
-    console.log('🔔 Enable notifications button clicked!');
-    
-    try {
-        // Check browser support
-        if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-            alert('Push notifications are not supported in this browser');
-            console.error('Browser does not support push notifications');
-            return;
-        }
-        
-        console.log('✅ Browser supports push notifications');
-        
-        // Update button state
-        const enableBtn = document.getElementById('enableBtn');
-        enableBtn.disabled = true;
-        enableBtn.innerHTML = '<span class="loading-spinner"></span><span>Setting up...</span>';
-        
-        // Request notification permission FIRST
-        console.log('📝 Requesting notification permission...');
-        const permission = await Notification.requestPermission();
-        console.log('📝 Permission result:', permission);
-        
-        if (permission !== 'granted') {
-            throw new Error('Notification permission denied');
-        }
-        
-        console.log('✅ Notification permission granted!');
-        alert('Great! Notification permission granted. Now setting up push notifications...');
-        
-        // Register service worker
-        console.log('📝 Registering service worker...');
-        const registration = await navigator.serviceWorker.register('/sw.js');
-        console.log('✅ Service Worker registered:', registration);
-        
-        // Subscribe to push notifications
-        console.log('📝 Subscribing to push notifications...');
-        const subscription = await registration.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: urlBase64ToUint8Array('BN3-pI2_z9rnLgHR2NowqM4yawWFlF-9wP2Gx8QzG9PnV1kdw0IkK3JWptNO8fn23bkb0O7Uo1d0cdlgVx-I4Ak')
-        });
-        
-        console.log('✅ Push subscription successful:', subscription);
-        
-        // Get current user ID
-        const currentUserId = 'admin-user-' + Date.now();
-        
-        // Send subscription to server
-        console.log('📝 Sending subscription to server...');
-        const response = await fetch('/api/notifications/subscribe', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                userId: currentUserId,
-                subscription: {
-                    endpoint: subscription.endpoint,
-                    keys: {
-                        p256dh: arrayBufferToBase64(subscription.getKey('p256dh')),
-                        auth: arrayBufferToBase64(subscription.getKey('auth'))
-                    }
-                }
-            })
-        });
-        
-        if (!response.ok) {
-            throw new Error('Failed to save subscription to server');
-        }
-        
-        console.log('✅ Subscription saved to server!');
-        
-        // Update UI
-        updateNotificationStatus();
-        alert('🎉 Push notifications enabled successfully! You will now receive driver status updates.');
-        
-    } catch (error) {
-        console.error('❌ Failed to enable push notifications:', error);
-        alert('Error: ' + error.message);
-        
-        // Reset button
-        const enableBtn = document.getElementById('enableBtn');
-        enableBtn.disabled = false;
-        enableBtn.innerHTML = '<span class="btn-icon">🔔</span><span>Enable Push Notifications</span>';
-    }
-};
-
-window.testPushNotification = async function() {
-    console.log('🧪 Test notification button clicked!');
-    
-    try {
-        const testBtn = document.getElementById('testBtn');
-        testBtn.disabled = true;
-        testBtn.innerHTML = '<span class="loading-spinner"></span><span>Sending...</span>';
-        
-        const response = await fetch('/api/notifications/test', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
-        });
-        
-        if (response.ok) {
-            console.log('✅ Test notification sent!');
-            alert('Test notification sent! Check for the notification popup.');
-        } else {
-            throw new Error('Failed to send test notification');
-        }
-        
-    } catch (error) {
-        console.error('❌ Test notification failed:', error);
-        alert('Test failed: ' + error.message);
-    } finally {
-        // Reset button
-        setTimeout(() => {
-            const testBtn = document.getElementById('testBtn');
-            testBtn.disabled = false;
-            testBtn.innerHTML = '<span class="btn-icon">🧪</span><span>Send Test Notification</span>';
-        }, 2000);
-    }
-};
-
-window.disablePushNotifications = async function() {
-    console.log('🔕 Disable notifications button clicked!');
-    
-    try {
-        const registration = await navigator.serviceWorker.ready;
-        const subscription = await registration.pushManager.getSubscription();
-        
-        if (subscription) {
-            await subscription.unsubscribe();
-        }
-        
-        updateNotificationStatus();
-        alert('Push notifications have been disabled');
-        
-    } catch (error) {
-        console.error('❌ Failed to disable notifications:', error);
-        alert('Error disabling notifications: ' + error.message);
-    }
-};
-
-window.updateNotificationStatus = function() {
-    const statusEl = document.getElementById('notificationStatus');
-    const enableBtn = document.getElementById('enableBtn');
-    const testBtn = document.getElementById('testBtn');
-    const disableBtn = document.getElementById('disableBtn');
-    
-    if (!statusEl) return;
-    
-    if (!('Notification' in window)) {
-        statusEl.textContent = 'Not Supported';
-        statusEl.className = 'status-badge status-inactive';
-        enableBtn.style.display = 'none';
-        return;
-    }
-    
-    switch (Notification.permission) {
-        case 'granted':
-            statusEl.textContent = 'Enabled';
-            statusEl.className = 'status-badge status-active';
-            enableBtn.style.display = 'none';
-            testBtn.disabled = false;
-            disableBtn.style.display = 'block';
-            break;
-        case 'denied':
-            statusEl.textContent = 'Blocked';
-            statusEl.className = 'status-badge status-inactive';
-            enableBtn.innerHTML = '<span class="btn-icon">🔄</span><span>Unblock in Browser Settings</span>';
-            enableBtn.disabled = true;
-            break;
-        default:
-            statusEl.textContent = 'Not Enabled';
-            statusEl.className = 'status-badge status-inactive';
-            enableBtn.style.display = 'block';
-            testBtn.disabled = true;
-            disableBtn.style.display = 'none';
-    }
-};
-
-// Utility functions
-function urlBase64ToUint8Array(base64String) {
-    const padding = '='.repeat((4 - base64String.length % 4) % 4);
-    const base64 = (base64String + padding)
-        .replace(/-/g, '+')
-        .replace(/_/g, '/');
-    
-    const rawData = window.atob(base64);
-    const outputArray = new Uint8Array(rawData.length);
-    
-    for (let i = 0; i < rawData.length; ++i) {
-        outputArray[i] = rawData.charCodeAt(i);
-    }
-    return outputArray;
-}
-
-function arrayBufferToBase64(buffer) {
-    const bytes = new Uint8Array(buffer);
-    let binary = '';
-    for (let i = 0; i < bytes.byteLength; i++) {
-        binary += String.fromCharCode(bytes[i]);
-    }
-    return window.btoa(binary);
-}
-
-// Initialize when page loads
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Notification system initializing...');
-    updateNotificationStatus();
-    
-    // Check status every few seconds
-    setInterval(updateNotificationStatus, 5000);
-});
-</script>
+    </script>
 </body>
 </html>
