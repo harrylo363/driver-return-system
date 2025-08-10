@@ -1210,6 +1210,16 @@
         }
         
         /* Responsive Design */
+        @media (max-width: 1200px) {
+            .form-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+            
+            .settings-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
         @media (max-width: 1024px) {
             .mobile-menu-toggle {
                 display: block;
@@ -1234,16 +1244,26 @@
             .header-right {
                 flex-direction: column;
                 gap: 12px;
+                align-items: flex-end;
             }
             
             .search-input {
-                width: 100%;
+                width: 200px;
+            }
+            
+            .tab-navigation {
+                overflow-x: auto;
+                padding: 4px;
+            }
+            
+            .tab-btn {
+                min-width: 120px;
             }
         }
         
         @media (max-width: 768px) {
             .content-container {
-                padding: 20px;
+                padding: 16px;
             }
             
             .main-header {
@@ -1253,32 +1273,242 @@
                 align-items: flex-start;
             }
             
+            .header-right {
+                width: 100%;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+            
+            .connection-status {
+                font-size: 11px;
+                padding: 6px 12px;
+            }
+            
+            .dashboard-link {
+                font-size: 12px;
+                padding: 8px 16px;
+            }
+            
             .tab-navigation {
                 padding: 4px;
+                margin-bottom: 20px;
             }
             
             .tab-btn {
-                padding: 12px 16px;
+                padding: 10px 16px;
                 font-size: 12px;
+                min-width: 100px;
+            }
+            
+            .tab-icon {
+                font-size: 14px;
             }
             
             .card-body {
                 padding: 20px;
             }
             
+            .card-header {
+                padding: 20px 20px 0;
+            }
+            
+            .card-title {
+                font-size: 16px;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+                margin-bottom: 24px;
+            }
+            
             .user-table th,
             .user-table td {
-                padding: 12px 16px;
-                font-size: 13px;
+                padding: 10px 12px;
+                font-size: 12px;
+            }
+            
+            .user-table th {
+                font-size: 10px;
+            }
+            
+            .user-actions {
+                flex-direction: column;
+                gap: 4px;
+            }
+            
+            .btn-sm {
+                padding: 6px 12px;
+                font-size: 11px;
             }
             
             .modal-content {
-                margin: 20px;
+                margin: 10px;
                 max-width: none;
+                border-radius: 16px;
+            }
+            
+            .modal-header {
+                padding: 16px 20px;
             }
             
             .modal-body {
                 padding: 20px;
+            }
+            
+            .modal-actions {
+                padding: 16px 20px;
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .modal-actions .btn {
+                width: 100%;
+            }
+            
+            .search-input {
+                width: 100%;
+                font-size: 14px;
+            }
+            
+            .upload-area {
+                padding: 32px 20px;
+            }
+            
+            .upload-text {
+                font-size: 16px;
+            }
+            
+            .upload-subtext {
+                font-size: 13px;
+            }
+            
+            .template-section {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            .template-card {
+                padding: 16px;
+            }
+            
+            .settings-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .settings-card {
+                padding: 16px;
+            }
+            
+            .toast {
+                bottom: 16px;
+                right: 16px;
+                left: 16px;
+                min-width: auto;
+                max-width: none;
+            }
+            
+            .sidebar {
+                width: 100%;
+                z-index: 2000;
+            }
+            
+            .sidebar-header {
+                padding: 16px 20px;
+            }
+            
+            .sidebar-nav {
+                padding: 16px 0;
+            }
+            
+            .nav-item {
+                padding: 12px 20px;
+                font-size: 13px;
+            }
+            
+            .sidebar-footer {
+                padding: 16px 20px;
+            }
+            
+            .user-profile {
+                padding: 10px;
+            }
+            
+            .user-avatar {
+                width: 32px;
+                height: 32px;
+                font-size: 14px;
+            }
+            
+            .user-info h4 {
+                font-size: 12px;
+            }
+            
+            .user-info p {
+                font-size: 10px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .main-header h1 {
+                font-size: 20px;
+            }
+            
+            .main-header p {
+                font-size: 12px;
+            }
+            
+            .tab-btn span:last-child {
+                display: none;
+            }
+            
+            .tab-btn {
+                min-width: 60px;
+                padding: 10px 8px;
+            }
+            
+            .form-input, .form-select {
+                padding: 12px 14px;
+                font-size: 14px;
+            }
+            
+            .btn {
+                padding: 12px 20px;
+                font-size: 13px;
+            }
+            
+            .card-title {
+                font-size: 15px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            
+            .table-header {
+                padding: 16px 20px;
+                flex-direction: column;
+                gap: 12px;
+                align-items: flex-start;
+            }
+            
+            .search-container {
+                width: 100%;
+            }
+            
+            .user-table {
+                font-size: 11px;
+            }
+            
+            .user-table th,
+            .user-table td {
+                padding: 8px 10px;
+            }
+            
+            .status-badge {
+                font-size: 9px;
+                padding: 4px 8px;
             }
         }
     </style>
@@ -3195,277 +3425,4 @@ Tips:
         loadUsers();
     </script>
 </body>
-</html>!-- Add these enhancements to your existing admin panel HTML -->
-
-<!-- 1. Add to the user creation form (in the form-grid) -->
-<div class="form-group" id="notificationSettings" style="display: none;">
-    <label class="form-label">Push Notifications</label>
-    <div style="display: flex; flex-direction: column; gap: 8px;">
-        <label style="display: flex; align-items: center; gap: 8px; font-size: 13px;">
-            <input type="checkbox" id="enableNotifications" checked>
-            <span>Enable push notifications for this user</span>
-        </label>
-        <div id="notificationPreferences" style="margin-left: 24px; display: none;">
-            <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-secondary);">
-                <input type="checkbox" id="driverUpdates" checked>
-                <span>Driver status updates</span>
-            </label>
-            <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-secondary);">
-                <input type="checkbox" id="emergencies" checked>
-                <span>Emergency alerts</span>
-            </label>
-            <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-secondary);">
-                <input type="checkbox" id="systemAlerts" checked>
-                <span>System notifications</span>
-            </label>
-            <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-secondary);">
-                <input type="checkbox" id="dailyReports">
-                <span>Daily reports</span>
-            </label>
-        </div>
-    </div>
-</div>
-
-<!-- 2. Add to settings tab for managing push notifications -->
-<div class="settings-card">
-    <h3 class="settings-title">
-        <span>🔔</span>
-        <span>Push Notifications</span>
-    </h3>
-    
-    <div style="display: grid; gap: 16px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--bg-elevated); border-radius: 8px;">
-            <span>Browser Notifications</span>
-            <span class="status-badge" id="notificationStatus">Checking...</span>
-        </div>
-        
-        <button class="btn btn-primary" onclick="setupPushNotifications()" style="width: 100%; justify-content: center;">
-            <span class="btn-icon">🔔</span>
-            <span>Enable Notifications</span>
-        </button>
-        
-        <button class="btn btn-secondary" onclick="testNotification()" style="width: 100%; justify-content: center;">
-            <span class="btn-icon">🧪</span>
-            <span>Test Notification</span>
-        </button>
-        
-        <div id="vapidKeySection" style="display: none;">
-            <label class="form-label">VAPID Public Key</label>
-            <input type="text" class="form-input" id="vapidPublicKey" placeholder="Your VAPID public key" readonly>
-            <p style="font-size: 11px; color: var(--text-tertiary); margin-top: 4px;">
-                Copy this to your environment variables
-            </p>
-        </div>
-    </div>
-</div>
-
-<script>
-// Real Push Notification Functions - Works with your VAPID keys
-
-// Your real VAPID public key
-const VAPID_PUBLIC_KEY = 'BN3-pI2_z9rnLgHR2NowqM4yawWFlF-9wP2Gx8QzG9PnV1kdw0IkK3JWptNO8fn23bkb0O7Uo1d0cdlgVx-I4Ak';
-
-// Enable push notifications for current user
-async function enablePushNotifications() {
-    try {
-        // Check browser support
-        if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-            showToast('Not Supported', 'Push notifications are not supported in this browser', 'error');
-            return;
-        }
-        
-        // Update button state
-        document.getElementById('enableBtn').disabled = true;
-        document.getElementById('enableBtn').innerHTML = '<span class="loading-spinner"></span><span>Setting up...</span>';
-        
-        // Register service worker
-        console.log('Registering service worker...');
-        const registration = await navigator.serviceWorker.register('/sw.js');
-        console.log('Service Worker registered:', registration);
-        
-        // Request notification permission
-        console.log('Requesting notification permission...');
-        const permission = await Notification.requestPermission();
-        if (permission !== 'granted') {
-            throw new Error('Notification permission denied');
-        }
-        
-        // Subscribe to push notifications
-        console.log('Subscribing to push notifications...');
-        const subscription = await registration.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-        });
-        
-        console.log('Push subscription successful:', subscription);
-        
-        // Get current user ID (you might need to implement this based on your auth system)
-        const currentUserId = getCurrentUserId();
-        
-        // Send subscription to server
-        console.log('Sending subscription to server...');
-        const response = await fetch('/api/notifications/subscribe', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                userId: currentUserId,
-                subscription: {
-                    endpoint: subscription.endpoint,
-                    keys: {
-                        p256dh: arrayBufferToBase64(subscription.getKey('p256dh')),
-                        auth: arrayBufferToBase64(subscription.getKey('auth'))
-                    }
-                }
-            })
-        });
-        
-        if (!response.ok) {
-            throw new Error('Failed to save subscription to server');
-        }
-        
-        // Update UI
-        updateNotificationStatus();
-        showToast('Notifications Enabled!', 'You will now receive push notifications when drivers update their status', 'success');
-        
-    } catch (error) {
-        console.error('Failed to enable push notifications:', error);
-        showToast('Setup Failed', `Error: ${error.message}`, 'error');
-        
-        // Reset button
-        document.getElementById('enableBtn').disabled = false;
-        document.getElementById('enableBtn').innerHTML = '<span class="btn-icon">🔔</span><span>Enable Push Notifications</span>';
-    }
-}
-
-// Send test push notification
-async function testPushNotification() {
-    try {
-        document.getElementById('testBtn').disabled = true;
-        document.getElementById('testBtn').innerHTML = '<span class="loading-spinner"></span><span>Sending...</span>';
-        
-        const response = await fetch('/api/notifications/test', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
-        });
-        
-        if (response.ok) {
-            showToast('Test Sent!', 'Check for the notification popup!', 'success');
-        } else {
-            throw new Error('Failed to send test notification');
-        }
-        
-    } catch (error) {
-        console.error('Test notification failed:', error);
-        showToast('Test Failed', `Error: ${error.message}`, 'error');
-    } finally {
-        // Reset button
-        setTimeout(() => {
-            document.getElementById('testBtn').disabled = false;
-            document.getElementById('testBtn').innerHTML = '<span class="btn-icon">🧪</span><span>Send Test Notification</span>';
-        }, 2000);
-    }
-}
-
-// Disable push notifications
-async function disablePushNotifications() {
-    try {
-        const registration = await navigator.serviceWorker.ready;
-        const subscription = await registration.pushManager.getSubscription();
-        
-        if (subscription) {
-            await subscription.unsubscribe();
-        }
-        
-        // You could also call your server to remove the subscription
-        updateNotificationStatus();
-        showToast('Notifications Disabled', 'Push notifications have been turned off', 'info');
-        
-    } catch (error) {
-        console.error('Failed to disable notifications:', error);
-        showToast('Error', 'Failed to disable notifications', 'error');
-    }
-}
-
-// Update notification status display
-function updateNotificationStatus() {
-    const statusEl = document.getElementById('notificationStatus');
-    const enableBtn = document.getElementById('enableBtn');
-    const testBtn = document.getElementById('testBtn');
-    const disableBtn = document.getElementById('disableBtn');
-    
-    if (!statusEl) return;
-    
-    if (!('Notification' in window)) {
-        statusEl.textContent = 'Not Supported';
-        statusEl.className = 'status-badge status-inactive';
-        enableBtn.style.display = 'none';
-        return;
-    }
-    
-    switch (Notification.permission) {
-        case 'granted':
-            statusEl.textContent = 'Enabled';
-            statusEl.className = 'status-badge status-active';
-            enableBtn.style.display = 'none';
-            testBtn.disabled = false;
-            disableBtn.style.display = 'block';
-            break;
-        case 'denied':
-            statusEl.textContent = 'Blocked';
-            statusEl.className = 'status-badge status-inactive';
-            enableBtn.innerHTML = '<span class="btn-icon">🔄</span><span>Unblock in Browser Settings</span>';
-            enableBtn.disabled = true;
-            break;
-        default:
-            statusEl.textContent = 'Not Enabled';
-            statusEl.className = 'status-badge status-inactive';
-            enableBtn.style.display = 'block';
-            testBtn.disabled = true;
-            disableBtn.style.display = 'none';
-    }
-}
-
-// Get current user ID - you'll need to implement this based on your auth system
-function getCurrentUserId() {
-    // For now, return a placeholder ID
-    // In a real app, you'd get this from your authentication system
-    const userIdEl = document.getElementById('currentUserId');
-    if (userIdEl) {
-        return userIdEl.textContent;
-    }
-    return 'admin-user-' + Date.now(); // Temporary fallback
-}
-
-// Utility functions
-function urlBase64ToUint8Array(base64String) {
-    const padding = '='.repeat((4 - base64String.length % 4) % 4);
-    const base64 = (base64String + padding)
-        .replace(/-/g, '+')
-        .replace(/_/g, '/');
-    
-    const rawData = window.atob(base64);
-    const outputArray = new Uint8Array(rawData.length);
-    
-    for (let i = 0; i < rawData.length; ++i) {
-        outputArray[i] = rawData.charCodeAt(i);
-    }
-    return outputArray;
-}
-
-function arrayBufferToBase64(buffer) {
-    const bytes = new Uint8Array(buffer);
-    let binary = '';
-    for (let i = 0; i < bytes.byteLength; i++) {
-        binary += String.fromCharCode(bytes[i]);
-    }
-    return window.btoa(binary);
-}
-
-// Initialize notification status when page loads
-document.addEventListener('DOMContentLoaded', function() {
-    updateNotificationStatus();
-    
-    // Check status every few seconds in case user changes browser settings
-    setInterval(updateNotificationStatus, 5000);
-});
-</script>
+</html>
