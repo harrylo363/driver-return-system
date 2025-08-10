@@ -325,6 +325,17 @@
             transform: translateY(-2px);
         }
         
+        .btn-success {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+        
         .filter-group {
             display: flex;
             background: var(--bg-card);
@@ -475,6 +486,35 @@
             gap: 0.25rem;
         }
         
+        .activity-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .checkin-btn {
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            animation: pulseGreen 2s infinite;
+        }
+        
+        @keyframes pulseGreen {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+        }
+        
+        .checkin-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+        
         .status-badge {
             padding: 0.375rem 0.875rem;
             border-radius: 100px;
@@ -500,6 +540,228 @@
             background: rgba(100, 116, 139, 0.1);
             color: var(--text-muted);
             border: 1px solid rgba(100, 116, 139, 0.3);
+        }
+        
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .modal-header {
+            padding: 1.5rem;
+            background: var(--bg-dark);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: none;
+            background: var(--bg-hover);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .modal-close:hover {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+        
+        .inspection-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .form-section {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+        
+        .form-section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .form-section-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        
+        .form-section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .form-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+        
+        .form-input,
+        .form-select,
+        .form-textarea {
+            padding: 0.75rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+        
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .form-textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .checkbox-group:hover {
+            border-color: var(--accent);
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .checkbox-label {
+            flex: 1;
+            font-size: 0.875rem;
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+        
+        .modal-footer {
+            padding: 1.5rem;
+            background: var(--bg-dark);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .form-info {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 1rem;
         }
         
         /* Analytics Panel */
@@ -589,11 +851,11 @@
             align-items: center;
             gap: 1rem;
             min-width: 300px;
-            z-index: 2000;
-            animation: slideUp 0.3s ease;
+            z-index: 3000;
+            animation: toastSlideUp 0.3s ease;
         }
         
-        @keyframes slideUp {
+        @keyframes toastSlideUp {
             from {
                 transform: translateY(100%);
                 opacity: 0;
@@ -676,6 +938,15 @@
             .activity-details {
                 flex-direction: column;
                 gap: 0.5rem;
+            }
+            
+            .modal {
+                width: 95%;
+                max-height: 95vh;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -802,8 +1073,8 @@
                         <div class="metric-header">
                             <span class="metric-label">🚛 Tractor</span>
                             <button class="btn btn-primary btn-sm" onclick="reportIssue('tractor')">
-                                <span>➕</span>
-                                <span>Report</span>
+                                <span>📋</span>
+                                <span>View</span>
                             </button>
                         </div>
                         <div style="display: flex; align-items: baseline; gap: 1rem; margin-top: 1rem;">
@@ -817,8 +1088,8 @@
                         <div class="metric-header">
                             <span class="metric-label">🚚 Trailer</span>
                             <button class="btn btn-primary btn-sm" onclick="reportIssue('trailer')">
-                                <span>➕</span>
-                                <span>Report</span>
+                                <span>📋</span>
+                                <span>View</span>
                             </button>
                         </div>
                         <div style="display: flex; align-items: baseline; gap: 1rem; margin-top: 1rem;">
@@ -832,8 +1103,8 @@
                         <div class="metric-header">
                             <span class="metric-label">🏗️ Moffett</span>
                             <button class="btn btn-primary btn-sm" onclick="reportIssue('moffett')">
-                                <span>➕</span>
-                                <span>Report</span>
+                                <span>📋</span>
+                                <span>View</span>
                             </button>
                         </div>
                         <div style="display: flex; align-items: baseline; gap: 1rem; margin-top: 1rem;">
@@ -868,267 +1139,139 @@
         </div>
     </div>
     
-    <script>
-        // Initialize all global variables to prevent undefined errors
-        window.utils = window.utils || { js: {} };
-        window.tabutils = window.tabutils || { js: {} };
-        window.contextmenu = window.contextmenu || { js: { 124: { 21: {} } } };
-        window.download = window.download || { js: {} };
-        window.content = window.content || { js: {} };
-        window.background = window.background || { js: { 2: { 1118846: {} } } };
-        window['feature_extension-pl_ge-plugin-view'] = { js: { 1: {} } };
-        
-        // Global Variables
-        let notifications = [];
-        let driverStatuses = new Map();
-        let currentFilter = 'all';
-        let refreshInterval;
-        let equipmentIssues = {
-            tractor: [],
-            trailer: [],
-            moffett: []
-        };
-        
-        // Initialize Dashboard
-        document.addEventListener('DOMContentLoaded', function() {
-            loadNotifications();
-            startClock();
-            startAutoRefresh();
+    <!-- Check-in Modal -->
+    <div class="modal-overlay" id="checkinModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <span>📋</span>
+                    <span>Equipment Inspection Check-In</span>
+                </h2>
+                <button class="modal-close" onclick="closeCheckinModal()">✕</button>
+            </div>
             
-            // Animate KPIs on load
-            setTimeout(() => {
-                animateKPIs();
-                updateEquipmentMetrics();
-            }, 500);
-        });
-        
-        function refreshDashboard() {
-            showToast('Refreshing', 'Updating dashboard data...', 'info');
-            loadNotifications();
-        }
-        
-        // Load Notifications
-        async function loadNotifications() {
-            try {
-                console.log('Loading notifications and admin data...');
-                
-                // Use Promise.allSettled for better error handling
-                const [notifResult, usersResult, checkInsResult] = await Promise.allSettled([
-                    fetch('/api/notifications'),
-                    fetch('/api/users'),
-                    fetch('/api/checkins')
-                ]);
-                
-                let notificationsData = [];
-                if (notifResult.status === 'fulfilled' && notifResult.value.ok) {
-                    const data = await notifResult.value.json();
-                    notificationsData = Array.isArray(data) ? data : (data.data || []);
-                }
-                
-                let adminUsers = [];
-                if (usersResult.status === 'fulfilled' && usersResult.value.ok) {
-                    const userData = await usersResult.value.json();
-                    adminUsers = Array.isArray(userData) ? userData : (userData.data || []);
-                }
-                
-                let checkInsData = [];
-                if (checkInsResult.status === 'fulfilled' && checkInsResult.value.ok) {
-                    const data = await checkInsResult.value.json();
-                    checkInsData = Array.isArray(data) ? data : (data.data || []);
-                    processEquipmentIssues(checkInsData);
-                }
-                
-                const activeDriversFromAdmin = adminUsers.filter(user => 
-                    user.role === 'driver' && user.active !== false
-                );
-                
-                driverStatuses.clear();
-                
-                notificationsData.forEach(n => {
-                    if (n.driver && n.status) {
-                        const notificationTime = new Date(n.timestamp).getTime();
-                        const driverName = n.driver;
-                        
-                        if (!driverStatuses.has(driverName) || 
-                            notificationTime > new Date(driverStatuses.get(driverName).timestamp).getTime()) {
-                            driverStatuses.set(driverName, n);
-                        }
-                    }
-                });
-                
-                const consolidatedNotifications = Array.from(driverStatuses.values());
-                
-                const notificationDriverNames = consolidatedNotifications.map(n => n.driver);
-                const pendingCheckInDrivers = activeDriversFromAdmin
-                    .filter(driver => !notificationDriverNames.includes(driver.name))
-                    .map(driver => ({
-                        _id: `admin-${driver._id}`,
-                        driver: driver.name,
-                        status: 'pending-checkin',
-                        timestamp: new Date().toISOString(),
-                        warehouse: '5856 Tampa FDC',
-                        location: 'Location unavailable'
-                    }));
-                
-                const allDriverData = [...consolidatedNotifications, ...pendingCheckInDrivers];
-                notifications = allDriverData;
-                
-                updateDisplay(allDriverData);
-                updateMetrics(allDriverData, activeDriversFromAdmin);
-                
-                document.getElementById('lastUpdate').innerHTML = `Last updated: ${new Date().toLocaleTimeString()}`;
-                
-            } catch (error) {
-                console.error('Error loading data:', error);
-                document.getElementById('lastUpdate').innerHTML = `<span style="color: var(--danger);">Failed to load data</span>`;
-                showToast('Connection Error', 'Unable to load fleet data', 'error');
-            }
-        }
-        
-        // Process equipment issues from check-in data
-        function processEquipmentIssues(checkInsData) {
-            equipmentIssues = {
-                tractor: [],
-                trailer: [],
-                moffett: []
-            };
-            
-            checkInsData.forEach(checkIn => {
-                if (checkIn.tractorIssue && checkIn.tractorIssue !== 'No issues') {
-                    equipmentIssues.tractor.push({
-                        id: checkIn._id,
-                        description: checkIn.tractorIssue,
-                        reportedBy: checkIn.driverName || checkIn.driver,
-                        timestamp: checkIn.timestamp
-                    });
-                }
-                
-                if (checkIn.trailerIssue && checkIn.trailerIssue !== 'No issues') {
-                    equipmentIssues.trailer.push({
-                        id: checkIn._id,
-                        description: checkIn.trailerIssue,
-                        reportedBy: checkIn.driverName || checkIn.driver,
-                        timestamp: checkIn.timestamp
-                    });
-                }
-                
-                if (checkIn.moffettIssue && checkIn.moffettIssue !== 'No issues') {
-                    equipmentIssues.moffett.push({
-                        id: checkIn._id,
-                        description: checkIn.moffettIssue,
-                        reportedBy: checkIn.driverName || checkIn.driver,
-                        timestamp: checkIn.timestamp
-                    });
-                }
-            });
-            
-            updateEquipmentMetrics();
-        }
-        
-        function updateEquipmentMetrics() {
-            document.getElementById('tractorValue').textContent = equipmentIssues.tractor.length;
-            document.getElementById('tractorSubtext').textContent = `${equipmentIssues.tractor.length === 1 ? 'active issue' : 'active issues'}`;
-            
-            document.getElementById('trailerValue').textContent = equipmentIssues.trailer.length;
-            document.getElementById('trailerSubtext').textContent = `${equipmentIssues.trailer.length === 1 ? 'active issue' : 'active issues'}`;
-            
-            document.getElementById('moffettValue').textContent = equipmentIssues.moffett.length;
-            document.getElementById('moffettSubtext').textContent = `${equipmentIssues.moffett.length === 1 ? 'active issue' : 'active issues'}`;
-        }
-        
-        function reportIssue(equipmentType) {
-            const issues = equipmentIssues[equipmentType];
-            if (issues.length === 0) {
-                showToast('No Issues', `No active ${equipmentType} issues`, 'info');
-            } else {
-                const issueList = issues.map(i => `• ${i.description} (${i.reportedBy || 'Unknown'})`).join('\n');
-                showToast(`${equipmentType.charAt(0).toUpperCase() + equipmentType.slice(1)} Issues`, issueList, 'warning', 8000);
-            }
-        }
-        
-        // Update Metrics
-        function updateMetrics(allDriverData, adminDrivers = []) {
-            const totalRoutedDrivers = allDriverData.length;
-            const enRouteDrivers = allDriverData.filter(n => n.status === 'en-route').length;
-            const arrivedDrivers = allDriverData.filter(n => n.status === 'arrived').length;
-            const pendingCheckInCount = allDriverData.filter(n => n.status === 'pending-checkin').length;
-            
-            document.getElementById('activeDrivers').textContent = totalRoutedDrivers;
-            document.getElementById('enRouteCount').textContent = enRouteDrivers;
-            document.getElementById('arrivedCount').textContent = arrivedDrivers;
-            document.getElementById('notCheckedInCount').textContent = pendingCheckInCount;
-        }
-        
-        // Update Display
-        function updateDisplay(allDriverData) {
-            let filtered = allDriverData;
-            let feedTitle = 'Real-Time Activity Feed';
-            let feedIcon = '📡';
-            
-            if (currentFilter !== 'all') {
-                filtered = allDriverData.filter(n => n.status === currentFilter);
-                feedTitle = `${currentFilter.charAt(0).toUpperCase() + currentFilter.slice(1).replace('-', ' ')} Drivers`;
-            }
-            
-            document.getElementById('activityFeedTitle').textContent = feedTitle;
-            document.getElementById('activityFeedIcon').textContent = feedIcon;
-            document.getElementById('activityCount').textContent = `${filtered.length} active`;
-            
-            const activityList = document.getElementById('activityList');
-            
-            if (filtered.length === 0) {
-                activityList.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">📭</div>
-                        <p>No active fleet movements</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            activityList.innerHTML = filtered
-                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-                .slice(0, 30)
-                .map(notification => {
-                    const time = new Date(notification.timestamp).toLocaleTimeString();
-                    const timeAgo = getTimeAgo(new Date(notification.timestamp));
-                    
-                    let statusClass = notification.status || 'standby';
-                    let statusDisplay = notification.status || 'standby';
-                    
-                    if (notification.status === 'pending-checkin') {
-                        statusDisplay = 'pending check-in';
-                    }
-                    
-                    return `
-                        <div class="activity-item ${statusClass}">
-                            <div class="activity-content">
-                                <div class="activity-info">
-                                    <div class="activity-driver">${notification.driver}</div>
-                                    <div class="activity-details">
-                                        <span class="activity-detail">
-                                            <span>⏱</span>
-                                            <span>${timeAgo}</span>
-                                        </span>
-                                        <span class="activity-detail">
-                                            <span>📍</span>
-                                            <span>${notification.warehouse || '5856 Tampa FDC'}</span>
-                                        </span>
-                                        ${notification.estimatedArrival ? `
-                                            <span class="activity-detail">
-                                                <span>⏳</span>
-                                                <span>ETA: ${notification.estimatedArrival}</span>
-                                            </span>
-                                        ` : ''}
-                                    </div>
-                                </div>
-                                <span class="status-badge status-${statusClass}">
-                                    ${statusDisplay.replace('-', ' ')}
-                                </span>
+            <div class="modal-body">
+                <form class="inspection-form" id="inspectionForm">
+                    <!-- Driver Info -->
+                    <div style="padding: 1rem; background: rgba(59, 130, 246, 0.1); border-radius: 8px; margin-bottom: 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="font-size: 0.875rem; color: var(--text-secondary);">Driver:</div>
+                                <div style="font-size: 1.125rem; font-weight: 600; color: var(--text-primary);" id="checkinDriverName">-</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.875rem; color: var(--text-secondary);">Date/Time:</div>
+                                <div style="font-size: 1rem; color: var(--text-primary);" id="checkinDateTime">-</div>
                             </div>
                         </div>
                     `;
                 }).join('');
+        }
+        
+        // Open Check-in Modal
+        function openCheckinModal(driverName, driverId) {
+            currentCheckinDriver = { name: driverName, id: driverId };
+            
+            // Set driver info in modal
+            document.getElementById('checkinDriverName').textContent = driverName;
+            document.getElementById('checkinDateTime').textContent = new Date().toLocaleString();
+            
+            // Reset form
+            document.getElementById('inspectionForm').reset();
+            
+            // Show modal
+            document.getElementById('checkinModal').classList.add('active');
+        }
+        
+        // Close Check-in Modal
+        function closeCheckinModal() {
+            document.getElementById('checkinModal').classList.remove('active');
+            currentCheckinDriver = null;
+        }
+        
+        // Submit Check-in
+        async function submitCheckin() {
+            if (!currentCheckinDriver) {
+                showToast('Error', 'No driver selected for check-in', 'error');
+                return;
+            }
+            
+            // Gather form data
+            const formData = {
+                driverName: currentCheckinDriver.name,
+                driverId: currentCheckinDriver.id,
+                timestamp: new Date().toISOString(),
+                
+                // Tractor data
+                tractorNumber: document.getElementById('tractorNumber').value,
+                tractorCondition: document.getElementById('tractorCondition').value,
+                tractorDamage: document.getElementById('tractorDamage').value,
+                tractorLights: document.getElementById('tractorLights').checked,
+                tractorCab: document.getElementById('tractorCab').checked,
+                tractorExtinguisher: document.getElementById('tractorExtinguisher').checked,
+                tractorTires: document.getElementById('tractorTires').checked,
+                tractorAirLeaks: document.getElementById('tractorAirLeaks').checked,
+                tractorNotes: document.getElementById('tractorNotes').value,
+                
+                // Trailer data
+                trailerNumber: document.getElementById('trailerNumber').value,
+                trailerDeckCondition: document.getElementById('trailerDeckCondition').value,
+                trailerTires: document.getElementById('trailerTires').checked,
+                trailerElectrical: document.getElementById('trailerElectrical').checked,
+                trailerClean: document.getElementById('trailerClean').checked,
+                trailerDebris: document.getElementById('trailerDebris').checked,
+                trailerNotes: document.getElementById('trailerNotes').value,
+                
+                // Moffett data
+                moffettNumber: document.getElementById('moffettNumber').value,
+                moffettCondition: document.getElementById('moffettCondition').value,
+                moffettTires: document.getElementById('moffettTires').checked,
+                moffettElectrical: document.getElementById('moffettElectrical').checked,
+                moffettHydraulic: document.getElementById('moffettHydraulic').checked,
+                moffettSeatbelts: document.getElementById('moffettSeatbelts').checked,
+                moffettNotes: document.getElementById('moffettNotes').value,
+                
+                // Mark if there are issues
+                tractorIssues: document.getElementById('tractorDamage').value !== 'none' || 
+                              document.getElementById('tractorAirLeaks').checked ||
+                              !document.getElementById('tractorLights').checked ||
+                              !document.getElementById('tractorTires').checked,
+                              
+                trailerIssues: !document.getElementById('trailerTires').checked ||
+                              !document.getElementById('trailerElectrical').checked ||
+                              document.getElementById('trailerDebris').checked,
+                              
+                moffettIssues: !document.getElementById('moffettTires').checked ||
+                              !document.getElementById('moffettElectrical').checked ||
+                              document.getElementById('moffettHydraulic').checked ||
+                              !document.getElementById('moffettSeatbelts').checked
+            };
+            
+            try {
+                // Send to server
+                const response = await fetch('/api/checkins', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (response.ok) {
+                    showToast('Success', `Check-in completed for ${currentCheckinDriver.name}`, 'success');
+                    closeCheckinModal();
+                    
+                    // Refresh dashboard to show updated equipment issues
+                    setTimeout(() => {
+                        loadNotifications();
+                    }, 1000);
+                } else {
+                    throw new Error('Failed to submit check-in');
+                }
+            } catch (error) {
+                console.error('Error submitting check-in:', error);
+                showToast('Error', 'Failed to submit check-in. Please try again.', 'error');
+            }
         }
         
         function animateKPIs() {
@@ -1256,10 +1399,481 @@
             document.body.appendChild(toast);
             
             setTimeout(() => {
-                toast.style.animation = 'slideUp 0.3s ease reverse';
+                toast.style.animation = 'toastSlideUp 0.3s ease reverse';
                 setTimeout(() => toast.remove(), 300);
             }, duration);
         }
     </script>
 </body>
 </html>
+                    </div>
+                    
+                    <!-- Tractor Section -->
+                    <div class="form-section">
+                        <div class="form-section-header">
+                            <div class="form-section-icon">🚛</div>
+                            <div class="form-section-title">Tractor Inspection</div>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Tractor Number</label>
+                                <input type="text" class="form-input" id="tractorNumber" placeholder="Enter tractor number">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">General Condition</label>
+                                <select class="form-select" id="tractorCondition">
+                                    <option value="excellent">Excellent</option>
+                                    <option value="good" selected>Good</option>
+                                    <option value="fair">Fair</option>
+                                    <option value="poor">Poor</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Damage Present</label>
+                                <select class="form-select" id="tractorDamage">
+                                    <option value="none" selected>None</option>
+                                    <option value="minor">Minor</option>
+                                    <option value="major">Major</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-grid" style="margin-top: 1rem;">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="tractorLights" checked>
+                                <label class="checkbox-label" for="tractorLights">Lights Working</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="tractorCab" checked>
+                                <label class="checkbox-label" for="tractorCab">Cab Clean</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="tractorExtinguisher" checked>
+                                <label class="checkbox-label" for="tractorExtinguisher">Fire Extinguisher Present</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="tractorTires" checked>
+                                <label class="checkbox-label" for="tractorTires">Tires Good Condition</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="tractorAirLeaks">
+                                <label class="checkbox-label" for="tractorAirLeaks">Air Leaks Detected</label>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-top: 1rem;">
+                            <label class="form-label">Notes</label>
+                            <textarea class="form-textarea" id="tractorNotes" placeholder="Additional notes about tractor condition..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- Trailer Section -->
+                    <div class="form-section">
+                        <div class="form-section-header">
+                            <div class="form-section-icon" style="background: rgba(245, 158, 11, 0.1);">🚚</div>
+                            <div class="form-section-title">Trailer Inspection</div>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Trailer Number</label>
+                                <input type="text" class="form-input" id="trailerNumber" placeholder="Enter trailer number">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Deck Condition</label>
+                                <select class="form-select" id="trailerDeckCondition">
+                                    <option value="excellent">Excellent</option>
+                                    <option value="good" selected>Good</option>
+                                    <option value="fair">Fair</option>
+                                    <option value="poor">Poor</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-grid" style="margin-top: 1rem;">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="trailerTires" checked>
+                                <label class="checkbox-label" for="trailerTires">Tires Good Condition</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="trailerElectrical" checked>
+                                <label class="checkbox-label" for="trailerElectrical">Electrical Working</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="trailerClean" checked>
+                                <label class="checkbox-label" for="trailerClean">Deck Clean (No Debris)</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="trailerDebris">
+                                <label class="checkbox-label" for="trailerDebris">Needs Sweeping</label>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-top: 1rem;">
+                            <label class="form-label">Notes</label>
+                            <textarea class="form-textarea" id="trailerNotes" placeholder="Additional notes about trailer condition..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- Moffett Section -->
+                    <div class="form-section">
+                        <div class="form-section-header">
+                            <div class="form-section-icon" style="background: rgba(16, 185, 129, 0.1);">🏗️</div>
+                            <div class="form-section-title">Moffett Inspection</div>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Moffett Number</label>
+                                <input type="text" class="form-input" id="moffettNumber" placeholder="Enter moffett number">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">General Condition</label>
+                                <select class="form-select" id="moffettCondition">
+                                    <option value="excellent">Excellent</option>
+                                    <option value="good" selected>Good</option>
+                                    <option value="fair">Fair</option>
+                                    <option value="poor">Poor</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-grid" style="margin-top: 1rem;">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="moffettTires" checked>
+                                <label class="checkbox-label" for="moffettTires">Tires Good Condition</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="moffettElectrical" checked>
+                                <label class="checkbox-label" for="moffettElectrical">Electrical Working</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="moffettHydraulic">
+                                <label class="checkbox-label" for="moffettHydraulic">Hydraulic Leaks Present</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="moffettSeatbelts" checked>
+                                <label class="checkbox-label" for="moffettSeatbelts">Seatbelts Functional</label>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-top: 1rem;">
+                            <label class="form-label">Notes</label>
+                            <textarea class="form-textarea" id="moffettNotes" placeholder="Additional notes about moffett condition..."></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="modal-footer">
+                <div class="form-info">
+                    <span>⚠️</span> All fields are required for complete inspection
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-secondary" onclick="closeCheckinModal()">Cancel</button>
+                    <button class="btn btn-success" onclick="submitCheckin()">
+                        <span>✅</span>
+                        <span>Complete Check-In</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Global Variables
+        let notifications = [];
+        let driverStatuses = new Map();
+        let currentFilter = 'all';
+        let refreshInterval;
+        let equipmentIssues = {
+            tractor: [],
+            trailer: [],
+            moffett: []
+        };
+        let currentCheckinDriver = null;
+        
+        // Initialize Dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadNotifications();
+            startClock();
+            startAutoRefresh();
+            
+            // Animate KPIs on load
+            setTimeout(() => {
+                animateKPIs();
+                updateEquipmentMetrics();
+            }, 500);
+        });
+        
+        function refreshDashboard() {
+            showToast('Refreshing', 'Updating dashboard data...', 'info');
+            loadNotifications();
+        }
+        
+        // Load Notifications
+        async function loadNotifications() {
+            try {
+                console.log('Loading notifications and admin data...');
+                
+                // Use Promise.allSettled for better error handling
+                const [notifResult, usersResult, checkInsResult] = await Promise.allSettled([
+                    fetch('/api/notifications'),
+                    fetch('/api/users'),
+                    fetch('/api/checkins')
+                ]);
+                
+                let notificationsData = [];
+                if (notifResult.status === 'fulfilled' && notifResult.value.ok) {
+                    const data = await notifResult.value.json();
+                    notificationsData = Array.isArray(data) ? data : (data.data || []);
+                }
+                
+                let adminUsers = [];
+                if (usersResult.status === 'fulfilled' && usersResult.value.ok) {
+                    const userData = await usersResult.value.json();
+                    adminUsers = Array.isArray(userData) ? userData : (userData.data || []);
+                }
+                
+                let checkInsData = [];
+                if (checkInsResult.status === 'fulfilled' && checkInsResult.value.ok) {
+                    const data = await checkInsResult.value.json();
+                    checkInsData = Array.isArray(data) ? data : (data.data || []);
+                    processEquipmentIssues(checkInsData);
+                }
+                
+                const activeDriversFromAdmin = adminUsers.filter(user => 
+                    user.role === 'driver' && user.active !== false
+                );
+                
+                driverStatuses.clear();
+                
+                notificationsData.forEach(n => {
+                    if (n.driver && n.status) {
+                        const notificationTime = new Date(n.timestamp).getTime();
+                        const driverName = n.driver;
+                        
+                        if (!driverStatuses.has(driverName) || 
+                            notificationTime > new Date(driverStatuses.get(driverName).timestamp).getTime()) {
+                            driverStatuses.set(driverName, n);
+                        }
+                    }
+                });
+                
+                const consolidatedNotifications = Array.from(driverStatuses.values());
+                
+                const notificationDriverNames = consolidatedNotifications.map(n => n.driver);
+                const pendingCheckInDrivers = activeDriversFromAdmin
+                    .filter(driver => !notificationDriverNames.includes(driver.name))
+                    .map(driver => ({
+                        _id: `admin-${driver._id}`,
+                        driver: driver.name,
+                        status: 'pending-checkin',
+                        timestamp: new Date().toISOString(),
+                        warehouse: '5856 Tampa FDC',
+                        location: 'Location unavailable'
+                    }));
+                
+                const allDriverData = [...consolidatedNotifications, ...pendingCheckInDrivers];
+                notifications = allDriverData;
+                
+                updateDisplay(allDriverData);
+                updateMetrics(allDriverData, activeDriversFromAdmin);
+                
+                document.getElementById('lastUpdate').innerHTML = `Last updated: ${new Date().toLocaleTimeString()}`;
+                
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('lastUpdate').innerHTML = `<span style="color: var(--danger);">Failed to load data</span>`;
+                showToast('Connection Error', 'Unable to load fleet data', 'error');
+            }
+        }
+        
+        // Process equipment issues from check-in data
+        function processEquipmentIssues(checkInsData) {
+            equipmentIssues = {
+                tractor: [],
+                trailer: [],
+                moffett: []
+            };
+            
+            checkInsData.forEach(checkIn => {
+                // Process tractor issues
+                if (checkIn.tractorIssues) {
+                    const issues = [];
+                    if (checkIn.tractorDamage && checkIn.tractorDamage !== 'none') {
+                        issues.push(`${checkIn.tractorDamage} damage`);
+                    }
+                    if (checkIn.tractorAirLeaks) issues.push('Air leaks');
+                    if (!checkIn.tractorLights) issues.push('Lights not working');
+                    if (!checkIn.tractorCab) issues.push('Cab not clean');
+                    if (!checkIn.tractorExtinguisher) issues.push('No fire extinguisher');
+                    if (!checkIn.tractorTires) issues.push('Tire issues');
+                    
+                    if (issues.length > 0 || (checkIn.tractorNotes && checkIn.tractorNotes.trim())) {
+                        equipmentIssues.tractor.push({
+                            id: checkIn._id,
+                            tractorNumber: checkIn.tractorNumber,
+                            issues: issues.join(', '),
+                            notes: checkIn.tractorNotes,
+                            reportedBy: checkIn.driverName,
+                            timestamp: checkIn.timestamp
+                        });
+                    }
+                }
+                
+                // Process trailer issues
+                if (checkIn.trailerIssues) {
+                    const issues = [];
+                    if (!checkIn.trailerTires) issues.push('Tire issues');
+                    if (!checkIn.trailerElectrical) issues.push('Electrical issues');
+                    if (!checkIn.trailerClean || checkIn.trailerDebris) issues.push('Needs cleaning');
+                    
+                    if (issues.length > 0 || (checkIn.trailerNotes && checkIn.trailerNotes.trim())) {
+                        equipmentIssues.trailer.push({
+                            id: checkIn._id,
+                            trailerNumber: checkIn.trailerNumber,
+                            issues: issues.join(', '),
+                            notes: checkIn.trailerNotes,
+                            reportedBy: checkIn.driverName,
+                            timestamp: checkIn.timestamp
+                        });
+                    }
+                }
+                
+                // Process moffett issues
+                if (checkIn.moffettIssues) {
+                    const issues = [];
+                    if (!checkIn.moffettTires) issues.push('Tire issues');
+                    if (!checkIn.moffettElectrical) issues.push('Electrical issues');
+                    if (checkIn.moffettHydraulic) issues.push('Hydraulic leaks');
+                    if (!checkIn.moffettSeatbelts) issues.push('Seatbelt issues');
+                    
+                    if (issues.length > 0 || (checkIn.moffettNotes && checkIn.moffettNotes.trim())) {
+                        equipmentIssues.moffett.push({
+                            id: checkIn._id,
+                            moffettNumber: checkIn.moffettNumber,
+                            issues: issues.join(', '),
+                            notes: checkIn.moffettNotes,
+                            reportedBy: checkIn.driverName,
+                            timestamp: checkIn.timestamp
+                        });
+                    }
+                }
+            });
+            
+            updateEquipmentMetrics();
+        }
+        
+        function updateEquipmentMetrics() {
+            document.getElementById('tractorValue').textContent = equipmentIssues.tractor.length;
+            document.getElementById('tractorSubtext').textContent = `${equipmentIssues.tractor.length === 1 ? 'active issue' : 'active issues'}`;
+            
+            document.getElementById('trailerValue').textContent = equipmentIssues.trailer.length;
+            document.getElementById('trailerSubtext').textContent = `${equipmentIssues.trailer.length === 1 ? 'active issue' : 'active issues'}`;
+            
+            document.getElementById('moffettValue').textContent = equipmentIssues.moffett.length;
+            document.getElementById('moffettSubtext').textContent = `${equipmentIssues.moffett.length === 1 ? 'active issue' : 'active issues'}`;
+        }
+        
+        function reportIssue(equipmentType) {
+            const issues = equipmentIssues[equipmentType];
+            if (issues.length === 0) {
+                showToast('No Issues', `No active ${equipmentType} issues`, 'info');
+            } else {
+                const issueList = issues.map(i => {
+                    let text = `• ${i[equipmentType + 'Number'] || 'Unknown'}: ${i.issues || 'See notes'}`;
+                    if (i.notes) text += ` - ${i.notes}`;
+                    text += ` (${i.reportedBy})`;
+                    return text;
+                }).join('\n');
+                showToast(`${equipmentType.charAt(0).toUpperCase() + equipmentType.slice(1)} Issues`, issueList, 'warning', 10000);
+            }
+        }
+        
+        // Update Metrics
+        function updateMetrics(allDriverData, adminDrivers = []) {
+            const totalRoutedDrivers = allDriverData.length;
+            const enRouteDrivers = allDriverData.filter(n => n.status === 'en-route').length;
+            const arrivedDrivers = allDriverData.filter(n => n.status === 'arrived').length;
+            const pendingCheckInCount = allDriverData.filter(n => n.status === 'pending-checkin').length;
+            
+            document.getElementById('activeDrivers').textContent = totalRoutedDrivers;
+            document.getElementById('enRouteCount').textContent = enRouteDrivers;
+            document.getElementById('arrivedCount').textContent = arrivedDrivers;
+            document.getElementById('notCheckedInCount').textContent = pendingCheckInCount;
+        }
+        
+        // Update Display
+        function updateDisplay(allDriverData) {
+            let filtered = allDriverData;
+            let feedTitle = 'Real-Time Activity Feed';
+            let feedIcon = '📡';
+            
+            if (currentFilter !== 'all') {
+                filtered = allDriverData.filter(n => n.status === currentFilter);
+                feedTitle = `${currentFilter.charAt(0).toUpperCase() + currentFilter.slice(1).replace('-', ' ')} Drivers`;
+            }
+            
+            document.getElementById('activityFeedTitle').textContent = feedTitle;
+            document.getElementById('activityFeedIcon').textContent = feedIcon;
+            document.getElementById('activityCount').textContent = `${filtered.length} active`;
+            
+            const activityList = document.getElementById('activityList');
+            
+            if (filtered.length === 0) {
+                activityList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📭</div>
+                        <p>No active fleet movements</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            activityList.innerHTML = filtered
+                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+                .slice(0, 30)
+                .map(notification => {
+                    const time = new Date(notification.timestamp).toLocaleTimeString();
+                    const timeAgo = getTimeAgo(new Date(notification.timestamp));
+                    
+                    let statusClass = notification.status || 'standby';
+                    let statusDisplay = notification.status || 'standby';
+                    
+                    if (notification.status === 'pending-checkin') {
+                        statusDisplay = 'pending check-in';
+                    }
+                    
+                    // Add check-in button for arrived drivers
+                    let actionButton = '';
+                    if (notification.status === 'arrived') {
+                        actionButton = `
+                            <button class="checkin-btn" onclick="openCheckinModal('${notification.driver}', '${notification.driverId || ''}')">
+                                <span>📋</span>
+                                <span>Check-In</span>
+                            </button>
+                        `;
+                    }
+                    
+                    return `
+                        <div class="activity-item ${statusClass}">
+                            <div class="activity-content">
+                                <div class="activity-info">
+                                    <div class="activity-driver">${notification.driver}</div>
+                                    <div class="activity-details">
+                                        <span class="activity-detail">
+                                            <span>⏱</span>
+                                            <span>${timeAgo}</span>
+                                        </span>
+                                        <span class="activity-detail">
+                                            <span>📍</span>
+                                            <span>${notification.warehouse || '5856 Tampa FDC'}</span>
+                                        </span>
+                                        ${notification.estimatedArrival ? `
+                                            <span class="activity-detail">
+                                                <span>⏳</span>
+                                                <span>ETA: ${notification.estimatedArrival}</span>
+                                            </span>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                                <div class="activity-actions">
+                                    ${actionButton}
+                                    <span class="status-badge status-${statusClass}">
+                                        ${statusDisplay.replace('-', ' ')}
+                                    </span>
+                                </div>
+                            </div>
