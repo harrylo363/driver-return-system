@@ -1,12 +1,20 @@
-// server.js - Complete Fleet Management Backend for Railway + MongoDB Atlas with Simple Notifications
+// server.js - Complete Fleet Management Backend for Railway + MongoDB Atlas with Real Push Notifications
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
+const webpush = require('web-push');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Real push notification setup with your VAPID keys
+webpush.setVapidDetails(
+  'mailto:admin@fleetforce.com',
+  'BN3-pI2_z9rnLgHR2NowqM4yawWFlF-9wP2Gx8QzG9PnV1kdw0IkK3JWptNO8fn23bkb0O7Uo1d0cdlgVx-I4Ak',
+  'jiLvhykOZUbG7b5QmxV5WGhodqQN5db3fxP8dRKdJd0'
+);
 
 // Middleware
 app.use(cors({
@@ -54,10 +62,16 @@ const userSchema = new mongoose.Schema({
     vehicleId: { type: String },
     phoneNumber: { type: String },
     permissions: [String],
-    // Simple notification settings
+    // Push notification settings
     notifications: {
         enabled: { type: Boolean, default: false },
-        browserNotifications: { type: Boolean, default: false }
+        subscription: {
+            endpoint: String,
+            keys: {
+                p256dh: String,
+                auth: String
+            }
+        }
     },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
@@ -136,20 +150,89 @@ const User = mongoose.model('User', userSchema);
 const Notification = mongoose.model('Notification', notificationSchema);
 const Inspection = mongoose.model('Inspection', inspectionSchema);
 
-// Simple notification function (console logging for now)
-async function logDriverUpdate(title, message, driverName) {
+// Real push notification function
+async function sendNotificationToUsers(title, message, driverName) {
     try {
+        console.log(`📢 Sending notification: ${title}`);
+        
+        // Find users who have notifications enabled
+        const notificationUsers = await User.find({
+            'notifications.enabled': true,
+            role: { $in: ['dispatcher', 'admin'] },
+            active: true
+        });
+        
+        console.log(`Found ${notificationUsers.length} users with notifications enabled`);
+        
+        if (notificationUsers.length === 0) {
+            console.log('📝 No users have notifications enabled - logging to console');
+            console.log(`📢 DRIVER UPDATE: ${title}`);
+            console.log(`📝 Message: ${message}`);
+            console.log(`👤 Driver: ${driverName}`);
+            console.log(`⏰ Time: ${new Date().toLocaleString()}`);
+            return;
+        }
+        
+        // Send to each user with notifications enabled
+        let sentCount = 0;
+        for (const user of notificationUsers) {
+            if (user.notifications.subscription && user.notifications.subscription.endpoint) {
+                try {
+                    const payload = JSON.stringify({
+                        title: title,
+                        body: message,
+                        icon: 'https://img.icons8.com/color/192/truck.png',
+                        badge: 'https://img.icons8.com/color/72/truck.png',
+                        data: {
+                            driver: driverName,
+                            timestamp: new Date().toISOString(),
+                            url: '/dashboard.html'
+                        },
+                        actions: [
+                            {
+                                action: 'view',
+                                title: 'View Dashboard'
+                            }
+                        ]
+                    });
+                    
+                    await webpush.sendNotification(user.notifications.subscription, payload);
+                    console.log(`✅ Push notification sent to ${user.name}`);
+                    sentCount++;
+                } catch (error) {
+                    console.error(`❌ Failed to send push to ${user.name}:`, error.message);
+                    
+                    // If subscription is invalid, disable notifications for this user
+                    if (error.statusCode === 410 || error.statusCode === 404) {
+                        await User.findByIdAndUpdate(user._id, {
+                            'notifications.enabled': false,
+                            'notifications.subscription': null
+                        });
+                        console.log(`🔕 Disabled invalid subscription for ${user.name}`);
+                    }
+                }
+            } else {
+                console.log(`⚠️ ${user.name} has notifications enabled but no subscription`);
+            }
+        }
+        
+        if (sentCount === 0) {
+            // Fallback to console logging
+            console.log('📝 No valid push subscriptions - logging to console');
+            console.log(`📢 DRIVER UPDATE: ${title}`);
+            console.log(`📝 Message: ${message}`);
+            console.log(`👤 Driver: ${driverName}`);
+            console.log(`⏰ Time: ${new Date().toLocaleString()}`);
+        } else {
+            console.log(`📨 Successfully sent ${sentCount} push notifications`);
+        }
+        
+    } catch (error) {
+        console.error('Notification error:', error);
+        // Fallback to console logging
         console.log(`📢 DRIVER UPDATE: ${title}`);
         console.log(`📝 Message: ${message}`);
         console.log(`👤 Driver: ${driverName}`);
-        console.log(`⏰ Time: ${new Date().toLocaleString()}`);
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        
-        // In the future, we can add real push notifications here
-        // For now, this ensures your app doesn't crash
-        
-    } catch (error) {
-        console.error('Notification logging error:', error);
     }
 }
 
@@ -187,22 +270,26 @@ app.get('/api/health', (req, res) => {
         memory: process.memoryUsage(),
         environment: process.env.NODE_ENV || 'development',
         mongoConnection: mongoose.connection.readyState,
-        notifications: 'basic_logging',
+        pushNotifications: 'enabled',
         timestamp: new Date().toISOString()
     });
 });
 
-// NOTIFICATION ENDPOINTS
+// PUSH NOTIFICATION ENDPOINTS
 
-// Enable notifications for user
-app.post('/api/notifications/enable', handleAsync(async (req, res) => {
-    const { userId } = req.body;
+// Subscribe user to push notifications
+app.post('/api/notifications/subscribe', handleAsync(async (req, res) => {
+    const { userId, subscription } = req.body;
+    
+    if (!userId || !subscription) {
+        return sendError(res, new Error('User ID and subscription are required'), 400);
+    }
     
     const user = await User.findByIdAndUpdate(
         userId,
         {
             'notifications.enabled': true,
-            'notifications.browserNotifications': true,
+            'notifications.subscription': subscription,
             updatedAt: new Date()
         },
         { new: true }
@@ -212,20 +299,27 @@ app.post('/api/notifications/enable', handleAsync(async (req, res) => {
         return sendError(res, new Error('User not found'), 404);
     }
     
-    console.log(`✅ ${user.name} enabled notifications`);
-    sendResponse(res, user, 'Notifications enabled');
+    console.log(`✅ ${user.name} subscribed to push notifications`);
+    sendResponse(res, user, 'Push notifications enabled successfully');
 }));
 
 // Send test notification
 app.post('/api/notifications/test', handleAsync(async (req, res) => {
-    await logDriverUpdate(
-        'FleetForce Test',
-        'This is a test notification from your admin panel!',
+    await sendNotificationToUsers(
+        'FleetForce Test Notification',
+        'This is a test notification from your admin panel! Push notifications are working correctly.',
         'Test Driver'
     );
     
-    sendResponse(res, {}, 'Test notification logged to console');
+    sendResponse(res, {}, 'Test notification sent');
 }));
+
+// Get VAPID public key for frontend
+app.get('/api/notifications/vapid-key', (req, res) => {
+    sendResponse(res, {
+        publicKey: 'BN3-pI2_z9rnLgHR2NowqM4yawWFlF-9wP2Gx8QzG9PnV1kdw0IkK3JWptNO8fn23bkb0O7Uo1d0cdlgVx-I4Ak'
+    });
+});
 
 // USER MANAGEMENT ENDPOINTS
 
@@ -286,8 +380,7 @@ app.post('/api/users', handleAsync(async (req, res) => {
         active: true,
         createdAt: new Date(),
         notifications: {
-            enabled: false,
-            browserNotifications: false
+            enabled: false
         }
     };
     
@@ -332,8 +425,7 @@ app.post('/api/users/bulk', handleAsync(async (req, res) => {
                 active: true,
                 createdAt: new Date(),
                 notifications: {
-                    enabled: false,
-                    browserNotifications: false
+                    enabled: false
                 }
             };
             
@@ -403,7 +495,7 @@ app.get('/api/notifications', handleAsync(async (req, res) => {
     sendResponse(res, notifications, `Found ${notifications.length} notifications`);
 }));
 
-// Create notification WITH LOGGING
+// Create notification with REAL PUSH NOTIFICATIONS
 app.post('/api/notifications', handleAsync(async (req, res) => {
     const notificationData = {
         ...req.body,
@@ -425,14 +517,14 @@ app.post('/api/notifications', handleAsync(async (req, res) => {
     const notification = new Notification(notificationData);
     await notification.save();
     
-    // Log the driver update to console
-    await logDriverUpdate(
+    // Send REAL push notification to subscribed users
+    await sendNotificationToUsers(
         `Driver Update: ${notificationData.driver}`,
         `Status: ${notificationData.status} - ${notificationData.message}`,
         notificationData.driver
     );
     
-    sendResponse(res, notification, 'Notification created successfully', 201);
+    sendResponse(res, notification, 'Notification created and push notifications sent', 201);
 }));
 
 // Update notification with check-in data
@@ -470,10 +562,10 @@ app.put('/api/notifications/:id/checkin', handleAsync(async (req, res) => {
     
     await inspection.save();
     
-    // Log the check-in
-    await logDriverUpdate(
+    // Send push notification for check-in
+    await sendNotificationToUsers(
         `Driver Check-in: ${notification.driver}`,
-        `Driver has checked in at ${checkInData.checkInTime || 'warehouse'}`,
+        `Driver has completed check-in at ${new Date(checkInData.checkInTime).toLocaleTimeString()}`,
         notification.driver
     );
     
@@ -574,8 +666,8 @@ app.listen(PORT, () => {
     console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
     console.log(`🌐 API Base URL: http://localhost:${PORT}`);
     console.log(`📁 Static files served from: ${path.join(__dirname, 'public')}`);
-    console.log(`📝 Driver updates will be logged to console`);
-    console.log(`🔔 Push notifications: Available for future upgrade`);
+    console.log(`🔔 Real push notifications enabled with VAPID keys`);
+    console.log(`📱 Users can subscribe to notifications via admin panel`);
 });
 
 // Graceful shutdown
