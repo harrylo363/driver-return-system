@@ -2060,7 +2060,7 @@
             try {
                 // Check browser support
                 if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-                    alert('Push notifications are not supported in this browser');
+                    alert('❌ Push notifications are not supported in this browser.\n\nSupported browsers:\n- Chrome 42+\n- Firefox 44+\n- Safari 16+\n- Edge 17+');
                     console.error('Browser does not support push notifications');
                     return;
                 }
@@ -2072,21 +2072,43 @@
                 enableBtn.disabled = true;
                 enableBtn.innerHTML = '<span class="loading-spinner"></span><span>Setting up...</span>';
                 
-                // Request notification permission FIRST
+                // Request notification permission FIRST - with explicit user gesture
                 console.log('📝 Requesting notification permission...');
-                const permission = await Notification.requestPermission();
+                console.log('Current permission state:', Notification.permission);
+                
+                let permission;
+                
+                // Try the newer API first
+                if (Notification.requestPermission) {
+                    permission = await Notification.requestPermission();
+                } else {
+                    // Fallback for older browsers
+                    permission = await new Promise((resolve) => {
+                        Notification.requestPermission(resolve);
+                    });
+                }
+                
                 console.log('📝 Permission result:', permission);
                 
+                if (permission === 'denied') {
+                    throw new Error('❌ Notification permission was denied. Please enable notifications in your browser settings:\n\n1. Click the 🔒 lock icon in the address bar\n2. Change "Notifications" to "Allow"\n3. Refresh this page and try again');
+                }
+                
+                if (permission === 'default') {
+                    throw new Error('❌ Notification permission dialog was dismissed. Please try again and click "Allow" when prompted.');
+                }
+                
                 if (permission !== 'granted') {
-                    throw new Error('Notification permission denied');
+                    throw new Error('❌ Notification permission not granted. Current state: ' + permission);
                 }
                 
                 console.log('✅ Notification permission granted!');
-                alert('Great! Notification permission granted. Now setting up push notifications...');
+                showToast('Permission Granted!', 'Great! Now setting up push notifications...', 'success');
                 
                 // Register service worker
                 console.log('📝 Registering service worker...');
                 const registration = await navigator.serviceWorker.register('/sw.js');
+                await navigator.serviceWorker.ready; // Wait for it to be ready
                 console.log('✅ Service Worker registered:', registration);
                 
                 // Subscribe to push notifications
@@ -2119,18 +2141,29 @@
                 });
                 
                 if (!response.ok) {
-                    throw new Error('Failed to save subscription to server');
+                    const errorText = await response.text();
+                    console.warn('Server subscription failed:', errorText);
+                    // Don't throw error here - local notifications can still work
+                    showToast('Partial Setup', 'Push notifications enabled locally. Server sync may have failed.', 'warning');
+                } else {
+                    console.log('✅ Subscription saved to server!');
+                    showToast('Setup Complete!', 'Push notifications are now fully enabled!', 'success');
                 }
-                
-                console.log('✅ Subscription saved to server!');
                 
                 // Update UI
                 updateNotificationStatus();
-                showToast('Notifications Enabled!', 'You will now receive push notifications when drivers update their status', 'success');
                 
             } catch (error) {
                 console.error('❌ Failed to enable push notifications:', error);
-                alert('Error: ' + error.message);
+                
+                let errorMessage = error.message;
+                if (errorMessage.includes('not supported')) {
+                    errorMessage = 'Push notifications are not supported in this browser. Please use Chrome, Firefox, Safari, or Edge.';
+                } else if (errorMessage.includes('denied') || errorMessage.includes('blocked')) {
+                    errorMessage = 'Notifications are blocked. Please:\n\n1. Click the 🔒 lock icon in your address bar\n2. Set "Notifications" to "Allow"\n3. Refresh this page and try again';
+                }
+                
+                alert('❌ Push Notification Setup Failed\n\n' + errorMessage);
                 
                 // Reset button
                 const enableBtn = document.getElementById('enableBtn');
@@ -2178,11 +2211,32 @@
             console.log('🔕 Disable notifications button clicked!');
             
             try {
-                const registration = await navigator.serviceWorker.ready;
-                const subscription = await registration.pushManager.getSubscription();
+                const disableBtn = document.getElementById('disableBtn');
+                disableBtn.disabled = true;
+                disableBtn.innerHTML = '<span class="loading-spinner"></span><span>Disabling...</span>';
                 
-                if (subscription) {
-                    await subscription.unsubscribe();
+                // Unsubscribe from push notifications
+                if ('serviceWorker' in navigator) {
+                    const registration = await navigator.serviceWorker.ready;
+                    const subscription = await registration.pushManager.getSubscription();
+                    
+                    if (subscription) {
+                        await subscription.unsubscribe();
+                        console.log('✅ Push subscription cancelled');
+                    }
+                }
+                
+                // Also try to remove from server
+                try {
+                    const currentUserId = getCurrentUserId();
+                    await fetch('/api/notifications/unsubscribe', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userId: currentUserId })
+                    });
+                } catch (serverError) {
+                    // Server removal is optional
+                    console.warn('Could not remove from server:', serverError);
                 }
                 
                 updateNotificationStatus();
@@ -2190,7 +2244,12 @@
                 
             } catch (error) {
                 console.error('❌ Failed to disable notifications:', error);
-                showToast('Error', 'Failed to disable notifications', 'error');
+                showToast('Error', 'Failed to disable notifications: ' + error.message, 'error');
+            } finally {
+                // Reset button
+                const disableBtn = document.getElementById('disableBtn');
+                disableBtn.disabled = false;
+                disableBtn.innerHTML = '<span class="btn-icon">🔕</span><span>Disable Notifications</span>';
             }
         }
         
@@ -2203,32 +2262,49 @@
             
             if (!statusEl) return;
             
+            console.log('🔍 Checking notification status...');
+            console.log('Notification permission:', Notification.permission);
+            console.log('Notification supported:', 'Notification' in window);
+            
             if (!('Notification' in window)) {
+                console.log('❌ Notifications not supported');
                 statusEl.textContent = 'Not Supported';
                 statusEl.className = 'status-badge status-inactive';
                 enableBtn.style.display = 'none';
+                testBtn.style.display = 'none';
+                disableBtn.style.display = 'none';
                 return;
             }
             
             switch (Notification.permission) {
                 case 'granted':
+                    console.log('✅ Notifications are enabled');
                     statusEl.textContent = 'Enabled';
                     statusEl.className = 'status-badge status-active';
                     enableBtn.style.display = 'none';
+                    testBtn.style.display = 'block';
                     testBtn.disabled = false;
                     disableBtn.style.display = 'block';
+                    disableBtn.disabled = false;
                     break;
                 case 'denied':
+                    console.log('❌ Notifications are blocked');
                     statusEl.textContent = 'Blocked';
                     statusEl.className = 'status-badge status-inactive';
                     enableBtn.innerHTML = '<span class="btn-icon">🔄</span><span>Unblock in Browser Settings</span>';
                     enableBtn.disabled = true;
+                    enableBtn.style.display = 'block';
+                    testBtn.style.display = 'none';
+                    disableBtn.style.display = 'none';
                     break;
                 default:
+                    console.log('⚠️ Notifications not enabled yet');
                     statusEl.textContent = 'Not Enabled';
                     statusEl.className = 'status-badge status-inactive';
                     enableBtn.style.display = 'block';
-                    testBtn.disabled = true;
+                    enableBtn.disabled = false;
+                    enableBtn.innerHTML = '<span class="btn-icon">🔔</span><span>Enable Push Notifications</span>';
+                    testBtn.style.display = 'none';
                     disableBtn.style.display = 'none';
             }
         }
@@ -3278,18 +3354,8 @@ Tips:
                 
                 // For Railway deployment - also try to notify backend of data changes
                 try {
-                    // This would be used to trigger webhooks or real-time updates if configured
-                    fetch('/api/sync/notify', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            action: 'user_data_updated',
-                            count: cleanUsers.length,
-                            timestamp: new Date().toISOString()
-                        })
-                    }).catch(() => {
-                        // Silent fail - this is optional
-                    });
+                    // Optional: notify backend of data changes (removed the problematic /api/sync/notify)
+                    console.log('Data sync completed successfully');
                 } catch (e) {
                     // Silent fail - this is optional
                 }
