@@ -2021,6 +2021,7 @@
         let allUsers = [];
         let uploadedData = [];
         let currentEditId = null;
+        let notificationsManuallyDisabled = false; // Track if user manually disabled
         
         // Initialize - Enhanced for MongoDB Atlas & Railway
         document.addEventListener('DOMContentLoaded', function() {
@@ -2090,6 +2091,9 @@
                 }
                 
                 console.log('✅ Permission granted!');
+                
+                // Clear manual disable flag
+                notificationsManuallyDisabled = false;
                 
                 // Update UI immediately
                 statusEl.textContent = 'Enabled';
@@ -2176,6 +2180,9 @@
             const disableBtn = document.getElementById('disableBtn');
             const statusEl = document.getElementById('notificationStatus');
             
+            // Set manual disable flag
+            notificationsManuallyDisabled = true;
+            
             // Immediately update UI - don't wait for anything
             console.log('📝 Updating UI immediately...');
             
@@ -2229,11 +2236,25 @@
             
             console.log('Current permission:', Notification.permission);
             console.log('Notification support:', 'Notification' in window);
+            console.log('Manually disabled:', notificationsManuallyDisabled);
             
             if (!('Notification' in window)) {
                 statusEl.textContent = 'Not Supported';
                 statusEl.className = 'status-badge status-inactive';
                 enableBtn.style.display = 'none';
+                testBtn.style.display = 'none';
+                disableBtn.style.display = 'none';
+                return;
+            }
+            
+            // If user manually disabled, show as disabled regardless of browser permission
+            if (notificationsManuallyDisabled) {
+                console.log('⚠️ Notifications manually disabled by user');
+                statusEl.textContent = 'Not Enabled';
+                statusEl.className = 'status-badge status-inactive';
+                enableBtn.style.display = 'block';
+                enableBtn.disabled = false;
+                enableBtn.innerHTML = '<span class="btn-icon">🔔</span><span>Enable Push Notifications</span>';
                 testBtn.style.display = 'none';
                 disableBtn.style.display = 'none';
                 return;
