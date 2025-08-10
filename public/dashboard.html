@@ -359,28 +359,6 @@
             background: var(--accent);
         }
         
-        /* Equipment Buttons */
-        .equipment-btn {
-            transition: all 0.2s ease;
-            border: 2px solid var(--border);
-        }
-        
-        .equipment-btn:hover {
-            border-color: var(--accent);
-            transform: translateY(-2px);
-        }
-        
-        .equipment-btn.active {
-            background: var(--accent);
-            color: white;
-            border-color: var(--accent);
-        }
-        
-        .equipment-btn.active:hover {
-            background: var(--accent-hover);
-            border-color: var(--accent-hover);
-        }
-        
         /* Activity Feed */
         .dashboard-grid {
             display: grid;
@@ -497,78 +475,6 @@
             gap: 0.25rem;
         }
         
-        .location-info {
-            display: flex;
-            flex-direction: column;
-            gap: 0.25rem;
-            margin-top: 0.5rem;
-            padding: 0.75rem;
-            background: rgba(59, 130, 246, 0.05);
-            border: 1px solid rgba(59, 130, 246, 0.1);
-            border-radius: 8px;
-            font-size: 0.75rem;
-        }
-        
-        .coordinates {
-            color: var(--accent);
-            font-family: 'Courier New', monospace;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .address {
-            color: var(--text-secondary);
-            font-style: italic;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .location-link {
-            color: inherit;
-            text-decoration: none;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            flex: 1;
-        }
-        
-        .location-link:hover {
-            color: var(--text-primary);
-            text-decoration: underline;
-        }
-        
-        .coordinates .location-link:hover {
-            color: #60A5FA;
-        }
-        
-        .map-btn {
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            border-radius: 4px;
-            color: var(--accent);
-            cursor: pointer;
-            padding: 0.25rem 0.5rem;
-            font-size: 0.75rem;
-            transition: all 0.2s ease;
-            min-width: 28px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .map-btn:hover {
-            background: rgba(59, 130, 246, 0.2);
-            border-color: var(--accent);
-            transform: scale(1.05);
-        }
-        
-        .map-btn:active {
-            transform: scale(0.95);
-        }
-        
         .status-badge {
             padding: 0.375rem 0.875rem;
             border-radius: 100px;
@@ -594,12 +500,6 @@
             background: rgba(100, 116, 139, 0.1);
             color: var(--text-muted);
             border: 1px solid rgba(100, 116, 139, 0.3);
-        }
-        
-        .status-warning {
-            background: rgba(245, 158, 11, 0.1);
-            color: var(--warning);
-            border: 1px solid rgba(245, 158, 11, 0.3);
         }
         
         /* Analytics Panel */
@@ -660,59 +560,6 @@
             display: flex;
             align-items: center;
             gap: 0.25rem;
-        }
-        
-        .metric-change.positive {
-            color: var(--success);
-        }
-        
-        .metric-change.negative {
-            color: var(--danger);
-        }
-        
-        /* Progress Bars */
-        .progress-container {
-            margin-top: 1rem;
-        }
-        
-        .progress-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
-            font-size: 0.875rem;
-        }
-        
-        .progress-bar {
-            height: 8px;
-            background: var(--bg-dark);
-            border-radius: 100px;
-            overflow: hidden;
-            position: relative;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: var(--gradient-primary);
-            border-radius: 100px;
-            transition: width 0.5s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .progress-fill::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            animation: shimmer 2s infinite;
-        }
-        
-        @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
         }
         
         /* Empty State */
@@ -902,11 +749,10 @@
         <!-- Control Panel -->
         <div class="control-panel">
             <div class="filter-group">
-                <button class="filter-btn active" onclick="filterStatus('all', this)">Active Operations</button>
+                <button class="filter-btn active" onclick="filterStatus('all', this)">All Activity</button>
                 <button class="filter-btn" onclick="filterStatus('en-route', this)">En Route</button>
                 <button class="filter-btn" onclick="filterStatus('arrived', this)">Arrived</button>
                 <button class="filter-btn" onclick="filterStatus('pending-checkin', this)">Pending Check-In</button>
-                <button class="filter-btn" onclick="filterStatus('completed', this)" style="border-left: 2px solid var(--success);">✓ Completed</button>
             </div>
             <button class="btn btn-secondary" onclick="exportData()">
                 <span>📊</span>
@@ -948,36 +794,36 @@
                 <div class="analytics-panel" style="margin-bottom: 1.5rem;">
                     <h3 class="analytics-title">
                         <span>🔧</span>
-                        <span>Equipment Repair Status</span>
+                        <span>Equipment Status</span>
                     </h3>
                     
                     <!-- Tractor Card -->
-                    <div class="metric-card" style="margin-bottom: 1rem;">
+                    <div class="metric-card">
                         <div class="metric-header">
                             <span class="metric-label">🚛 Tractor</span>
-                            <button class="btn btn-primary btn-sm" onclick="reportNewIssue('tractor')" style="padding: 0.5rem 1rem; font-size: 0.75rem;">
+                            <button class="btn btn-primary btn-sm" onclick="reportIssue('tractor')">
                                 <span>➕</span>
-                                <span>Report Issue</span>
+                                <span>Report</span>
                             </button>
                         </div>
                         <div style="display: flex; align-items: baseline; gap: 1rem; margin-top: 1rem;">
-                            <div class="metric-value" id="tractorValue" style="font-size: 2.5rem; margin-bottom: 0;">0</div>
-                            <div class="metric-change" style="color: var(--text-muted); font-size: 0.875rem;" id="tractorSubtext">active issues</div>
+                            <div class="metric-value" id="tractorValue">0</div>
+                            <div class="metric-change" id="tractorSubtext">active issues</div>
                         </div>
                     </div>
                     
                     <!-- Trailer Card -->
-                    <div class="metric-card" style="margin-bottom: 1rem;">
+                    <div class="metric-card">
                         <div class="metric-header">
                             <span class="metric-label">🚚 Trailer</span>
-                            <button class="btn btn-primary btn-sm" onclick="reportNewIssue('trailer')" style="padding: 0.5rem 1rem; font-size: 0.75rem;">
+                            <button class="btn btn-primary btn-sm" onclick="reportIssue('trailer')">
                                 <span>➕</span>
-                                <span>Report Issue</span>
+                                <span>Report</span>
                             </button>
                         </div>
                         <div style="display: flex; align-items: baseline; gap: 1rem; margin-top: 1rem;">
-                            <div class="metric-value" id="trailerValue" style="font-size: 2.5rem; margin-bottom: 0;">0</div>
-                            <div class="metric-change" style="color: var(--text-muted); font-size: 0.875rem;" id="trailerSubtext">active issues</div>
+                            <div class="metric-value" id="trailerValue">0</div>
+                            <div class="metric-change" id="trailerSubtext">active issues</div>
                         </div>
                     </div>
                     
@@ -985,14 +831,14 @@
                     <div class="metric-card">
                         <div class="metric-header">
                             <span class="metric-label">🏗️ Moffett</span>
-                            <button class="btn btn-primary btn-sm" onclick="reportNewIssue('moffett')" style="padding: 0.5rem 1rem; font-size: 0.75rem;">
+                            <button class="btn btn-primary btn-sm" onclick="reportIssue('moffett')">
                                 <span>➕</span>
-                                <span>Report Issue</span>
+                                <span>Report</span>
                             </button>
                         </div>
                         <div style="display: flex; align-items: baseline; gap: 1rem; margin-top: 1rem;">
-                            <div class="metric-value" id="moffettValue" style="font-size: 2.5rem; margin-bottom: 0;">0</div>
-                            <div class="metric-change" style="color: var(--text-muted); font-size: 0.875rem;" id="moffettSubtext">active issues</div>
+                            <div class="metric-value" id="moffettValue">0</div>
+                            <div class="metric-change" id="moffettSubtext">active issues</div>
                         </div>
                     </div>
                 </div>
@@ -1004,17 +850,17 @@
                     </h3>
                     
                     <div style="display: grid; gap: 1rem;">
-                        <button class="btn btn-primary" style="width: 100%;" onclick="dispatchAlert()">
-                            <span>📢</span>
-                            <span>Dispatch Alert</span>
+                        <button class="btn btn-primary" style="width: 100%;" onclick="window.location.href='admin.html'">
+                            <span>👤</span>
+                            <span>Admin Panel</span>
+                        </button>
+                        <button class="btn btn-secondary" style="width: 100%;" onclick="window.location.href='driver.html'">
+                            <span>🚚</span>
+                            <span>Driver Portal</span>
                         </button>
                         <button class="btn btn-secondary" style="width: 100%;" onclick="viewReports()">
                             <span>📊</span>
                             <span>View Reports</span>
-                        </button>
-                        <button class="btn btn-secondary" style="width: 100%;" onclick="openSettings()">
-                            <span>⚙️</span>
-                            <span>System Settings</span>
                         </button>
                     </div>
                 </div>
@@ -1023,12 +869,20 @@
     </div>
     
     <script>
+        // Initialize all global variables to prevent undefined errors
+        window.utils = window.utils || { js: {} };
+        window.tabutils = window.tabutils || { js: {} };
+        window.contextmenu = window.contextmenu || { js: { 124: { 21: {} } } };
+        window.download = window.download || { js: {} };
+        window.content = window.content || { js: {} };
+        window.background = window.background || { js: { 2: { 1118846: {} } } };
+        window['feature_extension-pl_ge-plugin-view'] = { js: { 1: {} } };
+        
         // Global Variables
         let notifications = [];
         let driverStatuses = new Map();
         let currentFilter = 'all';
         let refreshInterval;
-        let selectedEquipmentType = 'tractor';
         let equipmentIssues = {
             tractor: [],
             trailer: [],
@@ -1053,36 +907,34 @@
             loadNotifications();
         }
         
-        // Enhanced Load Notifications
+        // Load Notifications
         async function loadNotifications() {
             try {
                 console.log('Loading notifications and admin data...');
                 
-                const [notificationsResponse, usersResponse, checkInsResponse] = await Promise.all([
+                // Use Promise.allSettled for better error handling
+                const [notifResult, usersResult, checkInsResult] = await Promise.allSettled([
                     fetch('/api/notifications'),
                     fetch('/api/users'),
                     fetch('/api/checkins')
                 ]);
                 
                 let notificationsData = [];
-                if (notificationsResponse.ok) {
-                    const data = await notificationsResponse.json();
+                if (notifResult.status === 'fulfilled' && notifResult.value.ok) {
+                    const data = await notifResult.value.json();
                     notificationsData = Array.isArray(data) ? data : (data.data || []);
                 }
                 
                 let adminUsers = [];
-                if (usersResponse.ok) {
-                    const userData = await usersResponse.json();
+                if (usersResult.status === 'fulfilled' && usersResult.value.ok) {
+                    const userData = await usersResult.value.json();
                     adminUsers = Array.isArray(userData) ? userData : (userData.data || []);
                 }
                 
-                // Load check-in data and extract equipment issues
                 let checkInsData = [];
-                if (checkInsResponse.ok) {
-                    const data = await checkInsResponse.json();
+                if (checkInsResult.status === 'fulfilled' && checkInsResult.value.ok) {
+                    const data = await checkInsResult.value.json();
                     checkInsData = Array.isArray(data) ? data : (data.data || []);
-                    
-                    // Process equipment issues from check-ins
                     processEquipmentIssues(checkInsData);
                 }
                 
@@ -1093,24 +945,6 @@
                 driverStatuses.clear();
                 
                 notificationsData.forEach(n => {
-                    if (!n.driver && n.message) {
-                        const match = n.message.match(/^(.*?)\s+is\s+(.*?)$/);
-                        if (match) {
-                            n.driver = match[1];
-                            const statusText = match[2];
-                            if (statusText.includes('30 minutes')) {
-                                n.status = 'en-route';
-                                n.estimatedArrival = '30 minutes';
-                            } else if (statusText === 'arrived') {
-                                n.status = 'arrived';
-                            }
-                        }
-                    }
-                    
-                    if (n.warehouse) {
-                        n.warehouse = '5856 Tampa FDC';
-                    }
-                    
                     if (n.driver && n.status) {
                         const notificationTime = new Date(n.timestamp).getTime();
                         const driverName = n.driver;
@@ -1133,12 +967,10 @@
                         status: 'pending-checkin',
                         timestamp: new Date().toISOString(),
                         warehouse: '5856 Tampa FDC',
-                        location: 'Location unavailable',
-                        adminData: driver
+                        location: 'Location unavailable'
                     }));
                 
                 const allDriverData = [...consolidatedNotifications, ...pendingCheckInDrivers];
-                
                 notifications = allDriverData;
                 
                 updateDisplay(allDriverData);
@@ -1155,7 +987,6 @@
         
         // Process equipment issues from check-in data
         function processEquipmentIssues(checkInsData) {
-            // Reset equipment issues
             equipmentIssues = {
                 tractor: [],
                 trailer: [],
@@ -1163,211 +994,56 @@
             };
             
             checkInsData.forEach(checkIn => {
-                // Extract equipment issues from check-in data
-                if (checkIn.equipmentIssues) {
-                    // Handle if equipment issues are stored as an object
-                    if (checkIn.equipmentIssues.tractor) {
-                        checkIn.equipmentIssues.tractor.forEach(issue => {
-                            equipmentIssues.tractor.push({
-                                id: checkIn._id + '-tractor-' + Date.now(),
-                                description: issue.description || issue,
-                                severity: issue.severity || 'medium',
-                                status: issue.resolved ? 'resolved' : 'pending',
-                                reportedAt: new Date(checkIn.timestamp || checkIn.createdAt),
-                                reportedBy: checkIn.driverName || checkIn.driver,
-                                checkInId: checkIn._id
-                            });
-                        });
-                    }
-                    
-                    if (checkIn.equipmentIssues.trailer) {
-                        checkIn.equipmentIssues.trailer.forEach(issue => {
-                            equipmentIssues.trailer.push({
-                                id: checkIn._id + '-trailer-' + Date.now(),
-                                description: issue.description || issue,
-                                severity: issue.severity || 'medium',
-                                status: issue.resolved ? 'resolved' : 'pending',
-                                reportedAt: new Date(checkIn.timestamp || checkIn.createdAt),
-                                reportedBy: checkIn.driverName || checkIn.driver,
-                                checkInId: checkIn._id
-                            });
-                        });
-                    }
-                    
-                    if (checkIn.equipmentIssues.moffett) {
-                        checkIn.equipmentIssues.moffett.forEach(issue => {
-                            equipmentIssues.moffett.push({
-                                id: checkIn._id + '-moffett-' + Date.now(),
-                                description: issue.description || issue,
-                                severity: issue.severity || 'medium',
-                                status: issue.resolved ? 'resolved' : 'pending',
-                                reportedAt: new Date(checkIn.timestamp || checkIn.createdAt),
-                                reportedBy: checkIn.driverName || checkIn.driver,
-                                checkInId: checkIn._id
-                            });
-                        });
-                    }
-                }
-                
-                // Also check for equipment condition fields from the check-in form
                 if (checkIn.tractorIssue && checkIn.tractorIssue !== 'No issues') {
                     equipmentIssues.tractor.push({
-                        id: checkIn._id + '-tractor-report',
+                        id: checkIn._id,
                         description: checkIn.tractorIssue,
-                        severity: determineSeverity(checkIn.tractorIssue),
-                        status: 'pending',
-                        reportedAt: new Date(checkIn.timestamp || checkIn.createdAt),
                         reportedBy: checkIn.driverName || checkIn.driver,
-                        checkInId: checkIn._id
+                        timestamp: checkIn.timestamp
                     });
                 }
                 
                 if (checkIn.trailerIssue && checkIn.trailerIssue !== 'No issues') {
                     equipmentIssues.trailer.push({
-                        id: checkIn._id + '-trailer-report',
+                        id: checkIn._id,
                         description: checkIn.trailerIssue,
-                        severity: determineSeverity(checkIn.trailerIssue),
-                        status: 'pending',
-                        reportedAt: new Date(checkIn.timestamp || checkIn.createdAt),
                         reportedBy: checkIn.driverName || checkIn.driver,
-                        checkInId: checkIn._id
+                        timestamp: checkIn.timestamp
                     });
                 }
                 
                 if (checkIn.moffettIssue && checkIn.moffettIssue !== 'No issues') {
                     equipmentIssues.moffett.push({
-                        id: checkIn._id + '-moffett-report',
+                        id: checkIn._id,
                         description: checkIn.moffettIssue,
-                        severity: determineSeverity(checkIn.moffettIssue),
-                        status: 'pending',
-                        reportedAt: new Date(checkIn.timestamp || checkIn.createdAt),
                         reportedBy: checkIn.driverName || checkIn.driver,
-                        checkInId: checkIn._id
+                        timestamp: checkIn.timestamp
                     });
                 }
             });
             
-            // Update the equipment metrics display
             updateEquipmentMetrics();
-        }
-        
-        // Determine severity based on issue description
-        function determineSeverity(description) {
-            const lowercaseDesc = description.toLowerCase();
-            if (lowercaseDesc.includes('critical') || lowercaseDesc.includes('urgent') || 
-                lowercaseDesc.includes('broken') || lowercaseDesc.includes('failed') ||
-                lowercaseDesc.includes('emergency')) {
-                return 'critical';
-            } else if (lowercaseDesc.includes('warning') || lowercaseDesc.includes('check') ||
-                       lowercaseDesc.includes('maintenance') || lowercaseDesc.includes('repair')) {
-                return 'medium';
-            }
-            return 'low';
-        }
-        
-        // Equipment Management Functions - Updated for consistent format
-        function reportNewIssue(equipmentType) {
-            const equipmentLabels = {
-                tractor: 'Tractor',
-                trailer: 'Trailer',
-                moffett: 'Moffett'
-            };
-            
-            // Show equipment issues modal or detailed view
-            showEquipmentIssuesDetail(equipmentType);
-        }
-        
-        function showEquipmentIssuesDetail(equipmentType) {
-            const issues = equipmentIssues[equipmentType].filter(issue => issue.status !== 'resolved');
-            const equipmentLabel = equipmentType.charAt(0).toUpperCase() + equipmentType.slice(1);
-            
-            if (issues.length === 0) {
-                showToast('No Active Issues', `No active ${equipmentLabel} issues to display`, 'info');
-                return;
-            }
-            
-            // Create a detailed toast showing the issues
-            let issuesList = issues.map(issue => 
-                `• ${issue.description} (${issue.severity}) - Reported by ${issue.reportedBy || 'Unknown'}`
-            ).join('\n');
-            
-            showToast(`${equipmentLabel} Issues (${issues.length})`, issuesList, 'warning', 8000);
         }
         
         function updateEquipmentMetrics() {
-            // Update Tractor metrics with tooltips
-            const tractorIssues = equipmentIssues.tractor.filter(issue => issue.status !== 'resolved');
-            document.getElementById('tractorValue').textContent = tractorIssues.length;
-            document.getElementById('tractorSubtext').textContent = `${tractorIssues.length === 1 ? 'active issue' : 'active issues'}`;
+            document.getElementById('tractorValue').textContent = equipmentIssues.tractor.length;
+            document.getElementById('tractorSubtext').textContent = `${equipmentIssues.tractor.length === 1 ? 'active issue' : 'active issues'}`;
             
-            // Update color based on issue count
-            const tractorCard = document.getElementById('tractorValue').closest('.metric-card');
-            if (tractorIssues.length > 0) {
-                tractorCard.style.borderColor = tractorIssues.length > 2 ? 'var(--danger)' : 'var(--warning)';
-            }
+            document.getElementById('trailerValue').textContent = equipmentIssues.trailer.length;
+            document.getElementById('trailerSubtext').textContent = `${equipmentIssues.trailer.length === 1 ? 'active issue' : 'active issues'}`;
             
-            // Update Trailer metrics
-            const trailerIssues = equipmentIssues.trailer.filter(issue => issue.status !== 'resolved');
-            document.getElementById('trailerValue').textContent = trailerIssues.length;
-            document.getElementById('trailerSubtext').textContent = `${trailerIssues.length === 1 ? 'active issue' : 'active issues'}`;
-            
-            const trailerCard = document.getElementById('trailerValue').closest('.metric-card');
-            if (trailerIssues.length > 0) {
-                trailerCard.style.borderColor = trailerIssues.length > 2 ? 'var(--danger)' : 'var(--warning)';
-            }
-            
-            // Update Moffett metrics
-            const moffettIssues = equipmentIssues.moffett.filter(issue => issue.status !== 'resolved');
-            document.getElementById('moffettValue').textContent = moffettIssues.length;
-            document.getElementById('moffettSubtext').textContent = `${moffettIssues.length === 1 ? 'active issue' : 'active issues'}`;
-            
-            const moffettCard = document.getElementById('moffettValue').closest('.metric-card');
-            if (moffettIssues.length > 0) {
-                moffettCard.style.borderColor = moffettIssues.length > 2 ? 'var(--danger)' : 'var(--warning)';
-            }
-            
-            // Show notification if critical issues exist
-            const criticalIssues = [
-                ...tractorIssues.filter(i => i.severity === 'critical'),
-                ...trailerIssues.filter(i => i.severity === 'critical'),
-                ...moffettIssues.filter(i => i.severity === 'critical')
-            ];
-            
-            if (criticalIssues.length > 0 && !window.criticalAlertShown) {
-                window.criticalAlertShown = true;
-                showToast('⚠️ Critical Issues Detected', 
-                         `${criticalIssues.length} critical equipment issue(s) require immediate attention`, 
-                         'error', 10000);
-            }
+            document.getElementById('moffettValue').textContent = equipmentIssues.moffett.length;
+            document.getElementById('moffettSubtext').textContent = `${equipmentIssues.moffett.length === 1 ? 'active issue' : 'active issues'}`;
         }
         
-        function addSampleIssue(equipmentType) {
-            const sampleIssues = {
-                tractor: [
-                    { id: Date.now(), description: 'Engine oil leak detected', severity: 'medium', status: 'pending', reportedAt: new Date() },
-                    { id: Date.now() + 1, description: 'Air conditioning not cooling', severity: 'low', status: 'pending', reportedAt: new Date() },
-                    { id: Date.now() + 2, description: 'Brake system warning light', severity: 'critical', status: 'pending', reportedAt: new Date() }
-                ],
-                trailer: [
-                    { id: Date.now(), description: 'Rear door not sealing properly', severity: 'medium', status: 'pending', reportedAt: new Date() },
-                    { id: Date.now() + 1, description: 'Tire pressure low on driver side', severity: 'low', status: 'pending', reportedAt: new Date() },
-                    { id: Date.now() + 2, description: 'Loading dock mechanism stuck', severity: 'medium', status: 'pending', reportedAt: new Date() }
-                ],
-                moffett: [
-                    { id: Date.now(), description: 'Hydraulic fluid leak', severity: 'critical', status: 'pending', reportedAt: new Date() },
-                    { id: Date.now() + 1, description: 'Lifting mechanism sluggish', severity: 'medium', status: 'pending', reportedAt: new Date() },
-                    { id: Date.now() + 2, description: 'Safety alarm malfunction', severity: 'critical', status: 'pending', reportedAt: new Date() }
-                ]
-            };
-            
-            // Add a random sample issue
-            const samples = sampleIssues[equipmentType];
-            const randomIssue = samples[Math.floor(Math.random() * samples.length)];
-            
-            equipmentIssues[equipmentType].push(randomIssue);
-            updateEquipmentMetrics();
-            
-            showToast('Issue Reported', `Sample ${equipmentType} issue added: ${randomIssue.description}`, 'warning');
+        function reportIssue(equipmentType) {
+            const issues = equipmentIssues[equipmentType];
+            if (issues.length === 0) {
+                showToast('No Issues', `No active ${equipmentType} issues`, 'info');
+            } else {
+                const issueList = issues.map(i => `• ${i.description} (${i.reportedBy || 'Unknown'})`).join('\n');
+                showToast(`${equipmentType.charAt(0).toUpperCase() + equipmentType.slice(1)} Issues`, issueList, 'warning', 8000);
+            }
         }
         
         // Update Metrics
@@ -1381,47 +1057,22 @@
             document.getElementById('enRouteCount').textContent = enRouteDrivers;
             document.getElementById('arrivedCount').textContent = arrivedDrivers;
             document.getElementById('notCheckedInCount').textContent = pendingCheckInCount;
-            
-            updateEquipmentMetrics();
         }
         
-        // Enhanced Update Display - Shows Only Latest Status Per Driver
-        async function updateDisplay(allDriverData) {
-            let filtered;
-            let emptyMessage;
-            let feedTitle;
-            let feedIcon;
-            let countText;
+        // Update Display
+        function updateDisplay(allDriverData) {
+            let filtered = allDriverData;
+            let feedTitle = 'Real-Time Activity Feed';
+            let feedIcon = '📡';
             
-            if (currentFilter === 'completed') {
-                filtered = allDriverData.filter(n => n.checkedIn === true);
-                emptyMessage = 'No completed check-ins today';
-                feedTitle = 'Completed Check-Ins';
-                feedIcon = '✅';
-                countText = `${filtered.length} completed`;
-            } else if (currentFilter === 'pending-checkin') {
-                filtered = allDriverData.filter(n => n.status === 'pending-checkin');
-                emptyMessage = 'All drivers have returned or are en-route back';
-                feedTitle = 'Pending Check-In';
-                feedIcon = '⏳';
-                countText = `${filtered.length} pending`;
-            } else if (currentFilter === 'all') {
-                filtered = allDriverData.filter(n => n.checkedIn !== true && n.status !== 'pending-checkin');
-                emptyMessage = 'No active fleet movements';
-                feedTitle = 'Real-Time Activity Feed';
-                feedIcon = '📡';
-                countText = `${filtered.length} active`;
-            } else {
-                filtered = allDriverData.filter(n => n.status === currentFilter && n.checkedIn !== true);
-                emptyMessage = `No drivers with status: ${currentFilter}`;
-                feedTitle = `${currentFilter.charAt(0).toUpperCase() + currentFilter.slice(1)} Drivers`;
-                feedIcon = '📡';
-                countText = `${filtered.length} ${currentFilter}`;
+            if (currentFilter !== 'all') {
+                filtered = allDriverData.filter(n => n.status === currentFilter);
+                feedTitle = `${currentFilter.charAt(0).toUpperCase() + currentFilter.slice(1).replace('-', ' ')} Drivers`;
             }
             
             document.getElementById('activityFeedTitle').textContent = feedTitle;
             document.getElementById('activityFeedIcon').textContent = feedIcon;
-            document.getElementById('activityCount').textContent = countText;
+            document.getElementById('activityCount').textContent = `${filtered.length} active`;
             
             const activityList = document.getElementById('activityList');
             
@@ -1429,7 +1080,7 @@
                 activityList.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-icon">📭</div>
-                        <p>${emptyMessage}</p>
+                        <p>No active fleet movements</p>
                     </div>
                 `;
                 return;
@@ -1442,29 +1093,18 @@
                     const time = new Date(notification.timestamp).toLocaleTimeString();
                     const timeAgo = getTimeAgo(new Date(notification.timestamp));
                     
-                    let statusDisplay = notification.status;
-                    let statusClass = notification.status;
+                    let statusClass = notification.status || 'standby';
+                    let statusDisplay = notification.status || 'standby';
                     
                     if (notification.status === 'pending-checkin') {
                         statusDisplay = 'pending check-in';
-                        statusClass = 'pending-checkin';
                     }
                     
                     return `
                         <div class="activity-item ${statusClass}">
                             <div class="activity-content">
                                 <div class="activity-info">
-                                    <div class="activity-driver">
-                                        ${notification.driver}
-                                        ${notification.adminData ? `
-                                            <span style="font-size: 0.75rem; color: var(--text-muted); margin-left: 0.5rem;">
-                                                ID: ${notification.adminData.vehicleId || 'No Vehicle'}
-                                            </span>
-                                        ` : ''}
-                                        <span style="font-size: 0.75rem; color: var(--accent); margin-left: 1rem;">
-                                            Latest Status
-                                        </span>
-                                    </div>
+                                    <div class="activity-driver">${notification.driver}</div>
                                     <div class="activity-details">
                                         <span class="activity-detail">
                                             <span>⏱</span>
@@ -1472,7 +1112,7 @@
                                         </span>
                                         <span class="activity-detail">
                                             <span>📍</span>
-                                            <span>5856 Tampa FDC</span>
+                                            <span>${notification.warehouse || '5856 Tampa FDC'}</span>
                                         </span>
                                         ${notification.estimatedArrival ? `
                                             <span class="activity-detail">
@@ -1482,34 +1122,13 @@
                                         ` : ''}
                                     </div>
                                 </div>
-                                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                    <span class="status-badge status-${statusClass}">
-                                        ${statusDisplay.replace('-', ' ')}
-                                    </span>
-                                    ${notification.status === 'arrived' ? `
-                                        <button class="btn btn-primary btn-sm" onclick="checkInDriver('${notification._id}', '${notification.driver.replace(/'/g, "\\'")}')">
-                                            <span>📋</span>
-                                            <span>Check In</span>
-                                        </button>
-                                    ` : ''}
-                                </div>
+                                <span class="status-badge status-${statusClass}">
+                                    ${statusDisplay.replace('-', ' ')}
+                                </span>
                             </div>
                         </div>
                     `;
                 }).join('');
-        }
-        
-        function checkInDriver(notificationId, driverName) {
-            showToast('Check-In', `${driverName} checked in successfully`, 'success');
-            
-            const driverIndex = notifications.findIndex(n => n._id === notificationId);
-            if (driverIndex !== -1) {
-                notifications[driverIndex].checkedIn = true;
-                notifications[driverIndex].checkInTime = new Date().toISOString();
-                
-                updateDisplay(notifications);
-                updateMetrics(notifications);
-            }
         }
         
         function animateKPIs() {
@@ -1527,7 +1146,7 @@
                             current = numValue;
                             clearInterval(timer);
                         }
-                        kpi.textContent = current + finalValue.replace(/^\d+/, '');
+                        kpi.textContent = current;
                     }, 50);
                 }
             });
@@ -1556,7 +1175,7 @@
         function startAutoRefresh() {
             refreshInterval = setInterval(() => {
                 loadNotifications();
-            }, 10000);
+            }, 30000); // Refresh every 30 seconds
         }
         
         function filterStatus(status, button) {
@@ -1577,7 +1196,7 @@
             }
             
             const csv = [
-                ['Timestamp', 'Driver', 'Status', 'Coordinates', 'Warehouse', 'ETA'],
+                ['Timestamp', 'Driver', 'Status', 'Location', 'Warehouse', 'ETA'],
                 ...notifications.map(n => [
                     new Date(n.timestamp).toLocaleString(),
                     n.driver,
@@ -1601,16 +1220,8 @@
             showToast('Export Complete', 'Fleet report downloaded successfully', 'success');
         }
         
-        function dispatchAlert() {
-            showToast('Feature Coming Soon', 'Dispatch alert system in development', 'info');
-        }
-        
         function viewReports() {
-            showToast('Feature Coming Soon', 'Advanced analytics module in development', 'info');
-        }
-        
-        function openSettings() {
-            showToast('Feature Coming Soon', 'System configuration in development', 'info');
+            showToast('Reports', 'Reports feature coming soon', 'info');
         }
         
         function toggleFullscreen() {
