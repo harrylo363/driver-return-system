@@ -1417,8 +1417,8 @@
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label class="form-label">Email Address *</label>
-                                    <input type="email" class="form-input" id="userEmail" name="email" placeholder="user@company.com" required>
+                                    <label class="form-label">Email Address</label>
+                                    <input type="email" class="form-input" id="userEmail" name="email" placeholder="user@company.com (optional)">
                                 </div>
                                 
                                 <div class="form-group">
@@ -1690,8 +1690,8 @@
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label">Email Address *</label>
-                            <input type="email" class="form-input" id="editUserEmail" required>
+                            <label class="form-label">Email Address</label>
+                            <input type="email" class="form-input" id="editUserEmail">
                         </div>
                         
                         <div class="form-group">
@@ -1911,7 +1911,7 @@
                     </td>
                     <td>
                         <div>
-                            <div style="font-weight: 500;">${user.email}</div>
+                            <div style="font-weight: 500;">${user.email || 'No email provided'}</div>
                             ${user.phoneNumber ? `<div style="font-size: 12px; color: var(--text-tertiary);">${user.phoneNumber}</div>` : ''}
                         </div>
                     </td>
@@ -1939,7 +1939,7 @@
             const search = document.getElementById('userSearch').value.toLowerCase();
             const filtered = allUsers.filter(user => 
                 user.name.toLowerCase().includes(search) ||
-                user.email.toLowerCase().includes(search) ||
+                (user.email && user.email.toLowerCase().includes(search)) ||
                 user.role.toLowerCase().includes(search) ||
                 (user.vehicleId && user.vehicleId.toLowerCase().includes(search))
             );
@@ -2006,13 +2006,13 @@
             };
             
             // Validate required fields
-            if (!userData.name || !userData.email || !userData.role) {
-                showToast('Validation Error', 'Please fill in all required fields', 'error');
+            if (!userData.name || !userData.role) {
+                showToast('Validation Error', 'Please fill in all required fields (Name and Role)', 'error');
                 return;
             }
             
-            // Check for duplicate email
-            if (allUsers.some(user => user.email === userData.email)) {
+            // Check for duplicate email only if email is provided
+            if (userData.email && allUsers.some(user => user.email === userData.email)) {
                 showToast('Duplicate Email', 'A user with this email already exists', 'error');
                 return;
             }
@@ -2364,7 +2364,7 @@
                 mappedRow.updatedAt = new Date().toISOString();
                 
                 return mappedRow;
-            }).filter(row => row.name && row.email); // Filter out rows without name/email
+            }).filter(row => row.name); // Filter out rows without name (email now optional)
             
             if (uploadedData.length === 0) {
                 showToast('No Valid Data', 'No valid user records found. Please check your file format.', 'error');
@@ -2432,8 +2432,8 @@
                     const batch = uploadedData.slice(i, i + batchSize);
                     
                     const batchPromises = batch.map(async (userData) => {
-                        // Check for duplicate email in existing users
-                        if (allUsers.some(user => user.email === userData.email)) {
+                        // Check for duplicate email in existing users (only if email provided)
+                        if (userData.email && allUsers.some(user => user.email === userData.email)) {
                             errorCount++;
                             errors.push(`Duplicate email: ${userData.email}`);
                             return null;
