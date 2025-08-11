@@ -1079,17 +1079,17 @@
                     <div class="kpi-icon" style="background: rgba(16, 185, 129, 0.1);">✓</div>
                 </div>
                 <div class="kpi-value" id="arrivedCount">0</div>
-                <div class="kpi-label">Arrived Today</div>
-                <div class="kpi-sublabel">Successfully checked in</div>
+                <div class="kpi-label">Arrived</div>
+                <div class="kpi-sublabel">At warehouse</div>
             </div>
             
             <div class="kpi-card">
                 <div class="kpi-header">
-                    <div class="kpi-icon" style="background: rgba(16, 185, 129, 0.1);">✅</div>
+                    <div class="kpi-icon" style="background: rgba(100, 116, 139, 0.1);">⏳</div>
                 </div>
-                <div class="kpi-value" id="notCheckedInCount">0</div>
-                <div class="kpi-label">Completed Today</div>
-                <div class="kpi-sublabel">Check-ins completed</div>
+                <div class="kpi-value" id="pendingCount">0</div>
+                <div class="kpi-label">Pending Status</div>
+                <div class="kpi-sublabel">No status selected</div>
             </div>
         </div>
         
@@ -1748,18 +1748,17 @@
                     const activeDrivers = allDriverData.filter(n => n && (n.status === 'en-route' || n.status === 'arrived' || n.status === 'pending-checkin'));
                     const enRouteDrivers = allDriverData.filter(n => n && n.status === 'en-route').length;
                     const arrivedDrivers = allDriverData.filter(n => n && n.status === 'arrived').length;
-                    const pendingCheckInCount = allDriverData.filter(n => n && n.status === 'pending-checkin').length;
-                    const completedCount = completedCheckIns.length;
+                    const pendingDrivers = allDriverData.filter(n => n && n.status === 'pending-checkin').length;
                     
                     const activeDriversEl = document.getElementById('activeDrivers');
                     const enRouteCountEl = document.getElementById('enRouteCount');
                     const arrivedCountEl = document.getElementById('arrivedCount');
-                    const notCheckedInCountEl = document.getElementById('notCheckedInCount');
+                    const pendingCountEl = document.getElementById('pendingCount');
                     
                     if (activeDriversEl) activeDriversEl.textContent = activeDrivers.length;
                     if (enRouteCountEl) enRouteCountEl.textContent = enRouteDrivers;
                     if (arrivedCountEl) arrivedCountEl.textContent = arrivedDrivers;
-                    if (notCheckedInCountEl) notCheckedInCountEl.textContent = completedCount;
+                    if (pendingCountEl) pendingCountEl.textContent = pendingDrivers;
                 },
                 
                 // Update Display
