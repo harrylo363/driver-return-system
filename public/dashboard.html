@@ -1303,9 +1303,41 @@
                                 <label class="checkbox-label" for="tractorAirLeaks">Air Leaks Detected</label>
                             </div>
                         </div>
+                        
+                        <!-- Issue Reporting Section -->
+                        <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 8px;">
+                            <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                <span>⚠️</span>
+                                <span>Report Specific Issues</span>
+                            </div>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label class="form-label">Issue Location/Part</label>
+                                    <select class="form-select" id="tractorIssuePart">
+                                        <option value="">No specific issue</option>
+                                        <option value="engine">Engine</option>
+                                        <option value="transmission">Transmission</option>
+                                        <option value="brakes">Brakes</option>
+                                        <option value="steering">Steering</option>
+                                        <option value="electrical">Electrical System</option>
+                                        <option value="hydraulics">Hydraulics</option>
+                                        <option value="tires">Tires/Wheels</option>
+                                        <option value="lights">Lights/Signals</option>
+                                        <option value="cab">Cab/Interior</option>
+                                        <option value="body">Body/Exterior</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Issue Description</label>
+                                    <input type="text" class="form-input" id="tractorIssueDescription" placeholder="Describe the specific issue...">
+                                </div>
+                            </div>
+                        </div>
+                        
                         <div class="form-group" style="margin-top: 1rem;">
-                            <label class="form-label">Notes</label>
-                            <textarea class="form-textarea" id="tractorNotes" placeholder="Additional notes about tractor condition..."></textarea>
+                            <label class="form-label">Additional Notes</label>
+                            <textarea class="form-textarea" id="tractorNotes" placeholder="Any other observations about tractor condition..."></textarea>
                         </div>
                     </div>
                     
@@ -1348,9 +1380,41 @@
                                 <label class="checkbox-label" for="trailerDebris">Needs Sweeping</label>
                             </div>
                         </div>
+                        
+                        <!-- Issue Reporting Section -->
+                        <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 8px;">
+                            <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                <span>⚠️</span>
+                                <span>Report Specific Issues</span>
+                            </div>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label class="form-label">Issue Location/Part</label>
+                                    <select class="form-select" id="trailerIssuePart">
+                                        <option value="">No specific issue</option>
+                                        <option value="deck">Deck/Floor</option>
+                                        <option value="walls">Walls/Sides</option>
+                                        <option value="doors">Doors/Gates</option>
+                                        <option value="tires">Tires/Wheels</option>
+                                        <option value="brakes">Brakes</option>
+                                        <option value="lights">Lights/Electrical</option>
+                                        <option value="straps">Straps/Tie-downs</option>
+                                        <option value="landing">Landing Gear</option>
+                                        <option value="suspension">Suspension</option>
+                                        <option value="refrigeration">Refrigeration Unit</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Issue Description</label>
+                                    <input type="text" class="form-input" id="trailerIssueDescription" placeholder="Describe the specific issue...">
+                                </div>
+                            </div>
+                        </div>
+                        
                         <div class="form-group" style="margin-top: 1rem;">
-                            <label class="form-label">Notes</label>
-                            <textarea class="form-textarea" id="trailerNotes" placeholder="Additional notes about trailer condition..."></textarea>
+                            <label class="form-label">Additional Notes</label>
+                            <textarea class="form-textarea" id="trailerNotes" placeholder="Any other observations about trailer condition..."></textarea>
                         </div>
                     </div>
                     
@@ -1393,9 +1457,41 @@
                                 <label class="checkbox-label" for="moffettSeatbelts">Seatbelts Functional</label>
                             </div>
                         </div>
+                        
+                        <!-- Issue Reporting Section -->
+                        <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 8px;">
+                            <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                <span>⚠️</span>
+                                <span>Report Specific Issues</span>
+                            </div>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label class="form-label">Issue Location/Part</label>
+                                    <select class="form-select" id="moffettIssuePart">
+                                        <option value="">No specific issue</option>
+                                        <option value="forks">Forks</option>
+                                        <option value="mast">Mast/Lift</option>
+                                        <option value="hydraulics">Hydraulic System</option>
+                                        <option value="engine">Engine</option>
+                                        <option value="controls">Controls/Joysticks</option>
+                                        <option value="tires">Tires/Wheels</option>
+                                        <option value="brakes">Brakes</option>
+                                        <option value="lights">Lights/Beacons</option>
+                                        <option value="safety">Safety Equipment</option>
+                                        <option value="mount">Mounting System</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Issue Description</label>
+                                    <input type="text" class="form-input" id="moffettIssueDescription" placeholder="Describe the specific issue...">
+                                </div>
+                            </div>
+                        </div>
+                        
                         <div class="form-group" style="margin-top: 1rem;">
-                            <label class="form-label">Notes</label>
-                            <textarea class="form-textarea" id="moffettNotes" placeholder="Additional notes about moffett condition..."></textarea>
+                            <label class="form-label">Additional Notes</label>
+                            <textarea class="form-textarea" id="moffettNotes" placeholder="Any other observations about moffett condition..."></textarea>
                         </div>
                     </div>
                 </form>
@@ -2017,6 +2113,8 @@
                             tractorExtinguisher: getElementValue('tractorExtinguisher', true),
                             tractorTires: getElementValue('tractorTires', true),
                             tractorAirLeaks: getElementValue('tractorAirLeaks', true),
+                            tractorIssuePart: getElementValue('tractorIssuePart'),
+                            tractorIssueDescription: getElementValue('tractorIssueDescription'),
                             tractorNotes: getElementValue('tractorNotes'),
                             
                             // Trailer data
@@ -2026,6 +2124,8 @@
                             trailerElectrical: getElementValue('trailerElectrical', true),
                             trailerClean: getElementValue('trailerClean', true),
                             trailerDebris: getElementValue('trailerDebris', true),
+                            trailerIssuePart: getElementValue('trailerIssuePart'),
+                            trailerIssueDescription: getElementValue('trailerIssueDescription'),
                             trailerNotes: getElementValue('trailerNotes'),
                             
                             // Moffett data
@@ -2035,22 +2135,27 @@
                             moffettElectrical: getElementValue('moffettElectrical', true),
                             moffettHydraulic: getElementValue('moffettHydraulic', true),
                             moffettSeatbelts: getElementValue('moffettSeatbelts', true),
+                            moffettIssuePart: getElementValue('moffettIssuePart'),
+                            moffettIssueDescription: getElementValue('moffettIssueDescription'),
                             moffettNotes: getElementValue('moffettNotes'),
                             
                             // Mark if there are issues
                             tractorIssues: getElementValue('tractorDamage') !== 'none' || 
                                           getElementValue('tractorAirLeaks', true) ||
                                           !getElementValue('tractorLights', true) ||
-                                          !getElementValue('tractorTires', true),
+                                          !getElementValue('tractorTires', true) ||
+                                          getElementValue('tractorIssuePart') !== '',
                                           
                             trailerIssues: !getElementValue('trailerTires', true) ||
                                           !getElementValue('trailerElectrical', true) ||
-                                          getElementValue('trailerDebris', true),
+                                          getElementValue('trailerDebris', true) ||
+                                          getElementValue('trailerIssuePart') !== '',
                                           
                             moffettIssues: !getElementValue('moffettTires', true) ||
                                           !getElementValue('moffettElectrical', true) ||
                                           getElementValue('moffettHydraulic', true) ||
-                                          !getElementValue('moffettSeatbelts', true)
+                                          !getElementValue('moffettSeatbelts', true) ||
+                                          getElementValue('moffettIssuePart') !== ''
                         };
                         
                         // Send to server
