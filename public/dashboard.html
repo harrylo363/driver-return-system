@@ -1085,21 +1085,22 @@
             
             <div class="kpi-card">
                 <div class="kpi-header">
-                    <div class="kpi-icon" style="background: rgba(245, 158, 11, 0.1);">⏳</div>
+                    <div class="kpi-icon" style="background: rgba(16, 185, 129, 0.1);">✅</div>
                 </div>
                 <div class="kpi-value" id="notCheckedInCount">0</div>
-                <div class="kpi-label">Pending Check-In</div>
-                <div class="kpi-sublabel">Drivers awaiting check-in</div>
+                <div class="kpi-label">Completed Today</div>
+                <div class="kpi-sublabel">Check-ins completed</div>
             </div>
         </div>
         
         <!-- Control Panel -->
         <div class="control-panel">
             <div class="filter-group">
-                <button class="filter-btn active" onclick="FleetDashboard.filterStatus('all', this)">All Activity</button>
-                <button class="filter-btn" onclick="FleetDashboard.filterStatus('en-route', this)">En Route</button>
-                <button class="filter-btn" onclick="FleetDashboard.filterStatus('arrived', this)">Arrived</button>
-                <button class="filter-btn" onclick="FleetDashboard.filterStatus('pending-checkin', this)">Pending Check-In</button>
+                <button class="filter-btn active" onclick="FleetDashboard.filterStatus('active', this)">Active Drivers</button>
+                <button class="filter-btn" onclick="FleetDashboard.filterStatus('completed', this)">Completed Check-ins</button>
+                <button class="filter-btn" onclick="FleetDashboard.filterStatus('en-route', this)">En Route Only</button>
+                <button class="filter-btn" onclick="FleetDashboard.filterStatus('arrived', this)">Arrived Only</button>
+                <button class="filter-btn" onclick="FleetDashboard.filterStatus('pending-checkin', this)">Pending Only</button>
             </div>
             <button class="btn btn-secondary" onclick="FleetDashboard.exportData()">
                 <span>📊</span>
@@ -1413,8 +1414,9 @@
             
             // Private variables
             let notifications = [];
+            let completedCheckIns = [];
             let driverStatuses = new Map();
-            let currentFilter = 'all';
+            let currentFilter = 'active';
             let refreshInterval = null;
             let equipmentIssues = {
                 tractor: [],
@@ -1526,6 +1528,9 @@
                                 const data = await checkInsResult.value.json();
                                 checkInsData = Array.isArray(data) ? data : (data && data.data ? data.data : []);
                                 this.processEquipmentIssues(checkInsData);
+                                
+                                // Process completed check-ins
+                                this.processCompletedCheckIns(checkInsData);
                             } catch (e) {
                                 console.error('Error parsing checkins:', e);
                             }
@@ -1551,9 +1556,17 @@
                         
                         const consolidatedNotifications = Array.from(driverStatuses.values());
                         
-                        const notificationDriverNames = consolidatedNotifications.map(n => n.driver);
+                        // Filter out drivers who have completed check-ins today
+                        const completedDriverNames = completedCheckIns.map(c => c.driverName);
+                        const activeNotifications = consolidatedNotifications.filter(n => 
+                            !completedDriverNames.includes(n.driver)
+                        );
+                        
+                        const notificationDriverNames = activeNotifications.map(n => n.driver);
                         const pendingCheckInDrivers = activeDriversFromAdmin
-                            .filter(driver => driver && driver.name && !notificationDriverNames.includes(driver.name))
+                            .filter(driver => driver && driver.name && 
+                                    !notificationDriverNames.includes(driver.name) &&
+                                    !completedDriverNames.includes(driver.name))
                             .map(driver => ({
                                 _id: `admin-${driver._id}`,
                                 driver: driver.name,
@@ -1563,11 +1576,11 @@
                                 location: 'Location unavailable'
                             }));
                         
-                        const allDriverData = [...consolidatedNotifications, ...pendingCheckInDrivers];
+                        const allDriverData = [...activeNotifications, ...pendingCheckInDrivers];
                         notifications = allDriverData;
                         
                         this.updateDisplay(allDriverData);
-                        this.updateMetrics(allDriverData, activeDriversFromAdmin);
+                        this.updateMetrics(allDriverData, activeDriversFromAdmin, completedCheckIns);
                         
                         const lastUpdateEl = document.getElementById('lastUpdate');
                         if (lastUpdateEl) {
@@ -1595,6 +1608,22 @@
                         
                         this.updateSystemStatus(false);
                     }
+                },
+                
+                // Process completed check-ins
+                processCompletedCheckIns: function(checkInsData) {
+                    if (!Array.isArray(checkInsData)) return;
+                    
+                    // Get today's check-ins
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    
+                    completedCheckIns = checkInsData.filter(checkIn => {
+                        if (!checkIn || !checkIn.timestamp) return false;
+                        const checkInDate = new Date(checkIn.timestamp);
+                        checkInDate.setHours(0, 0, 0, 0);
+                        return checkInDate.getTime() === today.getTime();
+                    });
                 },
                 
                 // Process equipment issues
@@ -1715,32 +1744,55 @@
                 },
                 
                 // Update Metrics
-                updateMetrics: function(allDriverData, adminDrivers = []) {
-                    const totalRoutedDrivers = allDriverData.length;
+                updateMetrics: function(allDriverData, adminDrivers = [], completedCheckIns = []) {
+                    const activeDrivers = allDriverData.filter(n => n && (n.status === 'en-route' || n.status === 'arrived' || n.status === 'pending-checkin'));
                     const enRouteDrivers = allDriverData.filter(n => n && n.status === 'en-route').length;
                     const arrivedDrivers = allDriverData.filter(n => n && n.status === 'arrived').length;
                     const pendingCheckInCount = allDriverData.filter(n => n && n.status === 'pending-checkin').length;
+                    const completedCount = completedCheckIns.length;
                     
                     const activeDriversEl = document.getElementById('activeDrivers');
                     const enRouteCountEl = document.getElementById('enRouteCount');
                     const arrivedCountEl = document.getElementById('arrivedCount');
                     const notCheckedInCountEl = document.getElementById('notCheckedInCount');
                     
-                    if (activeDriversEl) activeDriversEl.textContent = totalRoutedDrivers;
+                    if (activeDriversEl) activeDriversEl.textContent = activeDrivers.length;
                     if (enRouteCountEl) enRouteCountEl.textContent = enRouteDrivers;
                     if (arrivedCountEl) arrivedCountEl.textContent = arrivedDrivers;
-                    if (notCheckedInCountEl) notCheckedInCountEl.textContent = pendingCheckInCount;
+                    if (notCheckedInCountEl) notCheckedInCountEl.textContent = completedCount;
                 },
                 
                 // Update Display
                 updateDisplay: function(allDriverData) {
-                    let filtered = allDriverData;
+                    let filtered = [];
                     let feedTitle = 'Real-Time Activity Feed';
                     let feedIcon = '📡';
                     
-                    if (currentFilter !== 'all') {
-                        filtered = allDriverData.filter(n => n && n.status === currentFilter);
-                        feedTitle = `${currentFilter.charAt(0).toUpperCase() + currentFilter.slice(1).replace('-', ' ')} Drivers`;
+                    // Handle different filter views
+                    if (currentFilter === 'active') {
+                        // Show only active drivers (not completed check-ins)
+                        filtered = allDriverData.filter(n => n && (n.status === 'en-route' || n.status === 'arrived' || n.status === 'pending-checkin'));
+                        feedTitle = 'Active Drivers';
+                        feedIcon = '🚚';
+                    } else if (currentFilter === 'completed') {
+                        // Show completed check-ins
+                        feedTitle = 'Completed Check-ins Today';
+                        feedIcon = '✅';
+                        // Display completed check-ins differently
+                        this.displayCompletedCheckIns();
+                        return;
+                    } else if (currentFilter === 'en-route') {
+                        filtered = allDriverData.filter(n => n && n.status === 'en-route');
+                        feedTitle = 'En Route Drivers';
+                        feedIcon = '📍';
+                    } else if (currentFilter === 'arrived') {
+                        filtered = allDriverData.filter(n => n && n.status === 'arrived');
+                        feedTitle = 'Arrived Drivers';
+                        feedIcon = '🏁';
+                    } else if (currentFilter === 'pending-checkin') {
+                        filtered = allDriverData.filter(n => n && n.status === 'pending-checkin');
+                        feedTitle = 'Pending Check-in';
+                        feedIcon = '⏳';
                     }
                     
                     const feedTitleEl = document.getElementById('activityFeedTitle');
@@ -1758,7 +1810,7 @@
                         activityList.innerHTML = `
                             <div class="empty-state">
                                 <div class="empty-icon">📭</div>
-                                <p>No active fleet movements</p>
+                                <p>No ${currentFilter === 'active' ? 'active' : currentFilter.replace('-', ' ')} drivers</p>
                             </div>
                         `;
                         return;
@@ -1817,6 +1869,80 @@
                                             ${actionButton}
                                             <span class="status-badge status-${statusClass}">
                                                 ${statusDisplay.replace('-', ' ')}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                },
+                
+                // Display completed check-ins
+                displayCompletedCheckIns: function() {
+                    const feedTitleEl = document.getElementById('activityFeedTitle');
+                    const feedIconEl = document.getElementById('activityFeedIcon');
+                    const activityCountEl = document.getElementById('activityCount');
+                    
+                    if (feedTitleEl) feedTitleEl.textContent = 'Completed Check-ins Today';
+                    if (feedIconEl) feedIconEl.textContent = '✅';
+                    if (activityCountEl) activityCountEl.textContent = `${completedCheckIns.length} completed`;
+                    
+                    const activityList = document.getElementById('activityList');
+                    if (!activityList) return;
+                    
+                    if (completedCheckIns.length === 0) {
+                        activityList.innerHTML = `
+                            <div class="empty-state">
+                                <div class="empty-icon">📋</div>
+                                <p>No completed check-ins today</p>
+                            </div>
+                        `;
+                        return;
+                    }
+                    
+                    activityList.innerHTML = completedCheckIns
+                        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+                        .map(checkIn => {
+                            const time = new Date(checkIn.timestamp).toLocaleTimeString();
+                            const timeAgo = this.getTimeAgo(new Date(checkIn.timestamp));
+                            
+                            // Determine if there are any issues
+                            const hasIssues = checkIn.tractorIssues || checkIn.trailerIssues || checkIn.moffettIssues;
+                            const issuesList = [];
+                            if (checkIn.tractorIssues) issuesList.push('Tractor');
+                            if (checkIn.trailerIssues) issuesList.push('Trailer');
+                            if (checkIn.moffettIssues) issuesList.push('Moffett');
+                            
+                            return `
+                                <div class="activity-item completed" style="border-left: 3px solid var(--success);">
+                                    <div class="activity-content">
+                                        <div class="activity-info">
+                                            <div class="activity-driver">${checkIn.driverName}</div>
+                                            <div class="activity-details">
+                                                <span class="activity-detail">
+                                                    <span>✅</span>
+                                                    <span>Checked in ${timeAgo}</span>
+                                                </span>
+                                                <span class="activity-detail">
+                                                    <span>🕐</span>
+                                                    <span>${time}</span>
+                                                </span>
+                                                ${hasIssues ? `
+                                                    <span class="activity-detail" style="color: var(--warning);">
+                                                        <span>⚠️</span>
+                                                        <span>Issues: ${issuesList.join(', ')}</span>
+                                                    </span>
+                                                ` : `
+                                                    <span class="activity-detail" style="color: var(--success);">
+                                                        <span>✓</span>
+                                                        <span>No issues reported</span>
+                                                    </span>
+                                                `}
+                                            </div>
+                                        </div>
+                                        <div class="activity-actions">
+                                            <span class="status-badge" style="background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3);">
+                                                COMPLETED
                                             </span>
                                         </div>
                                     </div>
