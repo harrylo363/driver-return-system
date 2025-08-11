@@ -102,13 +102,112 @@ const notificationSchema = new mongoose.Schema({
 
 const Notification = mongoose.model('Notification', notificationSchema);
 
-// Check-in Schema (for equipment issues)
+// Enhanced Check-in Schema (for detailed equipment inspections)
 const checkInSchema = new mongoose.Schema({
+  // Driver Information
   driverName: {
     type: String,
     required: true
   },
   driverId: String,
+  
+  // Tractor Inspection
+  tractorNumber: String,
+  tractorCondition: {
+    type: String,
+    enum: ['excellent', 'good', 'fair', 'poor'],
+    default: 'good'
+  },
+  tractorDamage: {
+    type: String,
+    enum: ['none', 'minor', 'major'],
+    default: 'none'
+  },
+  tractorLights: {
+    type: Boolean,
+    default: true
+  },
+  tractorCab: {
+    type: Boolean,
+    default: true
+  },
+  tractorExtinguisher: {
+    type: Boolean,
+    default: true
+  },
+  tractorTires: {
+    type: Boolean,
+    default: true
+  },
+  tractorAirLeaks: {
+    type: Boolean,
+    default: false
+  },
+  tractorNotes: String,
+  tractorIssues: {
+    type: Boolean,
+    default: false
+  },
+  
+  // Trailer Inspection
+  trailerNumber: String,
+  trailerDeckCondition: {
+    type: String,
+    enum: ['excellent', 'good', 'fair', 'poor'],
+    default: 'good'
+  },
+  trailerTires: {
+    type: Boolean,
+    default: true
+  },
+  trailerElectrical: {
+    type: Boolean,
+    default: true
+  },
+  trailerClean: {
+    type: Boolean,
+    default: true
+  },
+  trailerDebris: {
+    type: Boolean,
+    default: false
+  },
+  trailerNotes: String,
+  trailerIssues: {
+    type: Boolean,
+    default: false
+  },
+  
+  // Moffett Inspection
+  moffettNumber: String,
+  moffettCondition: {
+    type: String,
+    enum: ['excellent', 'good', 'fair', 'poor'],
+    default: 'good'
+  },
+  moffettTires: {
+    type: Boolean,
+    default: true
+  },
+  moffettElectrical: {
+    type: Boolean,
+    default: true
+  },
+  moffettHydraulic: {
+    type: Boolean,
+    default: false
+  },
+  moffettSeatbelts: {
+    type: Boolean,
+    default: true
+  },
+  moffettNotes: String,
+  moffettIssues: {
+    type: Boolean,
+    default: false
+  },
+  
+  // Legacy fields for backward compatibility
   tractorIssue: {
     type: String,
     default: 'No issues'
@@ -121,10 +220,13 @@ const checkInSchema = new mongoose.Schema({
     type: String,
     default: 'No issues'
   },
+  
   timestamp: {
     type: Date,
     default: Date.now
   }
+}, {
+  timestamps: true
 });
 
 const CheckIn = mongoose.model('CheckIn', checkInSchema);
@@ -138,7 +240,8 @@ app.get('/api/health', async (req, res) => {
     res.json({
       status: 'ok',
       data: {
-        database: dbStatus
+        database: dbStatus,
+        timestamp: new Date().toISOString()
       }
     });
   } catch (error) {
@@ -373,20 +476,64 @@ app.get('/api/checkins', async (req, res) => {
   }
 });
 
-// Create check-in with equipment issues
+// Create detailed check-in with equipment inspection
 app.post('/api/checkins', async (req, res) => {
   try {
+    // Create comprehensive check-in data
     const checkInData = {
+      // Driver info
       driverName: req.body.driverName,
       driverId: req.body.driverId,
-      tractorIssue: req.body.tractorIssue || 'No issues',
-      trailerIssue: req.body.trailerIssue || 'No issues',
-      moffettIssue: req.body.moffettIssue || 'No issues',
+      
+      // Tractor inspection details
+      tractorNumber: req.body.tractorNumber,
+      tractorCondition: req.body.tractorCondition || 'good',
+      tractorDamage: req.body.tractorDamage || 'none',
+      tractorLights: req.body.tractorLights !== false,
+      tractorCab: req.body.tractorCab !== false,
+      tractorExtinguisher: req.body.tractorExtinguisher !== false,
+      tractorTires: req.body.tractorTires !== false,
+      tractorAirLeaks: req.body.tractorAirLeaks === true,
+      tractorNotes: req.body.tractorNotes || '',
+      tractorIssues: req.body.tractorIssues === true,
+      
+      // Trailer inspection details
+      trailerNumber: req.body.trailerNumber,
+      trailerDeckCondition: req.body.trailerDeckCondition || 'good',
+      trailerTires: req.body.trailerTires !== false,
+      trailerElectrical: req.body.trailerElectrical !== false,
+      trailerClean: req.body.trailerClean !== false,
+      trailerDebris: req.body.trailerDebris === true,
+      trailerNotes: req.body.trailerNotes || '',
+      trailerIssues: req.body.trailerIssues === true,
+      
+      // Moffett inspection details
+      moffettNumber: req.body.moffettNumber,
+      moffettCondition: req.body.moffettCondition || 'good',
+      moffettTires: req.body.moffettTires !== false,
+      moffettElectrical: req.body.moffettElectrical !== false,
+      moffettHydraulic: req.body.moffettHydraulic === true,
+      moffettSeatbelts: req.body.moffettSeatbelts !== false,
+      moffettNotes: req.body.moffettNotes || '',
+      moffettIssues: req.body.moffettIssues === true,
+      
+      // Legacy fields for backward compatibility
+      tractorIssue: req.body.tractorIssues ? 'Issues reported' : 'No issues',
+      trailerIssue: req.body.trailerIssues ? 'Issues reported' : 'No issues',
+      moffettIssue: req.body.moffettIssues ? 'Issues reported' : 'No issues',
+      
       timestamp: req.body.timestamp || new Date()
     };
 
     const checkIn = new CheckIn(checkInData);
     await checkIn.save();
+    
+    console.log('Check-in saved:', {
+      driver: checkIn.driverName,
+      tractor: checkIn.tractorIssues ? 'Has issues' : 'OK',
+      trailer: checkIn.trailerIssues ? 'Has issues' : 'OK',
+      moffett: checkIn.moffettIssues ? 'Has issues' : 'OK'
+    });
     
     res.status(201).json({ success: true, data: checkIn });
   } catch (error) {
@@ -395,10 +542,28 @@ app.post('/api/checkins', async (req, res) => {
   }
 });
 
+// Get check-ins with issues (for equipment monitoring)
+app.get('/api/checkins/issues', async (req, res) => {
+  try {
+    const checkInsWithIssues = await CheckIn.find({
+      $or: [
+        { tractorIssues: true },
+        { trailerIssues: true },
+        { moffettIssues: true }
+      ]
+    }).sort({ timestamp: -1 }).limit(50);
+    
+    res.json({ data: checkInsWithIssues });
+  } catch (error) {
+    console.error('Error fetching check-ins with issues:', error);
+    res.status(500).json({ error: 'Failed to fetch check-ins with issues' });
+  }
+});
+
 // ============= SERVE HTML FILES =============
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
 app.get('/admin', (req, res) => {
