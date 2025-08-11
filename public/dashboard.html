@@ -156,12 +156,22 @@
             font-weight: 500;
         }
         
+        .status-indicator.error {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: var(--danger);
+        }
+        
         .pulse {
             width: 8px;
             height: 8px;
             background: var(--success);
             border-radius: 50%;
             animation: pulse 2s infinite;
+        }
+        
+        .pulse.error {
+            background: var(--danger);
         }
         
         @keyframes pulse {
@@ -452,6 +462,7 @@
         
         .activity-item.en-route::before { background: var(--warning); }
         .activity-item.arrived::before { background: var(--success); }
+        .activity-item.pending-checkin::before { background: var(--text-muted); }
         .activity-item.standby::before { background: var(--text-muted); }
         
         .activity-content {
@@ -534,6 +545,12 @@
             background: rgba(16, 185, 129, 0.1);
             color: var(--success);
             border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .status-pending-checkin {
+            background: rgba(100, 116, 139, 0.1);
+            color: var(--text-muted);
+            border: 1px solid rgba(100, 116, 139, 0.3);
         }
         
         .status-standby {
@@ -837,6 +854,17 @@
             opacity: 0.3;
         }
         
+        /* Error State */
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--danger);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem;
+            text-align: center;
+        }
+        
         /* Toast Notifications */
         .toast {
             position: fixed;
@@ -963,9 +991,9 @@
                 </div>
             </div>
             <div class="header-actions">
-                <div class="status-indicator">
+                <div class="status-indicator" id="systemStatus">
                     <div class="pulse"></div>
-                    <span>System Operational</span>
+                    <span id="systemStatusText">System Operational</span>
                 </div>
                 <div class="header-time" id="currentTime">--:--:--</div>
                 <button class="btn btn-secondary" onclick="toggleFullscreen()">
@@ -1342,9 +1370,12 @@
             moffett: []
         };
         let currentCheckinDriver = null;
+        let isConnected = false;
         
         // Initialize Dashboard
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('Dashboard initializing...');
+            checkServerConnection();
             loadNotifications();
             startClock();
             startAutoRefresh();
@@ -1356,50 +1387,97 @@
             }, 500);
         });
         
+        // Check server connection
+        async function checkServerConnection() {
+            try {
+                const response = await fetch('/api/health');
+                if (response.ok) {
+                    isConnected = true;
+                    updateSystemStatus(true);
+                } else {
+                    throw new Error('Server not responding');
+                }
+            } catch (error) {
+                console.error('Server connection failed:', error);
+                isConnected = false;
+                updateSystemStatus(false);
+                // Try to reconnect after 5 seconds
+                setTimeout(checkServerConnection, 5000);
+            }
+        }
+        
+        function updateSystemStatus(connected) {
+            const statusIndicator = document.getElementById('systemStatus');
+            const statusText = document.getElementById('systemStatusText');
+            const pulse = statusIndicator.querySelector('.pulse');
+            
+            if (connected) {
+                statusIndicator.classList.remove('error');
+                pulse.classList.remove('error');
+                statusText.textContent = 'System Operational';
+            } else {
+                statusIndicator.classList.add('error');
+                pulse.classList.add('error');
+                statusText.textContent = 'Connection Error';
+            }
+        }
+        
         function refreshDashboard() {
             showToast('Refreshing', 'Updating dashboard data...', 'info');
             loadNotifications();
         }
         
-        // Load Notifications
+        // Load Notifications with better error handling
         async function loadNotifications() {
             try {
                 console.log('Loading notifications and admin data...');
                 
                 // Use Promise.allSettled for better error handling
                 const [notifResult, usersResult, checkInsResult] = await Promise.allSettled([
-                    fetch('/api/notifications'),
-                    fetch('/api/users'),
-                    fetch('/api/checkins')
+                    fetch('/api/notifications').catch(err => ({ ok: false, error: err })),
+                    fetch('/api/users').catch(err => ({ ok: false, error: err })),
+                    fetch('/api/checkins').catch(err => ({ ok: false, error: err }))
                 ]);
                 
                 let notificationsData = [];
-                if (notifResult.status === 'fulfilled' && notifResult.value.ok) {
-                    const data = await notifResult.value.json();
-                    notificationsData = Array.isArray(data) ? data : (data.data || []);
+                if (notifResult.status === 'fulfilled' && notifResult.value && notifResult.value.ok) {
+                    try {
+                        const data = await notifResult.value.json();
+                        notificationsData = Array.isArray(data) ? data : (data && data.data ? data.data : []);
+                    } catch (e) {
+                        console.error('Error parsing notifications:', e);
+                    }
                 }
                 
                 let adminUsers = [];
-                if (usersResult.status === 'fulfilled' && usersResult.value.ok) {
-                    const userData = await usersResult.value.json();
-                    adminUsers = Array.isArray(userData) ? userData : (userData.data || []);
+                if (usersResult.status === 'fulfilled' && usersResult.value && usersResult.value.ok) {
+                    try {
+                        const userData = await usersResult.value.json();
+                        adminUsers = Array.isArray(userData) ? userData : (userData && userData.data ? userData.data : []);
+                    } catch (e) {
+                        console.error('Error parsing users:', e);
+                    }
                 }
                 
                 let checkInsData = [];
-                if (checkInsResult.status === 'fulfilled' && checkInsResult.value.ok) {
-                    const data = await checkInsResult.value.json();
-                    checkInsData = Array.isArray(data) ? data : (data.data || []);
-                    processEquipmentIssues(checkInsData);
+                if (checkInsResult.status === 'fulfilled' && checkInsResult.value && checkInsResult.value.ok) {
+                    try {
+                        const data = await checkInsResult.value.json();
+                        checkInsData = Array.isArray(data) ? data : (data && data.data ? data.data : []);
+                        processEquipmentIssues(checkInsData);
+                    } catch (e) {
+                        console.error('Error parsing checkins:', e);
+                    }
                 }
                 
                 const activeDriversFromAdmin = adminUsers.filter(user => 
-                    user.role === 'driver' && user.active !== false
+                    user && user.role === 'driver' && user.active !== false
                 );
                 
                 driverStatuses.clear();
                 
                 notificationsData.forEach(n => {
-                    if (n.driver && n.status) {
+                    if (n && n.driver && n.status) {
                         const notificationTime = new Date(n.timestamp).getTime();
                         const driverName = n.driver;
                         
@@ -1414,7 +1492,7 @@
                 
                 const notificationDriverNames = consolidatedNotifications.map(n => n.driver);
                 const pendingCheckInDrivers = activeDriversFromAdmin
-                    .filter(driver => !notificationDriverNames.includes(driver.name))
+                    .filter(driver => driver && driver.name && !notificationDriverNames.includes(driver.name))
                     .map(driver => ({
                         _id: `admin-${driver._id}`,
                         driver: driver.name,
@@ -1431,11 +1509,23 @@
                 updateMetrics(allDriverData, activeDriversFromAdmin);
                 
                 document.getElementById('lastUpdate').innerHTML = `Last updated: ${new Date().toLocaleTimeString()}`;
+                updateSystemStatus(true);
                 
             } catch (error) {
                 console.error('Error loading data:', error);
                 document.getElementById('lastUpdate').innerHTML = `<span style="color: var(--danger);">Failed to load data</span>`;
-                showToast('Connection Error', 'Unable to load fleet data', 'error');
+                
+                // Show error in activity list
+                const activityList = document.getElementById('activityList');
+                activityList.innerHTML = `
+                    <div class="error-message">
+                        <p><strong>Unable to connect to server</strong></p>
+                        <p style="font-size: 0.875rem; margin-top: 0.5rem;">Please ensure the server is running on the correct port.</p>
+                        <button class="btn btn-primary btn-sm" style="margin-top: 1rem;" onclick="loadNotifications()">Retry</button>
+                    </div>
+                `;
+                
+                updateSystemStatus(false);
             }
         }
         
@@ -1447,7 +1537,11 @@
                 moffett: []
             };
             
+            if (!Array.isArray(checkInsData)) return;
+            
             checkInsData.forEach(checkIn => {
+                if (!checkIn) return;
+                
                 // Process tractor issues
                 if (checkIn.tractorIssues) {
                     const issues = [];
@@ -1516,19 +1610,23 @@
         }
         
         function updateEquipmentMetrics() {
-            document.getElementById('tractorValue').textContent = equipmentIssues.tractor.length;
-            document.getElementById('tractorSubtext').textContent = `${equipmentIssues.tractor.length === 1 ? 'active issue' : 'active issues'}`;
+            const tractorCount = equipmentIssues.tractor.length;
+            const trailerCount = equipmentIssues.trailer.length;
+            const moffettCount = equipmentIssues.moffett.length;
             
-            document.getElementById('trailerValue').textContent = equipmentIssues.trailer.length;
-            document.getElementById('trailerSubtext').textContent = `${equipmentIssues.trailer.length === 1 ? 'active issue' : 'active issues'}`;
+            document.getElementById('tractorValue').textContent = tractorCount;
+            document.getElementById('tractorSubtext').textContent = `${tractorCount === 1 ? 'active issue' : 'active issues'}`;
             
-            document.getElementById('moffettValue').textContent = equipmentIssues.moffett.length;
-            document.getElementById('moffettSubtext').textContent = `${equipmentIssues.moffett.length === 1 ? 'active issue' : 'active issues'}`;
+            document.getElementById('trailerValue').textContent = trailerCount;
+            document.getElementById('trailerSubtext').textContent = `${trailerCount === 1 ? 'active issue' : 'active issues'}`;
+            
+            document.getElementById('moffettValue').textContent = moffettCount;
+            document.getElementById('moffettSubtext').textContent = `${moffettCount === 1 ? 'active issue' : 'active issues'}`;
         }
         
         function reportIssue(equipmentType) {
             const issues = equipmentIssues[equipmentType];
-            if (issues.length === 0) {
+            if (!issues || issues.length === 0) {
                 showToast('No Issues', `No active ${equipmentType} issues`, 'info');
             } else {
                 const issueList = issues.map(i => {
@@ -1544,9 +1642,9 @@
         // Update Metrics
         function updateMetrics(allDriverData, adminDrivers = []) {
             const totalRoutedDrivers = allDriverData.length;
-            const enRouteDrivers = allDriverData.filter(n => n.status === 'en-route').length;
-            const arrivedDrivers = allDriverData.filter(n => n.status === 'arrived').length;
-            const pendingCheckInCount = allDriverData.filter(n => n.status === 'pending-checkin').length;
+            const enRouteDrivers = allDriverData.filter(n => n && n.status === 'en-route').length;
+            const arrivedDrivers = allDriverData.filter(n => n && n.status === 'arrived').length;
+            const pendingCheckInCount = allDriverData.filter(n => n && n.status === 'pending-checkin').length;
             
             document.getElementById('activeDrivers').textContent = totalRoutedDrivers;
             document.getElementById('enRouteCount').textContent = enRouteDrivers;
@@ -1561,7 +1659,7 @@
             let feedIcon = '📡';
             
             if (currentFilter !== 'all') {
-                filtered = allDriverData.filter(n => n.status === currentFilter);
+                filtered = allDriverData.filter(n => n && n.status === currentFilter);
                 feedTitle = `${currentFilter.charAt(0).toUpperCase() + currentFilter.slice(1).replace('-', ' ')} Drivers`;
             }
             
@@ -1585,6 +1683,8 @@
                 .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
                 .slice(0, 30)
                 .map(notification => {
+                    if (!notification) return '';
+                    
                     const time = new Date(notification.timestamp).toLocaleTimeString();
                     const timeAgo = getTimeAgo(new Date(notification.timestamp));
                     
