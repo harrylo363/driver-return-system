@@ -143,6 +143,8 @@ const checkInSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  tractorIssuePart: String,
+  tractorIssueDescription: String,
   tractorNotes: String,
   tractorIssues: {
     type: Boolean,
@@ -172,6 +174,8 @@ const checkInSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  trailerIssuePart: String,
+  trailerIssueDescription: String,
   trailerNotes: String,
   trailerIssues: {
     type: Boolean,
@@ -201,6 +205,8 @@ const checkInSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  moffettIssuePart: String,
+  moffettIssueDescription: String,
   moffettNotes: String,
   moffettIssues: {
     type: Boolean,
@@ -494,6 +500,8 @@ app.post('/api/checkins', async (req, res) => {
       tractorExtinguisher: req.body.tractorExtinguisher !== false,
       tractorTires: req.body.tractorTires !== false,
       tractorAirLeaks: req.body.tractorAirLeaks === true,
+      tractorIssuePart: req.body.tractorIssuePart || '',
+      tractorIssueDescription: req.body.tractorIssueDescription || '',
       tractorNotes: req.body.tractorNotes || '',
       tractorIssues: req.body.tractorIssues === true,
       
@@ -504,6 +512,8 @@ app.post('/api/checkins', async (req, res) => {
       trailerElectrical: req.body.trailerElectrical !== false,
       trailerClean: req.body.trailerClean !== false,
       trailerDebris: req.body.trailerDebris === true,
+      trailerIssuePart: req.body.trailerIssuePart || '',
+      trailerIssueDescription: req.body.trailerIssueDescription || '',
       trailerNotes: req.body.trailerNotes || '',
       trailerIssues: req.body.trailerIssues === true,
       
@@ -514,13 +524,21 @@ app.post('/api/checkins', async (req, res) => {
       moffettElectrical: req.body.moffettElectrical !== false,
       moffettHydraulic: req.body.moffettHydraulic === true,
       moffettSeatbelts: req.body.moffettSeatbelts !== false,
+      moffettIssuePart: req.body.moffettIssuePart || '',
+      moffettIssueDescription: req.body.moffettIssueDescription || '',
       moffettNotes: req.body.moffettNotes || '',
       moffettIssues: req.body.moffettIssues === true,
       
       // Legacy fields for backward compatibility
-      tractorIssue: req.body.tractorIssues ? 'Issues reported' : 'No issues',
-      trailerIssue: req.body.trailerIssues ? 'Issues reported' : 'No issues',
-      moffettIssue: req.body.moffettIssues ? 'Issues reported' : 'No issues',
+      tractorIssue: req.body.tractorIssues ? 
+        (req.body.tractorIssuePart ? `${req.body.tractorIssuePart}: ${req.body.tractorIssueDescription}` : 'Issues reported') : 
+        'No issues',
+      trailerIssue: req.body.trailerIssues ? 
+        (req.body.trailerIssuePart ? `${req.body.trailerIssuePart}: ${req.body.trailerIssueDescription}` : 'Issues reported') : 
+        'No issues',
+      moffettIssue: req.body.moffettIssues ? 
+        (req.body.moffettIssuePart ? `${req.body.moffettIssuePart}: ${req.body.moffettIssueDescription}` : 'Issues reported') : 
+        'No issues',
       
       timestamp: req.body.timestamp || new Date()
     };
@@ -530,9 +548,15 @@ app.post('/api/checkins', async (req, res) => {
     
     console.log('Check-in saved:', {
       driver: checkIn.driverName,
-      tractor: checkIn.tractorIssues ? 'Has issues' : 'OK',
-      trailer: checkIn.trailerIssues ? 'Has issues' : 'OK',
-      moffett: checkIn.moffettIssues ? 'Has issues' : 'OK'
+      tractor: checkIn.tractorIssues ? 
+        `Has issues - ${checkIn.tractorIssuePart || 'general'}: ${checkIn.tractorIssueDescription || 'see notes'}` : 
+        'OK',
+      trailer: checkIn.trailerIssues ? 
+        `Has issues - ${checkIn.trailerIssuePart || 'general'}: ${checkIn.trailerIssueDescription || 'see notes'}` : 
+        'OK',
+      moffett: checkIn.moffettIssues ? 
+        `Has issues - ${checkIn.moffettIssuePart || 'general'}: ${checkIn.moffettIssueDescription || 'see notes'}` : 
+        'OK'
     });
     
     res.status(201).json({ success: true, data: checkIn });
