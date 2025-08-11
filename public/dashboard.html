@@ -1094,7 +1094,7 @@
             
             <div class="kpi-card">
                 <div class="kpi-header">
-                    <div class="kpi-icon" style="background: rgba(100, 116, 139, 0.1);">🔨</div>
+                    <div class="kpi-icon" style="background: rgba(100, 116, 139, 0.1);">📦</div>
                 </div>
                 <div class="kpi-value" id="pendingCount">0</div>
                 <div class="kpi-label">Still Working</div>
@@ -1803,7 +1803,7 @@
                     } else if (currentFilter === 'pending-checkin') {
                         filtered = allDriverData.filter(n => n && n.status === 'pending-checkin');
                         feedTitle = 'Still Working - No Return Status';
-                        feedIcon = '🔨';
+                        feedIcon = '📦';
                     }
                     
                     const feedTitleEl = document.getElementById('activityFeedTitle');
