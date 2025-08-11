@@ -1085,20 +1085,20 @@
             
             <div class="kpi-card">
                 <div class="kpi-header">
-                    <div class="kpi-icon" style="background: rgba(100, 116, 139, 0.1);">⏳</div>
-                </div>
-                <div class="kpi-value" id="pendingCount">0</div>
-                <div class="kpi-label">Pending Status</div>
-                <div class="kpi-sublabel">No status yet</div>
-            </div>
-            
-            <div class="kpi-card">
-                <div class="kpi-header">
                     <div class="kpi-icon" style="background: rgba(16, 185, 129, 0.1);">✅</div>
                 </div>
                 <div class="kpi-value" id="completedCount">0</div>
                 <div class="kpi-label">Completed</div>
                 <div class="kpi-sublabel">Checked in today</div>
+            </div>
+            
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-icon" style="background: rgba(100, 116, 139, 0.1);">🔨</div>
+                </div>
+                <div class="kpi-value" id="pendingCount">0</div>
+                <div class="kpi-label">Still Working</div>
+                <div class="kpi-sublabel">Out on routes</div>
             </div>
         </div>
         
@@ -1106,10 +1106,10 @@
         <div class="control-panel">
             <div class="filter-group">
                 <button class="filter-btn active" onclick="FleetDashboard.filterStatus('active', this)">Active Drivers</button>
-                <button class="filter-btn" onclick="FleetDashboard.filterStatus('completed', this)">Completed Check-ins</button>
                 <button class="filter-btn" onclick="FleetDashboard.filterStatus('en-route', this)">En Route Only</button>
                 <button class="filter-btn" onclick="FleetDashboard.filterStatus('arrived', this)">Arrived Only</button>
-                <button class="filter-btn" onclick="FleetDashboard.filterStatus('pending-checkin', this)">Pending Only</button>
+                <button class="filter-btn" onclick="FleetDashboard.filterStatus('completed', this)">Completed Check-ins</button>
+                <button class="filter-btn" onclick="FleetDashboard.filterStatus('pending-checkin', this)">Still Working</button>
             </div>
             <button class="btn btn-secondary" onclick="FleetDashboard.exportData()">
                 <span>📊</span>
@@ -1802,8 +1802,8 @@
                         feedIcon = '🏁';
                     } else if (currentFilter === 'pending-checkin') {
                         filtered = allDriverData.filter(n => n && n.status === 'pending-checkin');
-                        feedTitle = 'Pending Check-in';
-                        feedIcon = '⏳';
+                        feedTitle = 'Still Working - No Return Status';
+                        feedIcon = '🔨';
                     }
                     
                     const feedTitleEl = document.getElementById('activityFeedTitle');
