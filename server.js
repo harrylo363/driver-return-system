@@ -1,354 +1,370 @@
-// server.js - Complete server file with all enhancements
-// This is a complete replacement for your existing server.js file
-
 const express = require('express');
-const cors = require('cors');
-const path = require('path');
 const { MongoClient } = require('mongodb');
+const path = require('path');
 const http = require('http');
-
-// Check if optional packages are installed
-let io = null;
-let multer = null;
-let PDFDocument = null;
-let ExcelJS = null;
-let Parser = null;
-
-try {
-    const socketIO = require('socket.io');
-    io = socketIO;
-    console.log('✅ WebSocket support enabled');
-} catch (e) {
-    console.log('⚠️  Socket.io not installed - real-time features disabled');
-}
-
-try {
-    multer = require('multer');
-    console.log('✅ Photo upload support enabled');
-} catch (e) {
-    console.log('⚠️  Multer not installed - photo upload disabled');
-}
-
-try {
-    PDFDocument = require('pdfkit');
-    console.log('✅ PDF export support enabled');
-} catch (e) {
-    console.log('⚠️  PDFKit not installed - PDF export disabled');
-}
-
-try {
-    ExcelJS = require('exceljs');
-    console.log('✅ Excel export support enabled');
-} catch (e) {
-    console.log('⚠️  ExcelJS not installed - Excel export disabled');
-}
-
-try {
-    const { Parser: CSVParser } = require('json2csv');
-    Parser = CSVParser;
-    console.log('✅ CSV export support enabled');
-} catch (e) {
-    console.log('⚠️  json2csv not installed - CSV export disabled');
-}
+const WebSocket = require('ws');
+const multer = require('multer');
+const fs = require('fs').promises;
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const server = http.createServer(app);
 
-// MongoDB connection string - REPLACE WITH YOUR ACTUAL CONNECTION STRING
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://YOUR_USERNAME:YOUR_PASSWORD@YOUR_CLUSTER.mongodb.net/YOUR_DATABASE?retryWrites=true&w=majority';
+// Initialize WebSocket server (optional - will work without it)
+let wss;
+try {
+    wss = new WebSocket.Server({ server });
+    console.log('WebSocket server initialized');
+    
+    wss.on('connection', (ws) => {
+        console.log('New WebSocket connection');
+        
+        ws.on('message', async (message) => {
+            try {
+                const data = JSON.parse(message);
+                
+                // Broadcast to all connected clients
+                wss.clients.forEach(client => {
+                    if (client.readyState === WebSocket.OPEN) {
+                        client.send(JSON.stringify(data));
+                    }
+                });
+            } catch (error) {
+                console.error('WebSocket message error:', error);
+            }
+        });
+        
+        ws.on('close', () => {
+            console.log('WebSocket connection closed');
+        });
+    });
+} catch (error) {
+    console.log('WebSocket not available - falling back to polling');
+}
+
+// MongoDB setup
+const mongoUrl = process.env.MONGODB_URI || 'mongodb://localhost:27017';
+const dbName = 'fleet_management';
+let db;
+
+// File upload configuration
+const upload = multer({ 
+    dest: 'uploads/',
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+    fileFilter: (req, file, cb) => {
+        const allowedTypes = /jpeg|jpg|png|gif|pdf/;
+        const mimetype = allowedTypes.test(file.mimetype);
+        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+        
+        if (mimetype && extname) {
+            return cb(null, true);
+        } else {
+            cb(new Error('Only image and PDF files are allowed'));
+        }
+    }
+});
 
 // Middleware
-app.use(cors());
 app.use(express.json());
-app.use(express.static('public')); // Serve your HTML files from 'public' folder
-app.use('/uploads', express.static('uploads')); // Serve uploaded files
-
-// MongoDB client
-let db;
-let mongoClient;
-let socketServer = null;
-let ioInstance = null;
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'public')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Connect to MongoDB
-async function connectToMongoDB() {
-    try {
-        mongoClient = new MongoClient(MONGODB_URI);
-        await mongoClient.connect();
-        db = mongoClient.db();
-        console.log('✅ Connected to MongoDB');
+MongoClient.connect(mongoUrl, { useUnifiedTopology: true })
+    .then(client => {
+        console.log('Connected to MongoDB');
+        db = client.db(dbName);
         
         // Initialize collections if they don't exist
-        const collections = await db.listCollections().toArray();
-        const collectionNames = collections.map(c => c.name);
+        initializeDatabase();
+    })
+    .catch(error => {
+        console.error('MongoDB connection error:', error);
+        process.exit(1);
+    });
+
+// Initialize database collections and indexes
+async function initializeDatabase() {
+    try {
+        // Create collections if they don't exist
+        const collections = ['drivers', 'messages', 'logs', 'checkins', 'reports'];
         
-        if (!collectionNames.includes('users')) {
-            await db.createCollection('users');
-            console.log('Created users collection');
-        }
-        if (!collectionNames.includes('notifications')) {
-            await db.createCollection('notifications');
-            console.log('Created notifications collection');
-        }
-        if (!collectionNames.includes('checkins')) {
-            await db.createCollection('checkins');
-            console.log('Created checkins collection');
-        }
-        if (!collectionNames.includes('messages')) {
-            await db.createCollection('messages');
-            console.log('Created messages collection');
-        }
-        if (!collectionNames.includes('equipment_photos')) {
-            await db.createCollection('equipment_photos');
-            console.log('Created equipment_photos collection');
+        for (const collection of collections) {
+            const exists = await db.listCollections({ name: collection }).toArray();
+            if (exists.length === 0) {
+                await db.createCollection(collection);
+                console.log(`Created collection: ${collection}`);
+            }
         }
         
-        return true;
+        // Create indexes for better performance
+        await db.collection('drivers').createIndex({ id: 1 });
+        await db.collection('drivers').createIndex({ status: 1 });
+        await db.collection('messages').createIndex({ timestamp: -1 });
+        await db.collection('messages').createIndex({ recipientId: 1 });
+        await db.collection('logs').createIndex({ timestamp: -1 });
+        await db.collection('checkins').createIndex({ timestamp: -1 });
+        await db.collection('checkins').createIndex({ driverId: 1 });
+        
+        console.log('Database initialized successfully');
     } catch (error) {
-        console.error('❌ MongoDB connection error:', error);
-        return false;
+        console.error('Database initialization error:', error);
     }
 }
 
-// Initialize WebSocket if available
-function initializeWebSocket(server) {
-    if (!io) return null;
-    
-    const socketIO = io;
-    ioInstance = socketIO(server, {
-        cors: {
-            origin: "*",
-            methods: ["GET", "POST"]
+// Routes
+
+// Serve HTML files
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+});
+
+app.get('/driver', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'driver.html'));
+});
+
+// Get all drivers
+app.get('/api/drivers', async (req, res) => {
+    try {
+        const drivers = await db.collection('drivers').find({}).toArray();
+        res.json(drivers);
+    } catch (error) {
+        console.error('Error fetching drivers:', error);
+        res.status(500).json({ error: 'Failed to fetch drivers' });
+    }
+});
+
+// Update driver status
+app.post('/api/update-status', async (req, res) => {
+    try {
+        const { driverId, status, location, notes } = req.body;
+        
+        const updateData = {
+            status,
+            lastUpdate: new Date(),
+            notes: notes || ''
+        };
+        
+        if (location) {
+            updateData.location = location;
+            updateData.locationUpdated = new Date();
         }
-    });
-    
-    ioInstance.on('connection', (socket) => {
-        console.log('New WebSocket client connected:', socket.id);
         
-        socket.on('join-dashboard', () => {
-            socket.join('dashboard');
-            console.log('Dashboard user joined');
-        });
-        
-        socket.on('join-driver-room', (driverId) => {
-            socket.join(`driver-${driverId}`);
-            console.log(`Driver ${driverId} joined`);
-        });
-        
-        socket.on('driver-message', async (data) => {
-            try {
-                await db.collection('messages').insertOne({
-                    ...data,
-                    timestamp: new Date(),
-                    read: false
-                });
-                ioInstance.to('dashboard').emit('new-driver-message', data);
-            } catch (error) {
-                console.error('Error handling message:', error);
-            }
-        });
-        
-        socket.on('dispatch-message', async (data) => {
-            try {
-                await db.collection('messages').insertOne({
-                    ...data,
-                    timestamp: new Date()
-                });
-                if (data.to) {
-                    ioInstance.to(`driver-${data.to}`).emit('new-message', data);
+        await db.collection('drivers').updateOne(
+            { id: driverId },
+            { 
+                $set: updateData,
+                $setOnInsert: { 
+                    id: driverId,
+                    name: `Driver ${driverId}`,
+                    createdAt: new Date()
                 }
-            } catch (error) {
-                console.error('Error handling dispatch message:', error);
-            }
+            },
+            { upsert: true }
+        );
+        
+        // Log the status change
+        await db.collection('logs').insertOne({
+            type: 'status_change',
+            driverId,
+            status,
+            timestamp: new Date(),
+            location
         });
         
-        socket.on('disconnect', () => {
-            console.log('Client disconnected:', socket.id);
-        });
-    });
-    
-    return ioInstance;
-}
-
-// Configure photo upload if multer is available
-const configureUpload = () => {
-    if (!multer) return null;
-    
-    const storage = multer.diskStorage({
-        destination: (req, file, cb) => {
-            const uploadDir = 'uploads/equipment-photos';
-            const fs = require('fs');
-            if (!fs.existsSync('uploads')) {
-                fs.mkdirSync('uploads');
-            }
-            if (!fs.existsSync(uploadDir)) {
-                fs.mkdirSync(uploadDir, { recursive: true });
-            }
-            cb(null, uploadDir);
-        },
-        filename: (req, file, cb) => {
-            const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1E9)}${path.extname(file.originalname)}`;
-            cb(null, uniqueName);
-        }
-    });
-    
-    return multer({ 
-        storage: storage,
-        limits: { fileSize: 10 * 1024 * 1024 }
-    });
-};
-
-const upload = configureUpload();
-
-// ===================== API ROUTES =====================
-
-// Health check endpoint
-app.get('/api/health', async (req, res) => {
-    res.json({
-        success: true,
-        data: {
-            server: 'running',
-            database: db ? 'connected' : 'disconnected',
-            websocket: ioInstance ? 'enabled' : 'disabled',
-            timestamp: new Date()
-        }
-    });
-});
-
-// Get users (for driver dropdown)
-app.get('/api/users', async (req, res) => {
-    try {
-        const { role } = req.query;
-        const query = role ? { role } : {};
-        const users = await db.collection('users').find(query).toArray();
-        res.json({ success: true, data: users });
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-// Create/update user
-app.post('/api/users', async (req, res) => {
-    try {
-        const user = {
-            ...req.body,
-            updatedAt: new Date()
-        };
-        
-        if (user._id) {
-            const { _id, ...updateData } = user;
-            await db.collection('users').updateOne(
-                { _id: new MongoClient.ObjectId(_id) },
-                { $set: updateData }
-            );
-        } else {
-            user.createdAt = new Date();
-            await db.collection('users').insertOne(user);
-        }
-        
-        res.json({ success: true, data: user });
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-// Get notifications (driver status updates)
-app.get('/api/notifications', async (req, res) => {
-    try {
-        const { limit = 100 } = req.query;
-        const notifications = await db.collection('notifications')
-            .find({})
-            .sort({ timestamp: -1 })
-            .limit(parseInt(limit))
-            .toArray();
-        res.json({ success: true, data: notifications });
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-// Create notification (driver status update)
-app.post('/api/notifications', async (req, res) => {
-    try {
-        const notification = {
-            ...req.body,
-            timestamp: new Date()
-        };
-        
-        const result = await db.collection('notifications').insertOne(notification);
-        
-        // Emit WebSocket event if available
-        if (ioInstance) {
-            ioInstance.to('dashboard').emit('driver-update', {
-                driverId: req.body.driverId,
-                driver: req.body.driver,
-                status: req.body.status,
-                timestamp: notification.timestamp,
-                type: 'status-change'
+        // Send WebSocket notification if available
+        if (wss) {
+            const notification = {
+                type: 'status_update',
+                driverId,
+                status,
+                timestamp: new Date().toISOString()
+            };
+            
+            wss.clients.forEach(client => {
+                if (client.readyState === WebSocket.OPEN) {
+                    client.send(JSON.stringify(notification));
+                }
             });
         }
         
-        res.json({ success: true, data: result });
+        res.json({ success: true, message: 'Status updated successfully' });
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        console.error('Status update error:', error);
+        res.status(500).json({ error: 'Failed to update status' });
     }
 });
 
-// Get check-ins
-app.get('/api/checkins', async (req, res) => {
-    try {
-        const checkins = await db.collection('checkins')
-            .find({})
-            .sort({ timestamp: -1 })
-            .limit(100)
-            .toArray();
-        res.json({ success: true, data: checkins });
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-// Create check-in
+// Handle check-in submissions from arrived drivers
 app.post('/api/checkins', async (req, res) => {
     try {
-        const checkin = {
-            ...req.body,
-            timestamp: new Date()
+        const checkinData = {
+            driverId: req.body.driverId,
+            driverName: req.body.driverName,
+            timestamp: new Date(),
+            equipment: {
+                condition: req.body.equipmentCondition,
+                issues: req.body.equipmentIssues || '',
+                photos: req.body.photos || []
+            },
+            notes: req.body.notes || '',
+            location: req.body.location || null
         };
+
+        // Store check-in data
+        const result = await db.collection('checkins').insertOne(checkinData);
         
-        const result = await db.collection('checkins').insertOne(checkin);
+        // Update driver status to 'working'
+        await db.collection('drivers').updateOne(
+            { id: req.body.driverId },
+            { 
+                $set: { 
+                    status: 'working',
+                    checkinTime: new Date(),
+                    lastUpdate: new Date(),
+                    currentEquipmentCondition: req.body.equipmentCondition
+                }
+            }
+        );
+
+        // Log the check-in event
+        await db.collection('logs').insertOne({
+            type: 'checkin',
+            driverId: req.body.driverId,
+            driverName: req.body.driverName,
+            timestamp: new Date(),
+            details: {
+                equipmentCondition: req.body.equipmentCondition,
+                hasIssues: !!req.body.equipmentIssues
+            }
+        });
+
+        // Send notification through WebSocket if available
+        if (wss) {
+            const notification = {
+                type: 'checkin',
+                driverId: req.body.driverId,
+                driverName: req.body.driverName,
+                status: 'working',
+                equipmentCondition: req.body.equipmentCondition,
+                timestamp: new Date().toISOString()
+            };
+
+            wss.clients.forEach(client => {
+                if (client.readyState === WebSocket.OPEN) {
+                    client.send(JSON.stringify(notification));
+                }
+            });
+        }
+
+        res.json({ 
+            success: true, 
+            message: 'Check-in completed successfully',
+            checkinId: result.insertedId 
+        });
+
+    } catch (error) {
+        console.error('Check-in error:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Failed to process check-in',
+            error: error.message 
+        });
+    }
+});
+
+// Get check-in history
+app.get('/api/checkins', async (req, res) => {
+    try {
+        const { driverId, date, limit = 50 } = req.query;
         
-        // Emit WebSocket event if available
-        if (ioInstance) {
-            ioInstance.to('dashboard').emit('new-inspection', checkin);
+        let query = {};
+        
+        if (driverId) {
+            query.driverId = driverId;
         }
         
-        res.json({ success: true, data: result });
+        if (date) {
+            const startDate = new Date(date);
+            startDate.setHours(0, 0, 0, 0);
+            const endDate = new Date(date);
+            endDate.setHours(23, 59, 59, 999);
+            
+            query.timestamp = {
+                $gte: startDate,
+                $lte: endDate
+            };
+        }
+
+        const checkins = await db.collection('checkins')
+            .find(query)
+            .sort({ timestamp: -1 })
+            .limit(parseInt(limit))
+            .toArray();
+
+        res.json(checkins);
+
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        console.error('Error fetching check-ins:', error);
+        res.status(500).json({ 
+            error: 'Failed to fetch check-in history',
+            message: error.message 
+        });
+    }
+});
+
+// Get equipment issues summary
+app.get('/api/equipment-status', async (req, res) => {
+    try {
+        // Get all check-ins from today
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const checkins = await db.collection('checkins')
+            .find({
+                timestamp: { $gte: today },
+                'equipment.condition': { $ne: 'good' }
+            })
+            .sort({ timestamp: -1 })
+            .toArray();
+
+        // Get current equipment conditions from drivers
+        const drivers = await db.collection('drivers')
+            .find({ 
+                status: { $in: ['working', 'arrived'] },
+                currentEquipmentCondition: { $exists: true }
+            })
+            .toArray();
+
+        const summary = {
+            totalIssues: checkins.length,
+            critical: checkins.filter(c => c.equipment.condition === 'critical').length,
+            maintenance: checkins.filter(c => c.equipment.condition === 'maintenance').length,
+            recentIssues: checkins.slice(0, 5).map(c => ({
+                driverName: c.driverName,
+                condition: c.equipment.condition,
+                issues: c.equipment.issues,
+                timestamp: c.timestamp
+            })),
+            activeEquipment: drivers.map(d => ({
+                driverName: d.name,
+                condition: d.currentEquipmentCondition || 'unknown',
+                status: d.status
+            }))
+        };
+
+        res.json(summary);
+
+    } catch (error) {
+        console.error('Error fetching equipment status:', error);
+        res.status(500).json({ 
+            error: 'Failed to fetch equipment status',
+            message: error.message 
+        });
     }
 });
 
 // Messages endpoints
-app.get('/api/messages/:userId', async (req, res) => {
-    try {
-        const { userId } = req.params;
-        const messages = await db.collection('messages')
-            .find({
-                $or: [
-                    { to: userId },
-                    { from: userId },
-                    { to: 'dispatch' }
-                ]
-            })
-            .sort({ timestamp: -1 })
-            .limit(50)
-            .toArray();
-        res.json(messages);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
 app.post('/api/messages', async (req, res) => {
     try {
         const message = {
@@ -359,223 +375,211 @@ app.post('/api/messages', async (req, res) => {
         
         const result = await db.collection('messages').insertOne(message);
         
-        if (ioInstance) {
-            if (message.to === 'dispatch') {
-                ioInstance.to('dashboard').emit('new-driver-message', message);
-            } else {
-                ioInstance.to(`driver-${message.to}`).emit('new-message', message);
-            }
+        // Send via WebSocket if available
+        if (wss) {
+            wss.clients.forEach(client => {
+                if (client.readyState === WebSocket.OPEN) {
+                    client.send(JSON.stringify({
+                        type: 'new_message',
+                        message
+                    }));
+                }
+            });
         }
         
-        res.json({ success: true, data: result });
+        res.json({ success: true, messageId: result.insertedId });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error('Message send error:', error);
+        res.status(500).json({ error: 'Failed to send message' });
     }
 });
 
-// Photo upload endpoint (if multer is available)
-if (upload) {
-    app.post('/api/upload-photo', upload.single('photo'), async (req, res) => {
-        try {
-            const photoData = {
-                photoId: req.file.filename,
-                originalName: req.file.originalname,
-                path: req.file.path,
-                size: req.file.size,
-                uploadedAt: new Date(),
-                driverId: req.body.driverId,
-                description: req.body.description
-            };
-            
-            await db.collection('equipment_photos').insertOne(photoData);
-            
-            res.json({ 
-                success: true, 
-                photoId: photoData.photoId,
-                url: `/uploads/equipment-photos/${photoData.photoId}`
-            });
-        } catch (error) {
-            res.status(500).json({ error: error.message });
-        }
-    });
-}
-
-// CSV Export (if json2csv is available)
-if (Parser) {
-    app.get('/api/export/csv', async (req, res) => {
-        try {
-            const { startDate, endDate } = req.query;
-            const query = {};
-            
-            if (startDate && endDate) {
-                query.timestamp = {
-                    $gte: new Date(startDate),
-                    $lte: new Date(endDate)
-                };
-            }
-            
-            const inspections = await db.collection('checkins').find(query).toArray();
-            
-            const fields = ['driverId', 'name', 'timestamp', 'status', 'generalNotes'];
-            const json2csvParser = new Parser({ fields });
-            const csv = json2csvParser.parse(inspections);
-            
-            res.header('Content-Type', 'text/csv');
-            res.attachment(`inspections_${Date.now()}.csv`);
-            res.send(csv);
-        } catch (error) {
-            res.status(500).json({ error: error.message });
-        }
-    });
-}
-
-// PDF Export (if pdfkit is available)
-if (PDFDocument) {
-    app.get('/api/export/pdf', async (req, res) => {
-        try {
-            const { startDate, endDate } = req.query;
-            const query = {};
-            
-            if (startDate && endDate) {
-                query.timestamp = {
-                    $gte: new Date(startDate),
-                    $lte: new Date(endDate)
-                };
-            }
-            
-            const inspections = await db.collection('checkins').find(query).toArray();
-            
-            const doc = new PDFDocument();
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename=inspections_${Date.now()}.pdf`);
-            
-            doc.pipe(res);
-            
-            doc.fontSize(20).text('Equipment Inspection Report', { align: 'center' });
-            doc.moveDown();
-            doc.fontSize(12).text(`Generated: ${new Date().toLocaleDateString()}`, { align: 'center' });
-            doc.moveDown(2);
-            
-            inspections.forEach((inspection, index) => {
-                if (index > 0 && index % 3 === 0) doc.addPage();
-                
-                doc.fontSize(14).text(`Inspection #${index + 1}`, { underline: true });
-                doc.fontSize(12);
-                doc.text(`Driver: ${inspection.driverId} - ${inspection.name || 'N/A'}`);
-                doc.text(`Date: ${new Date(inspection.timestamp).toLocaleString()}`);
-                doc.text(`Status: ${inspection.status || 'N/A'}`);
-                
-                if (inspection.generalNotes) {
-                    doc.text(`Notes: ${inspection.generalNotes}`);
-                }
-                doc.moveDown();
-            });
-            
-            doc.end();
-        } catch (error) {
-            res.status(500).json({ error: error.message });
-        }
-    });
-}
-
-// Excel Export (if exceljs is available)
-if (ExcelJS) {
-    app.get('/api/export/excel', async (req, res) => {
-        try {
-            const { startDate, endDate } = req.query;
-            const query = {};
-            
-            if (startDate && endDate) {
-                query.timestamp = {
-                    $gte: new Date(startDate),
-                    $lte: new Date(endDate)
-                };
-            }
-            
-            const inspections = await db.collection('checkins').find(query).toArray();
-            
-            const workbook = new ExcelJS.Workbook();
-            const worksheet = workbook.addWorksheet('Inspections');
-            
-            worksheet.columns = [
-                { header: 'Driver ID', key: 'driverId', width: 15 },
-                { header: 'Name', key: 'name', width: 20 },
-                { header: 'Timestamp', key: 'timestamp', width: 20 },
-                { header: 'Status', key: 'status', width: 15 },
-                { header: 'Notes', key: 'generalNotes', width: 40 }
+app.get('/api/messages', async (req, res) => {
+    try {
+        const { driverId, limit = 50 } = req.query;
+        
+        let query = {};
+        if (driverId) {
+            query.$or = [
+                { senderId: driverId },
+                { recipientId: driverId }
             ];
-            
-            worksheet.getRow(1).font = { bold: true };
-            
-            inspections.forEach(inspection => {
-                worksheet.addRow({
-                    driverId: inspection.driverId,
-                    name: inspection.name || 'N/A',
-                    timestamp: new Date(inspection.timestamp).toLocaleString(),
-                    status: inspection.status,
-                    generalNotes: inspection.generalNotes || ''
-                });
-            });
-            
-            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            res.setHeader('Content-Disposition', `attachment; filename=inspections_${Date.now()}.xlsx`);
-            
-            await workbook.xlsx.write(res);
-            res.end();
-        } catch (error) {
-            res.status(500).json({ error: error.message });
         }
+        
+        const messages = await db.collection('messages')
+            .find(query)
+            .sort({ timestamp: -1 })
+            .limit(parseInt(limit))
+            .toArray();
+        
+        res.json(messages);
+    } catch (error) {
+        console.error('Message fetch error:', error);
+        res.status(500).json({ error: 'Failed to fetch messages' });
+    }
+});
+
+// Upload photo endpoint
+app.post('/api/upload-photo', upload.single('photo'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+        
+        const photoData = {
+            filename: req.file.filename,
+            originalName: req.file.originalname,
+            path: `/uploads/${req.file.filename}`,
+            uploadedAt: new Date(),
+            uploadedBy: req.body.driverId || 'unknown',
+            type: req.body.type || 'equipment_damage'
+        };
+        
+        await db.collection('photos').insertOne(photoData);
+        
+        res.json({ 
+            success: true, 
+            photo: photoData 
+        });
+    } catch (error) {
+        console.error('Photo upload error:', error);
+        res.status(500).json({ error: 'Failed to upload photo' });
+    }
+});
+
+// Export endpoints
+app.get('/api/export/:format', async (req, res) => {
+    try {
+        const { format } = req.params;
+        const { startDate, endDate } = req.query;
+        
+        let query = {};
+        if (startDate && endDate) {
+            query.timestamp = {
+                $gte: new Date(startDate),
+                $lte: new Date(endDate)
+            };
+        }
+        
+        const logs = await db.collection('logs').find(query).toArray();
+        const drivers = await db.collection('drivers').find({}).toArray();
+        
+        switch (format) {
+            case 'csv':
+                const csv = generateCSV(logs, drivers);
+                res.setHeader('Content-Type', 'text/csv');
+                res.setHeader('Content-Disposition', 'attachment; filename=fleet_report.csv');
+                res.send(csv);
+                break;
+                
+            case 'pdf':
+                // For PDF generation, you'd need to install and use a library like puppeteer or pdfkit
+                // For now, returning a simple HTML that can be printed to PDF
+                const html = generateHTMLReport(logs, drivers);
+                res.setHeader('Content-Type', 'text/html');
+                res.send(html);
+                break;
+                
+            case 'excel':
+                // For Excel, you'd need a library like exceljs
+                // For now, returning CSV with Excel-compatible headers
+                const excelCsv = generateCSV(logs, drivers);
+                res.setHeader('Content-Type', 'application/vnd.ms-excel');
+                res.setHeader('Content-Disposition', 'attachment; filename=fleet_report.xls');
+                res.send(excelCsv);
+                break;
+                
+            default:
+                res.status(400).json({ error: 'Invalid format' });
+        }
+    } catch (error) {
+        console.error('Export error:', error);
+        res.status(500).json({ error: 'Failed to generate export' });
+    }
+});
+
+// Helper functions for export
+function generateCSV(logs, drivers) {
+    let csv = 'Date,Time,Driver ID,Driver Name,Status,Event Type\n';
+    
+    logs.forEach(log => {
+        const driver = drivers.find(d => d.id === log.driverId) || {};
+        const date = new Date(log.timestamp);
+        csv += `${date.toLocaleDateString()},${date.toLocaleTimeString()},${log.driverId},${driver.name || 'Unknown'},${log.status || 'N/A'},${log.type}\n`;
     });
+    
+    return csv;
 }
+
+function generateHTMLReport(logs, drivers) {
+    const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Fleet Management Report</title>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            h1 { color: #333; }
+            table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #4CAF50; color: white; }
+            tr:nth-child(even) { background-color: #f2f2f2; }
+        </style>
+    </head>
+    <body>
+        <h1>Fleet Management Report</h1>
+        <p>Generated on: ${new Date().toLocaleString()}</p>
+        <p>Total Events: ${logs.length}</p>
+        <p>Active Drivers: ${drivers.filter(d => d.status !== 'offline').length}</p>
+        
+        <h2>Recent Activity</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Driver</th>
+                    <th>Status</th>
+                    <th>Event</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${logs.slice(0, 100).map(log => {
+                    const driver = drivers.find(d => d.id === log.driverId) || {};
+                    const date = new Date(log.timestamp);
+                    return `
+                        <tr>
+                            <td>${date.toLocaleDateString()}</td>
+                            <td>${date.toLocaleTimeString()}</td>
+                            <td>${driver.name || 'Unknown'}</td>
+                            <td>${log.status || 'N/A'}</td>
+                            <td>${log.type}</td>
+                        </tr>
+                    `;
+                }).join('')}
+            </tbody>
+        </table>
+    </body>
+    </html>
+    `;
+    
+    return html;
+}
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+    res.json({ 
+        status: 'healthy',
+        mongodb: db ? 'connected' : 'disconnected',
+        websocket: wss ? 'enabled' : 'disabled',
+        timestamp: new Date().toISOString()
+    });
+});
 
 // Start server
-async function startServer() {
-    const connected = await connectToMongoDB();
-    
-    if (!connected) {
-        console.log('⚠️  Starting server without MongoDB connection');
-    }
-    
-    // Create HTTP server
-    const server = http.createServer(app);
-    
-    // Initialize WebSocket if available
-    if (io) {
-        initializeWebSocket(server);
-    }
-    
-    // Start listening
-    server.listen(PORT, () => {
-        console.log(`
-========================================
-🚀 Fleet Management Server Running
-========================================
-📍 Port: ${PORT}
-🌐 URL: http://localhost:${PORT}
-📊 Dashboard: http://localhost:${PORT}/dashboard.html
-🚛 Driver Portal: http://localhost:${PORT}/driver.html
-========================================
-Features Status:
-${db ? '✅' : '❌'} MongoDB Database
-${ioInstance ? '✅' : '❌'} Real-time WebSocket
-${upload ? '✅' : '❌'} Photo Upload
-${Parser ? '✅' : '❌'} CSV Export
-${PDFDocument ? '✅' : '❌'} PDF Export
-${ExcelJS ? '✅' : '❌'} Excel Export
-========================================
-        `);
-    });
-}
-
-// Handle graceful shutdown
-process.on('SIGINT', async () => {
-    console.log('\nShutting down gracefully...');
-    if (mongoClient) {
-        await mongoClient.close();
-        console.log('MongoDB connection closed');
-    }
-    process.exit(0);
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+    console.log(`Dashboard: http://localhost:${PORT}`);
+    console.log(`Driver Portal: http://localhost:${PORT}/driver`);
 });
-
-// Start the server
-startServer();
