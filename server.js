@@ -1,5 +1,5 @@
 const express = require('express');
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 const path = require('path');
 const http = require('http');
 const WebSocket = require('ws');
@@ -98,7 +98,7 @@ MongoClient.connect(mongoUrl, { useUnifiedTopology: true })
 async function initializeDatabase() {
     try {
         // Create collections if they don't exist
-        const collections = ['drivers', 'notifications', 'messages', 'logs', 'checkins', 'reports'];
+        const collections = ['drivers', 'users', 'notifications', 'messages', 'logs', 'checkins', 'reports'];
         
         for (const collection of collections) {
             const exists = await db.listCollections({ name: collection }).toArray();
@@ -111,6 +111,8 @@ async function initializeDatabase() {
         // Create indexes for better performance
         await db.collection('drivers').createIndex({ id: 1 });
         await db.collection('drivers').createIndex({ status: 1 });
+        await db.collection('users').createIndex({ email: 1 });
+        await db.collection('users').createIndex({ role: 1 });
         await db.collection('notifications').createIndex({ timestamp: -1 });
         await db.collection('notifications').createIndex({ driverId: 1 });
         await db.collection('messages').createIndex({ timestamp: -1 });
@@ -136,12 +138,20 @@ app.get('/driver', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'driver.html'));
 });
 
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
 app.get('/dashboard.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
 app.get('/driver.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'driver.html'));
+});
+
+app.get('/admin.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
 // Get all notifications (for dashboard)
@@ -524,6 +534,286 @@ app.get('/api/messages', async (req, res) => {
     }
 });
 
+// ============= USER MANAGEMENT ENDPOINTS =============
+
+// Get all users
+app.get('/api/users', async (req, res) => {
+    try {
+        const users = await db.collection('users').find({}).toArray();
+        res.json({
+            success: true,
+            data: users,
+            count: users.length
+        });
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        res.status(500).json({ 
+            success: false,
+            error: 'Failed to fetch users',
+            data: []
+        });
+    }
+});
+
+// Create new user
+app.post('/api/users', async (req, res) => {
+    try {
+        const userData = {
+            name: req.body.name,
+            email: req.body.email || '',
+            phoneNumber: req.body.phoneNumber || '',
+            role: req.body.role || 'driver',
+            vehicleId: req.body.vehicleId || '',
+            active: req.body.active !== false,
+            pushNotifications: req.body.pushNotifications !== false,
+            createdAt: new Date(),
+            updatedAt: new Date()
+        };
+
+        // Validate required fields
+        if (!userData.name || !userData.role) {
+            return res.status(400).json({
+                success: false,
+                error: 'Name and role are required'
+            });
+        }
+
+        // Check if user with same email already exists (if email provided)
+        if (userData.email) {
+            const existingUser = await db.collection('users').findOne({ email: userData.email });
+            if (existingUser) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'User with this email already exists'
+                });
+            }
+        }
+
+        // Insert user
+        const result = await db.collection('users').insertOne(userData);
+        
+        // Also create a driver record if role is driver
+        if (userData.role === 'driver') {
+            await db.collection('drivers').insertOne({
+                id: result.insertedId.toString(),
+                name: userData.name,
+                status: 'offline',
+                vehicleId: userData.vehicleId,
+                createdAt: new Date()
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'User created successfully',
+            userId: result.insertedId
+        });
+
+    } catch (error) {
+        console.error('Error creating user:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to create user'
+        });
+    }
+});
+
+// Update user
+app.patch('/api/users/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        
+        const updateData = {
+            ...req.body,
+            updatedAt: new Date()
+        };
+
+        // Remove fields that shouldn't be updated
+        delete updateData._id;
+        delete updateData.createdAt;
+
+        const result = await db.collection('users').updateOne(
+            { _id: new ObjectId(userId) },
+            { $set: updateData }
+        );
+
+        if (result.matchedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                error: 'User not found'
+            });
+        }
+
+        // Also update driver record if exists
+        if (updateData.name || updateData.vehicleId) {
+            await db.collection('drivers').updateOne(
+                { id: userId },
+                { 
+                    $set: {
+                        name: updateData.name,
+                        vehicleId: updateData.vehicleId
+                    }
+                }
+            );
+        }
+
+        res.json({
+            success: true,
+            message: 'User updated successfully'
+        });
+
+    } catch (error) {
+        console.error('Error updating user:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to update user'
+        });
+    }
+});
+
+// Delete user
+app.delete('/api/users/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        const result = await db.collection('users').deleteOne(
+            { _id: new ObjectId(userId) }
+        );
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                error: 'User not found'
+            });
+        }
+
+        // Also delete associated driver record
+        await db.collection('drivers').deleteOne({ id: userId });
+
+        res.json({
+            success: true,
+            message: 'User deleted successfully'
+        });
+
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to delete user'
+        });
+    }
+});
+
+// Bulk create users
+app.post('/api/users/bulk', async (req, res) => {
+    try {
+        const users = req.body.users;
+        
+        if (!Array.isArray(users) || users.length === 0) {
+            return res.status(400).json({
+                success: false,
+                error: 'No users provided'
+            });
+        }
+
+        const validUsers = [];
+        const errors = [];
+
+        // Validate and prepare users
+        for (let i = 0; i < users.length; i++) {
+            const user = users[i];
+            if (!user.name || !user.role) {
+                errors.push(`Row ${i + 1}: Name and role are required`);
+                continue;
+            }
+
+            validUsers.push({
+                name: user.name,
+                email: user.email || '',
+                phoneNumber: user.phoneNumber || '',
+                role: user.role || 'driver',
+                vehicleId: user.vehicleId || '',
+                active: user.active !== false,
+                pushNotifications: user.pushNotifications !== false,
+                createdAt: new Date(),
+                updatedAt: new Date()
+            });
+        }
+
+        if (validUsers.length === 0) {
+            return res.status(400).json({
+                success: false,
+                error: 'No valid users to create',
+                errors
+            });
+        }
+
+        // Insert all valid users
+        const result = await db.collection('users').insertMany(validUsers);
+
+        // Create driver records for users with driver role
+        const driverRecords = validUsers
+            .filter(user => user.role === 'driver')
+            .map((user, index) => ({
+                id: result.insertedIds[index].toString(),
+                name: user.name,
+                status: 'offline',
+                vehicleId: user.vehicleId,
+                createdAt: new Date()
+            }));
+
+        if (driverRecords.length > 0) {
+            await db.collection('drivers').insertMany(driverRecords);
+        }
+
+        res.json({
+            success: true,
+            message: `Created ${result.insertedCount} users`,
+            created: result.insertedCount,
+            errors: errors.length > 0 ? errors : undefined
+        });
+
+    } catch (error) {
+        console.error('Error in bulk user creation:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to create users'
+        });
+    }
+});
+
+// Get user statistics
+app.get('/api/users/stats', async (req, res) => {
+    try {
+        const totalUsers = await db.collection('users').countDocuments();
+        const activeUsers = await db.collection('users').countDocuments({ active: true });
+        const drivers = await db.collection('users').countDocuments({ role: 'driver' });
+        const dispatchers = await db.collection('users').countDocuments({ role: 'dispatcher' });
+        const admins = await db.collection('users').countDocuments({ role: 'admin' });
+
+        res.json({
+            success: true,
+            data: {
+                total: totalUsers,
+                active: activeUsers,
+                inactive: totalUsers - activeUsers,
+                byRole: {
+                    drivers,
+                    dispatchers,
+                    admins
+                }
+            }
+        });
+
+    } catch (error) {
+        console.error('Error fetching user stats:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to fetch statistics'
+        });
+    }
+});
+
 // Export endpoints
 app.get('/api/export/:format', async (req, res) => {
     try {
@@ -642,13 +932,41 @@ function generateHTMLReport(logs, drivers) {
 }
 
 // Health check endpoint
-app.get('/api/health', (req, res) => {
-    res.json({ 
-        status: 'healthy',
-        mongodb: db ? 'connected' : 'disconnected',
-        websocket: wss ? 'enabled' : 'disabled',
-        timestamp: new Date().toISOString()
-    });
+app.get('/api/health', async (req, res) => {
+    try {
+        // Test database connection
+        const dbStatus = db ? 'connected' : 'disconnected';
+        let userCount = 0;
+        let driverCount = 0;
+        
+        if (db) {
+            try {
+                userCount = await db.collection('users').countDocuments();
+                driverCount = await db.collection('drivers').countDocuments();
+            } catch (e) {
+                console.error('Error counting documents:', e);
+            }
+        }
+
+        res.json({ 
+            status: 'healthy',
+            data: {
+                database: dbStatus,
+                websocket: wss ? 'enabled' : 'disabled',
+                collections: {
+                    users: userCount,
+                    drivers: driverCount
+                }
+            },
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error('Health check error:', error);
+        res.status(500).json({
+            status: 'error',
+            error: error.message
+        });
+    }
 });
 
 // Start server
@@ -657,4 +975,5 @@ server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
     console.log(`Dashboard: http://localhost:${PORT}`);
     console.log(`Driver Portal: http://localhost:${PORT}/driver`);
+    console.log(`Admin Panel: http://localhost:${PORT}/admin`);
 });
