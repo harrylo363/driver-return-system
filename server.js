@@ -1,614 +1,581 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Driver Status Portal</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        
-        .container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-width: 500px;
-            width: 100%;
-            padding: 40px;
-            animation: fadeIn 0.5s ease;
-        }
-        
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        /* Login Screen */
-        .login-screen {
-            display: block;
-        }
-        
-        .login-screen.hidden {
-            display: none;
-        }
-        
-        /* Main Screen */
-        .main-screen {
-            display: none;
-        }
-        
-        .main-screen.visible {
-            display: block;
-        }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-        
-        .logo {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
-            margin: 0 auto 20px;
-            color: white;
-        }
-        
-        h1 {
-            color: #1a202c;
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-        
-        .subtitle {
-            color: #718096;
-            font-size: 16px;
-        }
-        
-        /* Login Form */
-        .form-group {
-            margin-bottom: 25px;
-        }
-        
-        .form-label {
-            display: block;
-            color: #4a5568;
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-        
-        .driver-select {
-            width: 100%;
-            padding: 15px;
-            font-size: 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            background: #f7fafc;
-            color: #2d3748;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234a5568' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 15px center;
-            background-size: 20px;
-        }
-        
-        .driver-select:focus {
-            outline: none;
-            border-color: #667eea;
-            background-color: white;
-        }
-        
-        .login-btn {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        }
-        
-        .login-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
-        }
-        
-        .login-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        /* Driver Info */
-        .driver-info {
-            background: #f7fafc;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 30px;
-            text-align: center;
-        }
-        
-        .driver-name {
-            font-size: 20px;
-            font-weight: 600;
-            color: #2d3748;
-            margin-bottom: 5px;
-        }
-        
-        .vehicle-id {
-            color: #718096;
-            font-size: 14px;
-        }
-        
-        /* Connection Status */
-        .connection-status {
-            text-align: center;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            margin: 20px auto;
-            display: inline-block;
-        }
-        
-        .status-connected {
-            background: rgba(16, 185, 129, 0.1);
-            color: #10b981;
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-        
-        .status-disconnected {
-            background: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
-            border: 1px solid rgba(239, 68, 68, 0.3);
-        }
-        
-        /* Status Section */
-        .status-section {
-            margin-bottom: 30px;
-        }
-        
-        .section-title {
-            color: #4a5568;
-            font-size: 16px;
-            font-weight: 600;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        .status-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        
-        .status-btn {
-            padding: 20px;
-            border: none;
-            border-radius: 12px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            color: white;
-            position: relative;
-        }
-        
-        .status-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-        }
-        
-        .status-btn:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-        }
-        
-        .btn-30min {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
-        }
-        
-        .btn-30min:hover:not(:disabled) {
-            box-shadow: 0 6px 25px rgba(245, 158, 11, 0.4);
-        }
-        
-        .btn-arrived {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-        }
-        
-        .btn-arrived:hover:not(:disabled) {
-            box-shadow: 0 6px 25px rgba(16, 185, 129, 0.4);
-        }
-        
-        /* Loading Spinner */
-        .loading {
-            display: none;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s ease-in-out infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        .status-btn.sending .btn-text {
-            display: none;
-        }
-        
-        .status-btn.sending .loading {
-            display: inline-block;
-        }
-        
-        /* Notification */
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: white;
-            padding: 16px 24px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            z-index: 9999;
-            animation: slideIn 0.3s ease;
-            min-width: 250px;
-        }
-        
-        .notification.success {
-            border-left: 4px solid #10b981;
-        }
-        
-        .notification.error {
-            border-left: 4px solid #ef4444;
-        }
-        
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        
-        @keyframes slideOut {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(100%); opacity: 0; }
-        }
-        
-        /* Sign Out */
-        .signout-section {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #e2e8f0;
-            text-align: center;
-        }
-        
-        .signout-btn {
-            background: transparent;
-            color: #667eea;
-            border: 2px solid #667eea;
-            padding: 10px 30px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .signout-btn:hover {
-            background: #667eea;
-            color: white;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <!-- Login Screen -->
-        <div class="login-screen" id="loginScreen">
-            <div class="header">
-                <div class="logo">🚚</div>
-                <h1>Driver Portal</h1>
-                <p class="subtitle">Warehouse Status Updates</p>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label" for="driverSelect">Select Your Name</label>
-                <select class="driver-select" id="driverSelect">
-                    <option value="">-- Loading drivers... --</option>
-                </select>
-            </div>
-            
-            <button class="login-btn" onclick="login()" disabled id="loginBtn">
-                Continue
-            </button>
-        </div>
-        
-        <!-- Main Screen -->
-        <div class="main-screen" id="mainScreen">
-            <div class="header">
-                <div class="logo">🚚</div>
-                <h1>Status Update</h1>
-                <p class="subtitle">Send Warehouse Notifications</p>
-            </div>
-            
-            <div class="driver-info">
-                <div class="driver-name" id="driverName">Driver Name</div>
-                <div class="vehicle-id" id="vehicleId">Vehicle: TRUCK-001</div>
-            </div>
-            
-            <div style="text-align: center;">
-                <div class="connection-status" id="connectionStatus">
-                    <span>Checking connection...</span>
-                </div>
-            </div>
-            
-            <div class="status-section">
-                <div class="section-title">Select Your Status</div>
-                <div class="status-buttons">
-                    <button class="status-btn btn-30min" onclick="sendUpdate('30min')" id="btn30min">
-                        <span class="btn-text">
-                            <span>🕐</span>
-                            <span>30 Minutes Away</span>
-                        </span>
-                        <span class="loading"></span>
-                    </button>
-                    
-                    <button class="status-btn btn-arrived" onclick="sendUpdate('arrived')" id="btnArrived">
-                        <span class="btn-text">
-                            <span>✅</span>
-                            <span>Arrived at Warehouse</span>
-                        </span>
-                        <span class="loading"></span>
-                    </button>
-                </div>
-            </div>
-            
-            <div class="signout-section">
-                <button class="signout-btn" onclick="signOut()">Sign Out</button>
-            </div>
-        </div>
-    </div>
+// server.js - Complete server file with all enhancements
+// This is a complete replacement for your existing server.js file
 
-    <script>
-        let currentDriver = null;
-        let currentVehicle = null;
-        let currentDriverId = null;
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
+const { MongoClient } = require('mongodb');
+const http = require('http');
+
+// Check if optional packages are installed
+let io = null;
+let multer = null;
+let PDFDocument = null;
+let ExcelJS = null;
+let Parser = null;
+
+try {
+    const socketIO = require('socket.io');
+    io = socketIO;
+    console.log('✅ WebSocket support enabled');
+} catch (e) {
+    console.log('⚠️  Socket.io not installed - real-time features disabled');
+}
+
+try {
+    multer = require('multer');
+    console.log('✅ Photo upload support enabled');
+} catch (e) {
+    console.log('⚠️  Multer not installed - photo upload disabled');
+}
+
+try {
+    PDFDocument = require('pdfkit');
+    console.log('✅ PDF export support enabled');
+} catch (e) {
+    console.log('⚠️  PDFKit not installed - PDF export disabled');
+}
+
+try {
+    ExcelJS = require('exceljs');
+    console.log('✅ Excel export support enabled');
+} catch (e) {
+    console.log('⚠️  ExcelJS not installed - Excel export disabled');
+}
+
+try {
+    const { Parser: CSVParser } = require('json2csv');
+    Parser = CSVParser;
+    console.log('✅ CSV export support enabled');
+} catch (e) {
+    console.log('⚠️  json2csv not installed - CSV export disabled');
+}
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// MongoDB connection string - REPLACE WITH YOUR ACTUAL CONNECTION STRING
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://YOUR_USERNAME:YOUR_PASSWORD@YOUR_CLUSTER.mongodb.net/YOUR_DATABASE?retryWrites=true&w=majority';
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.static('public')); // Serve your HTML files from 'public' folder
+app.use('/uploads', express.static('uploads')); // Serve uploaded files
+
+// MongoDB client
+let db;
+let mongoClient;
+let socketServer = null;
+let ioInstance = null;
+
+// Connect to MongoDB
+async function connectToMongoDB() {
+    try {
+        mongoClient = new MongoClient(MONGODB_URI);
+        await mongoClient.connect();
+        db = mongoClient.db();
+        console.log('✅ Connected to MongoDB');
         
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            loadDriversFromDatabase();
-            checkConnection();
-            
-            // Check connection every 30 seconds
-            setInterval(checkConnection, 30000);
-            
-            // Enable login button when driver selected
-            document.getElementById('driverSelect').addEventListener('change', function() {
-                document.getElementById('loginBtn').disabled = !this.value;
-            });
+        // Initialize collections if they don't exist
+        const collections = await db.listCollections().toArray();
+        const collectionNames = collections.map(c => c.name);
+        
+        if (!collectionNames.includes('users')) {
+            await db.createCollection('users');
+            console.log('Created users collection');
+        }
+        if (!collectionNames.includes('notifications')) {
+            await db.createCollection('notifications');
+            console.log('Created notifications collection');
+        }
+        if (!collectionNames.includes('checkins')) {
+            await db.createCollection('checkins');
+            console.log('Created checkins collection');
+        }
+        if (!collectionNames.includes('messages')) {
+            await db.createCollection('messages');
+            console.log('Created messages collection');
+        }
+        if (!collectionNames.includes('equipment_photos')) {
+            await db.createCollection('equipment_photos');
+            console.log('Created equipment_photos collection');
+        }
+        
+        return true;
+    } catch (error) {
+        console.error('❌ MongoDB connection error:', error);
+        return false;
+    }
+}
+
+// Initialize WebSocket if available
+function initializeWebSocket(server) {
+    if (!io) return null;
+    
+    const socketIO = io;
+    ioInstance = socketIO(server, {
+        cors: {
+            origin: "*",
+            methods: ["GET", "POST"]
+        }
+    });
+    
+    ioInstance.on('connection', (socket) => {
+        console.log('New WebSocket client connected:', socket.id);
+        
+        socket.on('join-dashboard', () => {
+            socket.join('dashboard');
+            console.log('Dashboard user joined');
         });
         
-        // Load drivers from MongoDB
-        async function loadDriversFromDatabase() {
+        socket.on('join-driver-room', (driverId) => {
+            socket.join(`driver-${driverId}`);
+            console.log(`Driver ${driverId} joined`);
+        });
+        
+        socket.on('driver-message', async (data) => {
             try {
-                const response = await fetch('/api/users?role=driver');
-                
-                if (response.ok) {
-                    const result = await response.json();
-                    const drivers = result.data || [];
-                    
-                    const activeDrivers = drivers.filter(d => d.active !== false);
-                    
-                    const select = document.getElementById('driverSelect');
-                    
-                    if (activeDrivers.length === 0) {
-                        select.innerHTML = '<option value="">No drivers found</option>';
-                        return;
-                    }
-                    
-                    select.innerHTML = '<option value="">-- Choose your name --</option>';
-                    
-                    activeDrivers.forEach(driver => {
-                        const option = document.createElement('option');
-                        option.value = driver._id;
-                        option.textContent = driver.name;
-                        option.dataset.vehicle = driver.vehicleId || 'No Vehicle';
-                        option.dataset.name = driver.name;
-                        select.appendChild(option);
-                    });
-                    
-                } else {
-                    throw new Error('Failed to load drivers');
-                }
-            } catch (error) {
-                console.error('Error loading drivers:', error);
-                
-                // Fallback to sample drivers if database is not connected
-                const select = document.getElementById('driverSelect');
-                select.innerHTML = `
-                    <option value="">-- Choose your name --</option>
-                    <option value="sample1" data-vehicle="TRUCK-001" data-name="John Smith">John Smith</option>
-                    <option value="sample2" data-vehicle="TRUCK-002" data-name="Sarah Johnson">Sarah Johnson</option>
-                    <option value="sample3" data-vehicle="TRUCK-003" data-name="Mike Wilson">Mike Wilson</option>
-                    <option value="sample4" data-vehicle="TRUCK-004" data-name="Emily Davis">Emily Davis</option>
-                    <option value="sample5" data-vehicle="TRUCK-005" data-name="David Brown">David Brown</option>
-                `;
-            }
-        }
-        
-        // Check MongoDB connection
-        async function checkConnection() {
-            try {
-                const response = await fetch('/api/health');
-                const statusEl = document.getElementById('connectionStatus');
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.data && data.data.database === 'connected') {
-                        statusEl.innerHTML = '<span class="status-connected">✅ Connected to Database</span>';
-                        statusEl.className = 'connection-status status-connected';
-                    } else {
-                        statusEl.innerHTML = '<span class="status-disconnected">⚠️ Database Offline</span>';
-                        statusEl.className = 'connection-status status-disconnected';
-                    }
-                } else {
-                    throw new Error('Connection failed');
-                }
-            } catch (error) {
-                const statusEl = document.getElementById('connectionStatus');
-                statusEl.innerHTML = '<span class="status-disconnected">❌ No Connection</span>';
-                statusEl.className = 'connection-status status-disconnected';
-            }
-        }
-        
-        // Login function
-        function login() {
-            const select = document.getElementById('driverSelect');
-            const selectedOption = select.options[select.selectedIndex];
-            
-            if (!select.value) {
-                alert('Please select your name');
-                return;
-            }
-            
-            currentDriverId = select.value;
-            currentDriver = selectedOption.dataset.name;
-            currentVehicle = selectedOption.dataset.vehicle;
-            
-            showMainScreen();
-        }
-        
-        // Show main screen
-        function showMainScreen() {
-            document.getElementById('loginScreen').classList.add('hidden');
-            document.getElementById('mainScreen').classList.add('visible');
-            document.getElementById('driverName').textContent = currentDriver;
-            document.getElementById('vehicleId').textContent = `Vehicle: ${currentVehicle}`;
-        }
-        
-        // Sign out
-        function signOut() {
-            currentDriver = null;
-            currentVehicle = null;
-            currentDriverId = null;
-            
-            document.getElementById('loginScreen').classList.remove('hidden');
-            document.getElementById('mainScreen').classList.remove('visible');
-            document.getElementById('driverSelect').value = '';
-            document.getElementById('loginBtn').disabled = true;
-        }
-        
-        // Send update to MongoDB
-        async function sendUpdate(type) {
-            const button = type === '30min' ? document.getElementById('btn30min') : document.getElementById('btnArrived');
-            
-            // Show loading
-            button.classList.add('sending');
-            button.disabled = true;
-            
-            const now = new Date();
-            let status, message;
-            
-            if (type === '30min') {
-                status = '30 minutes away';
-                message = `${currentDriver} is 30 minutes away from warehouse`;
-            } else {
-                status = 'arrived';
-                message = `${currentDriver} has arrived at warehouse`;
-            }
-            
-            try {
-                // Send to MongoDB via API
-                const response = await fetch('/api/notifications', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        driver: currentDriver,
-                        driverId: currentDriverId,
-                        status: status,
-                        message: message,
-                        warehouse: '5856 Tampa FDC',
-                        location: 'Driver location',
-                        timestamp: now.toISOString()
-                    })
+                await db.collection('messages').insertOne({
+                    ...data,
+                    timestamp: new Date(),
+                    read: false
                 });
-                
-                if (response.ok) {
-                    const result = await response.json();
-                    console.log('Status sent to database:', result);
-                    showNotification('✅ Status Sent', message, 'success');
-                } else {
-                    throw new Error('Failed to send status');
-                }
-                
+                ioInstance.to('dashboard').emit('new-driver-message', data);
             } catch (error) {
-                console.error('Error sending status:', error);
-                showNotification('❌ Error', 'Failed to send status. Please try again.', 'error');
-            } finally {
-                // Remove loading state
-                setTimeout(() => {
-                    button.classList.remove('sending');
-                    button.disabled = false;
-                }, 1000);
+                console.error('Error handling message:', error);
+            }
+        });
+        
+        socket.on('dispatch-message', async (data) => {
+            try {
+                await db.collection('messages').insertOne({
+                    ...data,
+                    timestamp: new Date()
+                });
+                if (data.to) {
+                    ioInstance.to(`driver-${data.to}`).emit('new-message', data);
+                }
+            } catch (error) {
+                console.error('Error handling dispatch message:', error);
+            }
+        });
+        
+        socket.on('disconnect', () => {
+            console.log('Client disconnected:', socket.id);
+        });
+    });
+    
+    return ioInstance;
+}
+
+// Configure photo upload if multer is available
+const configureUpload = () => {
+    if (!multer) return null;
+    
+    const storage = multer.diskStorage({
+        destination: (req, file, cb) => {
+            const uploadDir = 'uploads/equipment-photos';
+            const fs = require('fs');
+            if (!fs.existsSync('uploads')) {
+                fs.mkdirSync('uploads');
+            }
+            if (!fs.existsSync(uploadDir)) {
+                fs.mkdirSync(uploadDir, { recursive: true });
+            }
+            cb(null, uploadDir);
+        },
+        filename: (req, file, cb) => {
+            const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1E9)}${path.extname(file.originalname)}`;
+            cb(null, uniqueName);
+        }
+    });
+    
+    return multer({ 
+        storage: storage,
+        limits: { fileSize: 10 * 1024 * 1024 }
+    });
+};
+
+const upload = configureUpload();
+
+// ===================== API ROUTES =====================
+
+// Health check endpoint
+app.get('/api/health', async (req, res) => {
+    res.json({
+        success: true,
+        data: {
+            server: 'running',
+            database: db ? 'connected' : 'disconnected',
+            websocket: ioInstance ? 'enabled' : 'disabled',
+            timestamp: new Date()
+        }
+    });
+});
+
+// Get users (for driver dropdown)
+app.get('/api/users', async (req, res) => {
+    try {
+        const { role } = req.query;
+        const query = role ? { role } : {};
+        const users = await db.collection('users').find(query).toArray();
+        res.json({ success: true, data: users });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Create/update user
+app.post('/api/users', async (req, res) => {
+    try {
+        const user = {
+            ...req.body,
+            updatedAt: new Date()
+        };
+        
+        if (user._id) {
+            const { _id, ...updateData } = user;
+            await db.collection('users').updateOne(
+                { _id: new MongoClient.ObjectId(_id) },
+                { $set: updateData }
+            );
+        } else {
+            user.createdAt = new Date();
+            await db.collection('users').insertOne(user);
+        }
+        
+        res.json({ success: true, data: user });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Get notifications (driver status updates)
+app.get('/api/notifications', async (req, res) => {
+    try {
+        const { limit = 100 } = req.query;
+        const notifications = await db.collection('notifications')
+            .find({})
+            .sort({ timestamp: -1 })
+            .limit(parseInt(limit))
+            .toArray();
+        res.json({ success: true, data: notifications });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Create notification (driver status update)
+app.post('/api/notifications', async (req, res) => {
+    try {
+        const notification = {
+            ...req.body,
+            timestamp: new Date()
+        };
+        
+        const result = await db.collection('notifications').insertOne(notification);
+        
+        // Emit WebSocket event if available
+        if (ioInstance) {
+            ioInstance.to('dashboard').emit('driver-update', {
+                driverId: req.body.driverId,
+                driver: req.body.driver,
+                status: req.body.status,
+                timestamp: notification.timestamp,
+                type: 'status-change'
+            });
+        }
+        
+        res.json({ success: true, data: result });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Get check-ins
+app.get('/api/checkins', async (req, res) => {
+    try {
+        const checkins = await db.collection('checkins')
+            .find({})
+            .sort({ timestamp: -1 })
+            .limit(100)
+            .toArray();
+        res.json({ success: true, data: checkins });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Create check-in
+app.post('/api/checkins', async (req, res) => {
+    try {
+        const checkin = {
+            ...req.body,
+            timestamp: new Date()
+        };
+        
+        const result = await db.collection('checkins').insertOne(checkin);
+        
+        // Emit WebSocket event if available
+        if (ioInstance) {
+            ioInstance.to('dashboard').emit('new-inspection', checkin);
+        }
+        
+        res.json({ success: true, data: result });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Messages endpoints
+app.get('/api/messages/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const messages = await db.collection('messages')
+            .find({
+                $or: [
+                    { to: userId },
+                    { from: userId },
+                    { to: 'dispatch' }
+                ]
+            })
+            .sort({ timestamp: -1 })
+            .limit(50)
+            .toArray();
+        res.json(messages);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post('/api/messages', async (req, res) => {
+    try {
+        const message = {
+            ...req.body,
+            timestamp: new Date(),
+            read: false
+        };
+        
+        const result = await db.collection('messages').insertOne(message);
+        
+        if (ioInstance) {
+            if (message.to === 'dispatch') {
+                ioInstance.to('dashboard').emit('new-driver-message', message);
+            } else {
+                ioInstance.to(`driver-${message.to}`).emit('new-message', message);
             }
         }
         
-        // Show notification
-        function showNotification(title, message, type = 'success') {
-            const existing = document.querySelector('.notification');
-            if (existing) existing.remove();
+        res.json({ success: true, data: result });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Photo upload endpoint (if multer is available)
+if (upload) {
+    app.post('/api/upload-photo', upload.single('photo'), async (req, res) => {
+        try {
+            const photoData = {
+                photoId: req.file.filename,
+                originalName: req.file.originalname,
+                path: req.file.path,
+                size: req.file.size,
+                uploadedAt: new Date(),
+                driverId: req.body.driverId,
+                description: req.body.description
+            };
             
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            notification.innerHTML = `
-                <div style="font-weight: bold; margin-bottom: 4px;">${title}</div>
-                <div style="font-size: 14px; color: #4a5568;">${message}</div>
-            `;
-            document.body.appendChild(notification);
+            await db.collection('equipment_photos').insertOne(photoData);
             
-            setTimeout(() => {
-                notification.style.animation = 'slideOut 0.3s ease';
-                setTimeout(() => notification.remove(), 300);
-            }, 4000);
+            res.json({ 
+                success: true, 
+                photoId: photoData.photoId,
+                url: `/uploads/equipment-photos/${photoData.photoId}`
+            });
+        } catch (error) {
+            res.status(500).json({ error: error.message });
         }
-    </script>
-</body>
-</html>
+    });
+}
+
+// CSV Export (if json2csv is available)
+if (Parser) {
+    app.get('/api/export/csv', async (req, res) => {
+        try {
+            const { startDate, endDate } = req.query;
+            const query = {};
+            
+            if (startDate && endDate) {
+                query.timestamp = {
+                    $gte: new Date(startDate),
+                    $lte: new Date(endDate)
+                };
+            }
+            
+            const inspections = await db.collection('checkins').find(query).toArray();
+            
+            const fields = ['driverId', 'name', 'timestamp', 'status', 'generalNotes'];
+            const json2csvParser = new Parser({ fields });
+            const csv = json2csvParser.parse(inspections);
+            
+            res.header('Content-Type', 'text/csv');
+            res.attachment(`inspections_${Date.now()}.csv`);
+            res.send(csv);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    });
+}
+
+// PDF Export (if pdfkit is available)
+if (PDFDocument) {
+    app.get('/api/export/pdf', async (req, res) => {
+        try {
+            const { startDate, endDate } = req.query;
+            const query = {};
+            
+            if (startDate && endDate) {
+                query.timestamp = {
+                    $gte: new Date(startDate),
+                    $lte: new Date(endDate)
+                };
+            }
+            
+            const inspections = await db.collection('checkins').find(query).toArray();
+            
+            const doc = new PDFDocument();
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename=inspections_${Date.now()}.pdf`);
+            
+            doc.pipe(res);
+            
+            doc.fontSize(20).text('Equipment Inspection Report', { align: 'center' });
+            doc.moveDown();
+            doc.fontSize(12).text(`Generated: ${new Date().toLocaleDateString()}`, { align: 'center' });
+            doc.moveDown(2);
+            
+            inspections.forEach((inspection, index) => {
+                if (index > 0 && index % 3 === 0) doc.addPage();
+                
+                doc.fontSize(14).text(`Inspection #${index + 1}`, { underline: true });
+                doc.fontSize(12);
+                doc.text(`Driver: ${inspection.driverId} - ${inspection.name || 'N/A'}`);
+                doc.text(`Date: ${new Date(inspection.timestamp).toLocaleString()}`);
+                doc.text(`Status: ${inspection.status || 'N/A'}`);
+                
+                if (inspection.generalNotes) {
+                    doc.text(`Notes: ${inspection.generalNotes}`);
+                }
+                doc.moveDown();
+            });
+            
+            doc.end();
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    });
+}
+
+// Excel Export (if exceljs is available)
+if (ExcelJS) {
+    app.get('/api/export/excel', async (req, res) => {
+        try {
+            const { startDate, endDate } = req.query;
+            const query = {};
+            
+            if (startDate && endDate) {
+                query.timestamp = {
+                    $gte: new Date(startDate),
+                    $lte: new Date(endDate)
+                };
+            }
+            
+            const inspections = await db.collection('checkins').find(query).toArray();
+            
+            const workbook = new ExcelJS.Workbook();
+            const worksheet = workbook.addWorksheet('Inspections');
+            
+            worksheet.columns = [
+                { header: 'Driver ID', key: 'driverId', width: 15 },
+                { header: 'Name', key: 'name', width: 20 },
+                { header: 'Timestamp', key: 'timestamp', width: 20 },
+                { header: 'Status', key: 'status', width: 15 },
+                { header: 'Notes', key: 'generalNotes', width: 40 }
+            ];
+            
+            worksheet.getRow(1).font = { bold: true };
+            
+            inspections.forEach(inspection => {
+                worksheet.addRow({
+                    driverId: inspection.driverId,
+                    name: inspection.name || 'N/A',
+                    timestamp: new Date(inspection.timestamp).toLocaleString(),
+                    status: inspection.status,
+                    generalNotes: inspection.generalNotes || ''
+                });
+            });
+            
+            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            res.setHeader('Content-Disposition', `attachment; filename=inspections_${Date.now()}.xlsx`);
+            
+            await workbook.xlsx.write(res);
+            res.end();
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    });
+}
+
+// Start server
+async function startServer() {
+    const connected = await connectToMongoDB();
+    
+    if (!connected) {
+        console.log('⚠️  Starting server without MongoDB connection');
+    }
+    
+    // Create HTTP server
+    const server = http.createServer(app);
+    
+    // Initialize WebSocket if available
+    if (io) {
+        initializeWebSocket(server);
+    }
+    
+    // Start listening
+    server.listen(PORT, () => {
+        console.log(`
+========================================
+🚀 Fleet Management Server Running
+========================================
+📍 Port: ${PORT}
+🌐 URL: http://localhost:${PORT}
+📊 Dashboard: http://localhost:${PORT}/dashboard.html
+🚛 Driver Portal: http://localhost:${PORT}/driver.html
+========================================
+Features Status:
+${db ? '✅' : '❌'} MongoDB Database
+${ioInstance ? '✅' : '❌'} Real-time WebSocket
+${upload ? '✅' : '❌'} Photo Upload
+${Parser ? '✅' : '❌'} CSV Export
+${PDFDocument ? '✅' : '❌'} PDF Export
+${ExcelJS ? '✅' : '❌'} Excel Export
+========================================
+        `);
+    });
+}
+
+// Handle graceful shutdown
+process.on('SIGINT', async () => {
+    console.log('\nShutting down gracefully...');
+    if (mongoClient) {
+        await mongoClient.close();
+        console.log('MongoDB connection closed');
+    }
+    process.exit(0);
+});
+
+// Start the server
+startServer();
