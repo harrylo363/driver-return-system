@@ -505,10 +505,20 @@
             border: 1px solid rgba(16, 185, 129, 0.3);
         }
         
+        .status-still-working {
+            background: rgba(100, 116, 139, 0.1);
+            color: var(--text-muted);
+            border: 1px solid rgba(100, 116, 139, 0.3);
+        }
+        
         .status-completed {
             background: rgba(16, 185, 129, 0.1);
             color: var(--success);
             border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .activity-item.still-working::before { 
+            background: var(--text-muted); 
         }
         
         .activity-item.completed::before { 
@@ -945,7 +955,7 @@
                 <button class="filter-btn active" onclick="filterDrivers('active', this)">Active Operations</button>
                 <button class="filter-btn" onclick="filterDrivers('en-route', this)">En Route</button>
                 <button class="filter-btn" onclick="filterDrivers('arrived', this)">Arrived</button>
-                <button class="filter-btn" onclick="filterDrivers('pending-checkin', this)">Pending Check-in</button>
+                <button class="filter-btn" onclick="filterDrivers('still-working', this)">Still Working</button>
                 <button class="filter-btn" onclick="filterDrivers('completed', this)">✓ Completed</button>
             </div>
             <button class="btn btn-secondary" onclick="refreshDashboard()">
