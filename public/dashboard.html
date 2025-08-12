@@ -3,39 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fleet Command Center | Enterprise Logistics Platform</title>
-    
-    <!-- Isolate from extension errors -->
-    <script>
-        // Capture and suppress extension errors
-        window.addEventListener('error', function(e) {
-            // Check if error is from extensions
-            if (e.filename && (
-                e.filename.includes('chrome-extension://') || 
-                e.filename.includes('moz-extension://') ||
-                e.filename.includes('extension://') ||
-                e.filename.includes('Feature_extension')
-            )) {
-                e.preventDefault();
-                console.log('Extension error suppressed:', e.message);
-                return true;
-            }
-            // Let application errors through for debugging
-            console.error('Application error:', e);
-        });
-        
-        // Suppress unhandled promise rejections from extensions
-        window.addEventListener('unhandledrejection', function(e) {
-            if (e.reason && e.reason.stack && (
-                e.reason.stack.includes('chrome-extension://') ||
-                e.reason.stack.includes('Feature_extension')
-            )) {
-                e.preventDefault();
-                console.log('Extension promise rejection suppressed');
-                return true;
-            }
-        });
-    </script>
+    <title>Fleet Command Center - Enhanced</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
     <!-- Premium Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -212,13 +183,6 @@
             100% { opacity: 1; transform: scale(1); }
         }
         
-        .header-time {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-            font-variant-numeric: tabular-nums;
-        }
-        
         /* Main Container */
         .container {
             max-width: 1920px;
@@ -367,17 +331,6 @@
             transform: translateY(-2px);
         }
         
-        .btn-success {
-            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-            color: white;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-        }
-        
-        .btn-success:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
-        }
-        
         .filter-group {
             display: flex;
             background: var(--bg-card);
@@ -412,13 +365,14 @@
             background: var(--accent);
         }
         
-        /* Activity Feed */
+        /* Dashboard Grid */
         .dashboard-grid {
             display: grid;
             grid-template-columns: 2fr 1fr;
             gap: 2rem;
         }
         
+        /* Activity Section */
         .activity-section {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -495,7 +449,6 @@
         .activity-item.en-route::before { background: var(--warning); }
         .activity-item.arrived::before { background: var(--success); }
         .activity-item.pending-checkin::before { background: var(--text-muted); }
-        .activity-item.standby::before { background: var(--text-muted); }
         
         .activity-content {
             display: flex;
@@ -529,35 +482,6 @@
             gap: 0.25rem;
         }
         
-        .activity-actions {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .checkin-btn {
-            padding: 0.5rem 1rem;
-            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            animation: pulseGreen 2s infinite;
-        }
-        
-        @keyframes pulseGreen {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
-            50% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
-        }
-        
-        .checkin-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
-        }
-        
         .status-badge {
             padding: 0.375rem 0.875rem;
             border-radius: 100px;
@@ -583,234 +507,6 @@
             background: rgba(100, 116, 139, 0.1);
             color: var(--text-muted);
             border: 1px solid rgba(100, 116, 139, 0.3);
-        }
-        
-        .status-standby {
-            background: rgba(100, 116, 139, 0.1);
-            color: var(--text-muted);
-            border: 1px solid rgba(100, 116, 139, 0.3);
-        }
-        
-        /* Modal Styles */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(4px);
-            z-index: 2000;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        .modal-overlay.active {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        .modal {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            width: 90%;
-            max-width: 900px;
-            max-height: 90vh;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            animation: slideUp 0.3s ease;
-        }
-        
-        @keyframes slideUp {
-            from {
-                transform: translateY(50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-        
-        .modal-header {
-            padding: 1.5rem;
-            background: var(--bg-dark);
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .modal-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        
-        .modal-close {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            border: none;
-            background: var(--bg-hover);
-            color: var(--text-secondary);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-        }
-        
-        .modal-close:hover {
-            background: var(--danger);
-            color: white;
-        }
-        
-        .modal-body {
-            flex: 1;
-            overflow-y: auto;
-            padding: 1.5rem;
-        }
-        
-        .inspection-form {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-        
-        .form-section {
-            background: var(--bg-dark);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-        }
-        
-        .form-section-header {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--border);
-        }
-        
-        .form-section-icon {
-            width: 40px;
-            height: 40px;
-            background: rgba(59, 130, 246, 0.1);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-        }
-        
-        .form-section-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-        
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1rem;
-        }
-        
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-        
-        .form-label {
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: var(--text-secondary);
-        }
-        
-        .form-input,
-        .form-select,
-        .form-textarea {
-            padding: 0.75rem;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text-primary);
-            font-size: 0.875rem;
-            transition: all 0.2s ease;
-        }
-        
-        .form-input:focus,
-        .form-select:focus,
-        .form-textarea:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-        
-        .form-textarea {
-            min-height: 80px;
-            resize: vertical;
-        }
-        
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.75rem;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .checkbox-group:hover {
-            border-color: var(--accent);
-        }
-        
-        .checkbox-group input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-        }
-        
-        .checkbox-label {
-            flex: 1;
-            font-size: 0.875rem;
-            color: var(--text-primary);
-            cursor: pointer;
-        }
-        
-        .modal-footer {
-            padding: 1.5rem;
-            background: var(--bg-dark);
-            border-top: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .form-info {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-        }
-        
-        .form-actions {
-            display: flex;
-            gap: 1rem;
         }
         
         /* Analytics Panel */
@@ -873,6 +569,216 @@
             gap: 0.25rem;
         }
         
+        /* Map Container */
+        #map {
+            height: 400px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--bg-dark);
+        }
+        
+        /* Messaging Panel */
+        .messaging-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 380px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: var(--shadow-xl);
+            z-index: 999;
+            transition: transform 0.3s ease;
+        }
+        
+        .messaging-panel.minimized {
+            transform: translateY(calc(100% - 60px));
+        }
+        
+        .messaging-header {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            padding: 1rem;
+            border-radius: 12px 12px 0 0;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .message-count {
+            background: var(--danger);
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .messages-container {
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 1rem;
+            background: var(--bg-card);
+        }
+        
+        .message {
+            background: var(--bg-dark);
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        
+        .message.priority-high {
+            border-left: 4px solid var(--danger);
+            background: rgba(239, 68, 68, 0.05);
+        }
+        
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.25rem;
+        }
+        
+        .message-from {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .message-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        
+        .message-text {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+        
+        .message-reply {
+            display: flex;
+            padding: 1rem;
+            border-top: 1px solid var(--border);
+            gap: 0.5rem;
+        }
+        
+        .message-input {
+            flex: 1;
+            padding: 0.5rem;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+        }
+        
+        .message-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        .send-btn {
+            padding: 0.5rem 1rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .send-btn:hover {
+            background: var(--accent-hover);
+        }
+        
+        /* Export Panel */
+        .export-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .export-options {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .export-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .export-csv {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        
+        .export-pdf {
+            background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+        
+        .export-excel {
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+        
+        .export-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        /* Notification Toast */
+        .notification-toast {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow-xl);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1001;
+            max-width: 350px;
+        }
+        
+        .notification-toast.show {
+            transform: translateX(0);
+        }
+        
+        .notification-toast.success {
+            border-left: 4px solid var(--success);
+        }
+        
+        .notification-toast.warning {
+            border-left: 4px solid var(--warning);
+        }
+        
+        .notification-toast.error {
+            border-left: 4px solid var(--danger);
+        }
+        
         /* Empty State */
         .empty-state {
             text-align: center;
@@ -886,63 +792,22 @@
             opacity: 0.3;
         }
         
-        /* Error State */
-        .error-message {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: var(--danger);
-            padding: 1rem;
-            border-radius: 8px;
-            margin: 1rem;
-            text-align: center;
+        /* Tab Content */
+        .tab-content {
+            display: none;
         }
         
-        /* Toast Notifications */
-        .toast {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            padding: 1rem 1.5rem;
-            background: var(--bg-card);
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Input Styles */
+        input[type="date"] {
+            padding: 0.5rem;
+            background: var(--bg-dark);
             border: 1px solid var(--border);
-            border-radius: 12px;
-            box-shadow: var(--shadow-xl);
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            min-width: 300px;
-            z-index: 3000;
-            animation: toastSlideUp 0.3s ease;
-        }
-        
-        @keyframes toastSlideUp {
-            from {
-                transform: translateY(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-        
-        .toast-icon {
-            font-size: 1.5rem;
-        }
-        
-        .toast-content {
-            flex: 1;
-        }
-        
-        .toast-title {
-            font-weight: 600;
+            border-radius: 4px;
             color: var(--text-primary);
-            margin-bottom: 0.25rem;
-        }
-        
-        .toast-message {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
         }
         
         /* Loading Animation */
@@ -958,22 +823,6 @@
         
         @keyframes spin {
             to { transform: rotate(360deg); }
-        }
-        
-        .btn-sm {
-            padding: 0.5rem 1rem;
-            font-size: 0.75rem;
-        }
-        
-        /* Extension Warning Banner */
-        .extension-warning {
-            display: none;
-            background: rgba(245, 158, 11, 0.1);
-            border: 1px solid rgba(245, 158, 11, 0.3);
-            color: var(--warning);
-            padding: 0.75rem 1rem;
-            text-align: center;
-            font-size: 0.875rem;
         }
         
         @media (max-width: 1400px) {
@@ -993,11 +842,6 @@
                 align-items: flex-start;
             }
             
-            .header-actions {
-                width: 100%;
-                justify-content: space-between;
-            }
-            
             .kpi-grid {
                 grid-template-columns: 1fr;
             }
@@ -1006,28 +850,24 @@
                 flex-direction: column;
             }
             
-            .activity-details {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-            
-            .modal {
-                width: 95%;
-                max-height: 95vh;
-            }
-            
-            .form-grid {
-                grid-template-columns: 1fr;
+            .messaging-panel {
+                width: calc(100% - 40px);
             }
         }
     </style>
 </head>
 <body>
-    <!-- Extension Warning (hidden by default) -->
-    <div id="extensionWarning" class="extension-warning">
-        ⚠️ Browser extensions may interfere with this page. For best experience, consider disabling extensions or using incognito mode.
+    <!-- Connection Status -->
+    <div class="status-indicator" id="connectionIndicator" style="position: fixed; top: 20px; right: 20px; z-index: 1001;">
+        <div class="pulse" id="statusDot"></div>
+        <span id="connectionText">Connecting...</span>
     </div>
-    
+
+    <!-- Notification Toast -->
+    <div id="notificationToast" class="notification-toast">
+        <div id="notificationContent"></div>
+    </div>
+
     <!-- Premium Header -->
     <header class="header">
         <div class="header-content">
@@ -1035,24 +875,17 @@
                 <div class="logo">⚡</div>
                 <div class="brand-text">
                     <h1>Fleet Command Center</h1>
-                    <p>Enterprise Logistics Platform</p>
+                    <p>Real-time Fleet Management</p>
                 </div>
             </div>
             <div class="header-actions">
-                <div class="status-indicator" id="systemStatus">
-                    <div class="pulse"></div>
-                    <span id="systemStatusText">System Operational</span>
+                <div class="warehouse-label" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); color: var(--accent); padding: 0.5rem 1rem; border-radius: 100px; font-size: 0.875rem; font-weight: 500;">
+                    5856 Tampa FDC
                 </div>
-                <div class="header-time" id="currentTime">--:--:--</div>
-                <button class="btn btn-secondary" onclick="FleetDashboard.toggleFullscreen()">
-                    <span>⛶</span>
-                    <span>Fullscreen</span>
-                </button>
             </div>
         </div>
     </header>
-    
-    <!-- Main Container -->
+
     <div class="container">
         <!-- KPI Cards -->
         <div class="kpi-grid">
@@ -1060,7 +893,7 @@
                 <div class="kpi-header">
                     <div class="kpi-icon">🚚</div>
                 </div>
-                <div class="kpi-value" id="activeDrivers">0</div>
+                <div class="kpi-value" id="activeCount">0</div>
                 <div class="kpi-label">Active Drivers</div>
                 <div class="kpi-sublabel">Currently on duty</div>
             </div>
@@ -1069,7 +902,7 @@
                 <div class="kpi-header">
                     <div class="kpi-icon" style="background: rgba(245, 158, 11, 0.1);">📍</div>
                 </div>
-                <div class="kpi-value" id="enRouteCount">0</div>
+                <div class="kpi-value" id="enrouteCount">0</div>
                 <div class="kpi-label">En Route</div>
                 <div class="kpi-sublabel">30 min away</div>
             </div>
@@ -1096,1233 +929,628 @@
                 <div class="kpi-header">
                     <div class="kpi-icon" style="background: rgba(100, 116, 139, 0.1);">📦</div>
                 </div>
-                <div class="kpi-value" id="pendingCount">0</div>
+                <div class="kpi-value" id="workingCount">0</div>
                 <div class="kpi-label">Still Working</div>
                 <div class="kpi-sublabel">Out on routes</div>
             </div>
         </div>
-        
+
         <!-- Control Panel -->
         <div class="control-panel">
             <div class="filter-group">
-                <button class="filter-btn active" onclick="FleetDashboard.filterStatus('active', this)">Active Drivers</button>
-                <button class="filter-btn" onclick="FleetDashboard.filterStatus('en-route', this)">En Route Only</button>
-                <button class="filter-btn" onclick="FleetDashboard.filterStatus('arrived', this)">Arrived Only</button>
-                <button class="filter-btn" onclick="FleetDashboard.filterStatus('completed', this)">Completed Check-ins</button>
-                <button class="filter-btn" onclick="FleetDashboard.filterStatus('pending-checkin', this)">Still Working</button>
+                <button class="filter-btn active" onclick="switchTab('overview')">Overview</button>
+                <button class="filter-btn" onclick="switchTab('map')">Live Map</button>
+                <button class="filter-btn" onclick="switchTab('messages')">Messages</button>
+                <button class="filter-btn" onclick="switchTab('export')">Reports</button>
             </div>
-            <button class="btn btn-secondary" onclick="FleetDashboard.exportData()">
-                <span>📊</span>
-                <span>Export Report</span>
-            </button>
-            <button class="btn btn-secondary" onclick="FleetDashboard.refreshDashboard()">
+            <button class="btn btn-secondary" onclick="refreshDashboard()">
                 <span>🔄</span>
                 <span>Refresh</span>
             </button>
         </div>
-        
-        <!-- Dashboard Grid -->
-        <div class="dashboard-grid">
-            <!-- Activity Feed -->
-            <div class="activity-section">
-                <div class="section-header">
-                    <h2 class="section-title">
-                        <span id="activityFeedIcon">📡</span>
-                        <span id="activityFeedTitle">Real-Time Activity Feed</span>
-                    </h2>
-                    <div style="display: flex; align-items: center; gap: 1rem;">
-                        <span id="activityCount" style="font-size: 0.875rem; color: var(--text-secondary);"></span>
-                        <span id="lastUpdate" style="font-size: 0.875rem; color: var(--text-secondary);">
-                            <span class="loader" style="margin-right: 0.5rem;"></span>
-                            Syncing...
-                        </span>
-                    </div>
-                </div>
-                <div class="activity-list" id="activityList">
-                    <div class="empty-state">
-                        <div class="empty-icon">🛸</div>
-                        <p>Initializing fleet tracking system...</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Equipment Repair Panel -->
-            <div>
-                <div class="analytics-panel" style="margin-bottom: 1.5rem;">
-                    <h3 class="analytics-title">
-                        <span>🔧</span>
-                        <span>Equipment Status</span>
-                    </h3>
-                    
-                    <!-- Tractor Card -->
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <span class="metric-label">🚛 Tractor</span>
-                            <button class="btn btn-primary btn-sm" onclick="FleetDashboard.reportIssue('tractor')">
-                                <span>📋</span>
-                                <span>View</span>
-                            </button>
-                        </div>
-                        <div style="display: flex; align-items: baseline; gap: 1rem; margin-top: 1rem;">
-                            <div class="metric-value" id="tractorValue">0</div>
-                            <div class="metric-change" id="tractorSubtext">active issues</div>
+
+        <!-- Overview Tab -->
+        <div id="overviewTab" class="tab-content active">
+            <div class="dashboard-grid">
+                <!-- Activity Feed -->
+                <div class="activity-section">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <span>📡</span>
+                            <span>Real-Time Activity Feed</span>
+                        </h2>
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <span id="activityCount" style="font-size: 0.875rem; color: var(--text-secondary);"></span>
+                            <span id="lastUpdate" style="font-size: 0.875rem; color: var(--text-secondary);">
+                                <span class="loader" style="margin-right: 0.5rem;"></span>
+                                Syncing...
+                            </span>
                         </div>
                     </div>
-                    
-                    <!-- Trailer Card -->
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <span class="metric-label">🚚 Trailer</span>
-                            <button class="btn btn-primary btn-sm" onclick="FleetDashboard.reportIssue('trailer')">
-                                <span>📋</span>
-                                <span>View</span>
-                            </button>
-                        </div>
-                        <div style="display: flex; align-items: baseline; gap: 1rem; margin-top: 1rem;">
-                            <div class="metric-value" id="trailerValue">0</div>
-                            <div class="metric-change" id="trailerSubtext">active issues</div>
-                        </div>
-                    </div>
-                    
-                    <!-- Moffett Card -->
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <span class="metric-label">🏗️ Moffett</span>
-                            <button class="btn btn-primary btn-sm" onclick="FleetDashboard.reportIssue('moffett')">
-                                <span>📋</span>
-                                <span>View</span>
-                            </button>
-                        </div>
-                        <div style="display: flex; align-items: baseline; gap: 1rem; margin-top: 1rem;">
-                            <div class="metric-value" id="moffettValue">0</div>
-                            <div class="metric-change" id="moffettSubtext">active issues</div>
+                    <div class="activity-list" id="activityList">
+                        <div class="empty-state">
+                            <div class="empty-icon">🛸</div>
+                            <p>Initializing fleet tracking system...</p>
                         </div>
                     </div>
                 </div>
-                
-                <div class="analytics-panel">
-                    <h3 class="analytics-title">
-                        <span>⚡</span>
-                        <span>Quick Actions</span>
-                    </h3>
+
+                <!-- Equipment Status Panel -->
+                <div>
+                    <div class="analytics-panel" style="margin-bottom: 1.5rem;">
+                        <h3 class="analytics-title">
+                            <span>🔧</span>
+                            <span>Equipment Status</span>
+                        </h3>
+                        
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <span class="metric-label">🚛 Tractor Issues</span>
+                            </div>
+                            <div style="display: flex; align-items: baseline; gap: 1rem; margin-top: 1rem;">
+                                <div class="metric-value" id="tractorIssues">0</div>
+                                <div class="metric-change">active issues</div>
+                            </div>
+                        </div>
+                        
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <span class="metric-label">🚚 Trailer Issues</span>
+                            </div>
+                            <div style="display: flex; align-items: baseline; gap: 1rem; margin-top: 1rem;">
+                                <div class="metric-value" id="trailerIssues">0</div>
+                                <div class="metric-change">active issues</div>
+                            </div>
+                        </div>
+                        
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <span class="metric-label">🏗️ Moffett Issues</span>
+                            </div>
+                            <div style="display: flex; align-items: baseline; gap: 1rem; margin-top: 1rem;">
+                                <div class="metric-value" id="moffettIssues">0</div>
+                                <div class="metric-change">active issues</div>
+                            </div>
+                        </div>
+                    </div>
                     
-                    <div style="display: grid; gap: 1rem;">
-                        <button class="btn btn-primary" style="width: 100%;" onclick="window.location.href='admin.html'">
-                            <span>👤</span>
-                            <span>Admin Panel</span>
-                        </button>
-                        <button class="btn btn-secondary" style="width: 100%;" onclick="window.location.href='driver.html'">
-                            <span>🚚</span>
-                            <span>Driver Portal</span>
-                        </button>
-                        <button class="btn btn-secondary" style="width: 100%;" onclick="FleetDashboard.viewReports()">
-                            <span>📊</span>
-                            <span>View Reports</span>
-                        </button>
+                    <div class="analytics-panel">
+                        <h3 class="analytics-title">
+                            <span>⚡</span>
+                            <span>Quick Actions</span>
+                        </h3>
+                        
+                        <div style="display: grid; gap: 1rem;">
+                            <button class="btn btn-primary" style="width: 100%;" onclick="window.location.href='admin.html'">
+                                <span>👤</span>
+                                <span>Admin Panel</span>
+                            </button>
+                            <button class="btn btn-secondary" style="width: 100%;" onclick="window.location.href='driver.html'">
+                                <span>🚚</span>
+                                <span>Driver Portal</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    
-    <!-- Check-in Modal -->
-    <div class="modal-overlay" id="checkinModal">
-        <div class="modal">
-            <div class="modal-header">
-                <h2 class="modal-title">
-                    <span>📋</span>
-                    <span>Equipment Inspection Check-In</span>
-                </h2>
-                <button class="modal-close" onclick="FleetDashboard.closeCheckinModal()">✕</button>
-            </div>
-            
-            <div class="modal-body">
-                <form class="inspection-form" id="inspectionForm">
-                    <!-- Driver Info -->
-                    <div style="padding: 1rem; background: rgba(59, 130, 246, 0.1); border-radius: 8px; margin-bottom: 1rem;">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <div style="font-size: 0.875rem; color: var(--text-secondary);">Driver:</div>
-                                <div style="font-size: 1.125rem; font-weight: 600; color: var(--text-primary);" id="checkinDriverName">-</div>
-                            </div>
-                            <div>
-                                <div style="font-size: 0.875rem; color: var(--text-secondary);">Date/Time:</div>
-                                <div style="font-size: 1rem; color: var(--text-primary);" id="checkinDateTime">-</div>
-                            </div>
-                        </div>
+
+        <!-- Map Tab -->
+        <div id="mapTab" class="tab-content">
+            <div class="activity-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <span>📍</span>
+                        <span>Live Driver Locations</span>
+                    </h2>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-secondary" onclick="centerMap()">Center Map</button>
+                        <button class="btn btn-secondary" onclick="refreshMap()">Refresh</button>
                     </div>
-                    
-                    <!-- Tractor Section -->
-                    <div class="form-section">
-                        <div class="form-section-header">
-                            <div class="form-section-icon">🚛</div>
-                            <div class="form-section-title">Tractor Inspection</div>
-                        </div>
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label class="form-label">Tractor Number</label>
-                                <input type="text" class="form-input" id="tractorNumber" placeholder="Enter tractor number">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">General Condition</label>
-                                <select class="form-select" id="tractorCondition">
-                                    <option value="excellent">Excellent</option>
-                                    <option value="good" selected>Good</option>
-                                    <option value="fair">Fair</option>
-                                    <option value="poor">Poor</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Damage Present</label>
-                                <select class="form-select" id="tractorDamage">
-                                    <option value="none" selected>None</option>
-                                    <option value="minor">Minor</option>
-                                    <option value="major">Major</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-grid" style="margin-top: 1rem;">
-                            <div class="checkbox-group">
-                                <input type="checkbox" id="tractorLights" checked>
-                                <label class="checkbox-label" for="tractorLights">Lights Working</label>
-                            </div>
-                            <div class="checkbox-group">
-                                <input type="checkbox" id="tractorCab" checked>
-                                <label class="checkbox-label" for="tractorCab">Cab Clean</label>
-                            </div>
-                            <div class="checkbox-group">
-                                <input type="checkbox" id="tractorExtinguisher" checked>
-                                <label class="checkbox-label" for="tractorExtinguisher">Fire Extinguisher Present</label>
-                            </div>
-                            <div class="checkbox-group">
-                                <input type="checkbox" id="tractorTires" checked>
-                                <label class="checkbox-label" for="tractorTires">Tires Good Condition</label>
-                            </div>
-                            <div class="checkbox-group">
-                                <input type="checkbox" id="tractorAirLeaks">
-                                <label class="checkbox-label" for="tractorAirLeaks">Air Leaks Detected</label>
-                            </div>
-                        </div>
-                        
-                        <!-- Issue Reporting Section -->
-                        <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 8px;">
-                            <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
-                                <span>⚠️</span>
-                                <span>Report Specific Issues</span>
-                            </div>
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label class="form-label">Issue Location/Part</label>
-                                    <select class="form-select" id="tractorIssuePart">
-                                        <option value="">No specific issue</option>
-                                        <option value="engine">Engine</option>
-                                        <option value="transmission">Transmission</option>
-                                        <option value="brakes">Brakes</option>
-                                        <option value="steering">Steering</option>
-                                        <option value="electrical">Electrical System</option>
-                                        <option value="hydraulics">Hydraulics</option>
-                                        <option value="tires">Tires/Wheels</option>
-                                        <option value="lights">Lights/Signals</option>
-                                        <option value="cab">Cab/Interior</option>
-                                        <option value="body">Body/Exterior</option>
-                                        <option value="other">Other</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Issue Description</label>
-                                    <input type="text" class="form-input" id="tractorIssueDescription" placeholder="Describe the specific issue...">
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group" style="margin-top: 1rem;">
-                            <label class="form-label">Additional Notes</label>
-                            <textarea class="form-textarea" id="tractorNotes" placeholder="Any other observations about tractor condition..."></textarea>
-                        </div>
-                    </div>
-                    
-                    <!-- Trailer Section -->
-                    <div class="form-section">
-                        <div class="form-section-header">
-                            <div class="form-section-icon" style="background: rgba(245, 158, 11, 0.1);">🚚</div>
-                            <div class="form-section-title">Trailer Inspection</div>
-                        </div>
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label class="form-label">Trailer Number</label>
-                                <input type="text" class="form-input" id="trailerNumber" placeholder="Enter trailer number">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Deck Condition</label>
-                                <select class="form-select" id="trailerDeckCondition">
-                                    <option value="excellent">Excellent</option>
-                                    <option value="good" selected>Good</option>
-                                    <option value="fair">Fair</option>
-                                    <option value="poor">Poor</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-grid" style="margin-top: 1rem;">
-                            <div class="checkbox-group">
-                                <input type="checkbox" id="trailerTires" checked>
-                                <label class="checkbox-label" for="trailerTires">Tires Good Condition</label>
-                            </div>
-                            <div class="checkbox-group">
-                                <input type="checkbox" id="trailerElectrical" checked>
-                                <label class="checkbox-label" for="trailerElectrical">Electrical Working</label>
-                            </div>
-                            <div class="checkbox-group">
-                                <input type="checkbox" id="trailerClean" checked>
-                                <label class="checkbox-label" for="trailerClean">Deck Clean (No Debris)</label>
-                            </div>
-                            <div class="checkbox-group">
-                                <input type="checkbox" id="trailerDebris">
-                                <label class="checkbox-label" for="trailerDebris">Needs Sweeping</label>
-                            </div>
-                        </div>
-                        
-                        <!-- Issue Reporting Section -->
-                        <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 8px;">
-                            <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
-                                <span>⚠️</span>
-                                <span>Report Specific Issues</span>
-                            </div>
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label class="form-label">Issue Location/Part</label>
-                                    <select class="form-select" id="trailerIssuePart">
-                                        <option value="">No specific issue</option>
-                                        <option value="deck">Deck/Floor</option>
-                                        <option value="walls">Walls/Sides</option>
-                                        <option value="doors">Doors/Gates</option>
-                                        <option value="tires">Tires/Wheels</option>
-                                        <option value="brakes">Brakes</option>
-                                        <option value="lights">Lights/Electrical</option>
-                                        <option value="straps">Straps/Tie-downs</option>
-                                        <option value="landing">Landing Gear</option>
-                                        <option value="suspension">Suspension</option>
-                                        <option value="refrigeration">Refrigeration Unit</option>
-                                        <option value="other">Other</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Issue Description</label>
-                                    <input type="text" class="form-input" id="trailerIssueDescription" placeholder="Describe the specific issue...">
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group" style="margin-top: 1rem;">
-                            <label class="form-label">Additional Notes</label>
-                            <textarea class="form-textarea" id="trailerNotes" placeholder="Any other observations about trailer condition..."></textarea>
-                        </div>
-                    </div>
-                    
-                    <!-- Moffett Section -->
-                    <div class="form-section">
-                        <div class="form-section-header">
-                            <div class="form-section-icon" style="background: rgba(16, 185, 129, 0.1);">🏗️</div>
-                            <div class="form-section-title">Moffett Inspection</div>
-                        </div>
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label class="form-label">Moffett Number</label>
-                                <input type="text" class="form-input" id="moffettNumber" placeholder="Enter moffett number">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">General Condition</label>
-                                <select class="form-select" id="moffettCondition">
-                                    <option value="excellent">Excellent</option>
-                                    <option value="good" selected>Good</option>
-                                    <option value="fair">Fair</option>
-                                    <option value="poor">Poor</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-grid" style="margin-top: 1rem;">
-                            <div class="checkbox-group">
-                                <input type="checkbox" id="moffettTires" checked>
-                                <label class="checkbox-label" for="moffettTires">Tires Good Condition</label>
-                            </div>
-                            <div class="checkbox-group">
-                                <input type="checkbox" id="moffettElectrical" checked>
-                                <label class="checkbox-label" for="moffettElectrical">Electrical Working</label>
-                            </div>
-                            <div class="checkbox-group">
-                                <input type="checkbox" id="moffettHydraulic">
-                                <label class="checkbox-label" for="moffettHydraulic">Hydraulic Leaks Present</label>
-                            </div>
-                            <div class="checkbox-group">
-                                <input type="checkbox" id="moffettSeatbelts" checked>
-                                <label class="checkbox-label" for="moffettSeatbelts">Seatbelts Functional</label>
-                            </div>
-                        </div>
-                        
-                        <!-- Issue Reporting Section -->
-                        <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 8px;">
-                            <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
-                                <span>⚠️</span>
-                                <span>Report Specific Issues</span>
-                            </div>
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label class="form-label">Issue Location/Part</label>
-                                    <select class="form-select" id="moffettIssuePart">
-                                        <option value="">No specific issue</option>
-                                        <option value="forks">Forks</option>
-                                        <option value="mast">Mast/Lift</option>
-                                        <option value="hydraulics">Hydraulic System</option>
-                                        <option value="engine">Engine</option>
-                                        <option value="controls">Controls/Joysticks</option>
-                                        <option value="tires">Tires/Wheels</option>
-                                        <option value="brakes">Brakes</option>
-                                        <option value="lights">Lights/Beacons</option>
-                                        <option value="safety">Safety Equipment</option>
-                                        <option value="mount">Mounting System</option>
-                                        <option value="other">Other</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Issue Description</label>
-                                    <input type="text" class="form-input" id="moffettIssueDescription" placeholder="Describe the specific issue...">
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group" style="margin-top: 1rem;">
-                            <label class="form-label">Additional Notes</label>
-                            <textarea class="form-textarea" id="moffettNotes" placeholder="Any other observations about moffett condition..."></textarea>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            
-            <div class="modal-footer">
-                <div class="form-info">
-                    <span>⚠️</span> All fields are required for complete inspection
                 </div>
-                <div class="form-actions">
-                    <button class="btn btn-secondary" onclick="FleetDashboard.closeCheckinModal()">Cancel</button>
-                    <button class="btn btn-success" onclick="FleetDashboard.submitCheckin()">
-                        <span>✅</span>
-                        <span>Complete Check-In</span>
+                <div style="padding: 1rem;">
+                    <div id="map"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages Tab -->
+        <div id="messagesTab" class="tab-content">
+            <div class="activity-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <span>💬</span>
+                        <span>Driver Messages</span>
+                    </h2>
+                    <button class="btn btn-secondary" onclick="markAllRead()">Mark All Read</button>
+                </div>
+                <div id="messagesList" style="padding: 1rem;">
+                    <div class="empty-state">
+                        <div class="empty-icon">📭</div>
+                        <p>No messages</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Export Tab -->
+        <div id="exportTab" class="tab-content">
+            <div class="export-panel">
+                <div class="section-header" style="padding: 0; background: transparent; border: none;">
+                    <h2 class="section-title">
+                        <span>📊</span>
+                        <span>Export Reports</span>
+                    </h2>
+                </div>
+                <div style="margin: 1.5rem 0;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-secondary);">Date Range:</label>
+                    <input type="date" id="startDate" style="margin-right: 1rem;">
+                    <input type="date" id="endDate">
+                </div>
+                <div class="export-options">
+                    <button class="export-btn export-csv" onclick="exportToCSV()">
+                        <span>📄</span>
+                        <span>CSV</span>
+                    </button>
+                    <button class="export-btn export-pdf" onclick="exportToPDF()">
+                        <span>📑</span>
+                        <span>PDF</span>
+                    </button>
+                    <button class="export-btn export-excel" onclick="exportToExcel()">
+                        <span>📈</span>
+                        <span>Excel</span>
                     </button>
                 </div>
             </div>
         </div>
     </div>
-    
+
+    <!-- Messaging Panel (Floating) -->
+    <div class="messaging-panel minimized" id="messagingPanel">
+        <div class="messaging-header" onclick="toggleMessaging()">
+            <span>💬 Driver Messages</span>
+            <span class="message-count" id="messageCount">0</span>
+        </div>
+        <div class="messages-container" id="messagesContainer"></div>
+        <div class="message-reply">
+            <input type="text" class="message-input" id="replyInput" placeholder="Type a reply...">
+            <button class="send-btn" onclick="sendReply()">Send</button>
+        </div>
+    </div>
+
     <script>
-        // Namespace for dashboard to avoid conflicts with extensions
-        const FleetDashboard = (function() {
-            'use strict';
+        // Initialize variables
+        let socket;
+        let map;
+        let driverMarkers = {};
+        let currentTab = 'overview';
+        let drivers = [];
+        let messages = [];
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeSocket();
+            loadInitialData();
+            startPolling();
             
-            // Private variables
-            let notifications = [];
-            let completedCheckIns = [];
-            let driverStatuses = new Map();
-            let currentFilter = 'active';
-            let refreshInterval = null;
-            let equipmentIssues = {
-                tractor: [],
-                trailer: [],
-                moffett: []
+            // Set today's date for export
+            document.getElementById('endDate').valueAsDate = new Date();
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - 30);
+            document.getElementById('startDate').valueAsDate = startDate;
+        });
+        
+        // Initialize Socket.io connection
+        function initializeSocket() {
+            try {
+                socket = io(window.location.origin, {
+                    transports: ['websocket', 'polling'],
+                    reconnection: true
+                });
+                
+                socket.on('connect', () => {
+                    updateConnectionStatus(true);
+                    socket.emit('join-dashboard');
+                    showNotification('Connected to real-time updates', 'success');
+                });
+                
+                socket.on('disconnect', () => {
+                    updateConnectionStatus(false);
+                });
+                
+                // Listen for real-time updates
+                socket.on('driver-update', handleDriverUpdate);
+                socket.on('driver-location-update', handleLocationUpdate);
+                socket.on('new-driver-message', handleNewMessage);
+                
+            } catch (error) {
+                console.log('WebSocket not available, using polling');
+                updateConnectionStatus(false);
+            }
+        }
+        
+        // Update connection status
+        function updateConnectionStatus(connected) {
+            const indicator = document.getElementById('connectionIndicator');
+            const dot = document.getElementById('statusDot');
+            const text = document.getElementById('connectionText');
+            
+            if (connected) {
+                indicator.classList.remove('error');
+                dot.classList.remove('error');
+                text.textContent = 'Live Updates';
+            } else {
+                indicator.classList.add('error');
+                dot.classList.add('error');
+                text.textContent = 'Polling Mode';
+            }
+        }
+        
+        // Load initial data
+        async function loadInitialData() {
+            await loadDrivers();
+            await loadMessages();
+            updateKPIs();
+        }
+        
+        // Load drivers
+        async function loadDrivers() {
+            try {
+                const response = await fetch('/api/notifications?limit=100');
+                if (response.ok) {
+                    const result = await response.json();
+                    drivers = result.data || [];
+                    updateDriverList();
+                    updateKPIs();
+                }
+            } catch (error) {
+                console.error('Error loading drivers:', error);
+            }
+        }
+        
+        // Load messages
+        async function loadMessages() {
+            try {
+                const response = await fetch('/api/messages/dispatch');
+                if (response.ok) {
+                    messages = await response.json();
+                    updateMessagesDisplay();
+                    updateMessageCount();
+                }
+            } catch (error) {
+                console.error('Error loading messages:', error);
+            }
+        }
+        
+        // Update KPIs
+        function updateKPIs() {
+            const now = new Date();
+            const todayStart = new Date(now.setHours(0,0,0,0));
+            
+            const counts = {
+                active: 0,
+                enroute: 0,
+                arrived: 0,
+                completed: 0,
+                working: 0
             };
-            let currentCheckinDriver = null;
-            let isConnected = false;
-            let extensionErrorCount = 0;
             
-            // Public API
-            return {
-                // Initialization
-                init: function() {
-                    try {
-                        console.log('Fleet Dashboard initializing...');
-                        this.checkServerConnection();
-                        this.loadNotifications();
-                        this.startClock();
-                        this.startAutoRefresh();
-                        
-                        // Animate KPIs after a short delay
-                        setTimeout(() => {
-                            this.animateKPIs();
-                            this.updateEquipmentMetrics();
-                        }, 500);
-                    } catch (error) {
-                        console.error('Dashboard initialization error:', error);
-                        this.showToast('Initialization Error', 'Dashboard encountered an error during startup', 'error');
+            drivers.forEach(driver => {
+                const updateTime = new Date(driver.timestamp);
+                
+                if (updateTime >= todayStart) {
+                    if (driver.status === '30 minutes away') counts.enroute++;
+                    else if (driver.status === 'arrived') counts.arrived++;
+                    else if (driver.status === 'completed') counts.completed++;
+                    
+                    if (driver.status !== 'completed') {
+                        counts.active++;
+                        if (driver.status !== '30 minutes away' && driver.status !== 'arrived') {
+                            counts.working++;
+                        }
                     }
-                },
-                
-                // Check server connection
-                checkServerConnection: async function() {
-                    try {
-                        const response = await fetch('/api/health');
-                        if (response && response.ok) {
-                            isConnected = true;
-                            this.updateSystemStatus(true);
-                        } else {
-                            throw new Error('Server not responding');
-                        }
-                    } catch (error) {
-                        console.error('Server connection failed:', error);
-                        isConnected = false;
-                        this.updateSystemStatus(false);
-                        // Try to reconnect after 5 seconds
-                        setTimeout(() => this.checkServerConnection(), 5000);
-                    }
-                },
-                
-                updateSystemStatus: function(connected) {
-                    const statusIndicator = document.getElementById('systemStatus');
-                    const statusText = document.getElementById('systemStatusText');
-                    const pulse = statusIndicator ? statusIndicator.querySelector('.pulse') : null;
+                }
+            });
+            
+            document.getElementById('activeCount').textContent = counts.active;
+            document.getElementById('enrouteCount').textContent = counts.enroute;
+            document.getElementById('arrivedCount').textContent = counts.arrived;
+            document.getElementById('completedCount').textContent = counts.completed;
+            document.getElementById('workingCount').textContent = counts.working;
+            
+            // Update equipment issues (placeholder)
+            document.getElementById('tractorIssues').textContent = '0';
+            document.getElementById('trailerIssues').textContent = '0';
+            document.getElementById('moffettIssues').textContent = '0';
+        }
+        
+        // Update driver list
+        function updateDriverList() {
+            const activityList = document.getElementById('activityList');
+            
+            if (drivers.length === 0) {
+                activityList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📭</div>
+                        <p>No active drivers</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            activityList.innerHTML = drivers
+                .slice(0, 20)
+                .map(driver => {
+                    const time = new Date(driver.timestamp).toLocaleTimeString();
+                    let statusClass = 'pending-checkin';
+                    let statusText = 'Still Working';
                     
-                    if (!statusIndicator || !statusText || !pulse) return;
-                    
-                    if (connected) {
-                        statusIndicator.classList.remove('error');
-                        pulse.classList.remove('error');
-                        statusText.textContent = 'System Operational';
-                    } else {
-                        statusIndicator.classList.add('error');
-                        pulse.classList.add('error');
-                        statusText.textContent = 'Connection Error';
-                    }
-                },
-                
-                refreshDashboard: function() {
-                    this.showToast('Refreshing', 'Updating dashboard data...', 'info');
-                    this.loadNotifications();
-                },
-                
-                // Load Notifications with error handling
-                loadNotifications: async function() {
-                    try {
-                        console.log('Loading notifications and admin data...');
-                        
-                        const [notifResult, usersResult, checkInsResult] = await Promise.allSettled([
-                            fetch('/api/notifications').catch(err => ({ ok: false, error: err })),
-                            fetch('/api/users').catch(err => ({ ok: false, error: err })),
-                            fetch('/api/checkins').catch(err => ({ ok: false, error: err }))
-                        ]);
-                        
-                        let notificationsData = [];
-                        if (notifResult.status === 'fulfilled' && notifResult.value && notifResult.value.ok) {
-                            try {
-                                const data = await notifResult.value.json();
-                                notificationsData = Array.isArray(data) ? data : (data && data.data ? data.data : []);
-                            } catch (e) {
-                                console.error('Error parsing notifications:', e);
-                            }
-                        }
-                        
-                        let adminUsers = [];
-                        if (usersResult.status === 'fulfilled' && usersResult.value && usersResult.value.ok) {
-                            try {
-                                const userData = await usersResult.value.json();
-                                adminUsers = Array.isArray(userData) ? userData : (userData && userData.data ? userData.data : []);
-                            } catch (e) {
-                                console.error('Error parsing users:', e);
-                            }
-                        }
-                        
-                        let checkInsData = [];
-                        if (checkInsResult.status === 'fulfilled' && checkInsResult.value && checkInsResult.value.ok) {
-                            try {
-                                const data = await checkInsResult.value.json();
-                                checkInsData = Array.isArray(data) ? data : (data && data.data ? data.data : []);
-                                this.processEquipmentIssues(checkInsData);
-                                
-                                // Process completed check-ins
-                                this.processCompletedCheckIns(checkInsData);
-                            } catch (e) {
-                                console.error('Error parsing checkins:', e);
-                            }
-                        }
-                        
-                        const activeDriversFromAdmin = adminUsers.filter(user => 
-                            user && user.role === 'driver' && user.active !== false
-                        );
-                        
-                        driverStatuses.clear();
-                        
-                        notificationsData.forEach(n => {
-                            if (n && n.driver && n.status) {
-                                const notificationTime = new Date(n.timestamp).getTime();
-                                const driverName = n.driver;
-                                
-                                if (!driverStatuses.has(driverName) || 
-                                    notificationTime > new Date(driverStatuses.get(driverName).timestamp).getTime()) {
-                                    driverStatuses.set(driverName, n);
-                                }
-                            }
-                        });
-                        
-                        const consolidatedNotifications = Array.from(driverStatuses.values());
-                        
-                        // Filter out drivers who have completed check-ins today
-                        const completedDriverNames = completedCheckIns.map(c => c.driverName);
-                        const activeNotifications = consolidatedNotifications.filter(n => 
-                            !completedDriverNames.includes(n.driver)
-                        );
-                        
-                        const notificationDriverNames = activeNotifications.map(n => n.driver);
-                        const pendingCheckInDrivers = activeDriversFromAdmin
-                            .filter(driver => driver && driver.name && 
-                                    !notificationDriverNames.includes(driver.name) &&
-                                    !completedDriverNames.includes(driver.name))
-                            .map(driver => ({
-                                _id: `admin-${driver._id}`,
-                                driver: driver.name,
-                                status: 'pending-checkin',
-                                timestamp: new Date().toISOString(),
-                                warehouse: '5856 Tampa FDC',
-                                location: 'Location unavailable'
-                            }));
-                        
-                        const allDriverData = [...activeNotifications, ...pendingCheckInDrivers];
-                        notifications = allDriverData;
-                        
-                        this.updateDisplay(allDriverData);
-                        this.updateMetrics(allDriverData, activeDriversFromAdmin, completedCheckIns);
-                        
-                        const lastUpdateEl = document.getElementById('lastUpdate');
-                        if (lastUpdateEl) {
-                            lastUpdateEl.innerHTML = `Last updated: ${new Date().toLocaleTimeString()}`;
-                        }
-                        this.updateSystemStatus(true);
-                        
-                    } catch (error) {
-                        console.error('Error loading data:', error);
-                        const lastUpdateEl = document.getElementById('lastUpdate');
-                        if (lastUpdateEl) {
-                            lastUpdateEl.innerHTML = `<span style="color: var(--danger);">Failed to load data</span>`;
-                        }
-                        
-                        const activityList = document.getElementById('activityList');
-                        if (activityList) {
-                            activityList.innerHTML = `
-                                <div class="error-message">
-                                    <p><strong>Unable to connect to server</strong></p>
-                                    <p style="font-size: 0.875rem; margin-top: 0.5rem;">Please ensure the server is running on the correct port.</p>
-                                    <button class="btn btn-primary btn-sm" style="margin-top: 1rem;" onclick="FleetDashboard.loadNotifications()">Retry</button>
-                                </div>
-                            `;
-                        }
-                        
-                        this.updateSystemStatus(false);
-                    }
-                },
-                
-                // Process completed check-ins
-                processCompletedCheckIns: function(checkInsData) {
-                    if (!Array.isArray(checkInsData)) return;
-                    
-                    // Get today's check-ins
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    
-                    completedCheckIns = checkInsData.filter(checkIn => {
-                        if (!checkIn || !checkIn.timestamp) return false;
-                        const checkInDate = new Date(checkIn.timestamp);
-                        checkInDate.setHours(0, 0, 0, 0);
-                        return checkInDate.getTime() === today.getTime();
-                    });
-                },
-                
-                // Process equipment issues
-                processEquipmentIssues: function(checkInsData) {
-                    equipmentIssues = {
-                        tractor: [],
-                        trailer: [],
-                        moffett: []
-                    };
-                    
-                    if (!Array.isArray(checkInsData)) return;
-                    
-                    checkInsData.forEach(checkIn => {
-                        if (!checkIn) return;
-                        
-                        // Process tractor issues
-                        if (checkIn.tractorIssues) {
-                            const issues = [];
-                            if (checkIn.tractorDamage && checkIn.tractorDamage !== 'none') {
-                                issues.push(`${checkIn.tractorDamage} damage`);
-                            }
-                            if (checkIn.tractorAirLeaks) issues.push('Air leaks');
-                            if (!checkIn.tractorLights) issues.push('Lights not working');
-                            if (!checkIn.tractorCab) issues.push('Cab not clean');
-                            if (!checkIn.tractorExtinguisher) issues.push('No fire extinguisher');
-                            if (!checkIn.tractorTires) issues.push('Tire issues');
-                            
-                            if (issues.length > 0 || (checkIn.tractorNotes && checkIn.tractorNotes.trim())) {
-                                equipmentIssues.tractor.push({
-                                    id: checkIn._id,
-                                    tractorNumber: checkIn.tractorNumber,
-                                    issues: issues.join(', '),
-                                    notes: checkIn.tractorNotes,
-                                    reportedBy: checkIn.driverName,
-                                    timestamp: checkIn.timestamp
-                                });
-                            }
-                        }
-                        
-                        // Process trailer issues
-                        if (checkIn.trailerIssues) {
-                            const issues = [];
-                            if (!checkIn.trailerTires) issues.push('Tire issues');
-                            if (!checkIn.trailerElectrical) issues.push('Electrical issues');
-                            if (!checkIn.trailerClean || checkIn.trailerDebris) issues.push('Needs cleaning');
-                            
-                            if (issues.length > 0 || (checkIn.trailerNotes && checkIn.trailerNotes.trim())) {
-                                equipmentIssues.trailer.push({
-                                    id: checkIn._id,
-                                    trailerNumber: checkIn.trailerNumber,
-                                    issues: issues.join(', '),
-                                    notes: checkIn.trailerNotes,
-                                    reportedBy: checkIn.driverName,
-                                    timestamp: checkIn.timestamp
-                                });
-                            }
-                        }
-                        
-                        // Process moffett issues
-                        if (checkIn.moffettIssues) {
-                            const issues = [];
-                            if (!checkIn.moffettTires) issues.push('Tire issues');
-                            if (!checkIn.moffettElectrical) issues.push('Electrical issues');
-                            if (checkIn.moffettHydraulic) issues.push('Hydraulic leaks');
-                            if (!checkIn.moffettSeatbelts) issues.push('Seatbelt issues');
-                            
-                            if (issues.length > 0 || (checkIn.moffettNotes && checkIn.moffettNotes.trim())) {
-                                equipmentIssues.moffett.push({
-                                    id: checkIn._id,
-                                    moffettNumber: checkIn.moffettNumber,
-                                    issues: issues.join(', '),
-                                    notes: checkIn.moffettNotes,
-                                    reportedBy: checkIn.driverName,
-                                    timestamp: checkIn.timestamp
-                                });
-                            }
-                        }
-                    });
-                    
-                    this.updateEquipmentMetrics();
-                },
-                
-                updateEquipmentMetrics: function() {
-                    const tractorCount = equipmentIssues.tractor.length;
-                    const trailerCount = equipmentIssues.trailer.length;
-                    const moffettCount = equipmentIssues.moffett.length;
-                    
-                    const tractorValueEl = document.getElementById('tractorValue');
-                    const tractorSubtextEl = document.getElementById('tractorSubtext');
-                    const trailerValueEl = document.getElementById('trailerValue');
-                    const trailerSubtextEl = document.getElementById('trailerSubtext');
-                    const moffettValueEl = document.getElementById('moffettValue');
-                    const moffettSubtextEl = document.getElementById('moffettSubtext');
-                    
-                    if (tractorValueEl) tractorValueEl.textContent = tractorCount;
-                    if (tractorSubtextEl) tractorSubtextEl.textContent = `${tractorCount === 1 ? 'active issue' : 'active issues'}`;
-                    
-                    if (trailerValueEl) trailerValueEl.textContent = trailerCount;
-                    if (trailerSubtextEl) trailerSubtextEl.textContent = `${trailerCount === 1 ? 'active issue' : 'active issues'}`;
-                    
-                    if (moffettValueEl) moffettValueEl.textContent = moffettCount;
-                    if (moffettSubtextEl) moffettSubtextEl.textContent = `${moffettCount === 1 ? 'active issue' : 'active issues'}`;
-                },
-                
-                reportIssue: function(equipmentType) {
-                    const issues = equipmentIssues[equipmentType];
-                    if (!issues || issues.length === 0) {
-                        this.showToast('No Issues', `No active ${equipmentType} issues`, 'info');
-                    } else {
-                        const issueList = issues.map(i => {
-                            let text = `• ${i[equipmentType + 'Number'] || 'Unknown'}: ${i.issues || 'See notes'}`;
-                            if (i.notes) text += ` - ${i.notes}`;
-                            text += ` (${i.reportedBy})`;
-                            return text;
-                        }).join('\n');
-                        this.showToast(`${equipmentType.charAt(0).toUpperCase() + equipmentType.slice(1)} Issues`, issueList, 'warning', 10000);
-                    }
-                },
-                
-                // Update Metrics
-                updateMetrics: function(allDriverData, adminDrivers = [], completedCheckIns = []) {
-                    const activeDrivers = allDriverData.filter(n => n && (n.status === 'en-route' || n.status === 'arrived' || n.status === 'pending-checkin'));
-                    const enRouteDrivers = allDriverData.filter(n => n && n.status === 'en-route').length;
-                    const arrivedDrivers = allDriverData.filter(n => n && n.status === 'arrived').length;
-                    const pendingDrivers = allDriverData.filter(n => n && n.status === 'pending-checkin').length;
-                    const completedCount = completedCheckIns.length;
-                    
-                    const activeDriversEl = document.getElementById('activeDrivers');
-                    const enRouteCountEl = document.getElementById('enRouteCount');
-                    const arrivedCountEl = document.getElementById('arrivedCount');
-                    const pendingCountEl = document.getElementById('pendingCount');
-                    const completedCountEl = document.getElementById('completedCount');
-                    
-                    if (activeDriversEl) activeDriversEl.textContent = activeDrivers.length;
-                    if (enRouteCountEl) enRouteCountEl.textContent = enRouteDrivers;
-                    if (arrivedCountEl) arrivedCountEl.textContent = arrivedDrivers;
-                    if (pendingCountEl) pendingCountEl.textContent = pendingDrivers;
-                    if (completedCountEl) completedCountEl.textContent = completedCount;
-                },
-                
-                // Update Display
-                updateDisplay: function(allDriverData) {
-                    let filtered = [];
-                    let feedTitle = 'Real-Time Activity Feed';
-                    let feedIcon = '📡';
-                    
-                    // Handle different filter views
-                    if (currentFilter === 'active') {
-                        // Show only active drivers (not completed check-ins)
-                        filtered = allDriverData.filter(n => n && (n.status === 'en-route' || n.status === 'arrived' || n.status === 'pending-checkin'));
-                        feedTitle = 'Active Drivers';
-                        feedIcon = '🚚';
-                    } else if (currentFilter === 'completed') {
-                        // Show completed check-ins
-                        feedTitle = 'Completed Check-ins Today';
-                        feedIcon = '✅';
-                        // Display completed check-ins differently
-                        this.displayCompletedCheckIns();
-                        return;
-                    } else if (currentFilter === 'en-route') {
-                        filtered = allDriverData.filter(n => n && n.status === 'en-route');
-                        feedTitle = 'En Route Drivers';
-                        feedIcon = '📍';
-                    } else if (currentFilter === 'arrived') {
-                        filtered = allDriverData.filter(n => n && n.status === 'arrived');
-                        feedTitle = 'Arrived Drivers';
-                        feedIcon = '🏁';
-                    } else if (currentFilter === 'pending-checkin') {
-                        filtered = allDriverData.filter(n => n && n.status === 'pending-checkin');
-                        feedTitle = 'Still Working - No Return Status';
-                        feedIcon = '📦';
+                    if (driver.status === '30 minutes away') {
+                        statusClass = 'en-route';
+                        statusText = 'En Route';
+                    } else if (driver.status === 'arrived') {
+                        statusClass = 'arrived';
+                        statusText = 'Arrived';
                     }
                     
-                    const feedTitleEl = document.getElementById('activityFeedTitle');
-                    const feedIconEl = document.getElementById('activityFeedIcon');
-                    const activityCountEl = document.getElementById('activityCount');
-                    
-                    if (feedTitleEl) feedTitleEl.textContent = feedTitle;
-                    if (feedIconEl) feedIconEl.textContent = feedIcon;
-                    if (activityCountEl) activityCountEl.textContent = `${filtered.length} active`;
-                    
-                    const activityList = document.getElementById('activityList');
-                    if (!activityList) return;
-                    
-                    if (filtered.length === 0) {
-                        activityList.innerHTML = `
-                            <div class="empty-state">
-                                <div class="empty-icon">📭</div>
-                                <p>No ${currentFilter === 'active' ? 'active' : currentFilter.replace('-', ' ')} drivers</p>
-                            </div>
-                        `;
-                        return;
-                    }
-                    
-                    activityList.innerHTML = filtered
-                        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-                        .slice(0, 30)
-                        .map(notification => {
-                            if (!notification) return '';
-                            
-                            const time = new Date(notification.timestamp).toLocaleTimeString();
-                            const timeAgo = this.getTimeAgo(new Date(notification.timestamp));
-                            
-                            let statusClass = notification.status || 'standby';
-                            let statusDisplay = notification.status || 'standby';
-                            
-                            if (notification.status === 'pending-checkin') {
-                                statusDisplay = 'pending check-in';
-                            }
-                            
-                            // Add check-in button for arrived drivers
-                            let actionButton = '';
-                            if (notification.status === 'arrived') {
-                                actionButton = `
-                                    <button class="checkin-btn" onclick="FleetDashboard.openCheckinModal('${notification.driver}', '${notification.driverId || ''}')">
-                                        <span>📋</span>
-                                        <span>Check-In</span>
-                                    </button>
-                                `;
-                            }
-                            
-                            return `
-                                <div class="activity-item ${statusClass}">
-                                    <div class="activity-content">
-                                        <div class="activity-info">
-                                            <div class="activity-driver">${notification.driver}</div>
-                                            <div class="activity-details">
-                                                <span class="activity-detail">
-                                                    <span>⏱</span>
-                                                    <span>${timeAgo}</span>
-                                                </span>
-                                                <span class="activity-detail">
-                                                    <span>📍</span>
-                                                    <span>${notification.warehouse || '5856 Tampa FDC'}</span>
-                                                </span>
-                                                ${notification.estimatedArrival ? `
-                                                    <span class="activity-detail">
-                                                        <span>⏳</span>
-                                                        <span>ETA: ${notification.estimatedArrival}</span>
-                                                    </span>
-                                                ` : ''}
-                                            </div>
-                                        </div>
-                                        <div class="activity-actions">
-                                            ${actionButton}
-                                            <span class="status-badge status-${statusClass}">
-                                                ${statusDisplay.replace('-', ' ')}
-                                            </span>
-                                        </div>
+                    return `
+                        <div class="activity-item ${statusClass}">
+                            <div class="activity-content">
+                                <div class="activity-info">
+                                    <div class="activity-driver">${driver.driver}</div>
+                                    <div class="activity-details">
+                                        <span class="activity-detail">
+                                            <span>⏱</span>
+                                            <span>${time}</span>
+                                        </span>
+                                        <span class="activity-detail">
+                                            <span>📍</span>
+                                            <span>${driver.warehouse || '5856 Tampa FDC'}</span>
+                                        </span>
                                     </div>
                                 </div>
-                            `;
-                        }).join('');
-                },
-                
-                // Display completed check-ins
-                displayCompletedCheckIns: function() {
-                    const feedTitleEl = document.getElementById('activityFeedTitle');
-                    const feedIconEl = document.getElementById('activityFeedIcon');
-                    const activityCountEl = document.getElementById('activityCount');
-                    
-                    if (feedTitleEl) feedTitleEl.textContent = 'Completed Check-ins Today';
-                    if (feedIconEl) feedIconEl.textContent = '✅';
-                    if (activityCountEl) activityCountEl.textContent = `${completedCheckIns.length} completed`;
-                    
-                    const activityList = document.getElementById('activityList');
-                    if (!activityList) return;
-                    
-                    if (completedCheckIns.length === 0) {
-                        activityList.innerHTML = `
-                            <div class="empty-state">
-                                <div class="empty-icon">📋</div>
-                                <p>No completed check-ins today</p>
-                            </div>
-                        `;
-                        return;
-                    }
-                    
-                    activityList.innerHTML = completedCheckIns
-                        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-                        .map(checkIn => {
-                            const time = new Date(checkIn.timestamp).toLocaleTimeString();
-                            const timeAgo = this.getTimeAgo(new Date(checkIn.timestamp));
-                            
-                            // Determine if there are any issues
-                            const hasIssues = checkIn.tractorIssues || checkIn.trailerIssues || checkIn.moffettIssues;
-                            const issuesList = [];
-                            if (checkIn.tractorIssues) issuesList.push('Tractor');
-                            if (checkIn.trailerIssues) issuesList.push('Trailer');
-                            if (checkIn.moffettIssues) issuesList.push('Moffett');
-                            
-                            return `
-                                <div class="activity-item completed" style="border-left: 3px solid var(--success);">
-                                    <div class="activity-content">
-                                        <div class="activity-info">
-                                            <div class="activity-driver">${checkIn.driverName}</div>
-                                            <div class="activity-details">
-                                                <span class="activity-detail">
-                                                    <span>✅</span>
-                                                    <span>Checked in ${timeAgo}</span>
-                                                </span>
-                                                <span class="activity-detail">
-                                                    <span>🕐</span>
-                                                    <span>${time}</span>
-                                                </span>
-                                                ${hasIssues ? `
-                                                    <span class="activity-detail" style="color: var(--warning);">
-                                                        <span>⚠️</span>
-                                                        <span>Issues: ${issuesList.join(', ')}</span>
-                                                    </span>
-                                                ` : `
-                                                    <span class="activity-detail" style="color: var(--success);">
-                                                        <span>✓</span>
-                                                        <span>No issues reported</span>
-                                                    </span>
-                                                `}
-                                            </div>
-                                        </div>
-                                        <div class="activity-actions">
-                                            <span class="status-badge" style="background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3);">
-                                                COMPLETED
-                                            </span>
-                                        </div>
-                                    </div>
+                                <div class="activity-actions">
+                                    <span class="status-badge status-${statusClass}">
+                                        ${statusText}
+                                    </span>
                                 </div>
-                            `;
-                        }).join('');
-                },
-                
-                // Open Check-in Modal
-                openCheckinModal: function(driverName, driverId) {
-                    currentCheckinDriver = { name: driverName, id: driverId };
-                    
-                    const driverNameEl = document.getElementById('checkinDriverName');
-                    const dateTimeEl = document.getElementById('checkinDateTime');
-                    
-                    if (driverNameEl) driverNameEl.textContent = driverName;
-                    if (dateTimeEl) dateTimeEl.textContent = new Date().toLocaleString();
-                    
-                    // Reset form
-                    const form = document.getElementById('inspectionForm');
-                    if (form) form.reset();
-                    
-                    // Show modal
-                    const modal = document.getElementById('checkinModal');
-                    if (modal) modal.classList.add('active');
-                },
-                
-                // Close Check-in Modal
-                closeCheckinModal: function() {
-                    const modal = document.getElementById('checkinModal');
-                    if (modal) modal.classList.remove('active');
-                    currentCheckinDriver = null;
-                },
-                
-                // Submit Check-in
-                submitCheckin: async function() {
-                    if (!currentCheckinDriver) {
-                        this.showToast('Error', 'No driver selected for check-in', 'error');
-                        return;
-                    }
-                    
-                    try {
-                        // Gather form data with null checks
-                        const getElementValue = (id, isCheckbox = false) => {
-                            const el = document.getElementById(id);
-                            if (!el) return isCheckbox ? false : '';
-                            return isCheckbox ? el.checked : el.value;
-                        };
-                        
-                        const formData = {
-                            driverName: currentCheckinDriver.name,
-                            driverId: currentCheckinDriver.id,
-                            timestamp: new Date().toISOString(),
-                            
-                            // Tractor data
-                            tractorNumber: getElementValue('tractorNumber'),
-                            tractorCondition: getElementValue('tractorCondition'),
-                            tractorDamage: getElementValue('tractorDamage'),
-                            tractorLights: getElementValue('tractorLights', true),
-                            tractorCab: getElementValue('tractorCab', true),
-                            tractorExtinguisher: getElementValue('tractorExtinguisher', true),
-                            tractorTires: getElementValue('tractorTires', true),
-                            tractorAirLeaks: getElementValue('tractorAirLeaks', true),
-                            tractorIssuePart: getElementValue('tractorIssuePart'),
-                            tractorIssueDescription: getElementValue('tractorIssueDescription'),
-                            tractorNotes: getElementValue('tractorNotes'),
-                            
-                            // Trailer data
-                            trailerNumber: getElementValue('trailerNumber'),
-                            trailerDeckCondition: getElementValue('trailerDeckCondition'),
-                            trailerTires: getElementValue('trailerTires', true),
-                            trailerElectrical: getElementValue('trailerElectrical', true),
-                            trailerClean: getElementValue('trailerClean', true),
-                            trailerDebris: getElementValue('trailerDebris', true),
-                            trailerIssuePart: getElementValue('trailerIssuePart'),
-                            trailerIssueDescription: getElementValue('trailerIssueDescription'),
-                            trailerNotes: getElementValue('trailerNotes'),
-                            
-                            // Moffett data
-                            moffettNumber: getElementValue('moffettNumber'),
-                            moffettCondition: getElementValue('moffettCondition'),
-                            moffettTires: getElementValue('moffettTires', true),
-                            moffettElectrical: getElementValue('moffettElectrical', true),
-                            moffettHydraulic: getElementValue('moffettHydraulic', true),
-                            moffettSeatbelts: getElementValue('moffettSeatbelts', true),
-                            moffettIssuePart: getElementValue('moffettIssuePart'),
-                            moffettIssueDescription: getElementValue('moffettIssueDescription'),
-                            moffettNotes: getElementValue('moffettNotes'),
-                            
-                            // Mark if there are issues
-                            tractorIssues: getElementValue('tractorDamage') !== 'none' || 
-                                          getElementValue('tractorAirLeaks', true) ||
-                                          !getElementValue('tractorLights', true) ||
-                                          !getElementValue('tractorTires', true) ||
-                                          getElementValue('tractorIssuePart') !== '',
-                                          
-                            trailerIssues: !getElementValue('trailerTires', true) ||
-                                          !getElementValue('trailerElectrical', true) ||
-                                          getElementValue('trailerDebris', true) ||
-                                          getElementValue('trailerIssuePart') !== '',
-                                          
-                            moffettIssues: !getElementValue('moffettTires', true) ||
-                                          !getElementValue('moffettElectrical', true) ||
-                                          getElementValue('moffettHydraulic', true) ||
-                                          !getElementValue('moffettSeatbelts', true) ||
-                                          getElementValue('moffettIssuePart') !== ''
-                        };
-                        
-                        // Send to server
-                        const response = await fetch('/api/checkins', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify(formData)
-                        });
-                        
-                        if (response.ok) {
-                            this.showToast('Success', `Check-in completed for ${currentCheckinDriver.name}`, 'success');
-                            this.closeCheckinModal();
-                            
-                            // Refresh dashboard to show updated equipment issues
-                            setTimeout(() => {
-                                this.loadNotifications();
-                            }, 1000);
-                        } else {
-                            throw new Error('Failed to submit check-in');
-                        }
-                    } catch (error) {
-                        console.error('Error submitting check-in:', error);
-                        this.showToast('Error', 'Failed to submit check-in. Please try again.', 'error');
-                    }
-                },
-                
-                animateKPIs: function() {
-                    document.querySelectorAll('.kpi-value').forEach(kpi => {
-                        const finalValue = kpi.textContent;
-                        const isNumeric = /^\d+/.test(finalValue);
-                        
-                        if (isNumeric) {
-                            const numValue = parseInt(finalValue);
-                            let current = 0;
-                            const increment = Math.ceil(numValue / 20);
-                            const timer = setInterval(() => {
-                                current += increment;
-                                if (current >= numValue) {
-                                    current = numValue;
-                                    clearInterval(timer);
-                                }
-                                kpi.textContent = current;
-                            }, 50);
-                        }
-                    });
-                },
-                
-                startClock: function() {
-                    const updateTime = () => {
-                        const now = new Date();
-                        const timeEl = document.getElementById('currentTime');
-                        if (timeEl) {
-                            timeEl.textContent = now.toLocaleTimeString('en-US', { hour12: false });
-                        }
-                    };
-                    updateTime();
-                    setInterval(updateTime, 1000);
-                },
-                
-                getTimeAgo: function(date) {
-                    const seconds = Math.floor((new Date() - date) / 1000);
-                    if (seconds < 60) return 'just now';
-                    const minutes = Math.floor(seconds / 60);
-                    if (minutes < 60) return `${minutes}m ago`;
-                    const hours = Math.floor(minutes / 60);
-                    if (hours < 24) return `${hours}h ago`;
-                    return `${Math.floor(hours / 24)}d ago`;
-                },
-                
-                startAutoRefresh: function() {
-                    if (refreshInterval) clearInterval(refreshInterval);
-                    refreshInterval = setInterval(() => {
-                        this.loadNotifications();
-                    }, 30000); // Refresh every 30 seconds
-                },
-                
-                filterStatus: function(status, button) {
-                    currentFilter = status;
-                    
-                    document.querySelectorAll('.filter-btn').forEach(btn => {
-                        btn.classList.remove('active');
-                    });
-                    button.classList.add('active');
-                    
-                    this.updateDisplay(notifications);
-                },
-                
-                exportData: function() {
-                    if (notifications.length === 0) {
-                        this.showToast('No Data', 'No data to export', 'error');
-                        return;
-                    }
-                    
-                    const csv = [
-                        ['Timestamp', 'Driver', 'Status', 'Location', 'Warehouse', 'ETA'],
-                        ...notifications.map(n => [
-                            new Date(n.timestamp).toLocaleString(),
-                            n.driver,
-                            n.status,
-                            n.location || 'N/A',
-                            n.warehouse || 'N/A',
-                            n.estimatedArrival || 'N/A'
-                        ])
-                    ].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
-                    
-                    const blob = new Blob([csv], { type: 'text/csv' });
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `fleet-report-${new Date().toISOString().split('T')[0]}.csv`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    window.URL.revokeObjectURL(url);
-                    
-                    this.showToast('Export Complete', 'Fleet report downloaded successfully', 'success');
-                },
-                
-                viewReports: function() {
-                    this.showToast('Reports', 'Reports feature coming soon', 'info');
-                },
-                
-                toggleFullscreen: function() {
-                    if (!document.fullscreenElement) {
-                        document.documentElement.requestFullscreen();
-                    } else {
-                        document.exitFullscreen();
-                    }
-                },
-                
-                showToast: function(title, message, type = 'info', duration = 5000) {
-                    const existingToast = document.querySelector('.toast');
-                    if (existingToast) existingToast.remove();
-                    
-                    const icons = {
-                        success: '✅',
-                        error: '❌',
-                        info: 'ℹ️',
-                        warning: '⚠️'
-                    };
-                    
-                    const toast = document.createElement('div');
-                    toast.className = 'toast';
-                    toast.innerHTML = `
-                        <div class="toast-icon">${icons[type]}</div>
-                        <div class="toast-content">
-                            <div class="toast-title">${title}</div>
-                            <div class="toast-message" style="white-space: pre-line;">${message}</div>
+                            </div>
                         </div>
                     `;
-                    
-                    document.body.appendChild(toast);
-                    
-                    setTimeout(() => {
-                        toast.style.animation = 'toastSlideUp 0.3s ease reverse';
-                        setTimeout(() => toast.remove(), 300);
-                    }, duration);
-                }
-            };
-        })();
+                }).join('');
+            
+            document.getElementById('activityCount').textContent = `${drivers.length} drivers`;
+            document.getElementById('lastUpdate').innerHTML = `Updated: ${new Date().toLocaleTimeString()}`;
+        }
         
-        // Initialize when DOM is ready
-        document.addEventListener('DOMContentLoaded', function() {
-            FleetDashboard.init();
-        });
+        // Update messages display
+        function updateMessagesDisplay() {
+            const container = document.getElementById('messagesContainer');
+            const messagesList = document.getElementById('messagesList');
+            
+            if (messages.length === 0) {
+                const emptyHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📭</div>
+                        <p>No messages</p>
+                    </div>
+                `;
+                container.innerHTML = emptyHTML;
+                messagesList.innerHTML = emptyHTML;
+                return;
+            }
+            
+            const messagesHTML = messages.slice(0, 10).map(msg => `
+                <div class="message ${msg.priority === 'high' ? 'priority-high' : ''}">
+                    <div class="message-header">
+                        <span class="message-from">Driver ${msg.from}</span>
+                        <span class="message-time">${new Date(msg.timestamp).toLocaleTimeString()}</span>
+                    </div>
+                    <div class="message-text">${msg.message}</div>
+                </div>
+            `).join('');
+            
+            container.innerHTML = messagesHTML;
+            messagesList.innerHTML = `<div style="padding: 1rem;">${messagesHTML}</div>`;
+        }
+        
+        // Update message count
+        function updateMessageCount() {
+            const unreadCount = messages.filter(m => !m.read).length;
+            document.getElementById('messageCount').textContent = unreadCount;
+        }
+        
+        // Switch tabs
+        function switchTab(tabName) {
+            currentTab = tabName;
+            
+            // Update tab buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            
+            // Initialize map when map tab is opened
+            if (tabName === 'map' && !map) {
+                setTimeout(initializeMap, 100);
+            }
+        }
+        
+        // Initialize map
+        function initializeMap() {
+            map = L.map('map').setView([27.9506, -82.4572], 11); // Tampa coordinates
+            
+            // Dark theme tiles
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '© OpenStreetMap contributors © CARTO'
+            }).addTo(map);
+            
+            // Add warehouse marker
+            L.marker([27.9506, -82.4572], {
+                icon: L.divIcon({
+                    className: 'warehouse-marker',
+                    html: '<div style="background: var(--accent); color: white; padding: 5px 10px; border-radius: 20px; font-weight: bold;">🏭 Warehouse</div>',
+                    iconSize: [120, 30]
+                })
+            }).addTo(map);
+            
+            updateMapMarkers();
+        }
+        
+        // Update map markers
+        function updateMapMarkers() {
+            if (!map) return;
+            
+            // Clear existing markers
+            Object.values(driverMarkers).forEach(marker => {
+                map.removeLayer(marker);
+            });
+            driverMarkers = {};
+            
+            // Add driver markers (simulated positions)
+            drivers.forEach((driver, index) => {
+                const lat = 27.9506 + (Math.random() - 0.5) * 0.2;
+                const lng = -82.4572 + (Math.random() - 0.5) * 0.2;
+                
+                const icon = L.divIcon({
+                    className: 'driver-marker',
+                    html: driver.status === 'arrived' ? '🏁' : '🚚',
+                    iconSize: [25, 25]
+                });
+                
+                const marker = L.marker([lat, lng], { icon })
+                    .addTo(map)
+                    .bindPopup(`
+                        <strong>${driver.driver}</strong><br>
+                        Status: ${driver.status}<br>
+                        Time: ${new Date(driver.timestamp).toLocaleTimeString()}
+                    `);
+                
+                driverMarkers[driver.driverId] = marker;
+            });
+        }
+        
+        // Map controls
+        function centerMap() {
+            if (map) {
+                map.setView([27.9506, -82.4572], 11);
+            }
+        }
+        
+        function refreshMap() {
+            loadDrivers();
+            if (map) updateMapMarkers();
+            showNotification('Map refreshed', 'success');
+        }
+        
+        // Messaging
+        function toggleMessaging() {
+            const panel = document.getElementById('messagingPanel');
+            panel.classList.toggle('minimized');
+        }
+        
+        function sendReply() {
+            const input = document.getElementById('replyInput');
+            const message = input.value.trim();
+            
+            if (message) {
+                if (socket && socket.connected) {
+                    socket.emit('dispatch-message', {
+                        from: 'dispatch',
+                        message: message,
+                        timestamp: new Date()
+                    });
+                }
+                
+                input.value = '';
+                showNotification('Message sent', 'success');
+            }
+        }
+        
+        function markAllRead() {
+            messages.forEach(m => m.read = true);
+            updateMessageCount();
+            showNotification('All messages marked as read', 'success');
+        }
+        
+        // Export functions
+        async function exportToCSV() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            window.location.href = `/api/export/csv?startDate=${startDate}&endDate=${endDate}`;
+            showNotification('Exporting to CSV...', 'success');
+        }
+        
+        async function exportToPDF() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            window.location.href = `/api/export/pdf?startDate=${startDate}&endDate=${endDate}`;
+            showNotification('Exporting to PDF...', 'success');
+        }
+        
+        async function exportToExcel() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            window.location.href = `/api/export/excel?startDate=${startDate}&endDate=${endDate}`;
+            showNotification('Exporting to Excel...', 'success');
+        }
+        
+        // Handle real-time updates
+        function handleDriverUpdate(data) {
+            loadDrivers();
+            showNotification(`Driver ${data.driverId} status updated`, 'success');
+        }
+        
+        function handleLocationUpdate(data) {
+            if (map && driverMarkers[data.driverId]) {
+                driverMarkers[data.driverId].setLatLng([data.position.lat, data.position.lng]);
+            }
+        }
+        
+        function handleNewMessage(data) {
+            messages.unshift(data);
+            updateMessagesDisplay();
+            updateMessageCount();
+            showNotification(`New message from Driver ${data.from}`, 'warning');
+        }
+        
+        // Refresh dashboard
+        function refreshDashboard() {
+            loadInitialData();
+            showNotification('Dashboard refreshed', 'success');
+        }
+        
+        // Notification system
+        function showNotification(message, type = 'success') {
+            const toast = document.getElementById('notificationToast');
+            const content = document.getElementById('notificationContent');
+            
+            toast.className = `notification-toast ${type}`;
+            content.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Polling fallback
+        function startPolling() {
+            setInterval(() => {
+                if (!socket || !socket.connected) {
+                    loadInitialData();
+                }
+            }, 30000);
+        }
     </script>
 </body>
 </html>
