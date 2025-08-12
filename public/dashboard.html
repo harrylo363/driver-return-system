@@ -949,6 +949,20 @@
             </div>
         </div>
 
+        <!-- Tab Navigation -->
+        <div class="control-panel" style="margin-bottom: 1rem;">
+            <div class="filter-group">
+                <button class="filter-btn active" onclick="switchTab('overview', this)">Overview</button>
+                <button class="filter-btn" onclick="switchTab('map', this)">Live Map</button>
+                <button class="filter-btn" onclick="switchTab('messages', this)">Messages</button>
+                <button class="filter-btn" onclick="switchTab('export', this)">Reports</button>
+            </div>
+            <button class="btn btn-secondary" onclick="refreshDashboard()">
+                <span>🔄</span>
+                <span>Refresh</span>
+            </button>
+        </div>
+
         <!-- Control Panel -->
         <div class="control-panel">
             <div class="filter-group" style="flex: 1;">
@@ -957,20 +971,6 @@
                 <button class="filter-btn" onclick="filterDrivers('arrived', this)">Arrived</button>
                 <button class="filter-btn" onclick="filterDrivers('still-working', this)">Still Working</button>
                 <button class="filter-btn" onclick="filterDrivers('completed', this)">✓ Completed</button>
-            </div>
-            <button class="btn btn-secondary" onclick="refreshDashboard()">
-                <span>🔄</span>
-                <span>Refresh</span>
-            </button>
-        </div>
-
-        <!-- Tab Navigation -->
-        <div class="control-panel" style="margin-bottom: 2rem;">
-            <div class="filter-group">
-                <button class="filter-btn active" onclick="switchTab('overview', this)">Overview</button>
-                <button class="filter-btn" onclick="switchTab('map', this)">Live Map</button>
-                <button class="filter-btn" onclick="switchTab('messages', this)">Messages</button>
-                <button class="filter-btn" onclick="switchTab('export', this)">Reports</button>
             </div>
         </div>
 
