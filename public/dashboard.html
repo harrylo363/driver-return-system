@@ -1259,58 +1259,84 @@
             
             // Filter based on selected status
             if (currentFilter === 'overview') {
-                // Show only drivers who are actively returning
+                // Overview shows ALL active (non-completed) drivers
+                filteredDrivers = allDrivers.filter(d => 
+                    d.status !== 'completed'
+                );
+            } else if (currentFilter === 'en-route') {
+                // Only drivers who are 30 minutes away
                 filteredDrivers = allDrivers.filter(d => 
                     d.status === '30 minutes away' || 
                     d.status === 'en-route' ||
-                    d.status === 'arrived'
-                );
-            } else if (currentFilter === 'en-route') {
-                filteredDrivers = allDrivers.filter(d => 
-                    d.status === '30 minutes away' || 
-                    d.status === 'en-route'
+                    d.status === 'en route'
                 );
             } else if (currentFilter === 'arrived') {
-                filteredDrivers = allDrivers.filter(d => d.status === 'arrived');
+                // Only drivers who have arrived at warehouse
+                filteredDrivers = allDrivers.filter(d => 
+                    d.status === 'arrived' || 
+                    d.status === 'Arrived'
+                );
+            } else if (currentFilter === 'completed') {
+                // Only completed check-ins for today
+                filteredDrivers = completedCheckIns;
             } else if (currentFilter === 'still-working') {
+                // Drivers who haven't started their return (no status or other status)
                 filteredDrivers = allDrivers.filter(d => 
                     !d.status || 
                     (d.status !== '30 minutes away' && 
                      d.status !== 'en-route' && 
+                     d.status !== 'en route' &&
                      d.status !== 'arrived' && 
+                     d.status !== 'Arrived' &&
                      d.status !== 'completed')
                 );
-            } else if (currentFilter === 'completed') {
-                filteredDrivers = completedCheckIns;
             }
             
-            // Update activity count
-            const filterLabel = currentFilter === 'still-working' ? 'still working' : 
-                              currentFilter === 'overview' ? 'active' : 
-                              currentFilter.replace('-', ' ');
+            // Update activity count with proper label
+            let filterLabel = '';
+            if (currentFilter === 'overview') {
+                filterLabel = 'active drivers';
+            } else if (currentFilter === 'en-route') {
+                filterLabel = 'en route';
+            } else if (currentFilter === 'arrived') {
+                filterLabel = 'arrived';
+            } else if (currentFilter === 'completed') {
+                filterLabel = 'completed today';
+            } else if (currentFilter === 'still-working') {
+                filterLabel = 'still working';
+            }
+            
             document.getElementById('activityCount').textContent = `${filteredDrivers.length} ${filterLabel}`;
             
             if (filteredDrivers.length === 0) {
                 activityList.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-icon">📭</div>
-                        <p>No ${filterLabel} drivers</p>
+                        <p>No ${filterLabel}</p>
                     </div>
                 `;
                 return;
             }
             
+            // Sort by timestamp (newest first)
+            filteredDrivers.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
             activityList.innerHTML = filteredDrivers
-                .slice(0, 30)
+                .slice(0, 50) // Show up to 50 drivers
                 .map(driver => {
-                    const time = new Date(driver.timestamp).toLocaleTimeString();
+                    const time = new Date(driver.timestamp).toLocaleTimeString('en-US', {
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        hour12: true
+                    });
+                    
                     let statusClass = 'still-working';
                     let statusText = 'Still Working';
                     
-                    if (driver.status === '30 minutes away' || driver.status === 'en-route') {
+                    if (driver.status === '30 minutes away' || driver.status === 'en-route' || driver.status === 'en route') {
                         statusClass = 'en-route';
                         statusText = 'En Route (30 min)';
-                    } else if (driver.status === 'arrived') {
+                    } else if (driver.status === 'arrived' || driver.status === 'Arrived') {
                         statusClass = 'arrived';
                         statusText = 'Arrived';
                     } else if (driver.status === 'completed') {
@@ -1322,7 +1348,7 @@
                         <div class="activity-item ${statusClass}">
                             <div class="activity-content">
                                 <div class="activity-info">
-                                    <div class="activity-driver">${driver.driver}</div>
+                                    <div class="activity-driver">${driver.driver || 'Unknown Driver'}</div>
                                     <div class="activity-details">
                                         <span class="activity-detail">
                                             <span>⏱</span>
