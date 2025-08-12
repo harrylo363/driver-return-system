@@ -518,6 +518,261 @@
             border: 1px solid rgba(16, 185, 129, 0.3);
         }
         
+        /* Check-in Button */
+        .checkin-btn {
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            animation: pulseGreen 2s infinite;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        @keyframes pulseGreen {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+        }
+        
+        .checkin-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+        
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .modal-header {
+            padding: 1.5rem;
+            background: var(--bg-dark);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: none;
+            background: var(--bg-hover);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .modal-close:hover {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            background: var(--bg-card);
+        }
+        
+        .inspection-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .form-section {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+        
+        .form-section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .form-section-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        
+        .form-section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .form-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+        
+        .form-input,
+        .form-select,
+        .form-textarea {
+            padding: 0.75rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+        
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .form-textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .checkbox-group:hover {
+            border-color: var(--accent);
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .checkbox-label {
+            flex: 1;
+            font-size: 0.875rem;
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+        
+        .modal-footer {
+            padding: 1.5rem;
+            background: var(--bg-dark);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .form-info {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+        
         /* Analytics Panel */
         .analytics-panel {
             background: var(--bg-card);
@@ -1124,6 +1379,161 @@
         </div>
     </div>
 
+    <!-- Check-in Modal -->
+    <div class="modal-overlay" id="checkinModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <span>📋</span>
+                    <span>Equipment Inspection Check-In</span>
+                </h2>
+                <button class="modal-close" onclick="closeCheckinModal()">✕</button>
+            </div>
+            
+            <div class="modal-body">
+                <form class="inspection-form" id="inspectionForm">
+                    <!-- Driver Info -->
+                    <div style="padding: 1rem; background: rgba(59, 130, 246, 0.1); border-radius: 8px; margin-bottom: 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="font-size: 0.875rem; color: var(--text-secondary);">Driver:</div>
+                                <div style="font-size: 1.125rem; font-weight: 600; color: var(--text-primary);" id="checkinDriverName">-</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.875rem; color: var(--text-secondary);">Date/Time:</div>
+                                <div style="font-size: 1rem; color: var(--text-primary);" id="checkinDateTime">-</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tractor Section -->
+                    <div class="form-section">
+                        <div class="form-section-header">
+                            <div class="form-section-icon">🚛</div>
+                            <div class="form-section-title">Tractor Inspection</div>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Tractor Number</label>
+                                <input type="text" class="form-input" id="tractorNumber" placeholder="Enter tractor number">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">General Condition</label>
+                                <select class="form-select" id="tractorCondition">
+                                    <option value="excellent">Excellent</option>
+                                    <option value="good" selected>Good</option>
+                                    <option value="fair">Fair</option>
+                                    <option value="poor">Poor</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-grid" style="margin-top: 1rem;">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="tractorLights" checked>
+                                <label class="checkbox-label" for="tractorLights">Lights Working</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="tractorTires" checked>
+                                <label class="checkbox-label" for="tractorTires">Tires Good Condition</label>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-top: 1rem;">
+                            <label class="form-label">Notes/Issues</label>
+                            <textarea class="form-textarea" id="tractorNotes" placeholder="Any issues or observations..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- Trailer Section -->
+                    <div class="form-section">
+                        <div class="form-section-header">
+                            <div class="form-section-icon" style="background: rgba(245, 158, 11, 0.1);">🚚</div>
+                            <div class="form-section-title">Trailer Inspection</div>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Trailer Number</label>
+                                <input type="text" class="form-input" id="trailerNumber" placeholder="Enter trailer number">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Deck Condition</label>
+                                <select class="form-select" id="trailerCondition">
+                                    <option value="excellent">Excellent</option>
+                                    <option value="good" selected>Good</option>
+                                    <option value="fair">Fair</option>
+                                    <option value="poor">Poor</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-grid" style="margin-top: 1rem;">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="trailerTires" checked>
+                                <label class="checkbox-label" for="trailerTires">Tires Good Condition</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="trailerClean" checked>
+                                <label class="checkbox-label" for="trailerClean">Deck Clean (No Debris)</label>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-top: 1rem;">
+                            <label class="form-label">Notes/Issues</label>
+                            <textarea class="form-textarea" id="trailerNotes" placeholder="Any issues or observations..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- Moffett Section -->
+                    <div class="form-section">
+                        <div class="form-section-header">
+                            <div class="form-section-icon" style="background: rgba(16, 185, 129, 0.1);">🏗️</div>
+                            <div class="form-section-title">Moffett Inspection</div>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Moffett Number</label>
+                                <input type="text" class="form-input" id="moffettNumber" placeholder="Enter moffett number">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">General Condition</label>
+                                <select class="form-select" id="moffettCondition">
+                                    <option value="excellent">Excellent</option>
+                                    <option value="good" selected>Good</option>
+                                    <option value="fair">Fair</option>
+                                    <option value="poor">Poor</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-grid" style="margin-top: 1rem;">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="moffettTires" checked>
+                                <label class="checkbox-label" for="moffettTires">Tires Good Condition</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="moffettHydraulic" checked>
+                                <label class="checkbox-label" for="moffettHydraulic">Hydraulics Working</label>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-top: 1rem;">
+                            <label class="form-label">Notes/Issues</label>
+                            <textarea class="form-textarea" id="moffettNotes" placeholder="Any issues or observations..."></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="modal-footer">
+                <div class="form-info">
+                    <span>⚠️</span> All fields are required for complete inspection
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-secondary" onclick="closeCheckinModal()">Cancel</button>
+                    <button class="btn btn-success" onclick="submitCheckin()">
+                        <span>✅</span>
+                        <span>Complete Check-In</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Messaging Panel (Floating) -->
     <div class="messaging-panel minimized" id="messagingPanel">
         <div class="messaging-header" onclick="toggleMessaging()">
@@ -1147,6 +1557,7 @@
         let allDrivers = [];
         let messages = [];
         let completedCheckIns = [];
+        let currentCheckinDriver = null;
         
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
@@ -1361,6 +1772,12 @@
                                     </div>
                                 </div>
                                 <div class="activity-actions">
+                                    ${(driver.status === 'arrived' || driver.status === 'Arrived') ? `
+                                        <button class="checkin-btn" onclick="openCheckinModal('${driver.driver || 'Unknown'}', '${driver.driverId || driver._id || ''}')">
+                                            <span>📋</span>
+                                            <span>Check-In</span>
+                                        </button>
+                                    ` : ''}
                                     <span class="status-badge status-${statusClass}">
                                         ${statusText}
                                     </span>
@@ -1660,6 +2077,107 @@
                     loadInitialData();
                 }
             }, 30000);
+        }
+        
+        // Check-in Modal Functions
+        function openCheckinModal(driverName, driverId) {
+            currentCheckinDriver = { name: driverName, id: driverId };
+            
+            // Update driver info in modal
+            document.getElementById('checkinDriverName').textContent = driverName;
+            document.getElementById('checkinDateTime').textContent = new Date().toLocaleString();
+            
+            // Reset form
+            document.getElementById('inspectionForm').reset();
+            
+            // Show modal
+            document.getElementById('checkinModal').classList.add('active');
+        }
+        
+        function closeCheckinModal() {
+            document.getElementById('checkinModal').classList.remove('active');
+            currentCheckinDriver = null;
+        }
+        
+        async function submitCheckin() {
+            if (!currentCheckinDriver) {
+                showNotification('Error: No driver selected', 'error');
+                return;
+            }
+            
+            // Gather form data
+            const formData = {
+                driverName: currentCheckinDriver.name,
+                driverId: currentCheckinDriver.id,
+                timestamp: new Date().toISOString(),
+                status: 'completed',
+                
+                // Tractor data
+                tractorNumber: document.getElementById('tractorNumber').value,
+                tractorCondition: document.getElementById('tractorCondition').value,
+                tractorLights: document.getElementById('tractorLights').checked,
+                tractorTires: document.getElementById('tractorTires').checked,
+                tractorNotes: document.getElementById('tractorNotes').value,
+                tractorIssues: document.getElementById('tractorNotes').value ? true : false,
+                
+                // Trailer data
+                trailerNumber: document.getElementById('trailerNumber').value,
+                trailerCondition: document.getElementById('trailerCondition').value,
+                trailerTires: document.getElementById('trailerTires').checked,
+                trailerClean: document.getElementById('trailerClean').checked,
+                trailerNotes: document.getElementById('trailerNotes').value,
+                trailerIssues: document.getElementById('trailerNotes').value ? true : false,
+                
+                // Moffett data
+                moffettNumber: document.getElementById('moffettNumber').value,
+                moffettCondition: document.getElementById('moffettCondition').value,
+                moffettTires: document.getElementById('moffettTires').checked,
+                moffettHydraulic: document.getElementById('moffettHydraulic').checked,
+                moffettNotes: document.getElementById('moffettNotes').value,
+                moffettIssues: document.getElementById('moffettNotes').value ? true : false
+            };
+            
+            try {
+                // Send to server
+                const response = await fetch('/api/checkins', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (response.ok) {
+                    showNotification(`Check-in completed for ${currentCheckinDriver.name}`, 'success');
+                    closeCheckinModal();
+                    
+                    // Update the driver's status to completed
+                    await fetch('/api/notifications', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            driver: currentCheckinDriver.name,
+                            driverId: currentCheckinDriver.id,
+                            status: 'completed',
+                            message: `${currentCheckinDriver.name} has completed check-in`,
+                            warehouse: '5856 Tampa FDC',
+                            timestamp: new Date().toISOString()
+                        })
+                    });
+                    
+                    // Refresh the dashboard
+                    setTimeout(() => {
+                        loadInitialData();
+                    }, 1000);
+                } else {
+                    throw new Error('Failed to submit check-in');
+                }
+            } catch (error) {
+                console.error('Error submitting check-in:', error);
+                showNotification('Failed to submit check-in. Please try again.', 'error');
+            }
         }
     </script>
 </body>
