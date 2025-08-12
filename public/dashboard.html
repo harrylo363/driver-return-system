@@ -277,6 +277,7 @@
             gap: 1rem;
             margin-bottom: 2rem;
             flex-wrap: wrap;
+            align-items: center;
         }
         
         .btn {
@@ -292,6 +293,7 @@
             gap: 0.5rem;
             position: relative;
             overflow: hidden;
+            white-space: nowrap;
         }
         
         .btn::before {
@@ -857,12 +859,6 @@
     </style>
 </head>
 <body>
-    <!-- Connection Status -->
-    <div class="status-indicator" id="connectionIndicator" style="position: fixed; top: 20px; right: 20px; z-index: 1001;">
-        <div class="pulse" id="statusDot"></div>
-        <span id="connectionText">Connecting...</span>
-    </div>
-
     <!-- Notification Toast -->
     <div id="notificationToast" class="notification-toast">
         <div id="notificationContent"></div>
@@ -879,6 +875,10 @@
                 </div>
             </div>
             <div class="header-actions">
+                <div class="status-indicator" id="connectionIndicator">
+                    <div class="pulse" id="statusDot"></div>
+                    <span id="connectionText">Connecting...</span>
+                </div>
                 <div class="warehouse-label" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); color: var(--accent); padding: 0.5rem 1rem; border-radius: 100px; font-size: 0.875rem; font-weight: 500;">
                     5856 Tampa FDC
                 </div>
