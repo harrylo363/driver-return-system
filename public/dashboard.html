@@ -319,7 +319,7 @@
         .activity-list {
             max-height: 600px;
             overflow-y: auto;
-            padding: 1rem;
+            padding: 0;
         }
         
         .activity-item {
@@ -327,10 +327,36 @@
             border-bottom: 1px solid var(--border);
             transition: all 0.2s ease;
             cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .activity-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: transparent;
+            transition: all 0.2s ease;
         }
         
         .activity-item:hover {
             background: var(--bg-hover);
+            padding-left: 2rem;
+        }
+        
+        .activity-item.en-route::before { background: var(--warning); }
+        .activity-item.arrived::before { background: var(--success); }
+        .activity-item.completed::before { background: var(--success); }
+        .activity-item.working::before { background: var(--text-muted); }
+        
+        .activity-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
         }
         
         .activity-driver {
@@ -354,8 +380,6 @@
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            display: inline-block;
-            margin-top: 0.5rem;
         }
         
         .status-en-route {
@@ -382,11 +406,38 @@
             border: 1px solid rgba(100, 116, 139, 0.3);
         }
         
+        .checkin-btn {
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            animation: pulseGreen 2s infinite;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        @keyframes pulseGreen {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+        }
+        
+        .checkin-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+        
         .analytics-panel {
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 16px;
             padding: 1.5rem;
+            margin-bottom: 1.5rem;
         }
         
         .analytics-title {
@@ -394,6 +445,20 @@
             font-weight: 600;
             color: var(--text-primary);
             margin-bottom: 1.5rem;
+        }
+        
+        .metric-card {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            transition: all 0.2s ease;
+        }
+        
+        .metric-card:hover {
+            border-color: var(--accent);
+            transform: translateX(4px);
         }
         
         .empty-state {
@@ -500,11 +565,11 @@
         <!-- Filter Controls -->
         <div class="control-panel">
             <div class="filter-group" style="flex: 1;">
-                <button class="filter-btn active" onclick="filterDrivers('all')">All Drivers</button>
-                <button class="filter-btn" onclick="filterDrivers('en-route')">En Route</button>
-                <button class="filter-btn" onclick="filterDrivers('arrived')">Arrived</button>
-                <button class="filter-btn" onclick="filterDrivers('completed')">Completed</button>
-                <button class="filter-btn" onclick="filterDrivers('working')">Working</button>
+                <button class="filter-btn active" onclick="filterDrivers('overview', this)">Overview</button>
+                <button class="filter-btn" onclick="filterDrivers('en-route', this)">En Route</button>
+                <button class="filter-btn" onclick="filterDrivers('arrived', this)">Arrived</button>
+                <button class="filter-btn" onclick="filterDrivers('completed', this)">✓ Completed</button>
+                <button class="filter-btn" onclick="filterDrivers('working', this)">Still Working</button>
             </div>
             <button class="btn btn-secondary" onclick="refreshDashboard()">
                 🔄 Refresh
@@ -514,9 +579,9 @@
         <!-- Tab Navigation -->
         <div class="control-panel">
             <div class="filter-group">
-                <button class="filter-btn active" onclick="switchTab('operations')">Operations</button>
-                <button class="filter-btn" onclick="switchTab('map')">Live Map</button>
-                <button class="filter-btn" onclick="switchTab('reports')">Reports</button>
+                <button class="filter-btn active" onclick="switchTab('operations', this)">Active Operations</button>
+                <button class="filter-btn" onclick="switchTab('map', this)">Live Map</button>
+                <button class="filter-btn" onclick="switchTab('reports', this)">Reports</button>
             </div>
         </div>
 
@@ -526,11 +591,14 @@
                 <div class="activity-section">
                     <div class="section-header">
                         <h2 class="section-title">
-                            📡 Activity Feed
+                            📡 Real-Time Activity Feed
                         </h2>
-                        <span id="lastUpdate" style="font-size: 0.875rem; color: var(--text-secondary);">
-                            Loading...
-                        </span>
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <span id="activityCount" style="font-size: 0.875rem; color: var(--text-secondary);"></span>
+                            <span id="lastUpdate" style="font-size: 0.875rem; color: var(--text-secondary);">
+                                Loading...
+                            </span>
+                        </div>
                     </div>
                     <div class="activity-list" id="activityList">
                         <div class="empty-state">
@@ -541,6 +609,28 @@
                 </div>
 
                 <div>
+                    <div class="analytics-panel">
+                        <h3 class="analytics-title">🔧 Equipment Status</h3>
+                        <div class="metric-card">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 0.875rem; color: var(--text-secondary);">🚛 Tractor Issues</span>
+                                <span style="font-size: 1.5rem; font-weight: 700;">0</span>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 0.875rem; color: var(--text-secondary);">🚚 Trailer Issues</span>
+                                <span style="font-size: 1.5rem; font-weight: 700;">0</span>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 0.875rem; color: var(--text-secondary);">🏗️ Moffett Issues</span>
+                                <span style="font-size: 1.5rem; font-weight: 700;">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="analytics-panel">
                         <h3 class="analytics-title">⚡ Quick Actions</h3>
                         <div style="display: grid; gap: 1rem;">
@@ -594,9 +684,10 @@
     <script>
         // Global variables
         let allDrivers = [];
-        let currentFilter = 'all';
+        let currentFilter = 'overview';
         let currentTab = 'operations';
         let map = null;
+        let driverMap = new Map(); // Track unique drivers by name
         
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
@@ -611,12 +702,33 @@
                 const response = await fetch('/api/notifications?limit=100');
                 if (response.ok) {
                     const result = await response.json();
-                    allDrivers = result.data || [];
+                    processDriverData(result.data || []);
                     updateDashboard();
                 }
             } catch (error) {
                 console.error('Error loading data:', error);
             }
+        }
+        
+        // Process driver data to keep only latest status per driver
+        function processDriverData(data) {
+            // Clear the map for fresh data
+            driverMap.clear();
+            
+            // Sort by timestamp (newest first)
+            data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            // Keep only the most recent status for each driver
+            data.forEach(driver => {
+                const driverName = driver.driver || 'Unknown Driver';
+                // Only add if we haven't seen this driver yet (since we're sorted by newest first)
+                if (!driverMap.has(driverName)) {
+                    driverMap.set(driverName, driver);
+                }
+            });
+            
+            // Convert map values to array
+            allDrivers = Array.from(driverMap.values());
         }
         
         // Update dashboard
@@ -639,10 +751,10 @@
                 if (driverTime >= today) {
                     if (driver.status === 'completed') {
                         completed++;
-                    } else if (driver.status === '30 minutes away' || driver.status === 'en-route') {
+                    } else if (driver.status === '30 minutes away' || driver.status === 'en-route' || driver.status === 'en route') {
                         enroute++;
                         active++;
-                    } else if (driver.status === 'arrived') {
+                    } else if (driver.status === 'arrived' || driver.status === 'Arrived') {
                         arrived++;
                         active++;
                     } else {
@@ -665,25 +777,29 @@
             let filtered = allDrivers;
             
             // Apply filter
-            if (currentFilter !== 'all') {
+            if (currentFilter !== 'overview') {
                 filtered = allDrivers.filter(d => {
                     if (currentFilter === 'en-route') 
-                        return d.status === '30 minutes away' || d.status === 'en-route';
+                        return d.status === '30 minutes away' || d.status === 'en-route' || d.status === 'en route';
                     if (currentFilter === 'arrived') 
-                        return d.status === 'arrived';
+                        return d.status === 'arrived' || d.status === 'Arrived';
                     if (currentFilter === 'completed') 
                         return d.status === 'completed';
                     if (currentFilter === 'working') 
-                        return !['30 minutes away', 'en-route', 'arrived', 'completed'].includes(d.status);
+                        return !['30 minutes away', 'en-route', 'en route', 'arrived', 'Arrived', 'completed'].includes(d.status);
                     return true;
                 });
             }
+            
+            // Update count
+            let filterLabel = currentFilter === 'overview' ? 'active drivers' : currentFilter;
+            document.getElementById('activityCount').textContent = `${filtered.length} ${filterLabel}`;
             
             if (filtered.length === 0) {
                 list.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-icon">📭</div>
-                        <p>No drivers found</p>
+                        <p>No ${filterLabel}</p>
                     </div>
                 `;
                 return;
@@ -693,55 +809,68 @@
             filtered.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
             
             list.innerHTML = filtered.slice(0, 50).map(driver => {
-                let statusClass = 'status-working';
+                let statusClass = 'working';
                 let statusText = 'Working';
+                let showCheckin = false;
                 
-                if (driver.status === '30 minutes away' || driver.status === 'en-route') {
-                    statusClass = 'status-en-route';
-                    statusText = 'En Route';
-                } else if (driver.status === 'arrived') {
-                    statusClass = 'status-arrived';
-                    statusText = 'Arrived';
+                if (driver.status === '30 minutes away' || driver.status === 'en-route' || driver.status === 'en route') {
+                    statusClass = 'en-route';
+                    statusText = 'EN ROUTE (30 MIN)';
+                } else if (driver.status === 'arrived' || driver.status === 'Arrived') {
+                    statusClass = 'arrived';
+                    statusText = 'ARRIVED';
+                    showCheckin = true;
                 } else if (driver.status === 'completed') {
-                    statusClass = 'status-completed';
-                    statusText = 'Completed';
+                    statusClass = 'completed';
+                    statusText = 'COMPLETED';
                 }
                 
                 return `
-                    <div class="activity-item">
-                        <div class="activity-driver">${driver.driver || 'Unknown Driver'}</div>
-                        <div class="activity-details">
-                            <span>⏱ ${new Date(driver.timestamp).toLocaleTimeString()}</span>
-                            <span>📍 ${driver.warehouse || '5856 Tampa FDC'}</span>
+                    <div class="activity-item ${statusClass}">
+                        <div class="activity-content">
+                            <div style="flex: 1;">
+                                <div class="activity-driver">${driver.driver || 'Unknown Driver'}</div>
+                                <div class="activity-details">
+                                    <span>⏱ ${new Date(driver.timestamp).toLocaleTimeString()}</span>
+                                    <span>📍 ${driver.warehouse || '5856 Tampa FDC'}</span>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                ${showCheckin ? `
+                                    <button class="checkin-btn" onclick="alert('Check-in feature coming soon!')">
+                                        📋 Check-In
+                                    </button>
+                                ` : ''}
+                                <span class="status-badge status-${statusClass}">${statusText}</span>
+                            </div>
                         </div>
-                        <span class="status-badge ${statusClass}">${statusText}</span>
                     </div>
                 `;
             }).join('');
         }
         
         // Filter drivers
-        function filterDrivers(filter) {
+        function filterDrivers(filter, button) {
             currentFilter = filter;
             
             // Update button states
-            document.querySelectorAll('.filter-btn').forEach(btn => {
+            button.parentElement.querySelectorAll('.filter-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            event.target.classList.add('active');
+            button.classList.add('active');
             
             updateActivityList();
         }
         
         // Switch tabs
-        function switchTab(tab) {
+        function switchTab(tab, button) {
             currentTab = tab;
             
             // Update button states
-            event.target.parentElement.querySelectorAll('.filter-btn').forEach(btn => {
+            button.parentElement.querySelectorAll('.filter-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            event.target.classList.add('active');
+            button.classList.add('active');
             
             // Hide all tabs
             document.querySelectorAll('.tab-content').forEach(content => {
@@ -767,8 +896,9 @@
                 .bindPopup('5856 Tampa FDC - Warehouse');
         }
         
-        // Refresh dashboard
+        // Refresh dashboard - FIXED
         function refreshDashboard() {
+            console.log('Refreshing dashboard...');
             loadData();
         }
         
