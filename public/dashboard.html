@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fleet Command Center - Enhanced</title>
-    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <!-- REMOVED Socket.io - Using polling instead -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
@@ -151,30 +151,30 @@
             align-items: center;
             gap: 0.5rem;
             padding: 0.5rem 1rem;
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.3);
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
             border-radius: 100px;
             font-size: 0.875rem;
-            color: var(--success);
+            color: var(--warning);
             font-weight: 500;
         }
         
-        .status-indicator.error {
-            background: rgba(239, 68, 68, 0.1);
-            border-color: rgba(239, 68, 68, 0.3);
-            color: var(--danger);
+        .status-indicator.connected {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.3);
+            color: var(--success);
         }
         
         .pulse {
             width: 8px;
             height: 8px;
-            background: var(--success);
+            background: var(--warning);
             border-radius: 50%;
             animation: pulse 2s infinite;
         }
         
-        .pulse.error {
-            background: var(--danger);
+        .pulse.connected {
+            background: var(--success);
         }
         
         @keyframes pulse {
@@ -1139,7 +1139,7 @@
             <div class="header-actions">
                 <div class="status-indicator" id="connectionIndicator">
                     <div class="pulse" id="statusDot"></div>
-                    <span id="connectionText">Connecting...</span>
+                    <span id="connectionText">Polling Mode (30s)</span>
                 </div>
                 <div class="warehouse-label" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); color: var(--accent); padding: 0.5rem 1rem; border-radius: 100px; font-size: 0.875rem; font-weight: 500;">
                     5856 Tampa FDC
@@ -1406,6 +1406,7 @@
                         </div>
                     </div>
                     
+                    <!-- Form sections remain the same... -->
                     <!-- Tractor Section -->
                     <div class="form-section">
                         <div class="form-section-header">
@@ -1549,7 +1550,6 @@
 
     <script>
         // Initialize variables
-        let socket;
         let map;
         let driverMarkers = {};
         let currentTab = 'activeops';
@@ -1558,12 +1558,13 @@
         let messages = [];
         let completedCheckIns = [];
         let currentCheckinDriver = null;
+        let isConnected = false;
         
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
-            initializeSocket();
             loadInitialData();
             startPolling();
+            checkServerConnection();
             
             // Set today's date for export
             document.getElementById('endDate').valueAsDate = new Date();
@@ -1572,49 +1573,35 @@
             document.getElementById('startDate').valueAsDate = startDate;
         });
         
-        // Initialize Socket.io connection
-        function initializeSocket() {
+        // Check server connection
+        async function checkServerConnection() {
             try {
-                socket = io(window.location.origin, {
-                    transports: ['websocket', 'polling'],
-                    reconnection: true
-                });
-                
-                socket.on('connect', () => {
+                const response = await fetch('/api/health');
+                if (response.ok) {
                     updateConnectionStatus(true);
-                    socket.emit('join-dashboard');
-                    showNotification('Connected to real-time updates', 'success');
-                });
-                
-                socket.on('disconnect', () => {
+                } else {
                     updateConnectionStatus(false);
-                });
-                
-                // Listen for real-time updates
-                socket.on('driver-update', handleDriverUpdate);
-                socket.on('driver-location-update', handleLocationUpdate);
-                socket.on('new-driver-message', handleNewMessage);
-                
+                }
             } catch (error) {
-                console.log('WebSocket not available, using polling');
                 updateConnectionStatus(false);
             }
         }
         
         // Update connection status
         function updateConnectionStatus(connected) {
+            isConnected = connected;
             const indicator = document.getElementById('connectionIndicator');
             const dot = document.getElementById('statusDot');
             const text = document.getElementById('connectionText');
             
             if (connected) {
-                indicator.classList.remove('error');
-                dot.classList.remove('error');
-                text.textContent = 'Live Updates';
+                indicator.classList.add('connected');
+                dot.classList.add('connected');
+                text.textContent = 'Connected (Polling)';
             } else {
-                indicator.classList.add('error');
-                dot.classList.add('error');
-                text.textContent = 'Polling Mode';
+                indicator.classList.remove('connected');
+                dot.classList.remove('connected');
+                text.textContent = 'Offline Mode';
             }
         }
         
@@ -1644,9 +1631,13 @@
                     
                     updateDriverList();
                     updateKPIs();
+                    updateConnectionStatus(true);
+                } else {
+                    updateConnectionStatus(false);
                 }
             } catch (error) {
                 console.error('Error loading drivers:', error);
+                updateConnectionStatus(false);
             }
         }
         
@@ -1773,7 +1764,7 @@
                                 </div>
                                 <div class="activity-actions">
                                     ${(driver.status === 'arrived' || driver.status === 'Arrived') ? `
-                                        <button class="checkin-btn" onclick="openCheckinModal('${driver.driver || 'Unknown'}', '${driver.driverId || driver._id || ''}')">
+                                        <button class="checkin-btn" onclick="openCheckinModal('${(driver.driver || 'Unknown').replace(/'/g, "\\'")}', '${driver.driverId || driver._id || ''}')">
                                             <span>📋</span>
                                             <span>Check-In</span>
                                         </button>
@@ -1807,7 +1798,8 @@
         // Update KPIs
         function updateKPIs() {
             const now = new Date();
-            const todayStart = new Date(now.setHours(0,0,0,0));
+            const todayStart = new Date(now);
+            todayStart.setHours(0,0,0,0);
             
             const counts = {
                 active: 0,
@@ -1821,13 +1813,13 @@
                 const updateTime = new Date(driver.timestamp);
                 
                 if (updateTime >= todayStart) {
-                    if (driver.status === '30 minutes away' || driver.status === 'en-route') counts.enroute++;
-                    else if (driver.status === 'arrived') counts.arrived++;
+                    if (driver.status === '30 minutes away' || driver.status === 'en-route' || driver.status === 'en route') counts.enroute++;
+                    else if (driver.status === 'arrived' || driver.status === 'Arrived') counts.arrived++;
                     else if (driver.status === 'completed') counts.completed++;
                     
                     if (driver.status !== 'completed') {
                         counts.active++;
-                        if (driver.status !== '30 minutes away' && driver.status !== 'en-route' && driver.status !== 'arrived') {
+                        if (driver.status !== '30 minutes away' && driver.status !== 'en-route' && driver.status !== 'en route' && driver.status !== 'arrived' && driver.status !== 'Arrived') {
                             counts.working++;
                         }
                     }
@@ -1982,21 +1974,34 @@
             panel.classList.toggle('minimized');
         }
         
-        function sendReply() {
+        async function sendReply() {
             const input = document.getElementById('replyInput');
             const message = input.value.trim();
             
             if (message) {
-                if (socket && socket.connected) {
-                    socket.emit('dispatch-message', {
-                        from: 'dispatch',
-                        message: message,
-                        timestamp: new Date()
+                try {
+                    const response = await fetch('/api/messages', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            from: 'dispatch',
+                            to: 'all',
+                            message: message,
+                            timestamp: new Date()
+                        })
                     });
+                    
+                    if (response.ok) {
+                        input.value = '';
+                        showNotification('Message sent', 'success');
+                        loadMessages(); // Reload messages
+                    }
+                } catch (error) {
+                    console.error('Error sending message:', error);
+                    showNotification('Failed to send message', 'error');
                 }
-                
-                input.value = '';
-                showNotification('Message sent', 'success');
             }
         }
         
@@ -2031,28 +2036,10 @@
             showNotification('Exporting to Excel...', 'success');
         }
         
-        // Handle real-time updates
-        function handleDriverUpdate(data) {
-            loadDrivers();
-            showNotification(`Driver ${data.driverId} status updated`, 'success');
-        }
-        
-        function handleLocationUpdate(data) {
-            if (map && driverMarkers[data.driverId]) {
-                driverMarkers[data.driverId].setLatLng([data.position.lat, data.position.lng]);
-            }
-        }
-        
-        function handleNewMessage(data) {
-            messages.unshift(data);
-            updateMessagesDisplay();
-            updateMessageCount();
-            showNotification(`New message from Driver ${data.from}`, 'warning');
-        }
-        
         // Refresh dashboard
         function refreshDashboard() {
             loadInitialData();
+            checkServerConnection();
             showNotification('Dashboard refreshed', 'success');
         }
         
@@ -2070,13 +2057,12 @@
             }, 3000);
         }
         
-        // Polling fallback
+        // Polling fallback - refresh every 30 seconds
         function startPolling() {
             setInterval(() => {
-                if (!socket || !socket.connected) {
-                    loadInitialData();
-                }
-            }, 30000);
+                loadInitialData();
+                checkServerConnection();
+            }, 30000); // 30 seconds
         }
         
         // Check-in Modal Functions
