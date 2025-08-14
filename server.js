@@ -1,7 +1,6 @@
 const express = require('express');
 const { MongoClient, ObjectId } = require('mongodb');
 const path = require('path');
-const cors = require('cors');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -11,8 +10,19 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://appuser:hNOT8muSZQ
 let db;
 let usersCollection;
 
-// Middleware
-app.use(cors());
+// Middleware - Manual CORS setup (no external dependency)
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    
+    if (req.method === 'OPTIONS') {
+        res.sendStatus(200);
+    } else {
+        next();
+    }
+});
+
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -177,6 +187,7 @@ app.post('/api/users', async (req, res) => {
             
             // Store password (in production, hash this!)
             newUser.password = password;
+            console.log(`✅ Password set for ${role}: ${name}`);
         }
         
         // Insert user into database
@@ -231,7 +242,7 @@ app.patch('/api/users/:id', async (req, res) => {
                         error: 'Password must be at least 8 characters with uppercase, lowercase, number, and special character' 
                     });
                 }
-                // Password is valid, keep it in updates
+                console.log(`✅ Password updated for user: ${user.name}`);
             } else if (user && user.role === 'driver') {
                 // Remove password for drivers
                 delete updates.password;
@@ -478,6 +489,10 @@ async function startServer() {
         console.log(`🚚 Driver App: http://localhost:${PORT}/driver`);
         console.log(`📋 Dashboard: http://localhost:${PORT}/dashboard`);
         console.log(`🔗 Health Check: http://localhost:${PORT}/api/health`);
+        
+        if (mongoConnected) {
+            console.log('✅ Default admin login: admin@fleetforce.com / Admin123!');
+        }
     });
 }
 
