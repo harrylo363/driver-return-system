@@ -1473,32 +1473,61 @@
             console.log('Updating activity list, current filter:', currentFilter);
             console.log('All drivers:', allDrivers.map(d => ({ name: d.driver, status: d.status })));
             
-            // Apply filter
-            if (currentFilter !== 'overview') {
-                filtered = allDrivers.filter(d => {
-                    if (currentFilter === 'en-route') 
-                        return d.status === '30 minutes away' || d.status === 'en-route' || d.status === 'en route';
-                    if (currentFilter === 'arrived') 
-                        return d.status === 'arrived' || d.status === 'Arrived';
-                    if (currentFilter === 'completed') 
-                        return d.status === 'completed';
-                    if (currentFilter === 'working') 
-                        return !['30 minutes away', 'en-route', 'en route', 'arrived', 'Arrived', 'completed'].includes(d.status);
-                    return true;
-                });
+            // Apply filter - FIXED: Hide completed drivers from overview
+            if (currentFilter === 'overview') {
+                // Overview should show all ACTIVE drivers (exclude completed)
+                filtered = allDrivers.filter(d => d.status !== 'completed');
+                console.log('Overview filter: hiding completed drivers');
+            } else if (currentFilter === 'en-route') {
+                filtered = allDrivers.filter(d => 
+                    d.status === '30 minutes away' || d.status === 'en-route' || d.status === 'en route'
+                );
+            } else if (currentFilter === 'arrived') {
+                filtered = allDrivers.filter(d => 
+                    d.status === 'arrived' || d.status === 'Arrived'
+                );
+            } else if (currentFilter === 'completed') {
+                // Only show completed drivers
+                filtered = allDrivers.filter(d => d.status === 'completed');
+            } else if (currentFilter === 'working') {
+                filtered = allDrivers.filter(d => 
+                    !['30 minutes away', 'en-route', 'en route', 'arrived', 'Arrived', 'completed'].includes(d.status)
+                );
             }
             
             console.log('Filtered drivers:', filtered.map(d => ({ name: d.driver, status: d.status })));
             
-            // Update count
-            let filterLabel = currentFilter === 'overview' ? 'active drivers' : currentFilter;
-            document.getElementById('activityCount').textContent = `${filtered.length} ${filterLabel}`;
+            // Update count and label
+            let filterLabel;
+            let countLabel;
+            
+            if (currentFilter === 'overview') {
+                filterLabel = 'active drivers';
+                countLabel = `${filtered.length} active drivers`;
+            } else if (currentFilter === 'completed') {
+                filterLabel = 'completed drivers';
+                countLabel = `${filtered.length} completed today`;
+            } else {
+                filterLabel = currentFilter.replace('-', ' ');
+                countLabel = `${filtered.length} ${filterLabel}`;
+            }
+            
+            document.getElementById('activityCount').textContent = countLabel;
             
             if (filtered.length === 0) {
+                let emptyMessage;
+                if (currentFilter === 'overview') {
+                    emptyMessage = 'No active drivers - all drivers have completed check-in';
+                } else if (currentFilter === 'completed') {
+                    emptyMessage = 'No completed check-ins today';
+                } else {
+                    emptyMessage = `No ${filterLabel}`;
+                }
+                
                 list.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-icon">📭</div>
-                        <p>No ${filterLabel}</p>
+                        <p>${emptyMessage}</p>
                     </div>
                 `;
                 return;
@@ -1522,6 +1551,7 @@
                 } else if (driver.status === 'completed') {
                     statusClass = 'completed';
                     statusText = 'COMPLETED ✓';
+                    // No check-in button for completed drivers
                 }
                 
                 // Prepare returns display
