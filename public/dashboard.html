@@ -148,6 +148,29 @@
             100% { opacity: 1; transform: scale(1); }
         }
         
+        .logout-btn {
+            padding: 0.5rem 1rem;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--danger);
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+        
+        .logout-btn:hover {
+            background: var(--danger);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+        
         .container {
             max-width: 1920px;
             margin: 0 auto;
@@ -773,6 +796,12 @@
             .kpi-grid {
                 grid-template-columns: 1fr;
             }
+            
+            .header-actions {
+                flex-direction: column;
+                gap: 0.75rem;
+                align-items: flex-end;
+            }
         }
     </style>
 </head>
@@ -794,6 +823,9 @@
                 <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); color: var(--accent); padding: 0.5rem 1rem; border-radius: 100px; font-size: 0.875rem; font-weight: 500;">
                     6995 N US-41, Apollo Beach, FL 33572
                 </div>
+                <button class="logout-btn" onclick="logout()">
+                    🚪 Logout
+                </button>
             </div>
         </div>
     </header>
@@ -859,6 +891,9 @@
             </button>
             <button class="btn btn-danger" onclick="clearDailyCheckIns()">
                 🗑️ Clear Check-ins
+            </button>
+            <button class="btn btn-danger" onclick="logout()">
+                🚪 Logout
             </button>
         </div>
 
@@ -950,6 +985,9 @@
                             </button>
                             <button class="btn btn-primary" style="width: 100%; background: linear-gradient(135deg, #10B981 0%, #059669 100%);" onclick="testWarehousePing()">
                                 📡 Test Warehouse Ping
+                            </button>
+                            <button class="btn btn-danger" style="width: 100%;" onclick="logout()">
+                                🚪 Logout
                             </button>
                         </div>
                     </div>
@@ -2063,6 +2101,58 @@
             URL.revokeObjectURL(url);
             
             showToast('✅ JSON exported successfully!', 'success');
+        }
+        
+        // Logout function
+        async function logout() {
+            try {
+                // Show confirmation
+                if (!confirm('Are you sure you want to logout?')) {
+                    return;
+                }
+                
+                showToast('🚪 Logging out...', 'info');
+                
+                // Clear any stored data
+                localStorage.removeItem('completedDrivers');
+                localStorage.removeItem('lastResetDate');
+                
+                // Stop auto-refresh
+                if (refreshInterval) {
+                    clearInterval(refreshInterval);
+                }
+                
+                // Send logout request to server
+                const response = await fetch('/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    showToast('✅ Logged out successfully', 'success');
+                    
+                    // Redirect to login page after a short delay
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 1000);
+                } else {
+                    // Even if logout endpoint fails, still redirect
+                    showToast('⚠️ Logout request failed, redirecting...', 'info');
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 1500);
+                }
+            } catch (error) {
+                console.error('❌ Logout error:', error);
+                showToast('⚠️ Logout error, redirecting...', 'info');
+                
+                // Force redirect even if there's an error
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 1500);
+            }
         }
         
         // Show toast notification
