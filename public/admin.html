@@ -229,6 +229,7 @@
             background: var(--bg-elevated);
             border-radius: 12px;
             border: 1px solid var(--border-primary);
+            margin-bottom: 16px;
         }
         
         .user-avatar {
@@ -255,6 +256,28 @@
             font-size: 11px;
             color: var(--text-tertiary);
             margin: 0;
+        }
+        
+        .logout-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
         }
         
         /* Main Content */
@@ -572,11 +595,15 @@
         }
         
         .toggle-switch input:checked + .toggle-slider {
-            background: var(--accent-blue);
+            background: var(--accent-green);
         }
         
         .toggle-switch input:checked + .toggle-slider:before {
             transform: translateX(24px);
+        }
+        
+        .toggle-switch input:not(:checked) + .toggle-slider {
+            background: var(--text-muted);
         }
         
         /* Buttons */
@@ -981,6 +1008,10 @@
                         <p>Enterprise Edition</p>
                     </div>
                 </div>
+                <button class="logout-btn" onclick="logout()">
+                    <span>🚪</span>
+                    <span>Logout</span>
+                </button>
             </div>
         </div>
         
@@ -1043,6 +1074,11 @@
                                     <div class="form-group">
                                         <label class="form-label">Full Name *</label>
                                         <input type="text" class="form-input" id="userName" name="name" placeholder="Enter full name" required>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">Username</label>
+                                        <input type="text" class="form-input" id="userUsername" name="username" placeholder="Enter username (optional)">
                                     </div>
                                     
                                     <div class="form-group">
@@ -1187,6 +1223,7 @@
                                         <thead>
                                             <tr>
                                                 <th>Name</th>
+                                                <th>Username</th>
                                                 <th>Email</th>
                                                 <th>Phone</th>
                                                 <th>Role</th>
@@ -1479,6 +1516,23 @@
             }
         }
         
+        // Logout function
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                // Clear session storage
+                sessionStorage.removeItem('fleetforce_user');
+                localStorage.removeItem('auth_token');
+                
+                // Show logout message
+                showToast('Success', 'Logged out successfully', 'success');
+                
+                // Redirect to login page after a short delay
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1000);
+            }
+        }
+        
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             console.log('FleetForce Admin Panel Initialized');
@@ -1533,6 +1587,7 @@
             
             const userData = {
                 name: formData.get('name'),
+                username: formData.get('username'), // Added username field
                 email: formData.get('email'),
                 phoneNumber: formData.get('phoneNumber'),
                 role: role,
@@ -1589,7 +1644,7 @@
             }
         }
         
-        // Display users
+        // Display users with colored notification toggles
         function displayUsers(users) {
             const tbody = document.getElementById('userTableBody');
             
@@ -1611,49 +1666,54 @@
                 return;
             }
             
-            tbody.innerHTML = users.map(user => `
-                <tr>
-                    <td>
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <div style="width: 40px; height: 40px; background: var(--gradient-primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 16px;">
-                                ${user.name.charAt(0).toUpperCase()}
+            tbody.innerHTML = users.map(user => {
+                const notificationsEnabled = user.pushNotifications !== false;
+                
+                return `
+                    <tr>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div style="width: 40px; height: 40px; background: var(--gradient-primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 16px;">
+                                    ${user.name.charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                    <div style="font-weight: 600; color: var(--text-primary);">${user.name}</div>
+                                    ${user.username ? `<div style="font-size: 12px; color: var(--text-tertiary);">@${user.username}</div>` : ''}
+                                    <div style="font-size: 12px; color: var(--text-tertiary);">ID: ${user._id}</div>
+                                </div>
                             </div>
+                        </td>
+                        <td>
                             <div>
-                                <div style="font-weight: 600; color: var(--text-primary);">${user.name}</div>
-                                <div style="font-size: 12px; color: var(--text-tertiary);">ID: ${user._id}</div>
+                                <div style="font-weight: 500;">${user.email || 'No email'}</div>
+                                ${user.phoneNumber ? `<div style="font-size: 12px; color: var(--text-tertiary);">${user.phoneNumber}</div>` : ''}
                             </div>
-                        </div>
-                    </td>
-                    <td>
-                        <div>
-                            <div style="font-weight: 500;">${user.email || 'No email'}</div>
-                            ${user.phoneNumber ? `<div style="font-size: 12px; color: var(--text-tertiary);">${user.phoneNumber}</div>` : ''}
-                        </div>
-                    </td>
-                    <td><span class="status-badge role-${user.role}">${user.role}</span></td>
-                    <td><span class="status-badge ${user.active !== false ? 'status-active' : 'status-inactive'}">${user.active !== false ? 'Active' : 'Inactive'}</span></td>
-                    <td>${user.vehicleId || '-'}</td>
-                    <td>
-                        <label class="toggle-switch">
-                            <input type="checkbox" ${user.pushNotifications !== false ? 'checked' : ''} onchange="toggleUserNotifications('${user._id}', this.checked)">
-                            <span class="toggle-slider"></span>
-                        </label>
-                    </td>
-                    <td>${new Date(user.createdAt || Date.now()).toLocaleDateString()}</td>
-                    <td>
-                        <div style="display: flex; gap: 8px;">
-                            <button class="btn btn-secondary btn-sm" onclick="editUser('${user._id}')">
-                                <span>✏️</span>
-                                <span>Edit</span>
-                            </button>
-                            <button class="btn btn-danger btn-sm" onclick="deleteUser('${user._id}')">
-                                <span>🗑️</span>
-                                <span>Delete</span>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
+                        </td>
+                        <td><span class="status-badge role-${user.role}">${user.role}</span></td>
+                        <td><span class="status-badge ${user.active !== false ? 'status-active' : 'status-inactive'}">${user.active !== false ? 'Active' : 'Inactive'}</span></td>
+                        <td>${user.vehicleId || '-'}</td>
+                        <td>
+                            <label class="toggle-switch">
+                                <input type="checkbox" ${notificationsEnabled ? 'checked' : ''} onchange="toggleUserNotifications('${user._id}', this.checked)">
+                                <span class="toggle-slider" style="background: ${notificationsEnabled ? 'var(--accent-green)' : 'var(--text-muted)'}"></span>
+                            </label>
+                        </td>
+                        <td>${new Date(user.createdAt || Date.now()).toLocaleDateString()}</td>
+                        <td>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn btn-secondary btn-sm" onclick="editUser('${user._id}')">
+                                    <span>✏️</span>
+                                    <span>Edit</span>
+                                </button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteUser('${user._id}')">
+                                    <span>🗑️</span>
+                                    <span>Delete</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
         }
         
         // Delete user
@@ -1684,6 +1744,7 @@
                 // Switch to add user tab and populate form
                 switchTab('add-user', document.querySelector('.nav-item'));
                 document.getElementById('userName').value = user.name || '';
+                document.getElementById('userUsername').value = user.username || '';
                 document.getElementById('userEmail').value = user.email || '';
                 document.getElementById('userPhone').value = user.phoneNumber || '';
                 document.getElementById('userRole').value = user.role || '';
@@ -1702,7 +1763,7 @@
             }
         }
         
-        // Toggle user notifications
+        // Toggle user notifications with color feedback
         async function toggleUserNotifications(userId, enabled) {
             try {
                 const response = await fetch(`/api/users/${userId}`, {
@@ -1713,6 +1774,10 @@
                 
                 if (response.ok) {
                     showToast('Success', `Notifications ${enabled ? 'enabled' : 'disabled'} for user`, 'success');
+                    
+                    // Update the toggle color immediately
+                    const toggle = event.target.closest('.toggle-switch').querySelector('.toggle-slider');
+                    toggle.style.background = enabled ? 'var(--accent-green)' : 'var(--text-muted)';
                 } else {
                     throw new Error('Failed to update notification settings');
                 }
@@ -1728,6 +1793,7 @@
             const search = document.getElementById('userSearch').value.toLowerCase();
             const filtered = allUsers.filter(user => 
                 user.name.toLowerCase().includes(search) ||
+                (user.username && user.username.toLowerCase().includes(search)) ||
                 (user.email && user.email.toLowerCase().includes(search)) ||
                 user.role.toLowerCase().includes(search) ||
                 (user.vehicleId && user.vehicleId.toLowerCase().includes(search))
@@ -1791,13 +1857,14 @@
                         const values = lines[i].split(',').map(v => v.trim());
                         const user = {
                             name: values[0] || '',
-                            email: values[1] || '',
-                            phoneNumber: values[2] || '',
-                            role: values[3] || 'driver',
-                            password: values[4] || '',
-                            vehicleId: values[5] || '',
-                            active: values[6] !== 'inactive',
-                            pushNotifications: values[7] !== 'false'
+                            username: values[1] || '',
+                            email: values[2] || '',
+                            phoneNumber: values[3] || '',
+                            role: values[4] || 'driver',
+                            password: values[5] || '',
+                            vehicleId: values[6] || '',
+                            active: values[7] !== 'inactive',
+                            pushNotifications: values[8] !== 'false'
                         };
                         if (user.name) {
                             bulkUploadData.push(user);
@@ -1820,6 +1887,7 @@
                 
                 bulkUploadData = jsonData.map(row => ({
                     name: row['Name'] || row['name'] || '',
+                    username: row['Username'] || row['username'] || '',
                     email: row['Email'] || row['email'] || '',
                     phoneNumber: row['Phone'] || row['phoneNumber'] || '',
                     role: row['Role'] || row['role'] || 'driver',
@@ -1848,6 +1916,7 @@
             tbody.innerHTML = bulkUploadData.slice(0, 10).map(user => `
                 <tr>
                     <td>${user.name}</td>
+                    <td>${user.username || '-'}</td>
                     <td>${user.email || '-'}</td>
                     <td>${user.phoneNumber || '-'}</td>
                     <td>${user.role}</td>
@@ -1861,7 +1930,7 @@
             if (bulkUploadData.length > 10) {
                 tbody.innerHTML += `
                     <tr>
-                        <td colspan="8" style="text-align: center; font-style: italic;">
+                        <td colspan="9" style="text-align: center; font-style: italic;">
                             ... and ${bulkUploadData.length - 10} more users
                         </td>
                     </tr>
@@ -1930,11 +1999,11 @@
         }
         
         function downloadTemplate(type) {
-            const headers = ['Name', 'Email', 'Phone', 'Role', 'Password', 'Vehicle ID', 'Status', 'Notifications'];
+            const headers = ['Name', 'Username', 'Email', 'Phone', 'Role', 'Password', 'Vehicle ID', 'Status', 'Notifications'];
             const sampleData = [
-                ['John Doe', 'john@example.com', '+1234567890', 'driver', '', 'TRUCK-001', 'active', 'true'],
-                ['Jane Smith', 'jane@example.com', '+0987654321', 'dispatcher', 'SecurePass123!', '', 'active', 'true'],
-                ['Bob Johnson', 'bob@example.com', '+1122334455', 'admin', 'AdminPass456@', '', 'active', 'false']
+                ['John Doe', 'jdoe', 'john@example.com', '+1234567890', 'driver', '', 'TRUCK-001', 'active', 'true'],
+                ['Jane Smith', 'jsmith', 'jane@example.com', '+0987654321', 'dispatcher', 'SecurePass123!', '', 'active', 'true'],
+                ['Bob Johnson', 'bjohnson', 'bob@example.com', '+1122334455', 'admin', 'AdminPass456@', '', 'active', 'false']
             ];
             
             if (type === 'csv') {
@@ -2063,9 +2132,10 @@
             
             if (format === 'csv') {
                 const csv = [
-                    ['Name', 'Email', 'Phone', 'Role', 'Password', 'Vehicle ID', 'Status', 'Notifications'].join(','),
+                    ['Name', 'Username', 'Email', 'Phone', 'Role', 'Password', 'Vehicle ID', 'Status', 'Notifications'].join(','),
                     ...allUsers.map(user => [
                         `"${user.name}"`,
+                        `"${user.username || ''}"`,
                         `"${user.email || ''}"`,
                         `"${user.phoneNumber || ''}"`,
                         `"${user.role}"`,
@@ -2088,6 +2158,7 @@
             } else if (format === 'excel') {
                 const data = allUsers.map(user => ({
                     'Name': user.name,
+                    'Username': user.username || '',
                     'Email': user.email || '',
                     'Phone': user.phoneNumber || '',
                     'Role': user.role,
