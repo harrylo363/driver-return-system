@@ -1,136 +1,451 @@
 const express = require('express');
 const { MongoClient, ObjectId } = require('mongodb');
 const path = require('path');
-const http = require('http');
-const WebSocket = require('ws');
-const multer = require('multer');
-const fs = require('fs').promises;
+const cors = require('cors');
 
 const app = express();
-const server = http.createServer(app);
+const PORT = process.env.PORT || 3000;
 
-// Initialize WebSocket server (optional - will work without it)
-let wss;
-try {
-    wss = new WebSocket.Server({ server });
-    console.log('WebSocket server initialized');
-    
-    wss.on('connection', (ws) => {
-        console.log('New WebSocket connection');
+// MongoDB connection
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://appuser:hNOT8muSZQfzZnqb@cluster0.lryi4zm.mongodb.net/driver_return_app?retryWrites=true&w=majority&appName=Cluster0';
+let db;
+let usersCollection;
+
+// Middleware
+app.use(cors());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Connect to MongoDB
+async function connectToMongoDB() {
+    try {
+        const client = new MongoClient(MONGODB_URI);
+        await client.connect();
+        db = client.db('fleet_management');
+        usersCollection = db.collection('users');
         
-        ws.on('message', async (message) => {
-            try {
-                const data = JSON.parse(message);
-                
-                // Broadcast to all connected clients
-                wss.clients.forEach(client => {
-                    if (client.readyState === WebSocket.OPEN) {
-                        client.send(JSON.stringify(data));
-                    }
-                });
-            } catch (error) {
-                console.error('WebSocket message error:', error);
-            }
-        });
+        console.log('✅ Connected to MongoDB Atlas');
         
-        ws.on('close', () => {
-            console.log('WebSocket connection closed');
-        });
-    });
-} catch (error) {
-    console.log('WebSocket not available - falling back to polling');
+        // Create default admin user if none exists
+        await createDefaultUsers();
+        
+        return true;
+    } catch (error) {
+        console.error('❌ MongoDB connection failed:', error);
+        return false;
+    }
 }
 
-// MongoDB setup
-const mongoUrl = process.env.MONGODB_URI || 'mongodb://localhost:27017';
-const dbName = 'fleet_management';
-let db;
-
-// File upload configuration
-const upload = multer({ 
-    dest: 'uploads/',
-    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
-    fileFilter: (req, file, cb) => {
-        const allowedTypes = /jpeg|jpg|png|gif|pdf/;
-        const mimetype = allowedTypes.test(file.mimetype);
-        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+// Create default users if they don't exist
+async function createDefaultUsers() {
+    try {
+        const userCount = await usersCollection.countDocuments();
         
-        if (mimetype && extname) {
-            return cb(null, true);
-        } else {
-            cb(new Error('Only image and PDF files are allowed'));
+        if (userCount === 0) {
+            console.log('🔧 Creating default users...');
+            
+            const defaultUsers = [
+                {
+                    name: 'System Admin',
+                    email: 'admin@fleetforce.com',
+                    phoneNumber: '+1 (555) 123-4567',
+                    role: 'admin',
+                    password: 'Admin123!',
+                    vehicleId: '',
+                    active: true,
+                    pushNotifications: true,
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                },
+                {
+                    name: 'Main Dispatcher',
+                    email: 'dispatcher@fleetforce.com',
+                    phoneNumber: '+1 (555) 234-5678',
+                    role: 'dispatcher',
+                    password: 'Dispatch123!',
+                    vehicleId: '',
+                    active: true,
+                    pushNotifications: true,
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                },
+                {
+                    name: 'John Driver',
+                    email: 'john@fleetforce.com',
+                    phoneNumber: '+1 (555) 345-6789',
+                    role: 'driver',
+                    vehicleId: 'TRUCK-001',
+                    active: true,
+                    pushNotifications: true,
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                }
+            ];
+            
+            await usersCollection.insertMany(defaultUsers);
+            console.log('✅ Default users created successfully');
         }
+    } catch (error) {
+        console.error('❌ Error creating default users:', error);
+    }
+}
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+    const health = {
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        data: {
+            database: db ? 'connected' : 'disconnected',
+            server: 'running'
+        }
+    };
+    res.json(health);
+});
+
+// Get all users
+app.get('/api/users', async (req, res) => {
+    try {
+        if (!usersCollection) {
+            return res.status(500).json({ error: 'Database not connected' });
+        }
+        
+        const users = await usersCollection.find({}).toArray();
+        console.log(`📊 Retrieved ${users.length} users from database`);
+        res.json(users);
+    } catch (error) {
+        console.error('❌ Error fetching users:', error);
+        res.status(500).json({ error: 'Failed to fetch users', details: error.message });
     }
 });
 
-// Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Create uploads directory if it doesn't exist
-const createUploadsDir = async () => {
+// Create new user - FIXED PASSWORD HANDLING
+app.post('/api/users', async (req, res) => {
     try {
-        await fs.mkdir('uploads', { recursive: true });
+        if (!usersCollection) {
+            return res.status(500).json({ error: 'Database not connected' });
+        }
+        
+        const { name, email, phoneNumber, role, password, vehicleId, active, pushNotifications } = req.body;
+        
+        // Validate required fields
+        if (!name || !role) {
+            return res.status(400).json({ error: 'Name and role are required' });
+        }
+        
+        // Check if user already exists
+        const existingUser = await usersCollection.findOne({
+            $or: [
+                { name: name },
+                { email: email }
+            ]
+        });
+        
+        if (existingUser) {
+            return res.status(400).json({ error: 'User with this name or email already exists' });
+        }
+        
+        // Create user object
+        const newUser = {
+            name: name.trim(),
+            email: email ? email.trim() : '',
+            phoneNumber: phoneNumber ? phoneNumber.trim() : '',
+            role: role.toLowerCase(),
+            vehicleId: vehicleId ? vehicleId.trim() : '',
+            active: active !== false,
+            pushNotifications: pushNotifications !== false,
+            createdAt: new Date(),
+            updatedAt: new Date()
+        };
+        
+        // Add password ONLY for dispatchers and admins (FIXED!)
+        if (role === 'dispatcher' || role === 'admin' || role === 'administrator') {
+            if (!password) {
+                return res.status(400).json({ 
+                    error: `Password is required for ${role} accounts` 
+                });
+            }
+            
+            // Validate password strength
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+            if (!passwordRegex.test(password)) {
+                return res.status(400).json({ 
+                    error: 'Password must be at least 8 characters with uppercase, lowercase, number, and special character' 
+                });
+            }
+            
+            // Store password (in production, hash this!)
+            newUser.password = password;
+        }
+        
+        // Insert user into database
+        const result = await usersCollection.insertOne(newUser);
+        
+        // Return created user (without password for security)
+        const createdUser = { ...newUser, _id: result.insertedId };
+        if (createdUser.password) {
+            delete createdUser.password;
+        }
+        
+        console.log(`✅ Created new user: ${name} (${role})`);
+        res.status(201).json(createdUser);
+        
     } catch (error) {
-        console.log('Uploads directory already exists or cannot be created');
+        console.error('❌ Error creating user:', error);
+        res.status(500).json({ error: 'Failed to create user', details: error.message });
     }
-};
-createUploadsDir();
+});
 
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-// Connect to MongoDB
-MongoClient.connect(mongoUrl, { useUnifiedTopology: true })
-    .then(client => {
-        console.log('Connected to MongoDB');
-        db = client.db(dbName);
-        
-        // Initialize collections if they don't exist
-        initializeDatabase();
-    })
-    .catch(error => {
-        console.error('MongoDB connection error:', error);
-        process.exit(1);
-    });
-
-// Initialize database collections and indexes
-async function initializeDatabase() {
+// Update user - FIXED PASSWORD HANDLING
+app.patch('/api/users/:id', async (req, res) => {
     try {
-        // Create collections if they don't exist
-        const collections = ['drivers', 'users', 'notifications', 'messages', 'logs', 'checkins', 'reports'];
+        if (!usersCollection) {
+            return res.status(500).json({ error: 'Database not connected' });
+        }
         
-        for (const collection of collections) {
-            const exists = await db.listCollections({ name: collection }).toArray();
-            if (exists.length === 0) {
-                await db.createCollection(collection);
-                console.log(`Created collection: ${collection}`);
+        const userId = req.params.id;
+        const updates = req.body;
+        
+        // Validate ObjectId
+        if (!ObjectId.isValid(userId)) {
+            return res.status(400).json({ error: 'Invalid user ID' });
+        }
+        
+        // Remove fields that shouldn't be updated this way
+        delete updates._id;
+        delete updates.createdAt;
+        
+        // Add updated timestamp
+        updates.updatedAt = new Date();
+        
+        // Handle password updates
+        if (updates.password) {
+            const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
+            
+            if (user && (user.role === 'dispatcher' || user.role === 'admin' || user.role === 'administrator')) {
+                // Validate password strength for admin/dispatcher roles
+                const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+                if (!passwordRegex.test(updates.password)) {
+                    return res.status(400).json({ 
+                        error: 'Password must be at least 8 characters with uppercase, lowercase, number, and special character' 
+                    });
+                }
+                // Password is valid, keep it in updates
+            } else if (user && user.role === 'driver') {
+                // Remove password for drivers
+                delete updates.password;
             }
         }
         
-        // Create indexes for better performance
-        await db.collection('drivers').createIndex({ id: 1 });
-        await db.collection('drivers').createIndex({ status: 1 });
-        await db.collection('users').createIndex({ email: 1 });
-        await db.collection('users').createIndex({ role: 1 });
-        await db.collection('notifications').createIndex({ timestamp: -1 });
-        await db.collection('notifications').createIndex({ driverId: 1 });
-        await db.collection('messages').createIndex({ timestamp: -1 });
-        await db.collection('messages').createIndex({ recipientId: 1 });
-        await db.collection('logs').createIndex({ timestamp: -1 });
-        await db.collection('checkins').createIndex({ timestamp: -1 });
-        await db.collection('checkins').createIndex({ driverId: 1 });
+        const result = await usersCollection.updateOne(
+            { _id: new ObjectId(userId) },
+            { $set: updates }
+        );
         
-        console.log('Database initialized successfully');
+        if (result.matchedCount === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        
+        console.log(`✅ Updated user: ${userId}`);
+        res.json({ message: 'User updated successfully' });
+        
     } catch (error) {
-        console.error('Database initialization error:', error);
+        console.error('❌ Error updating user:', error);
+        res.status(500).json({ error: 'Failed to update user', details: error.message });
     }
-}
+});
 
-// Routes
+// Delete user
+app.delete('/api/users/:id', async (req, res) => {
+    try {
+        if (!usersCollection) {
+            return res.status(500).json({ error: 'Database not connected' });
+        }
+        
+        const userId = req.params.id;
+        
+        // Validate ObjectId
+        if (!ObjectId.isValid(userId)) {
+            return res.status(400).json({ error: 'Invalid user ID' });
+        }
+        
+        const result = await usersCollection.deleteOne({ _id: new ObjectId(userId) });
+        
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        
+        console.log(`✅ Deleted user: ${userId}`);
+        res.json({ message: 'User deleted successfully' });
+        
+    } catch (error) {
+        console.error('❌ Error deleting user:', error);
+        res.status(500).json({ error: 'Failed to delete user', details: error.message });
+    }
+});
 
-// Serve HTML files
+// Authentication endpoint for login
+app.post('/api/auth/login', async (req, res) => {
+    try {
+        if (!usersCollection) {
+            return res.status(500).json({ error: 'Database not connected' });
+        }
+        
+        const { username, password } = req.body;
+        
+        if (!username || !password) {
+            return res.status(400).json({ error: 'Username and password are required' });
+        }
+        
+        // Find user by name, email, or username
+        const user = await usersCollection.findOne({
+            $or: [
+                { name: { $regex: new RegExp(`^${username}$`, 'i') } },
+                { email: { $regex: new RegExp(`^${username}$`, 'i') } },
+                { username: { $regex: new RegExp(`^${username}$`, 'i') } }
+            ]
+        });
+        
+        if (!user) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+        
+        // Check if user is active
+        if (user.active === false) {
+            return res.status(401).json({ error: 'Account is deactivated' });
+        }
+        
+        // Authenticate based on role
+        if (user.role === 'driver') {
+            // Drivers don't need password authentication
+            const userResponse = { ...user };
+            delete userResponse.password;
+            return res.json({ 
+                message: 'Login successful', 
+                user: userResponse,
+                token: 'driver_token_' + user._id 
+            });
+        } else if (user.role === 'dispatcher' || user.role === 'admin' || user.role === 'administrator') {
+            // Check password for admin/dispatcher
+            if (!user.password) {
+                return res.status(401).json({ error: 'Password not set for this account' });
+            }
+            
+            if (user.password !== password) {
+                return res.status(401).json({ error: 'Invalid credentials' });
+            }
+            
+            const userResponse = { ...user };
+            delete userResponse.password;
+            return res.json({ 
+                message: 'Login successful', 
+                user: userResponse,
+                token: 'auth_token_' + user._id 
+            });
+        } else {
+            return res.status(401).json({ error: 'Invalid user role' });
+        }
+        
+    } catch (error) {
+        console.error('❌ Authentication error:', error);
+        res.status(500).json({ error: 'Authentication failed', details: error.message });
+    }
+});
+
+// Get drivers for driver app
+app.get('/api/drivers', async (req, res) => {
+    try {
+        if (!usersCollection) {
+            return res.status(500).json({ error: 'Database not connected' });
+        }
+        
+        const drivers = await usersCollection.find({ 
+            role: 'driver',
+            active: { $ne: false }
+        }).toArray();
+        
+        // Remove sensitive information
+        const safeDrivers = drivers.map(driver => ({
+            _id: driver._id,
+            name: driver.name,
+            vehicleId: driver.vehicleId,
+            phoneNumber: driver.phoneNumber
+        }));
+        
+        res.json(safeDrivers);
+    } catch (error) {
+        console.error('❌ Error fetching drivers:', error);
+        res.status(500).json({ error: 'Failed to fetch drivers', details: error.message });
+    }
+});
+
+// Simple notification endpoint (for driver app)
+app.post('/api/notifications/simple', async (req, res) => {
+    try {
+        const { driverName, message, location } = req.body;
+        
+        const notification = {
+            driverName,
+            message,
+            location: location || 'Unknown',
+            timestamp: new Date(),
+            type: 'driver_update'
+        };
+        
+        // In a real app, you'd store this and send push notifications
+        console.log('📱 Notification received:', notification);
+        
+        res.json({ 
+            success: true, 
+            message: 'Notification sent successfully',
+            data: notification 
+        });
+    } catch (error) {
+        console.error('❌ Error processing notification:', error);
+        res.status(500).json({ error: 'Failed to send notification' });
+    }
+});
+
+// Dashboard stats endpoint
+app.get('/api/stats/dashboard', async (req, res) => {
+    try {
+        if (!usersCollection) {
+            return res.status(500).json({ error: 'Database not connected' });
+        }
+        
+        const totalUsers = await usersCollection.countDocuments();
+        const activeUsers = await usersCollection.countDocuments({ active: { $ne: false } });
+        const drivers = await usersCollection.countDocuments({ role: 'driver' });
+        const dispatchers = await usersCollection.countDocuments({ role: 'dispatcher' });
+        const admins = await usersCollection.countDocuments({ 
+            $or: [{ role: 'admin' }, { role: 'administrator' }] 
+        });
+        
+        res.json({
+            totalUsers,
+            activeUsers,
+            drivers,
+            dispatchers,
+            admins,
+            timestamp: new Date()
+        });
+    } catch (error) {
+        console.error('❌ Error fetching dashboard stats:', error);
+        res.status(500).json({ error: 'Failed to fetch dashboard stats' });
+    }
+});
+
+// Serve main pages
 app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+app.get('/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
@@ -138,898 +453,32 @@ app.get('/driver', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'driver.html'));
 });
 
-app.get('/admin', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error('❌ Unhandled error:', err);
+    res.status(500).json({ error: 'Internal server error', details: err.message });
 });
 
-app.get('/dashboard.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
-});
-
-app.get('/driver.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'driver.html'));
-});
-
-app.get('/admin.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
-});
-
-// Get all notifications (for dashboard)
-app.get('/api/notifications', async (req, res) => {
-    try {
-        const limit = parseInt(req.query.limit) || 100;
-        
-        const notifications = await db.collection('notifications')
-            .find({})
-            .sort({ timestamp: -1 })
-            .limit(limit)
-            .toArray();
-        
-        res.json({ 
-            success: true,
-            data: notifications,
-            count: notifications.length 
-        });
-    } catch (error) {
-        console.error('Error fetching notifications:', error);
-        res.status(500).json({ 
-            success: false,
-            error: 'Failed to fetch notifications',
-            data: [] 
-        });
-    }
-});
-
-// Create new notification (from driver portal) - UPDATED WITH RETURNS TRACKING
-app.post('/api/notifications', async (req, res) => {
-    try {
-        const notification = {
-            driver: req.body.driver || 'Unknown Driver',
-            driverId: req.body.driverId || `driver-${Date.now()}`,
-            status: req.body.status || 'still-working',
-            message: req.body.message || '',
-            warehouse: req.body.warehouse || '5856 Tampa FDC',
-            timestamp: new Date(req.body.timestamp || Date.now()),
-            location: req.body.location || null,
-            notes: req.body.notes || '',
-            // RETURNS TRACKING FIELDS
-            hasReturns: req.body.hasReturns || false,
-            returnsCount: parseInt(req.body.returnsCount) || 0,
-            vehicleId: req.body.vehicleId || null
-        };
-        
-        // Insert notification
-        const result = await db.collection('notifications').insertOne(notification);
-        
-        // Also update/create driver record with returns data
-        await db.collection('drivers').updateOne(
-            { id: notification.driverId },
-            { 
-                $set: {
-                    name: notification.driver,
-                    status: notification.status,
-                    lastUpdate: notification.timestamp,
-                    warehouse: notification.warehouse,
-                    location: notification.location,
-                    vehicleId: notification.vehicleId,
-                    // RETURNS DATA
-                    hasReturns: notification.hasReturns,
-                    returnsCount: notification.returnsCount
-                },
-                $setOnInsert: {
-                    id: notification.driverId,
-                    createdAt: new Date()
-                }
-            },
-            { upsert: true }
-        );
-        
-        // Log the event with returns info
-        await db.collection('logs').insertOne({
-            type: 'status_change',
-            driverId: notification.driverId,
-            driverName: notification.driver,
-            status: notification.status,
-            timestamp: notification.timestamp,
-            warehouse: notification.warehouse,
-            hasReturns: notification.hasReturns,
-            returnsCount: notification.returnsCount
-        });
-        
-        // Send WebSocket notification if available
-        if (wss) {
-            const wsNotification = {
-                type: 'driver-update',
-                ...notification
-            };
-            
-            wss.clients.forEach(client => {
-                if (client.readyState === WebSocket.OPEN) {
-                    client.send(JSON.stringify(wsNotification));
-                }
-            });
-        }
-        
-        res.json({ 
-            success: true, 
-            message: 'Notification created successfully',
-            id: result.insertedId 
-        });
-    } catch (error) {
-        console.error('Error creating notification:', error);
-        res.status(500).json({ 
-            success: false,
-            error: 'Failed to create notification' 
-        });
-    }
-});
-
-// Get messages for dispatch
-app.get('/api/messages/dispatch', async (req, res) => {
-    try {
-        const messages = await db.collection('messages')
-            .find({ 
-                $or: [
-                    { to: 'dispatch' },
-                    { from: 'dispatch' },
-                    { recipientId: 'dispatch' }
-                ]
-            })
-            .sort({ timestamp: -1 })
-            .limit(50)
-            .toArray();
-        
-        res.json(messages);
-    } catch (error) {
-        console.error('Error fetching dispatch messages:', error);
-        res.json([]); // Return empty array on error
-    }
-});
-
-// Get all drivers
-app.get('/api/drivers', async (req, res) => {
-    try {
-        const drivers = await db.collection('drivers').find({}).toArray();
-        res.json(drivers);
-    } catch (error) {
-        console.error('Error fetching drivers:', error);
-        res.status(500).json({ error: 'Failed to fetch drivers' });
-    }
-});
-
-// Update driver status
-app.post('/api/update-status', async (req, res) => {
-    try {
-        const { driverId, status, location, notes, hasReturns, returnsCount } = req.body;
-        
-        const updateData = {
-            status,
-            lastUpdate: new Date(),
-            notes: notes || '',
-            hasReturns: hasReturns || false,
-            returnsCount: parseInt(returnsCount) || 0
-        };
-        
-        if (location) {
-            updateData.location = location;
-            updateData.locationUpdated = new Date();
-        }
-        
-        await db.collection('drivers').updateOne(
-            { id: driverId },
-            { 
-                $set: updateData,
-                $setOnInsert: { 
-                    id: driverId,
-                    name: `Driver ${driverId}`,
-                    createdAt: new Date()
-                }
-            },
-            { upsert: true }
-        );
-        
-        // Log the status change with returns info
-        await db.collection('logs').insertOne({
-            type: 'status_change',
-            driverId,
-            status,
-            timestamp: new Date(),
-            location,
-            hasReturns: updateData.hasReturns,
-            returnsCount: updateData.returnsCount
-        });
-        
-        // Send WebSocket notification if available
-        if (wss) {
-            const notification = {
-                type: 'status_update',
-                driverId,
-                status,
-                hasReturns: updateData.hasReturns,
-                returnsCount: updateData.returnsCount,
-                timestamp: new Date().toISOString()
-            };
-            
-            wss.clients.forEach(client => {
-                if (client.readyState === WebSocket.OPEN) {
-                    client.send(JSON.stringify(notification));
-                }
-            });
-        }
-        
-        res.json({ success: true, message: 'Status updated successfully' });
-    } catch (error) {
-        console.error('Status update error:', error);
-        res.status(500).json({ error: 'Failed to update status' });
-    }
-});
-
-// Handle check-in submissions from arrived drivers - UPDATED WITH RETURNS
-app.post('/api/checkins', async (req, res) => {
-    try {
-        const checkinData = {
-            driverId: req.body.driverId,
-            driverName: req.body.driverName,
-            timestamp: new Date(),
-            
-            // Returns data
-            hasReturns: req.body.hasReturns || false,
-            returnsCount: parseInt(req.body.returnsCount) || 0,
-            
-            // Equipment data
-            tractorNumber: req.body.tractorNumber,
-            tractorCondition: req.body.tractorCondition,
-            tractorLights: req.body.tractorLights,
-            tractorTires: req.body.tractorTires,
-            tractorNotes: req.body.tractorNotes,
-            tractorIssue: req.body.tractorIssue,
-            tractorIssues: req.body.tractorIssues,
-            
-            trailerNumber: req.body.trailerNumber,
-            trailerCondition: req.body.trailerCondition,
-            trailerTires: req.body.trailerTires,
-            trailerClean: req.body.trailerClean,
-            trailerNotes: req.body.trailerNotes,
-            trailerIssue: req.body.trailerIssue,
-            trailerIssues: req.body.trailerIssues,
-            
-            moffettNumber: req.body.moffettNumber,
-            moffettCondition: req.body.moffettCondition,
-            moffettTires: req.body.moffettTires,
-            moffettHydraulic: req.body.moffettHydraulic,
-            moffettNotes: req.body.moffettNotes,
-            moffettIssue: req.body.moffettIssue,
-            moffettIssues: req.body.moffettIssues,
-            
-            additionalNotes: req.body.additionalNotes,
-            status: 'completed',
-            warehouse: req.body.warehouse || '6995 N US-41, Apollo Beach, FL 33572'
-        };
-
-        // Store check-in data
-        const result = await db.collection('checkins').insertOne(checkinData);
-        
-        // Update driver status to 'completed' with returns info
-        await db.collection('drivers').updateOne(
-            { id: req.body.driverId },
-            { 
-                $set: { 
-                    status: 'completed',
-                    checkinTime: new Date(),
-                    lastUpdate: new Date(),
-                    hasReturns: checkinData.hasReturns,
-                    returnsCount: checkinData.returnsCount
-                }
-            }
-        );
-
-        // Log the check-in event with returns info
-        await db.collection('logs').insertOne({
-            type: 'checkin',
-            driverId: req.body.driverId,
-            driverName: req.body.driverName,
-            timestamp: new Date(),
-            hasReturns: checkinData.hasReturns,
-            returnsCount: checkinData.returnsCount,
-            details: {
-                tractorCondition: req.body.tractorCondition,
-                trailerCondition: req.body.trailerCondition,
-                moffettCondition: req.body.moffettCondition
-            }
-        });
-
-        // Send notification through WebSocket if available
-        if (wss) {
-            const notification = {
-                type: 'checkin',
-                driverId: req.body.driverId,
-                driverName: req.body.driverName,
-                status: 'completed',
-                hasReturns: checkinData.hasReturns,
-                returnsCount: checkinData.returnsCount,
-                timestamp: new Date().toISOString()
-            };
-
-            wss.clients.forEach(client => {
-                if (client.readyState === WebSocket.OPEN) {
-                    client.send(JSON.stringify(notification));
-                }
-            });
-        }
-
-        res.json({ 
-            success: true, 
-            message: 'Check-in completed successfully',
-            checkinId: result.insertedId 
-        });
-
-    } catch (error) {
-        console.error('Check-in error:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Failed to process check-in',
-            error: error.message 
-        });
-    }
-});
-
-// Get check-in history
-app.get('/api/checkins', async (req, res) => {
-    try {
-        const { driverId, date, limit = 50 } = req.query;
-        
-        let query = {};
-        
-        if (driverId) {
-            query.driverId = driverId;
-        }
-        
-        if (date) {
-            const startDate = new Date(date);
-            startDate.setHours(0, 0, 0, 0);
-            const endDate = new Date(date);
-            endDate.setHours(23, 59, 59, 999);
-            
-            query.timestamp = {
-                $gte: startDate,
-                $lte: endDate
-            };
-        }
-
-        const checkins = await db.collection('checkins')
-            .find(query)
-            .sort({ timestamp: -1 })
-            .limit(parseInt(limit))
-            .toArray();
-
-        res.json(checkins);
-
-    } catch (error) {
-        console.error('Error fetching check-ins:', error);
-        res.status(500).json({ 
-            error: 'Failed to fetch check-in history',
-            message: error.message 
-        });
-    }
-});
-
-// Messages endpoints
-app.post('/api/messages', async (req, res) => {
-    try {
-        const message = {
-            ...req.body,
-            timestamp: new Date(),
-            read: false
-        };
-        
-        const result = await db.collection('messages').insertOne(message);
-        
-        // Send via WebSocket if available
-        if (wss) {
-            wss.clients.forEach(client => {
-                if (client.readyState === WebSocket.OPEN) {
-                    client.send(JSON.stringify({
-                        type: 'new_message',
-                        message
-                    }));
-                }
-            });
-        }
-        
-        res.json({ success: true, messageId: result.insertedId });
-    } catch (error) {
-        console.error('Message send error:', error);
-        res.status(500).json({ error: 'Failed to send message' });
-    }
-});
-
-app.get('/api/messages', async (req, res) => {
-    try {
-        const { driverId, limit = 50 } = req.query;
-        
-        let query = {};
-        if (driverId) {
-            query.$or = [
-                { senderId: driverId },
-                { recipientId: driverId }
-            ];
-        }
-        
-        const messages = await db.collection('messages')
-            .find(query)
-            .sort({ timestamp: -1 })
-            .limit(parseInt(limit))
-            .toArray();
-        
-        res.json(messages);
-    } catch (error) {
-        console.error('Message fetch error:', error);
-        res.status(500).json({ error: 'Failed to fetch messages' });
-    }
-});
-
-// ============= USER MANAGEMENT ENDPOINTS =============
-
-// Get all users - with optional role filter for drivers
-app.get('/api/users', async (req, res) => {
-    try {
-        const { role } = req.query;
-        let query = {};
-        
-        if (role) {
-            query.role = role;
-        }
-        
-        const users = await db.collection('users').find(query).toArray();
-        res.json({
-            success: true,
-            data: users,
-            count: users.length
-        });
-    } catch (error) {
-        console.error('Error fetching users:', error);
-        res.status(500).json({ 
-            success: false,
-            error: 'Failed to fetch users',
-            data: []
-        });
-    }
-});
-
-// Create new user
-app.post('/api/users', async (req, res) => {
-    try {
-        const userData = {
-            name: req.body.name,
-            email: req.body.email || '',
-            phoneNumber: req.body.phoneNumber || '',
-            role: req.body.role || 'driver',
-            vehicleId: req.body.vehicleId || '',
-            active: req.body.active !== false,
-            pushNotifications: req.body.pushNotifications !== false,
-            createdAt: new Date(),
-            updatedAt: new Date()
-        };
-
-        // Validate required fields
-        if (!userData.name || !userData.role) {
-            return res.status(400).json({
-                success: false,
-                error: 'Name and role are required'
-            });
-        }
-
-        // Check if user with same email already exists (if email provided)
-        if (userData.email) {
-            const existingUser = await db.collection('users').findOne({ email: userData.email });
-            if (existingUser) {
-                return res.status(400).json({
-                    success: false,
-                    error: 'User with this email already exists'
-                });
-            }
-        }
-
-        // Insert user
-        const result = await db.collection('users').insertOne(userData);
-        
-        // Also create a driver record if role is driver
-        if (userData.role === 'driver') {
-            await db.collection('drivers').insertOne({
-                id: result.insertedId.toString(),
-                name: userData.name,
-                status: 'offline',
-                vehicleId: userData.vehicleId,
-                createdAt: new Date()
-            });
-        }
-
-        res.json({
-            success: true,
-            message: 'User created successfully',
-            userId: result.insertedId
-        });
-
-    } catch (error) {
-        console.error('Error creating user:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Failed to create user'
-        });
-    }
-});
-
-// Update user
-app.patch('/api/users/:userId', async (req, res) => {
-    try {
-        const { userId } = req.params;
-        
-        const updateData = {
-            ...req.body,
-            updatedAt: new Date()
-        };
-
-        // Remove fields that shouldn't be updated
-        delete updateData._id;
-        delete updateData.createdAt;
-
-        const result = await db.collection('users').updateOne(
-            { _id: new ObjectId(userId) },
-            { $set: updateData }
-        );
-
-        if (result.matchedCount === 0) {
-            return res.status(404).json({
-                success: false,
-                error: 'User not found'
-            });
-        }
-
-        // Also update driver record if exists
-        if (updateData.name || updateData.vehicleId) {
-            await db.collection('drivers').updateOne(
-                { id: userId },
-                { 
-                    $set: {
-                        name: updateData.name,
-                        vehicleId: updateData.vehicleId
-                    }
-                }
-            );
-        }
-
-        res.json({
-            success: true,
-            message: 'User updated successfully'
-        });
-
-    } catch (error) {
-        console.error('Error updating user:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Failed to update user'
-        });
-    }
-});
-
-// Delete user
-app.delete('/api/users/:userId', async (req, res) => {
-    try {
-        const { userId } = req.params;
-
-        const result = await db.collection('users').deleteOne(
-            { _id: new ObjectId(userId) }
-        );
-
-        if (result.deletedCount === 0) {
-            return res.status(404).json({
-                success: false,
-                error: 'User not found'
-            });
-        }
-
-        // Also delete associated driver record
-        await db.collection('drivers').deleteOne({ id: userId });
-
-        res.json({
-            success: true,
-            message: 'User deleted successfully'
-        });
-
-    } catch (error) {
-        console.error('Error deleting user:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Failed to delete user'
-        });
-    }
-});
-
-// Bulk create users
-app.post('/api/users/bulk', async (req, res) => {
-    try {
-        const users = req.body.users;
-        
-        if (!Array.isArray(users) || users.length === 0) {
-            return res.status(400).json({
-                success: false,
-                error: 'No users provided'
-            });
-        }
-
-        const validUsers = [];
-        const errors = [];
-
-        // Validate and prepare users
-        for (let i = 0; i < users.length; i++) {
-            const user = users[i];
-            if (!user.name || !user.role) {
-                errors.push(`Row ${i + 1}: Name and role are required`);
-                continue;
-            }
-
-            validUsers.push({
-                name: user.name,
-                email: user.email || '',
-                phoneNumber: user.phoneNumber || '',
-                role: user.role || 'driver',
-                vehicleId: user.vehicleId || '',
-                active: user.active !== false,
-                pushNotifications: user.pushNotifications !== false,
-                createdAt: new Date(),
-                updatedAt: new Date()
-            });
-        }
-
-        if (validUsers.length === 0) {
-            return res.status(400).json({
-                success: false,
-                error: 'No valid users to create',
-                errors
-            });
-        }
-
-        // Insert all valid users
-        const result = await db.collection('users').insertMany(validUsers);
-
-        // Create driver records for users with driver role
-        const driverRecords = validUsers
-            .filter(user => user.role === 'driver')
-            .map((user, index) => ({
-                id: result.insertedIds[index].toString(),
-                name: user.name,
-                status: 'offline',
-                vehicleId: user.vehicleId,
-                createdAt: new Date()
-            }));
-
-        if (driverRecords.length > 0) {
-            await db.collection('drivers').insertMany(driverRecords);
-        }
-
-        res.json({
-            success: true,
-            message: `Created ${result.insertedCount} users`,
-            created: result.insertedCount,
-            errors: errors.length > 0 ? errors : undefined
-        });
-
-    } catch (error) {
-        console.error('Error in bulk user creation:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Failed to create users'
-        });
-    }
-});
-
-// Get user statistics
-app.get('/api/users/stats', async (req, res) => {
-    try {
-        const totalUsers = await db.collection('users').countDocuments();
-        const activeUsers = await db.collection('users').countDocuments({ active: true });
-        const drivers = await db.collection('users').countDocuments({ role: 'driver' });
-        const dispatchers = await db.collection('users').countDocuments({ role: 'dispatcher' });
-        const admins = await db.collection('users').countDocuments({ role: 'admin' });
-
-        res.json({
-            success: true,
-            data: {
-                total: totalUsers,
-                active: activeUsers,
-                inactive: totalUsers - activeUsers,
-                byRole: {
-                    drivers,
-                    dispatchers,
-                    admins
-                }
-            }
-        });
-
-    } catch (error) {
-        console.error('Error fetching user stats:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Failed to fetch statistics'
-        });
-    }
-});
-
-// Export endpoints - UPDATED WITH RETURNS DATA
-app.get('/api/export/:format', async (req, res) => {
-    try {
-        const { format } = req.params;
-        const { startDate, endDate } = req.query;
-        
-        let query = {};
-        if (startDate && endDate) {
-            query.timestamp = {
-                $gte: new Date(startDate),
-                $lte: new Date(endDate)
-            };
-        }
-        
-        const logs = await db.collection('logs').find(query).toArray();
-        const drivers = await db.collection('drivers').find({}).toArray();
-        const checkins = await db.collection('checkins').find(query).toArray();
-        
-        switch (format) {
-            case 'csv':
-                const csv = generateCSV(logs, drivers, checkins);
-                res.setHeader('Content-Type', 'text/csv');
-                res.setHeader('Content-Disposition', 'attachment; filename=fleet_report.csv');
-                res.send(csv);
-                break;
-                
-            case 'pdf':
-                // For PDF generation, returning HTML that can be printed to PDF
-                const html = generateHTMLReport(logs, drivers, checkins);
-                res.setHeader('Content-Type', 'text/html');
-                res.send(html);
-                break;
-                
-            case 'excel':
-                // For Excel, returning CSV with Excel-compatible headers
-                const excelCsv = generateCSV(logs, drivers, checkins);
-                res.setHeader('Content-Type', 'application/vnd.ms-excel');
-                res.setHeader('Content-Disposition', 'attachment; filename=fleet_report.xls');
-                res.send(excelCsv);
-                break;
-                
-            default:
-                res.status(400).json({ error: 'Invalid format' });
-        }
-    } catch (error) {
-        console.error('Export error:', error);
-        res.status(500).json({ error: 'Failed to generate export' });
-    }
-});
-
-// Helper functions for export - UPDATED WITH RETURNS
-function generateCSV(logs, drivers, checkins) {
-    let csv = 'Date,Time,Driver ID,Driver Name,Status,Event Type,Has Returns,Returns Count\n';
-    
-    logs.forEach(log => {
-        const driver = drivers.find(d => d.id === log.driverId) || {};
-        const date = new Date(log.timestamp);
-        csv += `${date.toLocaleDateString()},${date.toLocaleTimeString()},${log.driverId},${driver.name || log.driverName || 'Unknown'},${log.status || 'N/A'},${log.type},${log.hasReturns || false},${log.returnsCount || 0}\n`;
-    });
-    
-    return csv;
-}
-
-function generateHTMLReport(logs, drivers, checkins) {
-    const totalReturns = checkins.reduce((sum, c) => sum + (c.returnsCount || 0), 0);
-    const driversWithReturns = checkins.filter(c => c.hasReturns).length;
-    
-    const html = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Fleet Management Report</title>
-        <style>
-            body { font-family: Arial, sans-serif; margin: 20px; }
-            h1 { color: #333; }
-            table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-            th { background-color: #4CAF50; color: white; }
-            tr:nth-child(even) { background-color: #f2f2f2; }
-            .stats { background: #f0f0f0; padding: 15px; border-radius: 5px; margin: 10px 0; }
-        </style>
-    </head>
-    <body>
-        <h1>Fleet Management Report</h1>
-        <p>Generated on: ${new Date().toLocaleString()}</p>
-        
-        <div class="stats">
-            <h3>Summary Statistics</h3>
-            <p>Total Events: ${logs.length}</p>
-            <p>Active Drivers: ${drivers.filter(d => d.status !== 'offline').length}</p>
-            <p>Total Returns Today: ${totalReturns}</p>
-            <p>Drivers with Returns: ${driversWithReturns}</p>
-        </div>
-        
-        <h2>Recent Activity</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Time</th>
-                    <th>Driver</th>
-                    <th>Status</th>
-                    <th>Event</th>
-                    <th>Returns</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${logs.slice(0, 100).map(log => {
-                    const driver = drivers.find(d => d.id === log.driverId) || {};
-                    const date = new Date(log.timestamp);
-                    const returnsInfo = log.hasReturns ? `${log.returnsCount} returns` : 'No returns';
-                    return `
-                        <tr>
-                            <td>${date.toLocaleDateString()}</td>
-                            <td>${date.toLocaleTimeString()}</td>
-                            <td>${driver.name || log.driverName || 'Unknown'}</td>
-                            <td>${log.status || 'N/A'}</td>
-                            <td>${log.type}</td>
-                            <td>${returnsInfo}</td>
-                        </tr>
-                    `;
-                }).join('')}
-            </tbody>
-        </table>
-    </body>
-    </html>
-    `;
-    
-    return html;
-}
-
-// Health check endpoint
-app.get('/api/health', async (req, res) => {
-    try {
-        // Test database connection
-        const dbStatus = db ? 'connected' : 'disconnected';
-        let userCount = 0;
-        let driverCount = 0;
-        
-        if (db) {
-            try {
-                userCount = await db.collection('users').countDocuments();
-                driverCount = await db.collection('drivers').countDocuments();
-            } catch (e) {
-                console.error('Error counting documents:', e);
-            }
-        }
-
-        res.json({ 
-            status: 'healthy',
-            database: dbStatus,
-            data: {
-                database: dbStatus,
-                websocket: wss ? 'enabled' : 'disabled',
-                collections: {
-                    users: userCount,
-                    drivers: driverCount
-                }
-            },
-            timestamp: new Date().toISOString()
-        });
-    } catch (error) {
-        console.error('Health check error:', error);
-        res.status(500).json({
-            status: 'error',
-            error: error.message
-        });
-    }
+// 404 handler
+app.use((req, res) => {
+    res.status(404).json({ error: 'Endpoint not found' });
 });
 
 // Start server
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-    console.log(`Dashboard: http://localhost:${PORT}`);
-    console.log(`Driver Portal: http://localhost:${PORT}/driver`);
-    console.log(`Admin Panel: http://localhost:${PORT}/admin`);
-});
+async function startServer() {
+    const mongoConnected = await connectToMongoDB();
+    
+    if (!mongoConnected) {
+        console.log('⚠️ Starting server without MongoDB connection');
+    }
+    
+    app.listen(PORT, () => {
+        console.log(`🚀 FleetForce server running on port ${PORT}`);
+        console.log(`📊 Admin Panel: http://localhost:${PORT}/admin`);
+        console.log(`🚚 Driver App: http://localhost:${PORT}/driver`);
+        console.log(`📋 Dashboard: http://localhost:${PORT}/dashboard`);
+        console.log(`🔗 Health Check: http://localhost:${PORT}/api/health`);
+    });
+}
+
+startServer();
