@@ -619,7 +619,7 @@
                 
                 if (response.ok) {
                     const data = await response.json();
-                    if (data.data && data.data.database === 'connected') {
+                    if (data.database === 'connected' || data.status === 'ok') {
                         statusEl.innerHTML = '<span class="status-connected">✅ Connected to Database</span>';
                         statusEl.className = 'connection-status status-connected';
                     } else {
@@ -751,9 +751,10 @@
                     body: JSON.stringify({
                         driver: currentDriver,
                         driverId: currentDriverId,
+                        vehicleId: currentVehicle,
                         status: status,
                         message: message,
-                        warehouse: '6995 N US-41, Apollo Beach, FL',
+                        warehouse: '6995 N US-41, Apollo Beach, FL 33572',
                         location: 'Driver location',
                         timestamp: now.toISOString(),
                         hasReturns: hasReturns,
