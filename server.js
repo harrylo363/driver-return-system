@@ -36,6 +36,8 @@ async function connectToMongoDB() {
         usersCollection = db.collection('users');
         
         console.log('✅ Connected to MongoDB Atlas');
+        console.log('📊 Database:', db.databaseName);
+        console.log('📋 Collection: users');
         
         // Create default admin user if none exists
         await createDefaultUsers();
@@ -51,6 +53,7 @@ async function connectToMongoDB() {
 async function createDefaultUsers() {
     try {
         const userCount = await usersCollection.countDocuments();
+        console.log(`📊 Current user count: ${userCount}`);
         
         if (userCount === 0) {
             console.log('🔧 Creating default users...');
@@ -95,6 +98,7 @@ async function createDefaultUsers() {
             
             await usersCollection.insertMany(defaultUsers);
             console.log('✅ Default users created successfully');
+            console.log('🔑 Admin login: admin@fleetforce.com / Admin123!');
         }
     } catch (error) {
         console.error('❌ Error creating default users:', error);
@@ -102,58 +106,99 @@ async function createDefaultUsers() {
 }
 
 // Health check endpoint
-app.get('/api/health', (req, res) => {
-    const health = {
-        status: 'ok',
-        timestamp: new Date().toISOString(),
-        data: {
-            database: db ? 'connected' : 'disconnected',
-            server: 'running'
+app.get('/api/health', async (req, res) => {
+    try {
+        const health = {
+            status: 'ok',
+            timestamp: new Date().toISOString(),
+            data: {
+                database: db ? 'connected' : 'disconnected',
+                server: 'running',
+                mongodb: MONGODB_URI ? 'configured' : 'missing'
+            }
+        };
+        
+        // Test database connection
+        if (db && usersCollection) {
+            const userCount = await usersCollection.countDocuments();
+            health.data.userCount = userCount;
         }
-    };
-    res.json(health);
+        
+        console.log('💓 Health check:', health);
+        res.json(health);
+    } catch (error) {
+        console.error('❌ Health check failed:', error);
+        res.status(500).json({
+            status: 'error',
+            error: error.message,
+            timestamp: new Date().toISOString()
+        });
+    }
 });
 
 // Get all users
 app.get('/api/users', async (req, res) => {
     try {
         if (!usersCollection) {
+            console.log('❌ Database not connected for /api/users');
             return res.status(500).json({ error: 'Database not connected' });
         }
         
         const users = await usersCollection.find({}).toArray();
         console.log(`📊 Retrieved ${users.length} users from database`);
-        res.json(users);
+        
+        // Remove passwords from response for security
+        const safeUsers = users.map(user => {
+            const { password, ...safeUser } = user;
+            return safeUser;
+        });
+        
+        res.json(safeUsers);
     } catch (error) {
         console.error('❌ Error fetching users:', error);
         res.status(500).json({ error: 'Failed to fetch users', details: error.message });
     }
 });
 
-// Create new user - FIXED PASSWORD HANDLING
+// Create new user - FIXED DUPLICATE CHECK & PASSWORD HANDLING
 app.post('/api/users', async (req, res) => {
     try {
         if (!usersCollection) {
+            console.log('❌ Database not connected for /api/users POST');
             return res.status(500).json({ error: 'Database not connected' });
         }
         
         const { name, email, phoneNumber, role, password, vehicleId, active, pushNotifications } = req.body;
+        
+        console.log('🔧 Creating user:', { name, email, role, hasPassword: !!password });
         
         // Validate required fields
         if (!name || !role) {
             return res.status(400).json({ error: 'Name and role are required' });
         }
         
-        // Check if user already exists
+        // Check if user already exists - FIXED LOGIC
+        const existingUserQuery = [
+            { name: { $regex: new RegExp(`^${name.trim()}$`, 'i') } }
+        ];
+        
+        // Only check email if it's provided and not empty
+        if (email && email.trim() !== '') {
+            existingUserQuery.push({ email: { $regex: new RegExp(`^${email.trim()}$`, 'i') } });
+        }
+        
         const existingUser = await usersCollection.findOne({
-            $or: [
-                { name: name },
-                { email: email }
-            ]
+            $or: existingUserQuery
         });
         
         if (existingUser) {
-            return res.status(400).json({ error: 'User with this name or email already exists' });
+            if (existingUser.name.toLowerCase() === name.trim().toLowerCase()) {
+                console.log('❌ User name already exists:', name);
+                return res.status(400).json({ error: 'User with this name already exists' });
+            } else {
+                console.log('❌ User email already exists:', email);
+                return res.status(400).json({ error: 'User with this email already exists' });
+            }
         }
         
         // Create user object
@@ -217,6 +262,8 @@ app.patch('/api/users/:id', async (req, res) => {
         
         const userId = req.params.id;
         const updates = req.body;
+        
+        console.log('🔧 Updating user:', userId, updates);
         
         // Validate ObjectId
         if (!ObjectId.isValid(userId)) {
@@ -305,6 +352,8 @@ app.post('/api/auth/login', async (req, res) => {
         
         const { username, password } = req.body;
         
+        console.log('🔐 Login attempt:', username);
+        
         if (!username || !password) {
             return res.status(400).json({ error: 'Username and password are required' });
         }
@@ -319,8 +368,11 @@ app.post('/api/auth/login', async (req, res) => {
         });
         
         if (!user) {
+            console.log('❌ User not found:', username);
             return res.status(401).json({ error: 'Invalid credentials' });
         }
+        
+        console.log('✅ User found:', user.name, 'Role:', user.role, 'Has Password:', !!user.password);
         
         // Check if user is active
         if (user.active === false) {
@@ -332,6 +384,7 @@ app.post('/api/auth/login', async (req, res) => {
             // Drivers don't need password authentication
             const userResponse = { ...user };
             delete userResponse.password;
+            console.log('✅ Driver login successful:', user.name);
             return res.json({ 
                 message: 'Login successful', 
                 user: userResponse,
@@ -340,15 +393,18 @@ app.post('/api/auth/login', async (req, res) => {
         } else if (user.role === 'dispatcher' || user.role === 'admin' || user.role === 'administrator') {
             // Check password for admin/dispatcher
             if (!user.password) {
+                console.log('❌ No password set for:', user.name);
                 return res.status(401).json({ error: 'Password not set for this account' });
             }
             
             if (user.password !== password) {
+                console.log('❌ Invalid password for:', user.name);
                 return res.status(401).json({ error: 'Invalid credentials' });
             }
             
             const userResponse = { ...user };
             delete userResponse.password;
+            console.log('✅ Admin/Dispatcher login successful:', user.name);
             return res.json({ 
                 message: 'Login successful', 
                 user: userResponse,
@@ -384,6 +440,7 @@ app.get('/api/drivers', async (req, res) => {
             phoneNumber: driver.phoneNumber
         }));
         
+        console.log(`📊 Retrieved ${safeDrivers.length} drivers`);
         res.json(safeDrivers);
     } catch (error) {
         console.error('❌ Error fetching drivers:', error);
@@ -472,11 +529,15 @@ app.use((err, req, res, next) => {
 
 // 404 handler
 app.use((req, res) => {
-    res.status(404).json({ error: 'Endpoint not found' });
+    console.log('❌ 404 - Not found:', req.method, req.path);
+    res.status(404).json({ error: 'Endpoint not found', path: req.path });
 });
 
 // Start server
 async function startServer() {
+    console.log('🚀 Starting FleetForce server...');
+    console.log('🔗 MongoDB URI configured:', !!MONGODB_URI);
+    
     const mongoConnected = await connectToMongoDB();
     
     if (!mongoConnected) {
