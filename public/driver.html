@@ -741,6 +741,22 @@
                 message += ' with no returns';
             }
             
+            // Debug: Log the data being sent
+            const notificationData = {
+                driver: currentDriver,
+                driverId: currentDriverId,
+                vehicleId: currentVehicle,
+                status: status,
+                message: message,
+                warehouse: '6995 N US-41, Apollo Beach, FL 33572',
+                location: 'Driver location',
+                timestamp: now.toISOString(),
+                hasReturns: hasReturns,
+                returnsCount: hasReturns ? returnsCount : 0
+            };
+            
+            console.log('Sending notification with data:', JSON.stringify(notificationData, null, 2));
+            
             try {
                 // Send to MongoDB via API
                 const response = await fetch('/api/notifications', {
@@ -748,18 +764,7 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        driver: currentDriver,
-                        driverId: currentDriverId,
-                        vehicleId: currentVehicle,
-                        status: status,
-                        message: message,
-                        warehouse: '6995 N US-41, Apollo Beach, FL 33572',
-                        location: 'Driver location',
-                        timestamp: now.toISOString(),
-                        hasReturns: hasReturns,
-                        returnsCount: hasReturns ? returnsCount : 0
-                    })
+                    body: JSON.stringify(notificationData)
                 });
                 
                 if (response.ok) {
