@@ -55,49 +55,29 @@ async function createDefaultUsers() {
         const userCount = await usersCollection.countDocuments();
         console.log(`📊 Current user count: ${userCount}`);
         
-        if (userCount === 0) {
-            console.log('🔧 Creating default users...');
+        // Only create defaults if we have no admin users
+        const adminCount = await usersCollection.countDocuments({ 
+            $or: [{ role: 'admin' }, { role: 'administrator' }] 
+        });
+        
+        if (adminCount === 0) {
+            console.log('🔧 Creating default admin user...');
             
-            const defaultUsers = [
-                {
-                    name: 'System Admin',
-                    email: 'admin@fleetforce.com',
-                    phoneNumber: '+1 (555) 123-4567',
-                    role: 'admin',
-                    password: 'Admin123!',
-                    vehicleId: '',
-                    active: true,
-                    pushNotifications: true,
-                    createdAt: new Date(),
-                    updatedAt: new Date()
-                },
-                {
-                    name: 'Main Dispatcher',
-                    email: 'dispatcher@fleetforce.com',
-                    phoneNumber: '+1 (555) 234-5678',
-                    role: 'dispatcher',
-                    password: 'Dispatch123!',
-                    vehicleId: '',
-                    active: true,
-                    pushNotifications: true,
-                    createdAt: new Date(),
-                    updatedAt: new Date()
-                },
-                {
-                    name: 'John Driver',
-                    email: 'john@fleetforce.com',
-                    phoneNumber: '+1 (555) 345-6789',
-                    role: 'driver',
-                    vehicleId: 'TRUCK-001',
-                    active: true,
-                    pushNotifications: true,
-                    createdAt: new Date(),
-                    updatedAt: new Date()
-                }
-            ];
+            const defaultAdmin = {
+                name: 'System Admin',
+                email: 'admin@fleetforce.com',
+                phoneNumber: '+1 (555) 123-4567',
+                role: 'admin',
+                password: 'Admin123!',
+                vehicleId: '',
+                active: true,
+                pushNotifications: true,
+                createdAt: new Date(),
+                updatedAt: new Date()
+            };
             
-            await usersCollection.insertMany(defaultUsers);
-            console.log('✅ Default users created successfully');
+            await usersCollection.insertOne(defaultAdmin);
+            console.log('✅ Default admin user created successfully');
             console.log('🔑 Admin login: admin@fleetforce.com / Admin123!');
         }
     } catch (error) {
@@ -121,7 +101,9 @@ app.get('/api/health', async (req, res) => {
         // Test database connection
         if (db && usersCollection) {
             const userCount = await usersCollection.countDocuments();
+            const usersWithPasswords = await usersCollection.countDocuments({ password: { $exists: true, $ne: "" } });
             health.data.userCount = userCount;
+            health.data.usersWithPasswords = usersWithPasswords;
         }
         
         console.log('💓 Health check:', health);
@@ -147,8 +129,9 @@ app.get('/api/users', async (req, res) => {
         const users = await usersCollection.find({}).toArray();
         console.log(`📊 Retrieved ${users.length} users from database`);
         
-        // Remove passwords from response for security
+        // Remove passwords from response for security but log if they exist
         const safeUsers = users.map(user => {
+            console.log(`👤 User: ${user.name} (${user.role}) - Has Password: ${!!user.password}`);
             const { password, ...safeUser } = user;
             return safeUser;
         });
@@ -160,7 +143,7 @@ app.get('/api/users', async (req, res) => {
     }
 });
 
-// Create new user - FIXED DUPLICATE CHECK & PASSWORD HANDLING
+// Create new user - ENHANCED WITH DETAILED LOGGING
 app.post('/api/users', async (req, res) => {
     try {
         if (!usersCollection) {
@@ -168,12 +151,24 @@ app.post('/api/users', async (req, res) => {
             return res.status(500).json({ error: 'Database not connected' });
         }
         
+        console.log('🔧 Raw request body:', JSON.stringify(req.body, null, 2));
+        
         const { name, email, phoneNumber, role, password, vehicleId, active, pushNotifications } = req.body;
         
-        console.log('🔧 Creating user:', { name, email, role, hasPassword: !!password });
+        console.log('🔧 Extracted fields:', { 
+            name, 
+            email, 
+            role, 
+            hasPassword: !!password,
+            passwordLength: password ? password.length : 0,
+            vehicleId,
+            active,
+            pushNotifications
+        });
         
         // Validate required fields
         if (!name || !role) {
+            console.log('❌ Missing required fields:', { name: !!name, role: !!role });
             return res.status(400).json({ error: 'Name and role are required' });
         }
         
@@ -194,10 +189,10 @@ app.post('/api/users', async (req, res) => {
         if (existingUser) {
             if (existingUser.name.toLowerCase() === name.trim().toLowerCase()) {
                 console.log('❌ User name already exists:', name);
-                return res.status(400).json({ error: 'User with this name already exists' });
+                return res.status(400).json({ error: `User "${name}" already exists. Please choose a different name.` });
             } else {
                 console.log('❌ User email already exists:', email);
-                return res.status(400).json({ error: 'User with this email already exists' });
+                return res.status(400).json({ error: `Email "${email}" already exists. Please choose a different email.` });
             }
         }
         
@@ -214,29 +209,43 @@ app.post('/api/users', async (req, res) => {
             updatedAt: new Date()
         };
         
-        // Add password ONLY for dispatchers and admins (FIXED!)
+        // CRITICAL FIX: Always add password for admin/dispatcher - even if empty
         if (role === 'dispatcher' || role === 'admin' || role === 'administrator') {
-            if (!password) {
+            if (!password || password.trim() === '') {
+                console.log(`❌ Password required for ${role} role`);
                 return res.status(400).json({ 
-                    error: `Password is required for ${role} accounts` 
+                    error: `Password is required for ${role} accounts. Please enter a password.` 
                 });
             }
             
             // Validate password strength
             const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
             if (!passwordRegex.test(password)) {
+                console.log(`❌ Password validation failed for: ${name}`);
                 return res.status(400).json({ 
-                    error: 'Password must be at least 8 characters with uppercase, lowercase, number, and special character' 
+                    error: 'Password must be at least 8 characters with uppercase, lowercase, number, and special character (!@#$%^&*)' 
                 });
             }
             
             // Store password (in production, hash this!)
-            newUser.password = password;
-            console.log(`✅ Password set for ${role}: ${name}`);
+            newUser.password = password.trim();
+            console.log(`✅ Password set for ${role}: ${name} (length: ${password.length})`);
+        } else {
+            console.log(`ℹ️ No password needed for ${role}: ${name}`);
         }
+        
+        console.log('🔧 Final user object (without password):', {
+            ...newUser,
+            password: newUser.password ? '[SET]' : '[NOT SET]'
+        });
         
         // Insert user into database
         const result = await usersCollection.insertOne(newUser);
+        console.log('✅ Database insert result:', result.acknowledged, result.insertedId);
+        
+        // Verify the user was saved correctly
+        const savedUser = await usersCollection.findOne({ _id: result.insertedId });
+        console.log('🔍 Verification - Saved user has password:', !!savedUser.password);
         
         // Return created user (without password for security)
         const createdUser = { ...newUser, _id: result.insertedId };
@@ -244,7 +253,7 @@ app.post('/api/users', async (req, res) => {
             delete createdUser.password;
         }
         
-        console.log(`✅ Created new user: ${name} (${role})`);
+        console.log(`✅ Successfully created user: ${name} (${role})`);
         res.status(201).json(createdUser);
         
     } catch (error) {
@@ -253,7 +262,7 @@ app.post('/api/users', async (req, res) => {
     }
 });
 
-// Update user - FIXED PASSWORD HANDLING
+// Update user - ENHANCED PASSWORD HANDLING
 app.patch('/api/users/:id', async (req, res) => {
     try {
         if (!usersCollection) {
@@ -270,6 +279,12 @@ app.patch('/api/users/:id', async (req, res) => {
             return res.status(400).json({ error: 'Invalid user ID' });
         }
         
+        // Get current user
+        const currentUser = await usersCollection.findOne({ _id: new ObjectId(userId) });
+        if (!currentUser) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        
         // Remove fields that shouldn't be updated this way
         delete updates._id;
         delete updates.createdAt;
@@ -278,10 +293,15 @@ app.patch('/api/users/:id', async (req, res) => {
         updates.updatedAt = new Date();
         
         // Handle password updates
-        if (updates.password) {
-            const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
-            
-            if (user && (user.role === 'dispatcher' || user.role === 'admin' || user.role === 'administrator')) {
+        if (updates.password !== undefined) {
+            if (currentUser.role === 'dispatcher' || currentUser.role === 'admin' || currentUser.role === 'administrator') {
+                if (updates.password === '') {
+                    console.log('❌ Cannot remove password from admin/dispatcher account');
+                    return res.status(400).json({ 
+                        error: 'Password cannot be empty for admin/dispatcher accounts' 
+                    });
+                }
+                
                 // Validate password strength for admin/dispatcher roles
                 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
                 if (!passwordRegex.test(updates.password)) {
@@ -289,12 +309,18 @@ app.patch('/api/users/:id', async (req, res) => {
                         error: 'Password must be at least 8 characters with uppercase, lowercase, number, and special character' 
                     });
                 }
-                console.log(`✅ Password updated for user: ${user.name}`);
-            } else if (user && user.role === 'driver') {
+                console.log(`✅ Password updated for user: ${currentUser.name}`);
+            } else if (currentUser.role === 'driver') {
                 // Remove password for drivers
                 delete updates.password;
+                console.log('ℹ️ Password removed for driver account');
             }
         }
+        
+        console.log('🔧 Final updates object:', {
+            ...updates,
+            password: updates.password ? '[UPDATED]' : '[NO CHANGE]'
+        });
         
         const result = await usersCollection.updateOne(
             { _id: new ObjectId(userId) },
@@ -304,6 +330,10 @@ app.patch('/api/users/:id', async (req, res) => {
         if (result.matchedCount === 0) {
             return res.status(404).json({ error: 'User not found' });
         }
+        
+        // Verify the update
+        const updatedUser = await usersCollection.findOne({ _id: new ObjectId(userId) });
+        console.log('🔍 Verification - Updated user has password:', !!updatedUser.password);
         
         console.log(`✅ Updated user: ${userId}`);
         res.json({ message: 'User updated successfully' });
@@ -394,7 +424,9 @@ app.post('/api/auth/login', async (req, res) => {
             // Check password for admin/dispatcher
             if (!user.password) {
                 console.log('❌ No password set for:', user.name);
-                return res.status(401).json({ error: 'Password not set for this account' });
+                return res.status(401).json({ 
+                    error: `Password not set for ${user.name}. Please contact an administrator to set a password.` 
+                });
             }
             
             if (user.password !== password) {
@@ -552,7 +584,7 @@ async function startServer() {
         console.log(`🔗 Health Check: http://localhost:${PORT}/api/health`);
         
         if (mongoConnected) {
-            console.log('✅ Default admin login: admin@fleetforce.com / Admin123!');
+            console.log('✅ Ready for user creation with password support!');
         }
     });
 }
