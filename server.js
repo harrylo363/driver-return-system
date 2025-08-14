@@ -81,6 +81,43 @@ async function createDefaultUsers() {
     }
 }
 
+// ====== HEALTH CHECK ENDPOINT (FIXED) ======
+
+app.get('/api/health', async (req, res) => {
+    try {
+        let dbStatus = 'disconnected';
+        
+        if (client) {
+            try {
+                await client.db('fleet_management').admin().ping();
+                dbStatus = 'connected';
+            } catch (dbError) {
+                console.error('Database ping failed:', dbError);
+                dbStatus = 'disconnected';
+            }
+        }
+        
+        res.json({
+            status: 'healthy',
+            timestamp: new Date().toISOString(),
+            mongodb: dbStatus,
+            data: {
+                database: dbStatus  // This is what admin panel looks for
+            }
+        });
+    } catch (error) {
+        console.error('Health check error:', error);
+        res.status(500).json({
+            status: 'error',
+            timestamp: new Date().toISOString(),
+            mongodb: 'disconnected',
+            data: {
+                database: 'disconnected'
+            }
+        });
+    }
+});
+
 // ====== AUTHENTICATION ENDPOINTS ======
 
 // Authentication endpoint
@@ -263,6 +300,30 @@ app.put('/api/users/:id', async (req, res) => {
     }
 });
 
+// Update user (PATCH for partial updates)
+app.patch('/api/users/:id', async (req, res) => {
+    try {
+        const db = client.db('fleet_management');
+        const users = db.collection('users');
+        const { ObjectId } = require('mongodb');
+        
+        const updateData = {
+            ...req.body,
+            updatedAt: new Date().toISOString()
+        };
+        
+        const result = await users.updateOne(
+            { _id: new ObjectId(req.params.id) },
+            { $set: updateData }
+        );
+        
+        res.json({ success: true, modifiedCount: result.modifiedCount });
+    } catch (error) {
+        console.error('Error updating user:', error);
+        res.status(500).json({ error: 'Failed to update user' });
+    }
+});
+
 // Delete user
 app.delete('/api/users/:id', async (req, res) => {
     try {
@@ -275,6 +336,40 @@ app.delete('/api/users/:id', async (req, res) => {
     } catch (error) {
         console.error('Error deleting user:', error);
         res.status(500).json({ error: 'Failed to delete user' });
+    }
+});
+
+// ====== NOTIFICATION ENDPOINTS ======
+
+// Get all notifications
+app.get('/api/notifications', async (req, res) => {
+    try {
+        const db = client.db('fleet_management');
+        const notifications = db.collection('notifications');
+        const allNotifications = await notifications.find({}).sort({ timestamp: -1 }).toArray();
+        res.json(allNotifications);
+    } catch (error) {
+        console.error('Error fetching notifications:', error);
+        res.status(500).json({ error: 'Failed to fetch notifications' });
+    }
+});
+
+// Create notification
+app.post('/api/notifications', async (req, res) => {
+    try {
+        const db = client.db('fleet_management');
+        const notifications = db.collection('notifications');
+        
+        const notificationData = {
+            ...req.body,
+            timestamp: new Date().toISOString()
+        };
+        
+        const result = await notifications.insertOne(notificationData);
+        res.json({ success: true, notificationId: result.insertedId });
+    } catch (error) {
+        console.error('Error creating notification:', error);
+        res.status(500).json({ error: 'Failed to create notification' });
     }
 });
 
@@ -313,14 +408,38 @@ app.post('/api/vehicles', async (req, res) => {
     }
 });
 
-// ====== HEALTH CHECK ENDPOINT ======
+// ====== CHECK-IN ENDPOINTS ======
 
-app.get('/api/health', (req, res) => {
-    res.json({
-        status: 'healthy',
-        timestamp: new Date().toISOString(),
-        mongodb: client ? 'connected' : 'disconnected'
-    });
+// Get all check-ins
+app.get('/api/checkins', async (req, res) => {
+    try {
+        const db = client.db('fleet_management');
+        const checkins = db.collection('checkins');
+        const allCheckins = await checkins.find({}).sort({ timestamp: -1 }).toArray();
+        res.json(allCheckins);
+    } catch (error) {
+        console.error('Error fetching check-ins:', error);
+        res.status(500).json({ error: 'Failed to fetch check-ins' });
+    }
+});
+
+// Create check-in
+app.post('/api/checkins', async (req, res) => {
+    try {
+        const db = client.db('fleet_management');
+        const checkins = db.collection('checkins');
+        
+        const checkinData = {
+            ...req.body,
+            timestamp: new Date().toISOString()
+        };
+        
+        const result = await checkins.insertOne(checkinData);
+        res.json({ success: true, checkinId: result.insertedId });
+    } catch (error) {
+        console.error('Error creating check-in:', error);
+        res.status(500).json({ error: 'Failed to create check-in' });
+    }
 });
 
 // ====== STATIC FILE ROUTES ======
@@ -338,6 +457,11 @@ app.get('/admin', (req, res) => {
 // Serve dashboard
 app.get('/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+});
+
+// Serve driver portal
+app.get('/driver', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'driver.html'));
 });
 
 // 404 handler
