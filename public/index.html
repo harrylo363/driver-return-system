@@ -333,45 +333,6 @@
             to { transform: rotate(360deg); }
         }
         
-        /* Debug Section */
-        .debug-section {
-            background: rgba(245, 158, 11, 0.1);
-            border: 1px solid rgba(245, 158, 11, 0.3);
-            border-radius: 12px;
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-            font-size: 0.875rem;
-        }
-        
-        .debug-title {
-            color: var(--accent-orange);
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-        
-        .debug-info {
-            color: var(--text-secondary);
-            font-family: 'Courier New', monospace;
-            font-size: 0.75rem;
-            line-height: 1.4;
-        }
-        
-        /* Forgot Password Link */
-        .forgot-password-link {
-            color: var(--text-tertiary);
-            text-decoration: none;
-            font-size: 0.875rem;
-            font-weight: 500;
-            transition: color var(--transition-fast);
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .forgot-password-link:hover {
-            color: var(--accent-blue);
-        }
-        
         /* Alert Messages */
         .alert {
             padding: 1rem;
@@ -474,14 +435,6 @@
                 <span>Checking connection...</span>
             </div>
             
-            <!-- Debug Section -->
-            <div class="debug-section" id="debugSection" style="display: none;">
-                <div class="debug-title">🔍 Debug Information</div>
-                <div class="debug-info" id="debugInfo">
-                    Loading system information...
-                </div>
-            </div>
-            
             <!-- Alert Messages -->
             <div id="alertContainer"></div>
             
@@ -520,13 +473,6 @@
                     </div>
                 </div>
                 
-                <!-- Forgot Password Link -->
-                <div class="form-group" style="text-align: right; margin-bottom: 2rem;">
-                    <a href="#" class="forgot-password-link" onclick="showUserDebugInfo()">
-                        🔍 Show User Debug Info
-                    </a>
-                </div>
-                
                 <!-- Login Button -->
                 <button type="submit" class="login-btn" id="loginBtn">
                     <span id="loginBtnText">🚀 Access System</span>
@@ -550,7 +496,6 @@
     <script>
         // Global variables
         let isConnected = false;
-        let debugMode = false;
         
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
@@ -566,11 +511,6 @@
             
             // Auto-focus username field
             document.getElementById('username').focus();
-            
-            // Show debug info by default for troubleshooting
-            setTimeout(() => {
-                showUserDebugInfo();
-            }, 2000);
         });
         
         // Create floating particles
@@ -591,7 +531,7 @@
         // Check server connection
         async function checkConnection() {
             try {
-                const response = await fetch('/api/auth/test', {
+                const response = await fetch('/api/health', {
                     method: 'GET'
                 });
                 
@@ -610,39 +550,6 @@
                 const statusEl = document.getElementById('connectionStatus');
                 statusEl.innerHTML = '<div class="status-dot"></div><span>❌ System Offline</span>';
                 statusEl.classList.add('offline');
-            }
-        }
-        
-        // Show/hide debug information
-        async function showUserDebugInfo() {
-            const debugSection = document.getElementById('debugSection');
-            debugMode = !debugMode;
-            debugSection.style.display = debugMode ? 'block' : 'none';
-            
-            if (debugMode) {
-                try {
-                    const response = await fetch('/api/auth/test');
-                    const data = await response.json();
-                    
-                    const debugInfo = document.getElementById('debugInfo');
-                    debugInfo.innerHTML = `
-Connection: ${isConnected ? '✅ Connected' : '❌ Offline'}
-API Status: ${response.ok ? 'OK' : 'Error'}
-Users in Database: ${data.userCount || 0}
-
-Available Users:
-${data.users ? data.users.map(u => 
-    `• ${u.name} (${u.email}) - Role: ${u.role} - Password: ${u.hasPassword ? 'Yes' : 'No'} - Active: ${u.active ? 'Yes' : 'No'}`
-).join('\n') : 'No users found'}
-
-Server Endpoint: ${window.location.origin}/api/auth/login
-                    `;
-                } catch (error) {
-                    document.getElementById('debugInfo').innerHTML = `
-Connection Error: ${error.message}
-Cannot retrieve user information from server.
-                    `;
-                }
             }
         }
         
