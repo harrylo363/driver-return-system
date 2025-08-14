@@ -385,6 +385,11 @@
             to { transform: translateY(0); opacity: 1; }
         }
         
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
         .modal-header {
             padding: 2rem;
             background: rgba(14, 165, 233, 0.05);
@@ -496,140 +501,6 @@
             color: var(--accent-blue);
         }
         
-        /* Demo Users Section */
-        .demo-users {
-            background: rgba(14, 165, 233, 0.05);
-            border: 1px solid rgba(14, 165, 233, 0.2);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-top: 1.5rem;
-        }
-        
-        .demo-title {
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .demo-user {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.75rem;
-            background: var(--bg-elevated);
-            border-radius: 8px;
-            margin-bottom: 0.5rem;
-            cursor: pointer;
-            transition: all var(--transition-fast);
-        }
-        
-        .demo-user:hover {
-            background: var(--bg-tertiary);
-            transform: translateX(4px);
-        }
-        
-        .demo-user-info {
-            font-size: 0.875rem;
-        }
-        
-        .demo-user-name {
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-        
-        .demo-user-role {
-            font-size: 0.75rem;
-            color: var(--text-tertiary);
-        }
-        
-        .demo-user-badge {
-            padding: 0.25rem 0.5rem;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-        
-        .badge-admin {
-            background: rgba(139, 92, 246, 0.1);
-            color: var(--accent-purple);
-        }
-        
-        .badge-dispatcher {
-            background: rgba(245, 158, 11, 0.1);
-            color: var(--accent-orange);
-        }
-        
-        /* Demo Users Section */
-        .demo-users {
-            background: rgba(14, 165, 233, 0.05);
-            border: 1px solid rgba(14, 165, 233, 0.2);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-top: 1.5rem;
-        }
-        
-        .demo-title {
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .demo-user {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.75rem;
-            background: var(--bg-elevated);
-            border-radius: 8px;
-            margin-bottom: 0.5rem;
-            cursor: pointer;
-            transition: all var(--transition-fast);
-        }
-        
-        .demo-user:hover {
-            background: var(--bg-tertiary);
-            transform: translateX(4px);
-        }
-        
-        .demo-user-info {
-            font-size: 0.875rem;
-        }
-        
-        .demo-user-name {
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-        
-        .demo-user-role {
-            font-size: 0.75rem;
-            color: var(--text-tertiary);
-        }
-        
-        .demo-user-badge {
-            padding: 0.25rem 0.5rem;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-        
-        .badge-admin {
-            background: rgba(139, 92, 246, 0.1);
-            color: var(--accent-purple);
-        }
-        
-        .badge-dispatcher {
-            background: rgba(245, 158, 11, 0.1);
-            color: var(--accent-orange);
-        }
-        
         /* Responsive Design */
         @media (max-width: 768px) {
             .login-container {
@@ -638,10 +509,6 @@
             
             .login-card {
                 padding: 2rem;
-            }
-            
-            .role-selector {
-                grid-template-columns: 1fr;
             }
             
             .footer-links {
@@ -677,13 +544,13 @@
             <form class="login-form" id="loginForm">
                 <!-- Username -->
                 <div class="form-group">
-                    <label class="form-label" for="username">Username</label>
+                    <label class="form-label" for="username">Username or Email</label>
                     <input 
                         type="text" 
                         id="username" 
                         name="username" 
                         class="form-input" 
-                        placeholder="Enter your username"
+                        placeholder="Enter your username or email"
                         required
                         autocomplete="username"
                     >
@@ -725,8 +592,8 @@
             <!-- Footer -->
             <div class="login-footer">
                 <div class="footer-links">
-                    <a href="#" class="footer-link">Help & Support</a>
                     <a href="#" class="footer-link" onclick="showSystemStatus()">System Status</a>
+                    <a href="#" class="footer-link">Help & Support</a>
                 </div>
                 <div class="copyright">
                     © 2025 FleetForce Command Center. All rights reserved.
@@ -780,11 +647,13 @@
     <script>
         // Global variables
         let isConnected = false;
+        let allUsers = [];
         
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
             console.log('FleetForce Login Portal - Initializing...');
             checkConnection();
+            loadUsers();
             createParticles();
             
             // Check connection every 30 seconds
@@ -809,6 +678,25 @@
                 particle.style.animationDelay = Math.random() * 6 + 's';
                 particle.style.animationDuration = (6 + Math.random() * 4) + 's';
                 particlesContainer.appendChild(particle);
+            }
+        }
+        
+        // Load users from MongoDB
+        async function loadUsers() {
+            try {
+                const response = await fetch('/api/users');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    allUsers = Array.isArray(data) ? data : (data.data || []);
+                    console.log('Loaded users for authentication:', allUsers.length);
+                } else {
+                    console.warn('Failed to load users');
+                    allUsers = [];
+                }
+            } catch (error) {
+                console.error('Error loading users:', error);
+                allUsers = [];
             }
         }
         
@@ -845,13 +733,13 @@
             
             const formData = new FormData(event.target);
             const credentials = {
-                username: formData.get('username').trim(),
+                username: formData.get('username').trim().toLowerCase(),
                 password: formData.get('password')
             };
             
             // Validate inputs
             if (!credentials.username || !credentials.password) {
-                showAlert('Please enter both username and password', 'error');
+                showAlert('Please enter both username/email and password', 'error');
                 return;
             }
             
@@ -860,7 +748,7 @@
             clearAlerts();
             
             try {
-                // Authenticate user via API
+                // Authenticate user
                 const authResult = await authenticateUser(credentials);
                 
                 if (authResult.success) {
@@ -868,26 +756,27 @@
                     
                     // Store session data
                     sessionStorage.setItem('fleetforce_user', JSON.stringify({
-                        username: credentials.username,
+                        username: authResult.user.name || authResult.user.username,
                         role: authResult.user.role,
-                        permissions: authResult.user.permissions || [],
+                        email: authResult.user.email,
+                        userId: authResult.user._id,
                         loginTime: new Date().toISOString()
                     }));
                     
-                    // Redirect based on user role/permissions
+                    // Redirect based on user role
                     setTimeout(() => {
-                        if (authResult.user.role === 'admin' || authResult.user.permissions?.includes('admin')) {
-                            window.location.href = 'dashboard.html';
-                        } else if (authResult.user.role === 'dispatcher' || authResult.user.permissions?.includes('dashboard')) {
+                        if (authResult.user.role === 'admin') {
+                            window.location.href = 'admin.html';
+                        } else if (authResult.user.role === 'dispatcher') {
                             window.location.href = 'dashboard.html';
                         } else {
-                            // Default to dashboard for any authenticated user
+                            // Drivers go to mobile view (dashboard for now)
                             window.location.href = 'dashboard.html';
                         }
                     }, 1500);
                     
                 } else {
-                    showAlert(authResult.message || 'Invalid username or password. Please try again.', 'error');
+                    showAlert(authResult.message || 'Invalid username/email or password. Please try again.', 'error');
                     
                     // Clear password field
                     document.getElementById('password').value = '';
@@ -902,72 +791,92 @@
             }
         }
         
-        // Authenticate user via API (checks user accounts from admin panel)
+        // Authenticate user against MongoDB users
         async function authenticateUser(credentials) {
             try {
-                // First check if we have API connectivity
-                if (isConnected) {
-                    const response = await fetch('/api/auth/login', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(credentials)
-                    });
+                // Reload users to get latest data
+                await loadUsers();
+                
+                if (allUsers.length === 0) {
+                    return {
+                        success: false,
+                        message: 'Unable to load user database. Please check your connection.'
+                    };
+                }
+                
+                // Find user by username, email, or name
+                const user = allUsers.find(u => {
+                    const username = credentials.username.toLowerCase();
                     
-                    if (response.ok) {
-                        const result = await response.json();
-                        return {
-                            success: true,
-                            user: {
-                                username: result.user.username || credentials.username,
-                                role: result.user.role || 'dispatcher',
-                                permissions: result.user.permissions || [],
-                                id: result.user.id
-                            }
-                        };
-                    } else {
-                        const error = await response.json();
+                    // Check against name field (primary identifier)
+                    if (u.name && u.name.toLowerCase() === username) return true;
+                    
+                    // Check against email field
+                    if (u.email && u.email.toLowerCase() === username) return true;
+                    
+                    // Check against username field if it exists
+                    if (u.username && u.username.toLowerCase() === username) return true;
+                    
+                    return false;
+                });
+                
+                if (!user) {
+                    return {
+                        success: false,
+                        message: 'User not found. Please check your username/email.'
+                    };
+                }
+                
+                // Check if user is active
+                if (user.active === false) {
+                    return {
+                        success: false,
+                        message: 'Account is deactivated. Please contact an administrator.'
+                    };
+                }
+                
+                // Authenticate based on role
+                if (user.role === 'driver') {
+                    // Drivers don't need passwords - they use mobile app authentication
+                    return {
+                        success: true,
+                        user: user
+                    };
+                } else if (user.role === 'dispatcher' || user.role === 'admin') {
+                    // Dispatchers and admins need password authentication
+                    if (!user.password) {
                         return {
                             success: false,
-                            message: error.message || 'Invalid credentials'
+                            message: 'Password not set for this account. Please contact an administrator.'
+                        };
+                    }
+                    
+                    // Simple password comparison (in production, use proper hashing)
+                    if (user.password === credentials.password) {
+                        return {
+                            success: true,
+                            user: user
+                        };
+                    } else {
+                        return {
+                            success: false,
+                            message: 'Invalid password. Please try again.'
                         };
                     }
                 } else {
-                    // If no API connection, try to authenticate against local users database
-                    const usersResponse = await fetch('/api/users');
-                    if (usersResponse.ok) {
-                        const result = await usersResponse.json();
-                        const users = result.data || result || [];
-                        
-                        // Find user by username
-                        const user = users.find(u => 
-                            u.name?.toLowerCase() === credentials.username.toLowerCase() || 
-                            u.username?.toLowerCase() === credentials.username.toLowerCase()
-                        );
-                        
-                        if (user && user.password === credentials.password) {
-                            return {
-                                success: true,
-                                user: {
-                                    username: user.name || user.username,
-                                    role: user.role || 'dispatcher',
-                                    permissions: user.permissions || [],
-                                    id: user._id
-                                }
-                            };
-                        }
-                    }
+                    return {
+                        success: false,
+                        message: 'Invalid user role.'
+                    };
                 }
+                
             } catch (error) {
                 console.error('Authentication error:', error);
+                return {
+                    success: false,
+                    message: 'Authentication service unavailable. Please try again later.'
+                };
             }
-            
-            // Default failure response
-            return {
-                success: false,
-                message: 'Invalid username or password'
-            };
         }
         
         // Toggle password visibility
@@ -982,17 +891,6 @@
                 passwordInput.type = 'password';
                 toggleBtn.textContent = '👁️';
             }
-        }
-        
-        // Fill demo user credentials
-        function fillDemoUser(username, password) {
-            document.getElementById('username').value = username;
-            document.getElementById('password').value = password;
-            
-            // Focus the login button
-            document.getElementById('loginBtn').focus();
-            
-            showAlert(`Demo credentials loaded for ${username}`, 'info');
         }
         
         // Show forgot password modal
@@ -1032,23 +930,18 @@
                 // Simulate API call delay
                 await new Promise(resolve => setTimeout(resolve, 1500));
                 
-                // Try to send password reset request
-                if (isConnected) {
-                    const response = await fetch('/api/auth/forgot-password', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ identifier })
-                    });
-                    
-                    if (response.ok) {
-                        showAlert('Password reset instructions have been sent if an account exists with that information.', 'success');
-                    } else {
-                        showAlert('Password reset instructions have been sent if an account exists with that information.', 'success');
-                    }
+                // Check if user exists in our database
+                const userExists = allUsers.some(user => 
+                    user.name?.toLowerCase() === identifier.toLowerCase() ||
+                    user.email?.toLowerCase() === identifier.toLowerCase() ||
+                    user.username?.toLowerCase() === identifier.toLowerCase()
+                );
+                
+                if (userExists) {
+                    // In a real application, you would send an email here
+                    showAlert('Password reset instructions have been sent to your email address.', 'success');
                 } else {
-                    // Offline mode - still show success message for security
+                    // For security, always show success message even if user doesn't exist
                     showAlert('Password reset instructions have been sent if an account exists with that information.', 'success');
                 }
                 
@@ -1070,8 +963,9 @@
             const status = isConnected ? 'ONLINE' : 'OFFLINE';
             const dbStatus = isConnected ? 'Connected' : 'Disconnected';
             const timestamp = new Date().toLocaleString();
+            const userCount = allUsers.length;
             
-            showAlert(`System Status: ${status} | Database: ${dbStatus} | Last Check: ${timestamp}`, 'info');
+            showAlert(`System: ${status} | Database: ${dbStatus} | Users: ${userCount} | Last Check: ${timestamp}`, 'info');
         }
         
         // Set loading state
@@ -1140,7 +1034,11 @@
                     if (timeDiff < 8) {
                         showAlert('Existing session found. Redirecting...', 'info');
                         setTimeout(() => {
-                            window.location.href = user.role === 'admin' ? 'dashboard.html' : 'dashboard.html';
+                            if (user.role === 'admin') {
+                                window.location.href = 'admin.html';
+                            } else {
+                                window.location.href = 'dashboard.html';
+                            }
                         }, 1000);
                         return true;
                     } else {
