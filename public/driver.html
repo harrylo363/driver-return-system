@@ -194,6 +194,77 @@
             border: 1px solid rgba(239, 68, 68, 0.3);
         }
         
+        /* Returns Question Section */
+        .returns-section {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 2px solid #fbbf24;
+        }
+        
+        .returns-question {
+            color: #92400e;
+            font-size: 18px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .returns-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .returns-btn {
+            flex: 1;
+            padding: 12px 24px;
+            border: 2px solid transparent;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+            color: #4a5568;
+        }
+        
+        .returns-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .returns-btn.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .returns-btn.yes {
+            border-color: #10b981;
+        }
+        
+        .returns-btn.no {
+            border-color: #ef4444;
+        }
+        
+        .returns-btn.yes.selected {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-color: #10b981;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+        
+        .returns-btn.no.selected {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            border-color: #ef4444;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+        }
+        
         /* Status Section */
         .status-section {
             margin-bottom: 30px;
@@ -301,6 +372,10 @@
             border-left: 4px solid #ef4444;
         }
         
+        .notification.warning {
+            border-left: 4px solid #f59e0b;
+        }
+        
         @keyframes slideIn {
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
@@ -334,6 +409,43 @@
         .signout-btn:hover {
             background: #667eea;
             color: white;
+        }
+        
+        /* Returns Count Input */
+        .returns-count {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .returns-count.visible {
+            display: block;
+        }
+        
+        .returns-count-label {
+            color: #4a5568;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .returns-count-input {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .returns-count-input:focus {
+            outline: none;
+            border-color: #667eea;
         }
     </style>
 </head>
@@ -378,6 +490,26 @@
                 </div>
             </div>
             
+            <!-- Returns Question Section -->
+            <div class="returns-section">
+                <div class="returns-question">
+                    <span>📦</span>
+                    <span>Do you have any returns?</span>
+                </div>
+                <div class="returns-buttons">
+                    <button class="returns-btn yes" onclick="setReturns(true)" id="returnsYes">
+                        <span>✅ Yes</span>
+                    </button>
+                    <button class="returns-btn no" onclick="setReturns(false)" id="returnsNo">
+                        <span>❌ No</span>
+                    </button>
+                </div>
+                <div class="returns-count" id="returnsCount">
+                    <label class="returns-count-label" for="returnsCountInput">How many returns?</label>
+                    <input type="number" class="returns-count-input" id="returnsCountInput" min="1" placeholder="Enter number of returns">
+                </div>
+            </div>
+            
             <div class="status-section">
                 <div class="section-title">Select Your Status</div>
                 <div class="status-buttons">
@@ -409,6 +541,8 @@
         let currentDriver = null;
         let currentVehicle = null;
         let currentDriverId = null;
+        let hasReturns = null;
+        let returnsCount = 0;
         
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
@@ -421,6 +555,11 @@
             // Enable login button when driver selected
             document.getElementById('driverSelect').addEventListener('change', function() {
                 document.getElementById('loginBtn').disabled = !this.value;
+            });
+            
+            // Add event listener for returns count input
+            document.getElementById('returnsCountInput').addEventListener('input', function() {
+                returnsCount = parseInt(this.value) || 0;
             });
         });
         
@@ -527,6 +666,14 @@
             currentDriver = null;
             currentVehicle = null;
             currentDriverId = null;
+            hasReturns = null;
+            returnsCount = 0;
+            
+            // Reset returns selection
+            document.getElementById('returnsYes').classList.remove('selected');
+            document.getElementById('returnsNo').classList.remove('selected');
+            document.getElementById('returnsCount').classList.remove('visible');
+            document.getElementById('returnsCountInput').value = '';
             
             document.getElementById('loginScreen').classList.remove('hidden');
             document.getElementById('mainScreen').classList.remove('visible');
@@ -534,8 +681,42 @@
             document.getElementById('loginBtn').disabled = true;
         }
         
+        // Set returns status
+        function setReturns(value) {
+            hasReturns = value;
+            const yesBtn = document.getElementById('returnsYes');
+            const noBtn = document.getElementById('returnsNo');
+            const returnsCountDiv = document.getElementById('returnsCount');
+            
+            if (value === true) {
+                yesBtn.classList.add('selected');
+                noBtn.classList.remove('selected');
+                returnsCountDiv.classList.add('visible');
+                document.getElementById('returnsCountInput').focus();
+            } else {
+                yesBtn.classList.remove('selected');
+                noBtn.classList.add('selected');
+                returnsCountDiv.classList.remove('visible');
+                returnsCount = 0;
+                document.getElementById('returnsCountInput').value = '';
+            }
+        }
+        
         // Send update to MongoDB
         async function sendUpdate(type) {
+            // Check if returns question is answered
+            if (hasReturns === null) {
+                showNotification('⚠️ Required', 'Please answer the returns question first', 'warning');
+                return;
+            }
+            
+            // Check if returns count is provided when has returns
+            if (hasReturns === true && (!returnsCount || returnsCount < 1)) {
+                showNotification('⚠️ Required', 'Please enter the number of returns', 'warning');
+                document.getElementById('returnsCountInput').focus();
+                return;
+            }
+            
             const button = type === '30min' ? document.getElementById('btn30min') : document.getElementById('btnArrived');
             
             // Show loading
@@ -553,6 +734,13 @@
                 message = `${currentDriver} has arrived at warehouse`;
             }
             
+            // Add returns info to message
+            if (hasReturns) {
+                message += ` with ${returnsCount} return${returnsCount > 1 ? 's' : ''}`;
+            } else {
+                message += ' with no returns';
+            }
+            
             try {
                 // Send to MongoDB via API
                 const response = await fetch('/api/notifications', {
@@ -565,9 +753,11 @@
                         driverId: currentDriverId,
                         status: status,
                         message: message,
-                        warehouse: '5856 Tampa FDC',
+                        warehouse: '6995 N US-41, Apollo Beach, FL',
                         location: 'Driver location',
-                        timestamp: now.toISOString()
+                        timestamp: now.toISOString(),
+                        hasReturns: hasReturns,
+                        returnsCount: hasReturns ? returnsCount : 0
                     })
                 });
                 
@@ -575,6 +765,14 @@
                     const result = await response.json();
                     console.log('Status sent to database:', result);
                     showNotification('✅ Status Sent', message, 'success');
+                    
+                    // Reset returns selection after successful send
+                    hasReturns = null;
+                    returnsCount = 0;
+                    document.getElementById('returnsYes').classList.remove('selected');
+                    document.getElementById('returnsNo').classList.remove('selected');
+                    document.getElementById('returnsCount').classList.remove('visible');
+                    document.getElementById('returnsCountInput').value = '';
                 } else {
                     throw new Error('Failed to send status');
                 }
