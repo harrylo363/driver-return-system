@@ -473,23 +473,16 @@
                     </div>
                 </div>
                 
+                <!-- Forgot Password Link -->
+                <div class="form-group" style="text-align: right; margin-bottom: 2rem;">
+                    <a href="#" class="footer-link" onclick="showForgotPassword()">
+                        🔑 Forgot Password?
+                    </a>
+                </div>
+                
                 <!-- Login Button -->
                 <button type="submit" class="login-btn" id="loginBtn">
-                    <span id="loginBtnText">🚀 Access System</span>
-                    <div class="loading-spinner" id="loginSpinner" style="display: none;"></div>
-                </button>
-            </form>
-            
-            <!-- Footer -->
-            <div class="login-footer">
-                <div class="footer-links">
-                    <a href="#" class="footer-link" onclick="showSystemStatus()">System Status</a>
-                    <a href="admin.html" class="footer-link">Admin Panel</a>
-                </div>
-                <div class="copyright">
-                    © 2025 FleetForce Command Center. All rights reserved.
-                </div>
-            </div>
+                
         </div>
     </div>
     
@@ -647,6 +640,32 @@
             const timestamp = new Date().toLocaleString();
             
             showAlert(`System: ${status} | Last Check: ${timestamp}`, 'info');
+        }
+        
+        // Forgot password function
+        function showForgotPassword() {
+            const email = prompt('Enter your email address to reset your password:');
+            
+            if (!email) {
+                return; // User cancelled
+            }
+            
+            // Basic email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showAlert('Please enter a valid email address', 'error');
+                return;
+            }
+            
+            // Show informational message about password reset
+            showAlert(`Password reset instructions would be sent to ${email}. Please contact your system administrator for assistance.`, 'info');
+            
+            // In a real application, you would send this to your backend:
+            // fetch('/api/auth/forgot-password', {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify({ email: email })
+            // });
         }
         
         // Set loading state
