@@ -180,7 +180,7 @@ app.get('/api/notifications', async (req, res) => {
     }
 });
 
-// Create new notification (from driver portal)
+// Create new notification (from driver portal) - UPDATED WITH RETURNS TRACKING
 app.post('/api/notifications', async (req, res) => {
     try {
         const notification = {
@@ -191,13 +191,17 @@ app.post('/api/notifications', async (req, res) => {
             warehouse: req.body.warehouse || '5856 Tampa FDC',
             timestamp: new Date(req.body.timestamp || Date.now()),
             location: req.body.location || null,
-            notes: req.body.notes || ''
+            notes: req.body.notes || '',
+            // RETURNS TRACKING FIELDS
+            hasReturns: req.body.hasReturns || false,
+            returnsCount: parseInt(req.body.returnsCount) || 0,
+            vehicleId: req.body.vehicleId || null
         };
         
         // Insert notification
         const result = await db.collection('notifications').insertOne(notification);
         
-        // Also update/create driver record
+        // Also update/create driver record with returns data
         await db.collection('drivers').updateOne(
             { id: notification.driverId },
             { 
@@ -206,7 +210,11 @@ app.post('/api/notifications', async (req, res) => {
                     status: notification.status,
                     lastUpdate: notification.timestamp,
                     warehouse: notification.warehouse,
-                    location: notification.location
+                    location: notification.location,
+                    vehicleId: notification.vehicleId,
+                    // RETURNS DATA
+                    hasReturns: notification.hasReturns,
+                    returnsCount: notification.returnsCount
                 },
                 $setOnInsert: {
                     id: notification.driverId,
@@ -216,14 +224,16 @@ app.post('/api/notifications', async (req, res) => {
             { upsert: true }
         );
         
-        // Log the event
+        // Log the event with returns info
         await db.collection('logs').insertOne({
             type: 'status_change',
             driverId: notification.driverId,
             driverName: notification.driver,
             status: notification.status,
             timestamp: notification.timestamp,
-            warehouse: notification.warehouse
+            warehouse: notification.warehouse,
+            hasReturns: notification.hasReturns,
+            returnsCount: notification.returnsCount
         });
         
         // Send WebSocket notification if available
@@ -290,12 +300,14 @@ app.get('/api/drivers', async (req, res) => {
 // Update driver status
 app.post('/api/update-status', async (req, res) => {
     try {
-        const { driverId, status, location, notes } = req.body;
+        const { driverId, status, location, notes, hasReturns, returnsCount } = req.body;
         
         const updateData = {
             status,
             lastUpdate: new Date(),
-            notes: notes || ''
+            notes: notes || '',
+            hasReturns: hasReturns || false,
+            returnsCount: parseInt(returnsCount) || 0
         };
         
         if (location) {
@@ -316,13 +328,15 @@ app.post('/api/update-status', async (req, res) => {
             { upsert: true }
         );
         
-        // Log the status change
+        // Log the status change with returns info
         await db.collection('logs').insertOne({
             type: 'status_change',
             driverId,
             status,
             timestamp: new Date(),
-            location
+            location,
+            hasReturns: updateData.hasReturns,
+            returnsCount: updateData.returnsCount
         });
         
         // Send WebSocket notification if available
@@ -331,6 +345,8 @@ app.post('/api/update-status', async (req, res) => {
                 type: 'status_update',
                 driverId,
                 status,
+                hasReturns: updateData.hasReturns,
+                returnsCount: updateData.returnsCount,
                 timestamp: new Date().toISOString()
             };
             
@@ -348,7 +364,7 @@ app.post('/api/update-status', async (req, res) => {
     }
 });
 
-// Handle check-in submissions from arrived drivers
+// Handle check-in submissions from arrived drivers - UPDATED WITH RETURNS
 app.post('/api/checkins', async (req, res) => {
     try {
         const checkinData = {
@@ -356,49 +372,65 @@ app.post('/api/checkins', async (req, res) => {
             driverName: req.body.driverName,
             timestamp: new Date(),
             
+            // Returns data
+            hasReturns: req.body.hasReturns || false,
+            returnsCount: parseInt(req.body.returnsCount) || 0,
+            
             // Equipment data
             tractorNumber: req.body.tractorNumber,
             tractorCondition: req.body.tractorCondition,
             tractorLights: req.body.tractorLights,
             tractorTires: req.body.tractorTires,
             tractorNotes: req.body.tractorNotes,
+            tractorIssue: req.body.tractorIssue,
+            tractorIssues: req.body.tractorIssues,
             
             trailerNumber: req.body.trailerNumber,
             trailerCondition: req.body.trailerCondition,
             trailerTires: req.body.trailerTires,
             trailerClean: req.body.trailerClean,
             trailerNotes: req.body.trailerNotes,
+            trailerIssue: req.body.trailerIssue,
+            trailerIssues: req.body.trailerIssues,
             
             moffettNumber: req.body.moffettNumber,
             moffettCondition: req.body.moffettCondition,
             moffettTires: req.body.moffettTires,
             moffettHydraulic: req.body.moffettHydraulic,
             moffettNotes: req.body.moffettNotes,
+            moffettIssue: req.body.moffettIssue,
+            moffettIssues: req.body.moffettIssues,
             
-            status: 'completed'
+            additionalNotes: req.body.additionalNotes,
+            status: 'completed',
+            warehouse: req.body.warehouse || '6995 N US-41, Apollo Beach, FL 33572'
         };
 
         // Store check-in data
         const result = await db.collection('checkins').insertOne(checkinData);
         
-        // Update driver status to 'completed'
+        // Update driver status to 'completed' with returns info
         await db.collection('drivers').updateOne(
             { id: req.body.driverId },
             { 
                 $set: { 
                     status: 'completed',
                     checkinTime: new Date(),
-                    lastUpdate: new Date()
+                    lastUpdate: new Date(),
+                    hasReturns: checkinData.hasReturns,
+                    returnsCount: checkinData.returnsCount
                 }
             }
         );
 
-        // Log the check-in event
+        // Log the check-in event with returns info
         await db.collection('logs').insertOne({
             type: 'checkin',
             driverId: req.body.driverId,
             driverName: req.body.driverName,
             timestamp: new Date(),
+            hasReturns: checkinData.hasReturns,
+            returnsCount: checkinData.returnsCount,
             details: {
                 tractorCondition: req.body.tractorCondition,
                 trailerCondition: req.body.trailerCondition,
@@ -413,6 +445,8 @@ app.post('/api/checkins', async (req, res) => {
                 driverId: req.body.driverId,
                 driverName: req.body.driverName,
                 status: 'completed',
+                hasReturns: checkinData.hasReturns,
+                returnsCount: checkinData.returnsCount,
                 timestamp: new Date().toISOString()
             };
 
@@ -536,10 +570,17 @@ app.get('/api/messages', async (req, res) => {
 
 // ============= USER MANAGEMENT ENDPOINTS =============
 
-// Get all users
+// Get all users - with optional role filter for drivers
 app.get('/api/users', async (req, res) => {
     try {
-        const users = await db.collection('users').find({}).toArray();
+        const { role } = req.query;
+        let query = {};
+        
+        if (role) {
+            query.role = role;
+        }
+        
+        const users = await db.collection('users').find(query).toArray();
         res.json({
             success: true,
             data: users,
@@ -814,7 +855,7 @@ app.get('/api/users/stats', async (req, res) => {
     }
 });
 
-// Export endpoints
+// Export endpoints - UPDATED WITH RETURNS DATA
 app.get('/api/export/:format', async (req, res) => {
     try {
         const { format } = req.params;
@@ -830,10 +871,11 @@ app.get('/api/export/:format', async (req, res) => {
         
         const logs = await db.collection('logs').find(query).toArray();
         const drivers = await db.collection('drivers').find({}).toArray();
+        const checkins = await db.collection('checkins').find(query).toArray();
         
         switch (format) {
             case 'csv':
-                const csv = generateCSV(logs, drivers);
+                const csv = generateCSV(logs, drivers, checkins);
                 res.setHeader('Content-Type', 'text/csv');
                 res.setHeader('Content-Disposition', 'attachment; filename=fleet_report.csv');
                 res.send(csv);
@@ -841,14 +883,14 @@ app.get('/api/export/:format', async (req, res) => {
                 
             case 'pdf':
                 // For PDF generation, returning HTML that can be printed to PDF
-                const html = generateHTMLReport(logs, drivers);
+                const html = generateHTMLReport(logs, drivers, checkins);
                 res.setHeader('Content-Type', 'text/html');
                 res.send(html);
                 break;
                 
             case 'excel':
                 // For Excel, returning CSV with Excel-compatible headers
-                const excelCsv = generateCSV(logs, drivers);
+                const excelCsv = generateCSV(logs, drivers, checkins);
                 res.setHeader('Content-Type', 'application/vnd.ms-excel');
                 res.setHeader('Content-Disposition', 'attachment; filename=fleet_report.xls');
                 res.send(excelCsv);
@@ -863,20 +905,23 @@ app.get('/api/export/:format', async (req, res) => {
     }
 });
 
-// Helper functions for export
-function generateCSV(logs, drivers) {
-    let csv = 'Date,Time,Driver ID,Driver Name,Status,Event Type\n';
+// Helper functions for export - UPDATED WITH RETURNS
+function generateCSV(logs, drivers, checkins) {
+    let csv = 'Date,Time,Driver ID,Driver Name,Status,Event Type,Has Returns,Returns Count\n';
     
     logs.forEach(log => {
         const driver = drivers.find(d => d.id === log.driverId) || {};
         const date = new Date(log.timestamp);
-        csv += `${date.toLocaleDateString()},${date.toLocaleTimeString()},${log.driverId},${driver.name || log.driverName || 'Unknown'},${log.status || 'N/A'},${log.type}\n`;
+        csv += `${date.toLocaleDateString()},${date.toLocaleTimeString()},${log.driverId},${driver.name || log.driverName || 'Unknown'},${log.status || 'N/A'},${log.type},${log.hasReturns || false},${log.returnsCount || 0}\n`;
     });
     
     return csv;
 }
 
-function generateHTMLReport(logs, drivers) {
+function generateHTMLReport(logs, drivers, checkins) {
+    const totalReturns = checkins.reduce((sum, c) => sum + (c.returnsCount || 0), 0);
+    const driversWithReturns = checkins.filter(c => c.hasReturns).length;
+    
     const html = `
     <!DOCTYPE html>
     <html>
@@ -889,13 +934,20 @@ function generateHTMLReport(logs, drivers) {
             th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
             th { background-color: #4CAF50; color: white; }
             tr:nth-child(even) { background-color: #f2f2f2; }
+            .stats { background: #f0f0f0; padding: 15px; border-radius: 5px; margin: 10px 0; }
         </style>
     </head>
     <body>
         <h1>Fleet Management Report</h1>
         <p>Generated on: ${new Date().toLocaleString()}</p>
-        <p>Total Events: ${logs.length}</p>
-        <p>Active Drivers: ${drivers.filter(d => d.status !== 'offline').length}</p>
+        
+        <div class="stats">
+            <h3>Summary Statistics</h3>
+            <p>Total Events: ${logs.length}</p>
+            <p>Active Drivers: ${drivers.filter(d => d.status !== 'offline').length}</p>
+            <p>Total Returns Today: ${totalReturns}</p>
+            <p>Drivers with Returns: ${driversWithReturns}</p>
+        </div>
         
         <h2>Recent Activity</h2>
         <table>
@@ -906,12 +958,14 @@ function generateHTMLReport(logs, drivers) {
                     <th>Driver</th>
                     <th>Status</th>
                     <th>Event</th>
+                    <th>Returns</th>
                 </tr>
             </thead>
             <tbody>
                 ${logs.slice(0, 100).map(log => {
                     const driver = drivers.find(d => d.id === log.driverId) || {};
                     const date = new Date(log.timestamp);
+                    const returnsInfo = log.hasReturns ? `${log.returnsCount} returns` : 'No returns';
                     return `
                         <tr>
                             <td>${date.toLocaleDateString()}</td>
@@ -919,6 +973,7 @@ function generateHTMLReport(logs, drivers) {
                             <td>${driver.name || log.driverName || 'Unknown'}</td>
                             <td>${log.status || 'N/A'}</td>
                             <td>${log.type}</td>
+                            <td>${returnsInfo}</td>
                         </tr>
                     `;
                 }).join('')}
@@ -950,6 +1005,7 @@ app.get('/api/health', async (req, res) => {
 
         res.json({ 
             status: 'healthy',
+            database: dbStatus,
             data: {
                 database: dbStatus,
                 websocket: wss ? 'enabled' : 'disabled',
