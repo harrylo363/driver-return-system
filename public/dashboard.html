@@ -1552,4 +1552,459 @@
                     radio.parentElement.classList.remove('selected');
                     if (radio.value === 'good') {
                         radio.checked = true;
-                        radio.parentElement.classList.add('selecte
+                        radio.parentElement.classList.add('selected');
+                    }
+                });
+            });
+            
+            // Show modal
+            document.getElementById('checkInModal').classList.add('active');
+        }
+        
+        // Close check-in modal
+        function closeCheckInModal() {
+            document.getElementById('checkInModal').classList.remove('active');
+        }
+        
+        // Update issue indicator based on selection
+        function updateIssueIndicator(type, value) {
+            const indicator = document.getElementById(`${type}Indicator`);
+            const issuesTextarea = document.getElementById(`${type}IssuesText`);
+            
+            // Update radio button styling
+            document.querySelectorAll(`input[name="${type}Condition"]`).forEach(radio => {
+                radio.parentElement.classList.remove('selected');
+                if (radio.checked) {
+                    radio.parentElement.classList.add('selected');
+                }
+            });
+            
+            if (value === 'good') {
+                indicator.className = 'issue-indicator no-issues';
+                indicator.innerHTML = '<span>✓</span><span>No Issues</span>';
+                issuesTextarea.style.display = 'none';
+                issuesTextarea.value = '';
+            } else if (value === 'minor') {
+                indicator.className = 'issue-indicator has-issues';
+                indicator.innerHTML = '<span>⚠️</span><span>Minor Issues Reported</span>';
+                issuesTextarea.style.display = 'block';
+            } else if (value === 'major') {
+                indicator.className = 'issue-indicator has-issues';
+                indicator.innerHTML = '<span>🔴</span><span>Major Issues Reported</span>';
+                issuesTextarea.style.display = 'block';
+            } else if (value === 'na') {
+                indicator.className = 'issue-indicator no-issues';
+                indicator.innerHTML = '<span>➖</span><span>Not Applicable</span>';
+                issuesTextarea.style.display = 'none';
+                issuesTextarea.value = '';
+            }
+        }
+        
+        // Submit check-in form
+        async function submitCheckIn(event) {
+            event.preventDefault();
+            
+            const driverName = document.getElementById('modalDriverName').value;
+            const driverId = document.getElementById('modalDriverId').value;
+            
+            // Get equipment conditions
+            const tractorCondition = document.querySelector('input[name="tractorCondition"]:checked').value;
+            const trailerCondition = document.querySelector('input[name="trailerCondition"]:checked').value;
+            const moffettCondition = document.querySelector('input[name="moffettCondition"]:checked').value;
+            
+            // Get issue descriptions
+            const tractorIssues = document.getElementById('tractorIssuesText').value;
+            const trailerIssues = document.getElementById('trailerIssuesText').value;
+            const moffettIssues = document.getElementById('moffettIssuesText').value;
+            const additionalNotes = document.getElementById('additionalNotes').value;
+            
+            // Get driver's returns info from the driverMap
+            const driverData = driverMap.get(driverName);
+            const hasReturns = driverData?.hasReturns || false;
+            const returnsCount = driverData?.returnsCount || 0;
+            
+            // Prepare check-in data
+            const checkInData = {
+                driverName: driverName,
+                driverId: driverId || null,
+                status: 'completed',
+                warehouse: WAREHOUSE_ADDRESS,
+                timestamp: new Date().toISOString(),
+                completedAt: new Date().toISOString(),
+                
+                // Returns data
+                hasReturns: hasReturns,
+                returnsCount: returnsCount,
+                
+                // Equipment conditions
+                tractorCondition: tractorCondition,
+                trailerCondition: trailerCondition,
+                moffettCondition: moffettCondition,
+                
+                // Issues (only save if there are actual issues)
+                tractorIssue: tractorCondition !== 'good' ? (tractorIssues || `${tractorCondition} issues reported`) : null,
+                trailerIssue: trailerCondition !== 'good' ? (trailerIssues || `${trailerCondition} issues reported`) : null,
+                moffettIssue: moffettCondition !== 'good' && moffettCondition !== 'na' ? (moffettIssues || `${moffettCondition} issues reported`) : null,
+                
+                // Detailed descriptions
+                tractorIssues: tractorIssues || null,
+                trailerIssues: trailerIssues || null,
+                moffettIssues: moffettIssues || null,
+                
+                additionalNotes: additionalNotes || null
+            };
+            
+            try {
+                // Show loading state
+                showToast('Saving check-in...', 'info');
+                
+                // Send check-in to MongoDB
+                const response = await fetch('/api/checkins', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(checkInData)
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('Check-in saved:', result);
+                    
+                    // Add to completed set
+                    completedDrivers.add(driverName);
+                    localStorage.setItem('completedDrivers', JSON.stringify([...completedDrivers]));
+                    
+                    // Update the driver's status in the map
+                    if (driverMap.has(driverName)) {
+                        driverMap.get(driverName).status = 'completed';
+                    }
+                    
+                    // Also update notification status
+                    try {
+                        await fetch('/api/notifications', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                driver: driverName,
+                                driverId: driverId || null,
+                                status: 'completed',
+                                message: `${driverName} has completed check-in`,
+                                warehouse: WAREHOUSE_ADDRESS,
+                                timestamp: new Date().toISOString(),
+                                hasReturns: hasReturns,
+                                returnsCount: returnsCount
+                            })
+                        });
+                    } catch (err) {
+                        console.log('Notification update failed:', err);
+                    }
+                    
+                    // Close modal and update dashboard
+                    closeCheckInModal();
+                    updateDashboard();
+                    
+                    // Show success message with issue summary
+                    let issueCount = 0;
+                    if (tractorCondition !== 'good') issueCount++;
+                    if (trailerCondition !== 'good') issueCount++;
+                    if (moffettCondition !== 'good' && moffettCondition !== 'na') issueCount++;
+                    
+                    let message = `✅ ${driverName} checked in`;
+                    if (issueCount > 0) {
+                        message += ` with ${issueCount} issue(s) reported`;
+                    } else {
+                        message += ' - All equipment OK!';
+                    }
+                    
+                    if (hasReturns && returnsCount > 0) {
+                        message += ` (${returnsCount} return${returnsCount > 1 ? 's' : ''} processed)`;
+                    }
+                    
+                    showToast(message, 'success');
+                    
+                    // Reload data to get updated counts
+                    loadData();
+                    
+                } else {
+                    throw new Error('Failed to save check-in');
+                }
+            } catch (error) {
+                console.error('Error saving check-in:', error);
+                showToast('❌ Error saving check-in - please try again', 'error');
+            }
+        }
+        
+        // Filter drivers
+        function filterDrivers(filter, button) {
+            currentFilter = filter;
+            
+            // Update button states
+            button.parentElement.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            button.classList.add('active');
+            
+            updateActivityList();
+        }
+        
+        // Switch tabs
+        function switchTab(tab, button) {
+            currentTab = tab;
+            
+            // Update button states
+            button.parentElement.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            button.classList.add('active');
+            
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tab + 'Tab').classList.add('active');
+            
+            // Initialize map if needed
+            if (tab === 'map' && !map) {
+                setTimeout(initMap, 100);
+            }
+        }
+        
+        // Initialize map with Apollo Beach warehouse
+        function initMap() {
+            map = L.map('map').setView(WAREHOUSE_COORDS, 12);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+            
+            // Add warehouse marker for Apollo Beach
+            L.marker(WAREHOUSE_COORDS).addTo(map)
+                .bindPopup(`<strong>${WAREHOUSE_ADDRESS}</strong><br>Home Depot FDC`);
+        }
+        
+        // Refresh dashboard - FIXED
+        async function refreshDashboard() {
+            const refreshBtn = event.currentTarget;
+            const refreshIcon = document.getElementById('refreshIcon');
+            const refreshText = document.getElementById('refreshText');
+            
+            // Show loading state
+            refreshBtn.disabled = true;
+            refreshIcon.innerHTML = '<span class="loading-spinner"></span>';
+            refreshText.textContent = 'Refreshing...';
+            
+            try {
+                await loadData();
+                showToast('Dashboard refreshed successfully!', 'success');
+            } catch (error) {
+                console.error('Refresh error:', error);
+                showToast('Error refreshing - using cached data', 'error');
+            } finally {
+                // Reset button state
+                refreshBtn.disabled = false;
+                refreshIcon.innerHTML = '🔄';
+                refreshText.textContent = 'Refresh';
+            }
+        }
+        
+        // Clear daily check-ins
+        function clearDailyCheckIns() {
+            if (confirm('Are you sure you want to clear all check-ins for today? This will reset all completed drivers.')) {
+                completedDrivers.clear();
+                localStorage.removeItem('completedDrivers');
+                
+                // Set today as the reset date
+                const today = new Date().toDateString();
+                localStorage.setItem('lastResetDate', today);
+                lastResetDate = today;
+                
+                // Reset status for all drivers
+                allDrivers.forEach(driver => {
+                    if (driver.status === 'completed') {
+                        driver.status = 'arrived'; // Reset to arrived status
+                    }
+                });
+                
+                updateDashboard();
+                showToast('All check-ins have been cleared', 'success');
+            }
+        }
+        
+        // Test warehouse ping - VERIFY DATABASE CONNECTION
+        async function testWarehousePing() {
+            showToast('Testing warehouse & database connection...', 'info');
+            
+            try {
+                // Test database connection first
+                const dbResponse = await fetch('/api/health');
+                if (dbResponse.ok) {
+                    const health = await dbResponse.json();
+                    console.log('Database health:', health);
+                    
+                    if (health.database === 'connected' || health.status === 'ok') {
+                        // Test warehouse address validation
+                        const geoResponse = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(WAREHOUSE_ADDRESS)}`, {
+                            headers: {
+                                'User-Agent': 'FleetCommandCenter/1.0'
+                            }
+                        });
+                        
+                        if (geoResponse.ok) {
+                            const data = await geoResponse.json();
+                            if (data && data.length > 0) {
+                                showToast('✅ Database connected & warehouse verified!', 'success');
+                                console.log('Warehouse location:', data[0]);
+                                
+                                // Log connection details
+                                console.log('System Status:');
+                                console.log('- MongoDB: Connected');
+                                console.log('- Warehouse:', WAREHOUSE_ADDRESS);
+                                console.log('- Coordinates:', WAREHOUSE_COORDS);
+                            } else {
+                                showToast('⚠️ Database OK, warehouse address needs verification', 'error');
+                            }
+                        }
+                    } else {
+                        showToast('⚠️ Database connection issue detected', 'error');
+                    }
+                } else {
+                    throw new Error('Database health check failed');
+                }
+            } catch (error) {
+                showToast('❌ Connection test failed - check server', 'error');
+                console.error('Connection test error:', error);
+            }
+        }
+        
+        // Export data - FROM MONGODB
+        async function exportData(format) {
+            try {
+                const date = new Date().toISOString().split('T')[0];
+                
+                // First check if export endpoint exists
+                const testResponse = await fetch('/api/export/test');
+                
+                if (testResponse.ok) {
+                    // Export endpoint exists, proceed with download
+                    window.location.href = `/api/export/${format}?startDate=${date}&endDate=${date}`;
+                    showToast(`Exporting ${format.toUpperCase()} from database...`, 'info');
+                } else {
+                    // Fallback: fetch data and create client-side export
+                    showToast('Preparing export from current data...', 'info');
+                    
+                    const response = await fetch('/api/notifications?limit=1000');
+                    if (response.ok) {
+                        const result = await response.json();
+                        const data = result.data || result || [];
+                        
+                        if (format === 'csv') {
+                            downloadCSV(data);
+                        } else if (format === 'json') {
+                            downloadJSON(data);
+                        } else {
+                            showToast('Export format not yet implemented', 'info');
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Export error:', error);
+                showToast('Export failed - check server configuration', 'error');
+            }
+        }
+        
+        // Helper function to download CSV
+        function downloadCSV(data) {
+            const headers = ['Driver', 'Status', 'Timestamp', 'Warehouse', 'Has Returns', 'Returns Count'];
+            const rows = data.map(d => [
+                d.driver || 'Unknown',
+                d.status || 'Unknown',
+                new Date(d.timestamp).toLocaleString(),
+                d.warehouse || WAREHOUSE_ADDRESS,
+                d.hasReturns ? 'Yes' : 'No',
+                d.returnsCount || 0
+            ]);
+            
+            let csv = headers.join(',') + '\n';
+            rows.forEach(row => {
+                csv += row.map(cell => `"${cell}"`).join(',') + '\n';
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `fleet-report-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            
+            showToast('CSV exported successfully!', 'success');
+        }
+        
+        // Helper function to download JSON
+        function downloadJSON(data) {
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `fleet-report-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            
+            showToast('JSON exported successfully!', 'success');
+        }
+        
+        // Show toast notification
+        function showToast(message, type = 'info') {
+            // Remove any existing toasts
+            const existingToast = document.querySelector('.toast');
+            if (existingToast) {
+                existingToast.remove();
+            }
+            
+            // Create new toast
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            let icon = '';
+            switch (type) {
+                case 'success': icon = '✅'; break;
+                case 'error': icon = '❌'; break;
+                case 'info': icon = 'ℹ️'; break;
+                default: icon = '📢';
+            }
+            
+            toast.innerHTML = `
+                <span>${icon}</span>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                toast.style.animation = 'slideIn 0.3s ease reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+        
+        // Handle page visibility changes
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                loadData();
+            }
+        });
+        
+        // Handle online/offline status
+        window.addEventListener('online', () => {
+            showToast('Connection restored', 'success');
+            loadData();
+        });
+        
+        window.addEventListener('offline', () => {
+            showToast('Connection lost - working offline', 'error');
+            updateConnectionStatus(false);
+        });
+    </script>
+</body>
+</html>
