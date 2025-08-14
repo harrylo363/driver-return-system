@@ -448,6 +448,11 @@
                 gap: 1rem;
             }
         }
+
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-10px); }
+        }
     </style>
 </head>
 <body>
@@ -545,14 +550,12 @@
     <script>
         // Global variables
         let isConnected = false;
-        let allUsers = [];
         let debugMode = false;
         
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
             console.log('FleetForce Login Portal - Initializing...');
             checkConnection();
-            loadUsers();
             createParticles();
             
             // Check connection every 30 seconds
@@ -585,80 +588,16 @@
             }
         }
         
-        // Load users from MongoDB
-        async function loadUsers() {
-            try {
-                const response = await fetch('/api/users');
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    allUsers = Array.isArray(data) ? data : (data.data || []);
-                    console.log('Loaded users for authentication:', allUsers.length);
-                    console.log('User details:', allUsers.map(u => ({
-                        name: u.name,
-                        email: u.email,
-                        role: u.role,
-                        hasPassword: !!u.password,
-                        active: u.active
-                    })));
-                    updateDebugInfo();
-                } else {
-                    console.warn('Failed to load users - Response:', response.status);
-                    allUsers = [];
-                    updateDebugInfo();
-                }
-            } catch (error) {
-                console.error('Error loading users:', error);
-                allUsers = [];
-                updateDebugInfo();
-            }
-        }
-        
-        // Update debug information
-        function updateDebugInfo() {
-            const debugInfo = document.getElementById('debugInfo');
-            const totalUsers = allUsers.length;
-            const usersWithPasswords = allUsers.filter(u => u.password).length;
-            const adminUsers = allUsers.filter(u => u.role === 'admin' || u.role === 'administrator').length;
-            const dispatcherUsers = allUsers.filter(u => u.role === 'dispatcher').length;
-            const driverUsers = allUsers.filter(u => u.role === 'driver').length;
-            
-            debugInfo.innerHTML = `
-Total Users: ${totalUsers}
-Users with Passwords: ${usersWithPasswords}
-Admins: ${adminUsers} | Dispatchers: ${dispatcherUsers} | Drivers: ${driverUsers}
-
-Available Users:
-${allUsers.map(u => `• ${u.name} (${u.role}) ${u.password ? '🔒' : '🔓'} ${u.active !== false ? '✅' : '❌'}`).join('\n')}
-
-Connection: ${isConnected ? '✅ Connected' : '❌ Offline'}
-API Endpoint: ${window.location.origin}/api/users
-            `;
-        }
-        
-        // Show/hide debug information
-        function showUserDebugInfo() {
-            const debugSection = document.getElementById('debugSection');
-            debugMode = !debugMode;
-            debugSection.style.display = debugMode ? 'block' : 'none';
-            
-            if (debugMode) {
-                loadUsers(); // Refresh user data
-            }
-        }
-        
         // Check server connection
         async function checkConnection() {
             try {
-                const response = await fetch('/api/health', {
-                    method: 'GET',
-                    timeout: 5000
+                const response = await fetch('/api/auth/test', {
+                    method: 'GET'
                 });
                 
                 const statusEl = document.getElementById('connectionStatus');
                 
                 if (response.ok) {
-                    const data = await response.json();
                     isConnected = true;
                     statusEl.innerHTML = '<div class="status-dot"></div><span>✅ System Online</span>';
                     statusEl.classList.remove('offline');
@@ -672,8 +611,39 @@ API Endpoint: ${window.location.origin}/api/users
                 statusEl.innerHTML = '<div class="status-dot"></div><span>❌ System Offline</span>';
                 statusEl.classList.add('offline');
             }
+        }
+        
+        // Show/hide debug information
+        async function showUserDebugInfo() {
+            const debugSection = document.getElementById('debugSection');
+            debugMode = !debugMode;
+            debugSection.style.display = debugMode ? 'block' : 'none';
             
-            updateDebugInfo();
+            if (debugMode) {
+                try {
+                    const response = await fetch('/api/auth/test');
+                    const data = await response.json();
+                    
+                    const debugInfo = document.getElementById('debugInfo');
+                    debugInfo.innerHTML = `
+Connection: ${isConnected ? '✅ Connected' : '❌ Offline'}
+API Status: ${response.ok ? 'OK' : 'Error'}
+Users in Database: ${data.userCount || 0}
+
+Available Users:
+${data.users ? data.users.map(u => 
+    `• ${u.name} (${u.email}) - Role: ${u.role} - Password: ${u.hasPassword ? 'Yes' : 'No'} - Active: ${u.active ? 'Yes' : 'No'}`
+).join('\n') : 'No users found'}
+
+Server Endpoint: ${window.location.origin}/api/auth/login
+                    `;
+                } catch (error) {
+                    document.getElementById('debugInfo').innerHTML = `
+Connection Error: ${error.message}
+Cannot retrieve user information from server.
+                    `;
+                }
+            }
         }
         
         // Handle login form submission
@@ -697,35 +667,45 @@ API Endpoint: ${window.location.origin}/api/users
             clearAlerts();
             
             try {
-                // Authenticate user
-                const authResult = await authenticateUser(credentials);
+                console.log('Attempting login for:', credentials.username);
                 
-                if (authResult.success) {
+                // Make API call to your server's authentication endpoint
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(credentials)
+                });
+                
+                const data = await response.json();
+                console.log('Login response:', data);
+                
+                if (data.success) {
                     showAlert('Login successful! Redirecting...', 'success');
                     
                     // Store session data
                     sessionStorage.setItem('fleetforce_user', JSON.stringify({
-                        username: authResult.user.name || authResult.user.username,
-                        role: authResult.user.role,
-                        email: authResult.user.email,
-                        userId: authResult.user._id,
+                        username: data.user.name,
+                        role: data.user.role,
+                        email: data.user.email,
+                        userId: data.user.id,
                         loginTime: new Date().toISOString()
                     }));
                     
                     // Redirect based on user role
                     setTimeout(() => {
-                        if (authResult.user.role === 'admin' || authResult.user.role === 'administrator') {
+                        if (data.user.role === 'admin' || data.user.role === 'administrator') {
                             window.location.href = 'admin.html';
-                        } else if (authResult.user.role === 'dispatcher') {
+                        } else if (data.user.role === 'dispatcher') {
                             window.location.href = 'dashboard.html';
                         } else {
-                            // Drivers go to mobile view (dashboard for now)
                             window.location.href = 'dashboard.html';
                         }
                     }, 1500);
                     
                 } else {
-                    showAlert(authResult.message || 'Invalid username/email or password. Please try again.', 'error');
+                    showAlert(data.message || 'Invalid username/email or password. Please try again.', 'error');
                     
                     // Clear password field
                     document.getElementById('password').value = '';
@@ -734,110 +714,9 @@ API Endpoint: ${window.location.origin}/api/users
                 
             } catch (error) {
                 console.error('Login error:', error);
-                showAlert('Login failed. Please check your connection and try again.', 'error');
+                showAlert('Connection error. Please check your internet connection and try again.', 'error');
             } finally {
                 setLoading(false);
-            }
-        }
-        
-        // Enhanced authenticate user function with better debugging
-        async function authenticateUser(credentials) {
-            try {
-                // Reload users to get latest data
-                await loadUsers();
-                
-                if (allUsers.length === 0) {
-                    return {
-                        success: false,
-                        message: 'Unable to load user database. Please check your connection.'
-                    };
-                }
-                
-                // Normalize the input
-                const inputUsername = credentials.username.toLowerCase().trim();
-                
-                console.log('🔍 Authentication attempt for:', inputUsername);
-                console.log('🔍 Available users:', allUsers.map(u => ({
-                    name: u.name?.toLowerCase(),
-                    email: u.email?.toLowerCase(),
-                    role: u.role,
-                    hasPassword: !!u.password
-                })));
-                
-                // Find user by username, email, or name (case insensitive)
-                const user = allUsers.find(u => {
-                    const matches = [
-                        u.name?.toLowerCase() === inputUsername,
-                        u.email?.toLowerCase() === inputUsername,
-                        u.username?.toLowerCase() === inputUsername
-                    ];
-                    return matches.some(match => match);
-                });
-                
-                if (!user) {
-                    console.log('❌ No user found for:', inputUsername);
-                    return {
-                        success: false,
-                        message: 'User not found. Please check your username/email.'
-                    };
-                }
-                
-                console.log('✅ User found:', user.name, 'Role:', user.role, 'Has Password:', !!user.password);
-                
-                // Check if user is active
-                if (user.active === false) {
-                    return {
-                        success: false,
-                        message: 'Account is deactivated. Please contact an administrator.'
-                    };
-                }
-                
-                // Authenticate based on role
-                if (user.role === 'driver') {
-                    // Drivers don't need passwords - they use mobile app authentication
-                    console.log('✅ Driver login - no password required');
-                    return {
-                        success: true,
-                        user: user
-                    };
-                } else if (user.role === 'dispatcher' || user.role === 'admin' || user.role === 'administrator') {
-                    // Dispatchers and admins need password authentication
-                    if (!user.password) {
-                        console.log('❌ User found but no password set:', user.name, 'Role:', user.role);
-                        return {
-                            success: false,
-                            message: `Password not set for ${user.name} (${user.role}). Please contact an administrator to set a password.`
-                        };
-                    }
-                    
-                    console.log('🔍 Checking password for:', user.name);
-                    // Simple password comparison (in production, use proper hashing)
-                    if (user.password === credentials.password) {
-                        console.log('✅ Password correct for:', user.name);
-                        return {
-                            success: true,
-                            user: user
-                        };
-                    } else {
-                        console.log('❌ Password incorrect for:', user.name);
-                        return {
-                            success: false,
-                            message: 'Invalid password. Please try again.'
-                        };
-                    }
-                } else {
-                    return {
-                        success: false,
-                        message: 'Invalid user role: ' + user.role
-                    };
-                }
-                
-            } catch (error) {
-                console.error('Authentication error:', error);
-                return {
-                    success: false,
-                    message: 'Authentication service unavailable. Please try again later.'
-                };
             }
         }
         
@@ -858,11 +737,9 @@ API Endpoint: ${window.location.origin}/api/users
         // Show system status
         function showSystemStatus() {
             const status = isConnected ? 'ONLINE' : 'OFFLINE';
-            const dbStatus = isConnected ? 'Connected' : 'Disconnected';
             const timestamp = new Date().toLocaleString();
-            const userCount = allUsers.length;
             
-            showAlert(`System: ${status} | Database: ${dbStatus} | Users: ${userCount} | Last Check: ${timestamp}`, 'info');
+            showAlert(`System: ${status} | Last Check: ${timestamp}`, 'info');
         }
         
         // Set loading state
@@ -916,16 +793,6 @@ API Endpoint: ${window.location.origin}/api/users
             const container = document.getElementById('alertContainer');
             container.innerHTML = '';
         }
-        
-        // Add CSS animation for fadeOut
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes fadeOut {
-                from { opacity: 1; transform: translateY(0); }
-                to { opacity: 0; transform: translateY(-10px); }
-            }
-        `;
-        document.head.appendChild(style);
     </script>
 </body>
 </html>
