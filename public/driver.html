@@ -752,7 +752,7 @@
             </div>
             
             <div class="form-group">
-                <label class="form-label" for="driverSelect">Choose Your Name</label>
+                <label class="form-label" for="driverSelect">Select Your Name</label>
                 <select class="driver-select" id="driverSelect">
                     <option value="">Loading driver profiles...</option>
                 </select>
@@ -902,7 +902,7 @@
                     }
                     
                     // Populate dropdown
-                    select.innerHTML = '<option value="">-- Select your profile --</option>';
+                    select.innerHTML = '<option value="">-- Select your name --</option>';
                     
                     drivers.forEach((driver, index) => {
                         const option = document.createElement('option');
@@ -974,7 +974,7 @@
             const selectedOption = select.options[select.selectedIndex];
             
             if (!select.value) {
-                showNotification('Selection Required', 'Please select your driver profile to continue', 'warning');
+                showNotification('Selection Required', 'Please select your name to continue', 'warning');
                 return;
             }
             
