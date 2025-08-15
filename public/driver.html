@@ -784,7 +784,7 @@
             <div style="text-align: center;">
                 <div class="connection-status" id="connectionStatus">
                     <div class="status-dot"></div>
-                    <span>Checking connection...</span>
+                    <span>Connecting to MongoDB...</span>
                 </div>
             </div>
             
@@ -838,6 +838,11 @@
     </div>
 
     <script>
+        // Configuration for Railway + MongoDB Atlas
+        const API_BASE = window.location.origin; // Railway will handle this automatically
+        const WAREHOUSE_ADDRESS = "6995 N US-41, Apollo Beach, FL 33572";
+        
+        // Global state
         let currentDriver = null;
         let currentVehicle = null;
         let currentDriverId = null;
@@ -847,123 +852,162 @@
         
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('FleetForce Driver Portal Initialized');
-            loadDriversFromDatabase();
-            checkConnection();
+            console.log('🚀 FleetForce Driver Portal - MongoDB Atlas + Railway');
+            console.log('API Base:', API_BASE);
             
-            // Auto-refresh drivers every 30 seconds for real-time sync
-            autoRefreshInterval = setInterval(loadDriversFromDatabase, 30000);
+            loadDriversFromMongoDB();
+            checkConnectionStatus();
             
-            // Check connection every 30 seconds
-            setInterval(checkConnection, 30000);
+            // Auto-refresh drivers every 30 seconds
+            autoRefreshInterval = setInterval(loadDriversFromMongoDB, 30000);
+            
+            // Check connection every 30 seconds  
+            setInterval(checkConnectionStatus, 30000);
             
             // Enable login button when driver selected
             document.getElementById('driverSelect').addEventListener('change', function() {
-                document.getElementById('loginBtn').disabled = !this.value;
+                const isSelected = this.value !== '';
+                document.getElementById('loginBtn').disabled = !isSelected;
+                console.log('Driver selection changed:', this.value, 'Enabled:', isSelected);
             });
             
-            // Add event listener for returns count input
+            // Returns count input handler
             document.getElementById('returnsCountInput').addEventListener('input', function() {
                 returnsCount = parseInt(this.value) || 0;
+                console.log('Returns count updated:', returnsCount);
             });
         });
         
-        // Load drivers from the same endpoint as admin panel with auto-sync
-        async function loadDriversFromDatabase() {
+        // Load drivers from MongoDB Atlas via Railway API
+        async function loadDriversFromMongoDB() {
+            console.log('🔄 Loading drivers from MongoDB Atlas...');
+            
             try {
-                const response = await fetch('/api/users?role=driver');
+                const response = await fetch(`${API_BASE}/api/users`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
                 
-                if (response.ok) {
-                    const result = await response.json();
-                    
-                    // Handle both array and object responses
-                    let users = [];
-                    if (Array.isArray(result)) {
-                        users = result;
-                    } else if (result.data && Array.isArray(result.data)) {
-                        users = result.data;
-                    } else if (result.users && Array.isArray(result.users)) {
-                        users = result.users;
-                    }
-                    
-                    // Filter for active drivers (same logic as admin panel)
-                    const drivers = users.filter(user => {
-                        const isDriver = user.role === 'driver';
-                        const isActive = user.active !== false;
-                        return isDriver && isActive;
-                    });
-                    
-                    const select = document.getElementById('driverSelect');
-                    const currentValue = select.value; // Preserve selection if refreshing
-                    
-                    if (drivers.length === 0) {
-                        select.innerHTML = '<option value="">No active drivers available</option>';
-                        return;
-                    }
-                    
-                    // Populate dropdown
-                    select.innerHTML = '<option value="">-- Select your name --</option>';
-                    
-                    drivers.forEach((driver, index) => {
-                        const option = document.createElement('option');
-                        option.value = driver._id;
-                        option.textContent = driver.name;
-                        option.dataset.vehicle = driver.vehicleId || `FLEET-${String(index + 1).padStart(3, '0')}`;
-                        option.dataset.name = driver.name;
-                        
-                        // Restore selection if this was the previously selected driver
-                        if (driver._id === currentValue) {
-                            option.selected = true;
-                        }
-                        
-                        select.appendChild(option);
-                    });
-                    
-                    // Re-enable login button if a driver was previously selected
-                    document.getElementById('loginBtn').disabled = !select.value;
-                    
-                } else {
-                    throw new Error(`HTTP ${response.status}: Failed to load drivers`);
+                console.log('API Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
-            } catch (error) {
-                console.error('Error loading drivers:', error);
                 
-                // Fallback to ensure system remains functional
+                const result = await response.json();
+                console.log('Raw API response:', result);
+                
+                // Handle different response formats
+                let users = [];
+                if (Array.isArray(result)) {
+                    users = result;
+                } else if (result.data && Array.isArray(result.data)) {
+                    users = result.data;
+                } else if (result.users && Array.isArray(result.users)) {
+                    users = result.users;
+                } else {
+                    console.warn('Unexpected response format:', result);
+                    users = [];
+                }
+                
+                console.log('Processed users:', users.length);
+                
+                // Filter for active drivers only
+                const drivers = users.filter(user => {
+                    const isDriver = user.role === 'driver';
+                    const isActive = user.active !== false && user.status !== 'inactive';
+                    console.log(`User ${user.name}: role=${user.role}, active=${user.active}, isDriver=${isDriver}, isActive=${isActive}`);
+                    return isDriver && isActive;
+                });
+                
+                console.log('✅ Active drivers found:', drivers.length);
+                
                 const select = document.getElementById('driverSelect');
-                if (select.children.length <= 1) { // Only show fallback if no drivers loaded
+                const currentValue = select.value; // Preserve selection
+                
+                if (drivers.length === 0) {
+                    select.innerHTML = '<option value="">No active drivers available</option>';
+                    console.log('⚠️ No active drivers found');
+                    return;
+                }
+                
+                // Populate dropdown
+                select.innerHTML = '<option value="">-- Select your name --</option>';
+                
+                drivers.forEach((driver, index) => {
+                    const option = document.createElement('option');
+                    option.value = driver._id || driver.id;
+                    option.textContent = driver.name;
+                    option.dataset.vehicle = driver.vehicleId || `FLEET-${String(index + 1).padStart(3, '0')}`;
+                    option.dataset.name = driver.name;
+                    
+                    // Restore previous selection
+                    if ((driver._id || driver.id) === currentValue) {
+                        option.selected = true;
+                    }
+                    
+                    select.appendChild(option);
+                    console.log(`Added driver: ${driver.name} (${option.value})`);
+                });
+                
+                // Re-enable login button if driver was previously selected
+                document.getElementById('loginBtn').disabled = !select.value;
+                
+                console.log('✅ Driver dropdown populated successfully');
+                
+            } catch (error) {
+                console.error('❌ Error loading drivers from MongoDB:', error);
+                
+                const select = document.getElementById('driverSelect');
+                if (select.children.length <= 1) {
                     select.innerHTML = `
-                        <option value="">-- Connection issue --</option>
+                        <option value="">-- Connection error --</option>
                         <option value="demo1" data-vehicle="DEMO-001" data-name="Demo Driver">Demo Driver (Offline Mode)</option>
                     `;
                 }
+                
+                showNotification('Connection Error', `Failed to load drivers: ${error.message}`, 'error');
             }
         }
         
-        // Check MongoDB connection
-        async function checkConnection() {
+        // Check MongoDB connection via Railway health endpoint
+        async function checkConnectionStatus() {
             try {
-                const response = await fetch('/api/health');
+                const response = await fetch(`${API_BASE}/api/health`, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                });
+                
                 const statusEl = document.getElementById('connectionStatus');
                 
                 if (response.ok) {
                     const data = await response.json();
-                    const isConnected = (data.database === 'connected') || 
-                                      (data.data && data.data.database === 'connected') || 
-                                      (data.status === 'ok');
+                    console.log('Health check response:', data);
+                    
+                    const isConnected = data.status === 'ok' || 
+                                      data.database === 'connected' || 
+                                      (data.data && data.data.database === 'connected');
                     
                     if (isConnected) {
-                        statusEl.innerHTML = '<div class="status-dot"></div><span>System Online</span>';
+                        statusEl.innerHTML = '<div class="status-dot"></div><span>MongoDB Connected</span>';
                         statusEl.className = 'connection-status status-connected';
+                        console.log('✅ MongoDB connection verified');
                     } else {
-                        statusEl.innerHTML = '<div class="status-dot"></div><span>Limited Connectivity</span>';
+                        statusEl.innerHTML = '<div class="status-dot"></div><span>Database Issues</span>';
                         statusEl.className = 'connection-status status-disconnected';
+                        console.log('⚠️ Database connection issues');
                     }
                 } else {
-                    throw new Error('Health check failed');
+                    throw new Error(`Health check failed: ${response.status}`);
                 }
+                
             } catch (error) {
+                console.error('❌ Health check failed:', error);
                 const statusEl = document.getElementById('connectionStatus');
-                statusEl.innerHTML = '<div class="status-dot"></div><span>Offline Mode</span>';
+                statusEl.innerHTML = '<div class="status-dot"></div><span>Connection Failed</span>';
                 statusEl.className = 'connection-status status-disconnected';
             }
         }
@@ -982,7 +1026,13 @@
             currentDriver = selectedOption.dataset.name;
             currentVehicle = selectedOption.dataset.vehicle;
             
-            // Stop auto-refresh when logged in to prevent disruption
+            console.log('✅ Login successful:', {
+                id: currentDriverId,
+                name: currentDriver,
+                vehicle: currentVehicle
+            });
+            
+            // Stop auto-refresh when logged in
             if (autoRefreshInterval) {
                 clearInterval(autoRefreshInterval);
                 autoRefreshInterval = null;
@@ -1003,22 +1053,23 @@
             // Set driver avatar initials
             const initials = currentDriver.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
             document.getElementById('driverAvatar').textContent = initials;
+            
+            console.log('📱 Main screen displayed for:', currentDriver);
         }
         
         // Sign out
         function signOut() {
-            // Reset all state
+            console.log('👋 Signing out:', currentDriver);
+            
+            // Reset state
             currentDriver = null;
             currentVehicle = null;
             currentDriverId = null;
             hasReturns = null;
             returnsCount = 0;
             
-            // Reset returns selection
-            document.getElementById('returnsYes').classList.remove('selected');
-            document.getElementById('returnsNo').classList.remove('selected');
-            document.getElementById('returnsCount').classList.remove('visible');
-            document.getElementById('returnsCountInput').value = '';
+            // Reset UI
+            resetReturnsSelection();
             
             // Return to login screen
             document.getElementById('loginScreen').classList.remove('hidden');
@@ -1028,7 +1079,7 @@
             
             // Restart auto-refresh
             if (!autoRefreshInterval) {
-                autoRefreshInterval = setInterval(loadDriversFromDatabase, 30000);
+                autoRefreshInterval = setInterval(loadDriversFromMongoDB, 30000);
             }
             
             showNotification('Session Ended', 'You have been signed out successfully', 'success');
@@ -1040,6 +1091,8 @@
             const yesBtn = document.getElementById('returnsYes');
             const noBtn = document.getElementById('returnsNo');
             const returnsCountDiv = document.getElementById('returnsCount');
+            
+            console.log('Returns status set to:', value);
             
             if (value === true) {
                 yesBtn.classList.add('selected');
@@ -1055,8 +1108,20 @@
             }
         }
         
-        // Send update to MongoDB
+        // Reset returns selection
+        function resetReturnsSelection() {
+            hasReturns = null;
+            returnsCount = 0;
+            document.getElementById('returnsYes').classList.remove('selected');
+            document.getElementById('returnsNo').classList.remove('selected');
+            document.getElementById('returnsCount').classList.remove('visible');
+            document.getElementById('returnsCountInput').value = '';
+        }
+        
+        // Send update to MongoDB Atlas via Railway API
         async function sendUpdate(type) {
+            console.log('📡 Sending update to MongoDB:', type);
+            
             // Validation
             if (hasReturns === null) {
                 showNotification('Returns Status Required', 'Please indicate whether you have returns before proceeding', 'warning');
@@ -1099,41 +1164,56 @@
                 vehicleId: currentVehicle,
                 status: status,
                 message: message,
-                warehouse: '6995 N US-41, Apollo Beach, FL 33572',
-                location: 'Driver location',
+                warehouse: WAREHOUSE_ADDRESS,
+                location: 'Driver Location',
                 timestamp: now.toISOString(),
                 hasReturns: hasReturns,
-                returnsCount: hasReturns ? returnsCount : 0
+                returnsCount: hasReturns ? returnsCount : 0,
+                // Additional fields for better tracking
+                type: type,
+                source: 'driver_portal'
             };
             
+            console.log('Sending notification data:', notificationData);
+            
             try {
-                const response = await fetch('/api/notifications', {
+                const response = await fetch(`${API_BASE}/api/notifications`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
                     },
                     body: JSON.stringify(notificationData)
                 });
                 
+                console.log('API response status:', response.status);
+                
                 if (response.ok) {
                     const result = await response.json();
-                    showNotification('Status Updated', `${status === 'arrived' ? 'Arrival' : 'ETA'} notification sent successfully`, 'success');
+                    console.log('✅ Notification sent successfully:', result);
+                    
+                    showNotification(
+                        'Status Updated', 
+                        `${status === 'arrived' ? 'Arrival' : 'ETA'} notification sent to command center`,
+                        'success'
+                    );
                     
                     // Reset returns selection after successful send
-                    hasReturns = null;
-                    returnsCount = 0;
-                    document.getElementById('returnsYes').classList.remove('selected');
-                    document.getElementById('returnsNo').classList.remove('selected');
-                    document.getElementById('returnsCount').classList.remove('visible');
-                    document.getElementById('returnsCountInput').value = '';
+                    resetReturnsSelection();
+                    
                 } else {
                     const errorText = await response.text();
-                    throw new Error(`Server Error: ${errorText}`);
+                    console.error('❌ API error response:', errorText);
+                    throw new Error(`Server responded with ${response.status}: ${errorText}`);
                 }
                 
             } catch (error) {
-                console.error('Error sending status update:', error);
-                showNotification('Update Failed', 'Unable to send status update. Please check your connection and try again.', 'error');
+                console.error('❌ Error sending notification:', error);
+                showNotification(
+                    'Update Failed', 
+                    `Unable to send status update: ${error.message}. Please try again.`,
+                    'error'
+                );
             } finally {
                 // Remove loading state
                 setTimeout(() => {
@@ -1157,6 +1237,7 @@
             `;
             
             document.body.appendChild(notification);
+            console.log(`📢 Notification: ${title} - ${message}`);
             
             // Auto-remove after 5 seconds
             setTimeout(() => {
@@ -1171,6 +1252,15 @@
                 clearInterval(autoRefreshInterval);
             }
         });
+        
+        // Debug information
+        console.log('🔧 Debug Information:');
+        console.log('- Current URL:', window.location.href);
+        console.log('- API Base:', API_BASE);
+        console.log('- Expected endpoints:');
+        console.log('  - Users: /api/users');
+        console.log('  - Notifications: /api/notifications');
+        console.log('  - Health: /api/health');
     </script>
 </body>
 </html>
