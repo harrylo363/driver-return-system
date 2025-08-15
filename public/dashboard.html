@@ -3,11 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fleet Command Center</title>
-    
-    <!-- Leaflet for Maps -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <title>Fleet Command Center - MongoDB Connected</title>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -146,29 +142,6 @@
             0% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.5; transform: scale(1.5); }
             100% { opacity: 1; transform: scale(1); }
-        }
-        
-        .logout-btn {
-            padding: 0.5rem 1rem;
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: var(--danger);
-            border-radius: 8px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            text-decoration: none;
-        }
-        
-        .logout-btn:hover {
-            background: var(--danger);
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
         }
         
         .container {
@@ -413,6 +386,7 @@
             padding: 0.125rem 0.5rem;
             border-radius: 6px;
             font-weight: 600;
+            font-size: 0.75rem;
         }
         
         .status-badge {
@@ -515,222 +489,6 @@
             opacity: 0.3;
         }
         
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(5px);
-        }
-        
-        .modal.active {
-            display: flex;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        .modal-content {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            max-width: 600px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-            animation: slideUp 0.3s ease;
-        }
-        
-        @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        
-        .modal-header {
-            padding: 2rem;
-            background: rgba(15, 23, 42, 0.5);
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .modal-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        
-        .modal-close {
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
-            background: var(--bg-hover);
-            border: 1px solid var(--border);
-            color: var(--text-secondary);
-            font-size: 1.25rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-        }
-        
-        .modal-close:hover {
-            background: var(--danger);
-            color: white;
-            transform: rotate(90deg);
-        }
-        
-        .modal-body {
-            padding: 2rem;
-        }
-        
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-        
-        .form-label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            font-size: 0.875rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        
-        .form-input, .form-select, .form-textarea {
-            width: 100%;
-            padding: 0.875rem;
-            background: var(--bg-dark);
-            border: 2px solid var(--border);
-            border-radius: 10px;
-            color: var(--text-primary);
-            font-size: 1rem;
-            transition: all 0.2s ease;
-        }
-        
-        .form-input:focus, .form-select:focus, .form-textarea:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-        
-        .form-textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-        
-        .form-radio-group {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-        
-        .form-radio-label {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1.25rem;
-            background: var(--bg-dark);
-            border: 2px solid var(--border);
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .form-radio-label:hover {
-            border-color: var(--accent);
-        }
-        
-        .form-radio-label.selected {
-            background: var(--accent);
-            border-color: var(--accent);
-            color: white;
-        }
-        
-        .form-radio-label input[type="radio"] {
-            display: none;
-        }
-        
-        .issue-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-        }
-        
-        .issue-indicator.no-issues {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--success);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-        
-        .issue-indicator.has-issues {
-            background: rgba(245, 158, 11, 0.1);
-            color: var(--warning);
-            border: 1px solid rgba(245, 158, 11, 0.3);
-        }
-        
-        .form-actions {
-            display: flex;
-            gap: 1rem;
-            margin-top: 2rem;
-            padding-top: 2rem;
-            border-top: 1px solid var(--border);
-        }
-        
-        .form-actions .btn {
-            flex: 1;
-        }
-        
-        .tab-content {
-            display: none;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        #map {
-            height: 400px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            background: var(--bg-dark);
-        }
-        
-        /* Returns Info Box */
-        .returns-info-box {
-            background: rgba(245, 158, 11, 0.1);
-            border: 1px solid rgba(245, 158, 11, 0.3);
-            border-radius: 8px;
-            padding: 0.75rem;
-            margin-bottom: 1rem;
-            color: var(--warning);
-            font-size: 0.875rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
         /* Toast notification styles */
         .toast {
             position: fixed;
@@ -786,6 +544,14 @@
             to { transform: rotate(360deg); }
         }
         
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
         @media (max-width: 1400px) {
             .dashboard-grid {
                 grid-template-columns: 1fr;
@@ -812,18 +578,18 @@
                 <div class="logo">⚡</div>
                 <div class="brand-text">
                     <h1>Fleet Command Center</h1>
-                    <p>Real-time Fleet Management</p>
+                    <p>MongoDB Atlas + Railway Integration</p>
                 </div>
             </div>
             <div class="header-actions">
                 <div class="status-indicator" id="connectionIndicator">
                     <div class="pulse"></div>
-                    <span id="connectionStatus">Connected (Polling)</span>
+                    <span id="connectionStatus">Connecting to MongoDB...</span>
                 </div>
                 <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); color: var(--accent); padding: 0.5rem 1rem; border-radius: 100px; font-size: 0.875rem; font-weight: 500;">
                     6995 N US-41, Apollo Beach, FL 33572
                 </div>
-                <button class="logout-btn" onclick="logout()">
+                <button class="btn btn-danger" onclick="logout()">
                     🚪 Logout
                 </button>
             </div>
@@ -894,293 +660,103 @@
             </button>
         </div>
 
-        <!-- Tab Navigation -->
-        <div class="control-panel">
-            <div class="filter-group">
-                <button class="filter-btn active" onclick="switchTab('operations', this)">Active Operations</button>
-                <button class="filter-btn" onclick="switchTab('map', this)">Live Map</button>
-                <button class="filter-btn" onclick="switchTab('reports', this)">Reports</button>
-            </div>
-        </div>
-
-        <!-- Operations Tab -->
-        <div id="operationsTab" class="tab-content active">
-            <div class="dashboard-grid">
-                <div class="activity-section">
-                    <div class="section-header">
-                        <h2 class="section-title">
-                            📡 Real-Time Activity Feed
-                        </h2>
-                        <div style="display: flex; align-items: center; gap: 1rem;">
-                            <span id="activityCount" style="font-size: 0.875rem; color: var(--text-secondary);"></span>
-                            <span id="lastUpdate" style="font-size: 0.875rem; color: var(--text-secondary);">
-                                Loading...
-                            </span>
-                        </div>
-                    </div>
-                    <div class="activity-list" id="activityList">
-                        <div class="empty-state">
-                            <div class="empty-icon">📭</div>
-                            <p>No activity to display</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div>
-                    <div class="analytics-panel">
-                        <h3 class="analytics-title">📦 Returns Summary</h3>
-                        <div class="metric-card">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-size: 0.875rem; color: var(--text-secondary);">📥 Total Returns</span>
-                                <span style="font-size: 1.5rem; font-weight: 700;" id="totalReturnsToday">0</span>
-                            </div>
-                        </div>
-                        <div class="metric-card">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-size: 0.875rem; color: var(--text-secondary);">🚚 Drivers w/ Returns</span>
-                                <span style="font-size: 1.5rem; font-weight: 700;" id="driversWithReturns">0</span>
-                            </div>
-                        </div>
-                        <div class="metric-card">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-size: 0.875rem; color: var(--text-secondary);">📊 Avg Returns/Driver</span>
-                                <span style="font-size: 1.5rem; font-weight: 700;" id="avgReturns">0</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="analytics-panel">
-                        <h3 class="analytics-title">🔧 Equipment Status</h3>
-                        <div class="metric-card">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-size: 0.875rem; color: var(--text-secondary);">🚛 Tractor Issues</span>
-                                <span style="font-size: 1.5rem; font-weight: 700;" id="tractorIssues">0</span>
-                            </div>
-                        </div>
-                        <div class="metric-card">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-size: 0.875rem; color: var(--text-secondary);">🚚 Trailer Issues</span>
-                                <span style="font-size: 1.5rem; font-weight: 700;" id="trailerIssues">0</span>
-                            </div>
-                        </div>
-                        <div class="metric-card">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-size: 0.875rem; color: var(--text-secondary);">🏗️ Moffett Issues</span>
-                                <span style="font-size: 1.5rem; font-weight: 700;" id="moffettIssues">0</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="analytics-panel">
-                        <h3 class="analytics-title">⚡ Quick Actions</h3>
-                        <div style="display: grid; gap: 1rem;">
-                            <button class="btn btn-primary" style="width: 100%;" onclick="window.location.href='admin.html'">
-                                👤 Admin Panel
-                            </button>
-                            <button class="btn btn-secondary" style="width: 100%;" onclick="window.location.href='driver.html'">
-                                🚚 Driver Portal
-                            </button>
-                            <button class="btn btn-primary" style="width: 100%; background: linear-gradient(135deg, #10B981 0%, #059669 100%);" onclick="testWarehousePing()">
-                                📡 Test Warehouse Ping
-                            </button>
-                            <button class="btn btn-danger" style="width: 100%;" onclick="logout()">
-                                🚪 Logout
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Map Tab -->
-        <div id="mapTab" class="tab-content">
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
             <div class="activity-section">
                 <div class="section-header">
-                    <h2 class="section-title">📍 Live Map</h2>
+                    <h2 class="section-title">
+                        📡 MongoDB Real-Time Activity Feed
+                    </h2>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <span id="activityCount" style="font-size: 0.875rem; color: var(--text-secondary);"></span>
+                        <span id="lastUpdate" style="font-size: 0.875rem; color: var(--text-secondary);">
+                            Loading from MongoDB...
+                        </span>
+                    </div>
                 </div>
-                <div style="padding: 1rem;">
-                    <div id="map"></div>
+                <div class="activity-list" id="activityList">
+                    <div class="empty-state">
+                        <div class="empty-icon">📭</div>
+                        <p>Loading driver activity from MongoDB Atlas...</p>
+                        <p style="font-size: 0.875rem; margin-top: 1rem;">Drivers can update status at /driver</p>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Reports Tab -->
-        <div id="reportsTab" class="tab-content">
-            <div class="activity-section">
-                <div class="section-header">
-                    <h2 class="section-title">📊 Export Reports</h2>
+            <div>
+                <div class="analytics-panel">
+                    <h3 class="analytics-title">📦 Returns Summary</h3>
+                    <div class="metric-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 0.875rem; color: var(--text-secondary);">📥 Total Returns</span>
+                            <span style="font-size: 1.5rem; font-weight: 700;" id="totalReturnsToday">0</span>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 0.875rem; color: var(--text-secondary);">🚚 Drivers w/ Returns</span>
+                            <span style="font-size: 1.5rem; font-weight: 700;" id="driversWithReturns">0</span>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 0.875rem; color: var(--text-secondary);">📊 Avg Returns/Driver</span>
+                            <span style="font-size: 1.5rem; font-weight: 700;" id="avgReturns">0</span>
+                        </div>
+                    </div>
                 </div>
-                <div style="padding: 2rem;">
-                    <div style="display: flex; gap: 1rem;">
-                        <button class="btn btn-primary" onclick="exportData('csv')">
-                            📄 Export CSV
+                
+                <div class="analytics-panel">
+                    <h3 class="analytics-title">⚡ Quick Actions</h3>
+                    <div style="display: grid; gap: 1rem;">
+                        <button class="btn btn-primary" style="width: 100%;" onclick="window.open('admin.html', '_blank')">
+                            👤 Admin Panel
                         </button>
-                        <button class="btn btn-primary" onclick="exportData('pdf')">
-                            📑 Export PDF
+                        <button class="btn btn-secondary" style="width: 100%;" onclick="window.open('driver.html', '_blank')">
+                            🚚 Driver Portal
                         </button>
-                        <button class="btn btn-primary" onclick="exportData('excel')">
-                            📈 Export Excel
+                        <button class="btn btn-primary" style="width: 100%; background: linear-gradient(135deg, #10B981 0%, #059669 100%);" onclick="testMongoConnection()">
+                            📡 Test MongoDB Connection
+                        </button>
+                        <button class="btn btn-danger" style="width: 100%;" onclick="logout()">
+                            🚪 Logout
                         </button>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Check-in Modal -->
-    <div id="checkInModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">
-                    <span>📋</span>
-                    <span>Equipment Check-In Form</span>
-                </h2>
-                <button class="modal-close" onclick="closeCheckInModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="checkInForm" onsubmit="submitCheckIn(event)">
-                    <!-- Driver Information -->
-                    <div class="form-group">
-                        <label class="form-label">Driver Name</label>
-                        <input type="text" class="form-input" id="modalDriverName" readonly>
-                        <input type="hidden" id="modalDriverId">
-                    </div>
-                    
-                    <!-- Returns Info Display -->
-                    <div id="modalReturnsInfo" class="returns-info-box" style="display: none;">
-                        <span>📦</span>
-                        <span id="modalReturnsText">Driver has returns</span>
-                    </div>
-                    
-                    <!-- Tractor Inspection -->
-                    <div class="form-group">
-                        <label class="form-label">🚛 Tractor Condition</label>
-                        <div class="issue-indicator no-issues" id="tractorIndicator">
-                            <span>✓</span>
-                            <span>No Issues</span>
-                        </div>
-                        <div class="form-radio-group">
-                            <label class="form-radio-label selected">
-                                <input type="radio" name="tractorCondition" value="good" checked onchange="updateIssueIndicator('tractor', this.value)">
-                                <span>✅ Good</span>
-                            </label>
-                            <label class="form-radio-label">
-                                <input type="radio" name="tractorCondition" value="minor" onchange="updateIssueIndicator('tractor', this.value)">
-                                <span>⚠️ Minor Issues</span>
-                            </label>
-                            <label class="form-radio-label">
-                                <input type="radio" name="tractorCondition" value="major" onchange="updateIssueIndicator('tractor', this.value)">
-                                <span>🔴 Major Issues</span>
-                            </label>
-                        </div>
-                        <textarea class="form-textarea" id="tractorIssuesText" placeholder="Describe any tractor issues (optional)..." style="margin-top: 1rem; display: none;"></textarea>
-                    </div>
-                    
-                    <!-- Trailer Inspection -->
-                    <div class="form-group">
-                        <label class="form-label">🚚 Trailer Condition</label>
-                        <div class="issue-indicator no-issues" id="trailerIndicator">
-                            <span>✓</span>
-                            <span>No Issues</span>
-                        </div>
-                        <div class="form-radio-group">
-                            <label class="form-radio-label selected">
-                                <input type="radio" name="trailerCondition" value="good" checked onchange="updateIssueIndicator('trailer', this.value)">
-                                <span>✅ Good</span>
-                            </label>
-                            <label class="form-radio-label">
-                                <input type="radio" name="trailerCondition" value="minor" onchange="updateIssueIndicator('trailer', this.value)">
-                                <span>⚠️ Minor Issues</span>
-                            </label>
-                            <label class="form-radio-label">
-                                <input type="radio" name="trailerCondition" value="major" onchange="updateIssueIndicator('trailer', this.value)">
-                                <span>🔴 Major Issues</span>
-                            </label>
-                        </div>
-                        <textarea class="form-textarea" id="trailerIssuesText" placeholder="Describe any trailer issues (optional)..." style="margin-top: 1rem; display: none;"></textarea>
-                    </div>
-                    
-                    <!-- Moffett Inspection -->
-                    <div class="form-group">
-                        <label class="form-label">🏗️ Moffett Condition</label>
-                        <div class="issue-indicator no-issues" id="moffettIndicator">
-                            <span>✓</span>
-                            <span>No Issues</span>
-                        </div>
-                        <div class="form-radio-group">
-                            <label class="form-radio-label selected">
-                                <input type="radio" name="moffettCondition" value="good" checked onchange="updateIssueIndicator('moffett', this.value)">
-                                <span>✅ Good</span>
-                            </label>
-                            <label class="form-radio-label">
-                                <input type="radio" name="moffettCondition" value="minor" onchange="updateIssueIndicator('moffett', this.value)">
-                                <span>⚠️ Minor Issues</span>
-                            </label>
-                            <label class="form-radio-label">
-                                <input type="radio" name="moffettCondition" value="major" onchange="updateIssueIndicator('moffett', this.value)">
-                                <span>🔴 Major Issues</span>
-                            </label>
-                            <label class="form-radio-label">
-                                <input type="radio" name="moffettCondition" value="na" onchange="updateIssueIndicator('moffett', this.value)">
-                                <span>➖ N/A</span>
-                            </label>
-                        </div>
-                        <textarea class="form-textarea" id="moffettIssuesText" placeholder="Describe any moffett issues (optional)..." style="margin-top: 1rem; display: none;"></textarea>
-                    </div>
-                    
-                    <!-- Additional Notes -->
-                    <div class="form-group">
-                        <label class="form-label">📝 Additional Notes (Optional)</label>
-                        <textarea class="form-textarea" id="additionalNotes" placeholder="Any other observations or concerns..."></textarea>
-                    </div>
-                    
-                    <!-- Form Actions -->
-                    <div class="form-actions">
-                        <button type="button" class="btn btn-secondary" onclick="closeCheckInModal()">
-                            Cancel
-                        </button>
-                        <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #10B981 0%, #059669 100%);">
-                            <span>✅</span>
-                            <span>Complete Check-In</span>
-                        </button>
-                    </div>
-                </form>
             </div>
         </div>
     </div>
 
     <script>
-        // Configuration
+        // Configuration for Railway + MongoDB Atlas
+        const API_BASE = window.location.origin;
         const WAREHOUSE_ADDRESS = "6995 N US-41, Apollo Beach, FL 33572";
-        const WAREHOUSE_COORDS = [27.7725, -82.4097]; // Corrected Apollo Beach coordinates
         
         // Global variables
         let allDrivers = [];
         let currentFilter = 'overview';
-        let currentTab = 'operations';
-        let map = null;
-        let driverMap = new Map(); // Track unique drivers by name
-        let completedDrivers = new Set(); // Track completed check-ins
+        let driverMap = new Map();
+        let completedDrivers = new Set();
         let lastResetDate = null;
         let refreshInterval = null;
         
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Fleet Command Center - Initializing MongoDB Connection...');
-            console.log('Warehouse:', WAREHOUSE_ADDRESS);
-            console.log('Coordinates:', WAREHOUSE_COORDS);
-            console.log('API Endpoints:');
-            console.log('- Notifications: /api/notifications');
-            console.log('- Check-ins: /api/checkins');
-            console.log('- Drivers: /api/drivers');
-            console.log('- Health: /api/health');
+            console.log('🚀 Fleet Command Center - MongoDB Atlas Integration');
+            console.log('🔗 API Base:', API_BASE);
+            console.log('📍 Warehouse:', WAREHOUSE_ADDRESS);
+            console.log('🔌 Expected MongoDB Endpoints:');
+            console.log('  - GET /api/notifications (driver status updates)');
+            console.log('  - GET /api/users (driver profiles)');
+            console.log('  - GET /api/health (connection status)');
+            
             initializeDashboard();
         });
         
         function initializeDashboard() {
             loadStoredState();
             checkDailyReset();
-            loadData();
+            loadDataFromMongoDB();
             startAutoRefresh();
         }
         
@@ -1190,9 +766,9 @@
             if (storedCompleted) {
                 try {
                     completedDrivers = new Set(JSON.parse(storedCompleted));
-                    console.log('Loaded completed drivers:', [...completedDrivers]);
+                    console.log('📂 Loaded completed drivers:', [...completedDrivers]);
                 } catch (e) {
-                    console.error('Error loading completed drivers:', e);
+                    console.error('❌ Error loading completed drivers:', e);
                     completedDrivers = new Set();
                 }
             }
@@ -1204,7 +780,7 @@
         function checkDailyReset() {
             const today = new Date().toDateString();
             if (lastResetDate !== today) {
-                console.log('New day detected, resetting check-ins');
+                console.log('🌅 New day detected, resetting check-ins');
                 completedDrivers.clear();
                 localStorage.removeItem('completedDrivers');
                 localStorage.setItem('lastResetDate', today);
@@ -1219,11 +795,11 @@
                 clearInterval(refreshInterval);
             }
             
-            // Refresh every 30 seconds
+            // Refresh every 15 seconds for real-time updates
             refreshInterval = setInterval(() => {
-                console.log('Auto-refreshing data...');
-                loadData();
-            }, 30000);
+                console.log('🔄 Auto-refreshing from MongoDB...');
+                loadDataFromMongoDB();
+            }, 15000);
             
             // Check for day change every minute
             setInterval(() => {
@@ -1231,126 +807,174 @@
             }, 60000);
         }
         
-        // Load data from server - CONNECTED TO MONGODB
-        async function loadData() {
+        // Load data from MongoDB Atlas via Railway API
+        async function loadDataFromMongoDB() {
             try {
-                console.log('Loading data from MongoDB...');
+                console.log('📡 Loading data from MongoDB Atlas...');
                 
-                // Fetch from MongoDB endpoints with better error handling
-                const [notificationsResponse, checkinsResponse, driversResponse] = await Promise.allSettled([
-                    fetch('/api/notifications?limit=100').catch(err => {
-                        console.log('Notifications endpoint error:', err);
-                        return { ok: false, error: err };
-                    }),
-                    fetch('/api/checkins').catch(err => {
-                        console.log('Check-ins endpoint error:', err);
-                        return { ok: false, error: err };
-                    }),
-                    fetch('/api/drivers').catch(err => {
-                        console.log('Drivers endpoint error:', err);
-                        return { ok: false, error: err };
-                    })
+                // Update connection status during loading
+                updateConnectionStatus('loading');
+                
+                // Fetch data from multiple endpoints
+                const [notificationsResponse, usersResponse, healthResponse] = await Promise.allSettled([
+                    fetch(`${API_BASE}/api/notifications?limit=100`, {
+                        headers: { 'Accept': 'application/json' }
+                    }).catch(err => ({ ok: false, error: err })),
+                    
+                    fetch(`${API_BASE}/api/users`, {
+                        headers: { 'Accept': 'application/json' }
+                    }).catch(err => ({ ok: false, error: err })),
+                    
+                    fetch(`${API_BASE}/api/health`, {
+                        headers: { 'Accept': 'application/json' }
+                    }).catch(err => ({ ok: false, error: err }))
                 ]);
                 
-                let data = [];
-                let checkinsData = [];
-                let driversData = [];
+                let notifications = [];
+                let users = [];
+                let dbConnected = false;
                 
-                // Process notifications from MongoDB
+                // Process notifications (driver status updates)
                 if (notificationsResponse.status === 'fulfilled' && notificationsResponse.value.ok) {
                     const result = await notificationsResponse.value.json();
-                    data = result.data || result || [];
-                    console.log('✅ Loaded notifications from MongoDB:', data.length);
+                    notifications = Array.isArray(result) ? result : (result.data || result.notifications || []);
+                    console.log('✅ Notifications loaded:', notifications.length);
                     
-                    if (data.length > 0) {
-                        console.log('Sample notification:', data[0]);
+                    if (notifications.length > 0) {
+                        console.log('📄 Sample notification:', {
+                            driver: notifications[0].driver,
+                            status: notifications[0].status,
+                            timestamp: notifications[0].timestamp,
+                            hasReturns: notifications[0].hasReturns,
+                            returnsCount: notifications[0].returnsCount
+                        });
                     }
                 } else {
-                    console.log('❌ Notifications endpoint failed');
+                    console.log('⚠️ Notifications endpoint failed');
                 }
                 
-                // Process check-ins from MongoDB
-                if (checkinsResponse.status === 'fulfilled' && checkinsResponse.value.ok) {
-                    const result = await checkinsResponse.value.json();
-                    checkinsData = Array.isArray(result) ? result : (result.data || []);
-                    console.log('✅ Loaded check-ins from MongoDB:', checkinsData.length);
+                // Process users (driver profiles)
+                if (usersResponse.status === 'fulfilled' && usersResponse.value.ok) {
+                    const result = await usersResponse.value.json();
+                    users = Array.isArray(result) ? result : (result.data || result.users || []);
+                    console.log('✅ Users loaded:', users.length);
                     
-                    // Count equipment issues from database
-                    let tractorCount = 0, trailerCount = 0, moffettCount = 0;
-                    const today = new Date().toDateString();
-                    
-                    checkinsData.forEach(checkin => {
-                        const checkinDate = new Date(checkin.timestamp || checkin.createdAt).toDateString();
-                        if (checkinDate === today) {
-                            if (checkin.tractorIssue || checkin.tractorIssues) tractorCount++;
-                            if (checkin.trailerIssue || checkin.trailerIssues) trailerCount++;
-                            if (checkin.moffettIssue || checkin.moffettIssues) moffettCount++;
-                        }
-                    });
-                    
-                    document.getElementById('tractorIssues').textContent = tractorCount;
-                    document.getElementById('trailerIssues').textContent = trailerCount;
-                    document.getElementById('moffettIssues').textContent = moffettCount;
+                    // Filter for drivers only
+                    const drivers = users.filter(user => user.role === 'driver' && user.active !== false);
+                    console.log('👨‍💼 Active drivers found:', drivers.length);
                 } else {
-                    console.log('❌ Check-ins endpoint failed');
+                    console.log('⚠️ Users endpoint failed');
                 }
                 
-                // Process drivers from MongoDB
-                if (driversResponse.status === 'fulfilled' && driversResponse.value.ok) {
-                    const result = await driversResponse.value.json();
-                    driversData = Array.isArray(result) ? result : (result.data || []);
-                    console.log('✅ Loaded drivers from MongoDB:', driversData.length);
+                // Process health check
+                if (healthResponse.status === 'fulfilled' && healthResponse.value.ok) {
+                    const healthData = await healthResponse.value.json();
+                    dbConnected = healthData.status === 'ok' || 
+                                 healthData.database === 'connected' || 
+                                 (healthData.data && healthData.data.database === 'connected');
+                    console.log('✅ Health check result:', dbConnected ? 'Connected' : 'Issues detected');
                 } else {
-                    console.log('❌ Drivers endpoint failed');
+                    console.log('⚠️ Health endpoint failed');
                 }
                 
-                // Merge and process data
-                if (driversData.length > 0) {
-                    driversData.forEach(driver => {
-                        if (!data.find(d => d.driver === driver.name)) {
-                            data.push({
-                                driver: driver.name,
-                                driverId: driver._id,
-                                status: driver.status || 'working',
-                                timestamp: driver.updatedAt || driver.createdAt || new Date().toISOString(),
-                                warehouse: driver.warehouse || WAREHOUSE_ADDRESS,
-                                vehicleId: driver.vehicleId,
-                                hasReturns: driver.hasReturns === true || driver.hasReturns === 'true' || false,
-                                returnsCount: parseInt(driver.returnsCount) || 0
-                            });
-                        }
-                    });
-                }
+                // Merge notifications with user data for complete driver profiles
+                const driverData = mergeDriverData(notifications, users);
                 
-                // Ensure all data has proper returns fields
-                data = data.map(item => ({
-                    ...item,
-                    hasReturns: item.hasReturns === true || item.hasReturns === 'true' || false,
-                    returnsCount: parseInt(item.returnsCount) || 0
-                }));
-                
-                if (data.length === 0) {
+                if (driverData.length === 0) {
                     showEmptyState();
                 } else {
-                    processDriverData(data);
+                    processDriverData(driverData);
                     updateDashboard();
                 }
                 
-                updateConnectionStatus(true);
+                updateConnectionStatus(dbConnected ? 'connected' : 'disconnected');
                 
             } catch (error) {
-                console.error('❌ Error loading data from MongoDB:', error);
-                updateConnectionStatus(false);
-                showToast('Database connection error - check server status', 'error');
+                console.error('❌ Critical error loading from MongoDB:', error);
+                updateConnectionStatus('error');
+                showToast(`Database error: ${error.message}`, 'error');
                 showEmptyState();
             }
+        }
+        
+        // Merge notifications with user profiles
+        function mergeDriverData(notifications, users) {
+            console.log('🔄 Merging driver data...');
+            
+            const merged = [];
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            // Create a map of users for quick lookup
+            const userMap = new Map();
+            users.forEach(user => {
+                if (user.role === 'driver') {
+                    userMap.set(user.name, user);
+                    userMap.set(user._id || user.id, user);
+                }
+            });
+            
+            // Process notifications
+            notifications.forEach(notification => {
+                const notificationDate = new Date(notification.timestamp);
+                
+                // Only include today's notifications
+                if (notificationDate >= today) {
+                    const driver = userMap.get(notification.driver) || userMap.get(notification.driverId);
+                    
+                    merged.push({
+                        driver: notification.driver,
+                        driverId: notification.driverId,
+                        status: notification.status,
+                        message: notification.message,
+                        timestamp: notification.timestamp,
+                        vehicleId: notification.vehicleId || (driver && driver.vehicleId),
+                        warehouse: notification.warehouse,
+                        hasReturns: notification.hasReturns === true || notification.hasReturns === 'true',
+                        returnsCount: parseInt(notification.returnsCount) || 0,
+                        // Additional fields from user profile
+                        email: driver && driver.email,
+                        phoneNumber: driver && driver.phoneNumber,
+                        active: driver ? driver.active !== false : true
+                    });
+                }
+            });
+            
+            // Add drivers who haven't sent notifications today but are active
+            users.forEach(user => {
+                if (user.role === 'driver' && user.active !== false) {
+                    const hasNotification = merged.find(m => 
+                        m.driver === user.name || m.driverId === (user._id || user.id)
+                    );
+                    
+                    if (!hasNotification) {
+                        merged.push({
+                            driver: user.name,
+                            driverId: user._id || user.id,
+                            status: 'working',
+                            message: `${user.name} is working`,
+                            timestamp: new Date().toISOString(),
+                            vehicleId: user.vehicleId,
+                            warehouse: WAREHOUSE_ADDRESS,
+                            hasReturns: false,
+                            returnsCount: 0,
+                            email: user.email,
+                            phoneNumber: user.phoneNumber,
+                            active: true
+                        });
+                    }
+                }
+            });
+            
+            console.log('🔀 Merged driver data:', merged.length);
+            return merged;
         }
         
         function showEmptyState() {
             document.getElementById('activityList').innerHTML = `
                 <div class="empty-state">
                     <div class="empty-icon">📡</div>
-                    <p>Waiting for driver activity...</p>
+                    <p>Waiting for driver activity from MongoDB...</p>
                     <p style="font-size: 0.875rem; margin-top: 1rem;">Drivers can update their status at /driver</p>
                 </div>
             `;
@@ -1358,7 +982,7 @@
         
         // Process driver data to keep only latest status per driver
         function processDriverData(data) {
-            console.log('Processing driver data:', data.length);
+            console.log('⚙️ Processing driver data:', data.length);
             
             // Clear the map for fresh data
             driverMap.clear();
@@ -1372,26 +996,26 @@
                 
                 // Check if driver is in completed set and update status
                 if (completedDrivers.has(driverName)) {
-                    console.log(`Driver ${driverName} is marked as completed`);
+                    console.log(`✅ Driver ${driverName} is marked as completed`);
                     driver.status = 'completed';
                 }
                 
-                // Only add if we haven't seen this driver yet
+                // Only add if we haven't seen this driver yet (most recent)
                 if (!driverMap.has(driverName)) {
                     const processedDriver = {
                         ...driver,
-                        hasReturns: driver.hasReturns === true || driver.hasReturns === 'true' || false,
+                        hasReturns: driver.hasReturns === true || driver.hasReturns === 'true',
                         returnsCount: parseInt(driver.returnsCount) || 0
                     };
                     driverMap.set(driverName, processedDriver);
-                    console.log(`Added driver ${driverName} with status: ${processedDriver.status}`);
+                    console.log(`➕ Added driver ${driverName} with status: ${processedDriver.status}`);
                 }
             });
             
             // Convert map values to array
             allDrivers = Array.from(driverMap.values());
-            console.log('Processed drivers:', allDrivers.length);
-            console.log('Completed drivers:', [...completedDrivers]);
+            console.log('📊 Final processed drivers:', allDrivers.length);
+            console.log('✅ Completed drivers tracked:', [...completedDrivers]);
             
             updateReturnsAnalytics();
         }
@@ -1404,21 +1028,43 @@
                 'Updated: ' + new Date().toLocaleTimeString();
         }
         
-        // Update connection status
-        function updateConnectionStatus(connected) {
+        // Update connection status indicator
+        function updateConnectionStatus(status) {
             const indicator = document.getElementById('connectionIndicator');
             const statusText = document.getElementById('connectionStatus');
             
-            if (connected) {
-                indicator.style.background = 'rgba(16, 185, 129, 0.1)';
-                indicator.style.borderColor = 'rgba(16, 185, 129, 0.3)';
-                indicator.querySelector('.pulse').style.background = 'var(--success)';
-                statusText.textContent = 'Connected (MongoDB)';
-            } else {
-                indicator.style.background = 'rgba(239, 68, 68, 0.1)';
-                indicator.style.borderColor = 'rgba(239, 68, 68, 0.3)';
-                indicator.querySelector('.pulse').style.background = 'var(--danger)';
-                statusText.textContent = 'Database Offline';
+            switch (status) {
+                case 'connected':
+                    indicator.style.background = 'rgba(16, 185, 129, 0.1)';
+                    indicator.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+                    indicator.querySelector('.pulse').style.background = 'var(--success)';
+                    statusText.textContent = 'MongoDB Connected';
+                    console.log('🟢 Connection status: Connected');
+                    break;
+                    
+                case 'loading':
+                    indicator.style.background = 'rgba(59, 130, 246, 0.1)';
+                    indicator.style.borderColor = 'rgba(59, 130, 246, 0.3)';
+                    indicator.querySelector('.pulse').style.background = 'var(--accent)';
+                    statusText.textContent = 'Syncing with MongoDB...';
+                    break;
+                    
+                case 'disconnected':
+                    indicator.style.background = 'rgba(245, 158, 11, 0.1)';
+                    indicator.style.borderColor = 'rgba(245, 158, 11, 0.3)';
+                    indicator.querySelector('.pulse').style.background = 'var(--warning)';
+                    statusText.textContent = 'Connection Issues';
+                    console.log('🟡 Connection status: Issues');
+                    break;
+                    
+                case 'error':
+                default:
+                    indicator.style.background = 'rgba(239, 68, 68, 0.1)';
+                    indicator.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+                    indicator.querySelector('.pulse').style.background = 'var(--danger)';
+                    statusText.textContent = 'Database Offline';
+                    console.log('🔴 Connection status: Error');
+                    break;
             }
         }
         
@@ -1431,7 +1077,7 @@
             let totalReturns = 0;
             let driversWithReturns = 0;
             
-            console.log('Updating KPIs for', allDrivers.length, 'drivers');
+            console.log('📊 Updating KPIs for', allDrivers.length, 'drivers');
             
             allDrivers.forEach(driver => {
                 const driverTime = new Date(driver.timestamp);
@@ -1445,24 +1091,24 @@
                     // Track status
                     if (driver.status === 'completed') {
                         completed++;
-                        console.log(`${driver.driver}: completed`);
+                        console.log(`✅ ${driver.driver}: completed`);
                     } else if (driver.status === '30 minutes away' || driver.status === 'en-route' || driver.status === 'en route') {
                         enroute++;
                         active++;
-                        console.log(`${driver.driver}: en route`);
+                        console.log(`🚚 ${driver.driver}: en route`);
                     } else if (driver.status === 'arrived' || driver.status === 'Arrived') {
                         arrived++;
                         active++;
-                        console.log(`${driver.driver}: arrived`);
+                        console.log(`📍 ${driver.driver}: arrived`);
                     } else {
                         working++;
                         active++;
-                        console.log(`${driver.driver}: working`);
+                        console.log(`⚡ ${driver.driver}: working`);
                     }
                 }
             });
             
-            console.log('KPI Counts:', { active, enroute, arrived, completed, working });
+            console.log('📈 KPI Summary:', { active, enroute, arrived, completed, working, totalReturns, driversWithReturns });
             
             document.getElementById('activeCount').textContent = active;
             document.getElementById('enrouteCount').textContent = enroute;
@@ -1505,14 +1151,14 @@
             const list = document.getElementById('activityList');
             let filtered = allDrivers;
             
-            console.log('Updating activity list, current filter:', currentFilter);
-            console.log('All drivers:', allDrivers.map(d => ({ name: d.driver, status: d.status })));
+            console.log('📋 Updating activity list, current filter:', currentFilter);
+            console.log('🔍 All drivers status:', allDrivers.map(d => ({ name: d.driver, status: d.status })));
             
-            // Apply filter - FIXED: Hide completed drivers from overview
+            // Apply filter
             if (currentFilter === 'overview') {
-                // Overview should show all ACTIVE drivers (exclude completed)
+                // Overview: show all ACTIVE drivers (exclude completed)
                 filtered = allDrivers.filter(d => d.status !== 'completed');
-                console.log('Overview filter: hiding completed drivers');
+                console.log('👁️ Overview filter: hiding completed drivers');
             } else if (currentFilter === 'en-route') {
                 filtered = allDrivers.filter(d => 
                     d.status === '30 minutes away' || d.status === 'en-route' || d.status === 'en route'
@@ -1530,21 +1176,14 @@
                 );
             }
             
-            console.log('Filtered drivers:', filtered.map(d => ({ name: d.driver, status: d.status })));
+            console.log('📝 Filtered drivers:', filtered.map(d => ({ name: d.driver, status: d.status })));
             
             // Update count and label
-            let filterLabel;
-            let countLabel;
+            let filterLabel = currentFilter === 'overview' ? 'active drivers' : currentFilter.replace('-', ' ');
+            let countLabel = `${filtered.length} ${filterLabel}`;
             
-            if (currentFilter === 'overview') {
-                filterLabel = 'active drivers';
-                countLabel = `${filtered.length} active drivers`;
-            } else if (currentFilter === 'completed') {
-                filterLabel = 'completed drivers';
+            if (currentFilter === 'completed') {
                 countLabel = `${filtered.length} completed today`;
-            } else {
-                filterLabel = currentFilter.replace('-', ' ');
-                countLabel = `${filtered.length} ${filterLabel}`;
             }
             
             document.getElementById('activityCount').textContent = countLabel;
@@ -1552,11 +1191,11 @@
             if (filtered.length === 0) {
                 let emptyMessage;
                 if (currentFilter === 'overview') {
-                    emptyMessage = 'No active drivers - all drivers have completed check-in';
+                    emptyMessage = 'No active drivers - all drivers have completed check-in or no activity today';
                 } else if (currentFilter === 'completed') {
                     emptyMessage = 'No completed check-ins today';
                 } else {
-                    emptyMessage = `No ${filterLabel}`;
+                    emptyMessage = `No ${filterLabel} found`;
                 }
                 
                 list.innerHTML = `
@@ -1567,3 +1206,197 @@
                 `;
                 return;
             }
+            
+            // Generate activity items
+            list.innerHTML = filtered.map(driver => {
+                const time = new Date(driver.timestamp).toLocaleTimeString();
+                const isCompleted = driver.status === 'completed';
+                const canCheckIn = !isCompleted && (driver.status === 'arrived' || driver.status === 'Arrived');
+                
+                let statusClass = 'working';
+                let statusText = driver.status;
+                let statusBadgeClass = 'status-working';
+                
+                if (driver.status === '30 minutes away' || driver.status === 'en-route' || driver.status === 'en route') {
+                    statusClass = 'en-route';
+                    statusText = 'En Route (30 min)';
+                    statusBadgeClass = 'status-en-route';
+                } else if (driver.status === 'arrived' || driver.status === 'Arrived') {
+                    statusClass = 'arrived';
+                    statusText = 'Arrived';
+                    statusBadgeClass = 'status-arrived';
+                } else if (driver.status === 'completed') {
+                    statusClass = 'completed';
+                    statusText = 'Completed';
+                    statusBadgeClass = 'status-completed';
+                }
+                
+                const returnsInfo = driver.hasReturns ? 
+                    `<span class="returns-badge">📦 ${driver.returnsCount} return${driver.returnsCount > 1 ? 's' : ''}</span>` : '';
+                
+                return `
+                    <div class="activity-item ${statusClass}">
+                        <div class="activity-content">
+                            <div>
+                                <div class="activity-driver">${driver.driver}</div>
+                                <div class="activity-details">
+                                    <span>🚚 ${driver.vehicleId || 'No vehicle'}</span>
+                                    <span>🕐 ${time}</span>
+                                    ${returnsInfo}
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                <span class="status-badge ${statusBadgeClass}">${statusText}</span>
+                                ${canCheckIn ? `<button class="checkin-btn" onclick="markComplete('${driver.driver}')">✅ Check In</button>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Filter drivers
+        function filterDrivers(filter, button) {
+            currentFilter = filter;
+            
+            // Update button states
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            
+            console.log('🔍 Filter changed to:', filter);
+            updateActivityList();
+        }
+        
+        // Mark driver as completed
+        function markComplete(driverName) {
+            if (confirm(`Mark ${driverName} as completed for today?`)) {
+                completedDrivers.add(driverName);
+                localStorage.setItem('completedDrivers', JSON.stringify([...completedDrivers]));
+                
+                // Update the driver's status in our data
+                const driver = allDrivers.find(d => d.driver === driverName);
+                if (driver) {
+                    driver.status = 'completed';
+                }
+                
+                console.log('✅ Marked as completed:', driverName);
+                updateDashboard();
+                showToast(`${driverName} marked as completed`, 'success');
+            }
+        }
+        
+        // Refresh dashboard
+        function refreshDashboard() {
+            const refreshIcon = document.getElementById('refreshIcon');
+            const refreshText = document.getElementById('refreshText');
+            
+            refreshIcon.textContent = '⏳';
+            refreshText.textContent = 'Refreshing...';
+            
+            loadDataFromMongoDB().then(() => {
+                refreshIcon.textContent = '✅';
+                refreshText.textContent = 'Updated';
+                
+                setTimeout(() => {
+                    refreshIcon.textContent = '🔄';
+                    refreshText.textContent = 'Refresh';
+                }, 2000);
+            });
+        }
+        
+        // Clear daily check-ins
+        function clearDailyCheckIns() {
+            if (confirm('Clear all check-ins for today? This will reset all completed status.')) {
+                completedDrivers.clear();
+                localStorage.removeItem('completedDrivers');
+                
+                // Reset status in current data
+                allDrivers.forEach(driver => {
+                    if (driver.status === 'completed') {
+                        driver.status = driver.originalStatus || 'working';
+                    }
+                });
+                
+                updateDashboard();
+                showToast('All check-ins cleared', 'success');
+                console.log('🗑️ All check-ins cleared');
+            }
+        }
+        
+        // Test MongoDB connection
+        async function testMongoConnection() {
+            showToast('Testing MongoDB connection...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/health`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showToast('MongoDB connection successful!', 'success');
+                    console.log('✅ MongoDB test successful:', data);
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                showToast(`MongoDB connection failed: ${error.message}`, 'error');
+                console.error('❌ MongoDB test failed:', error);
+            }
+        }
+        
+        // Logout function
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                showToast('Logged out successfully', 'success');
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1000);
+            }
+        }
+        
+        // Show toast notification
+        function showToast(message, type = 'info') {
+            const existingToast = document.querySelector('.toast');
+            if (existingToast) existingToast.remove();
+            
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            const icons = {
+                success: '✅',
+                error: '❌',
+                info: 'ℹ️',
+                warning: '⚠️'
+            };
+            
+            toast.innerHTML = `
+                <span>${icons[type] || 'ℹ️'}</span>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(toast);
+            console.log(`📢 Toast: ${message}`);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideIn 0.3s ease reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        }
+        
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+        });
+        
+        // Debug information
+        console.log('🔧 Debug Information:');
+        console.log('- Environment: Railway + MongoDB Atlas');
+        console.log('- Current URL:', window.location.href);
+        console.log('- API Base:', API_BASE);
+        console.log('- Warehouse:', WAREHOUSE_ADDRESS);
+        console.log('- Auto-refresh: Every 15 seconds');
+        console.log('- Ready to receive driver updates!');
+    </script>
+</body>
+</html>
