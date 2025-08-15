@@ -952,59 +952,6 @@
                     <div class="logo-icon">⚡</div>
                     <div class="brand-text">
                         <h1>FleetForce</h1>
-                        <p>Command Center</p>
-                    </div>
-                </div>
-            </div>
-            
-            <nav class="sidebar-nav">
-                <div class="nav-section">
-                    <div class="nav-section-title">Management</div>
-                    <button class="nav-item active" onclick="switchTab('add-user', this)">
-                        <span class="nav-icon">👤</span>
-                        <span>Add User</span>
-                    </button>
-                    <button class="nav-item" onclick="switchTab('bulk-upload', this)">
-                        <span class="nav-icon">📁</span>
-                        <span>Bulk Upload</span>
-                    </button>
-                    <button class="nav-item" onclick="switchTab('manage-users', this)">
-                        <span class="nav-icon">👥</span>
-                        <span>User Directory</span>
-                        <span class="nav-badge" id="userCount">0</span>
-                    </button>
-                    <button class="nav-item" onclick="switchTab('notifications', this)">
-                        <span class="nav-icon">🔔</span>
-                        <span>Notifications</span>
-                    </button>
-                </div>
-                
-                <div class="nav-section">
-                    <div class="nav-section-title">Operations</div>
-                    <a href="dashboard.html" class="nav-item">
-                        <span class="nav-icon">📊</span>
-                        <span>Live Dashboard</span>
-                    </a>
-                    <a href="driver.html" class="nav-item">
-                        <span class="nav-icon">🚚</span>
-                        <span>Driver Portal</span>
-                    </a>
-                </div>
-                
-                <div class="nav-section">
-                    <div class="nav-section-title">System</div>
-                    <button class="nav-item" onclick="exportAllUsers()">
-                        <span class="nav-icon">📤</span>
-                        <span>Export Data</span>
-                    </button>
-                </div>
-            </nav>
-            
-            <div class="sidebar-footer">
-                <div class="user-profile">
-                    <div class="user-avatar">AD</div>
-                    <div class="user-info">
-                        <h4>System Admin</h4>
                         <p>Enterprise Edition</p>
                     </div>
                 </div>
@@ -1516,7 +1463,7 @@
             }
         }
         
-        // Logout function
+        // FIXED LOGOUT FUNCTION - Redirects to index.html
         function logout() {
             if (confirm('Are you sure you want to logout?')) {
                 // Clear session storage
@@ -1526,9 +1473,9 @@
                 // Show logout message
                 showToast('Success', 'Logged out successfully', 'success');
                 
-                // Redirect to login page after a short delay
+                // Redirect to login page (index.html) after a short delay
                 setTimeout(() => {
-                    window.location.href = '/';
+                    window.location.href = 'index.html';
                 }, 1000);
             }
         }
@@ -1587,7 +1534,7 @@
             
             const userData = {
                 name: formData.get('name'),
-                username: formData.get('username'), // Added username field
+                username: formData.get('username'),
                 email: formData.get('email'),
                 phoneNumber: formData.get('phoneNumber'),
                 role: role,
@@ -2317,4 +2264,57 @@
         });
     </script>
 </body>
-</html>
+</html>>Command Center</p>
+                    </div>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Management</div>
+                    <button class="nav-item active" onclick="switchTab('add-user', this)">
+                        <span class="nav-icon">👤</span>
+                        <span>Add User</span>
+                    </button>
+                    <button class="nav-item" onclick="switchTab('bulk-upload', this)">
+                        <span class="nav-icon">📁</span>
+                        <span>Bulk Upload</span>
+                    </button>
+                    <button class="nav-item" onclick="switchTab('manage-users', this)">
+                        <span class="nav-icon">👥</span>
+                        <span>User Directory</span>
+                        <span class="nav-badge" id="userCount">0</span>
+                    </button>
+                    <button class="nav-item" onclick="switchTab('notifications', this)">
+                        <span class="nav-icon">🔔</span>
+                        <span>Notifications</span>
+                    </button>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">Operations</div>
+                    <a href="dashboard.html" class="nav-item">
+                        <span class="nav-icon">📊</span>
+                        <span>Live Dashboard</span>
+                    </a>
+                    <a href="driver.html" class="nav-item">
+                        <span class="nav-icon">🚚</span>
+                        <span>Driver Portal</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">System</div>
+                    <button class="nav-item" onclick="exportAllUsers()">
+                        <span class="nav-icon">📤</span>
+                        <span>Export Data</span>
+                    </button>
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar">AD</div>
+                    <div class="user-info">
+                        <h4>System Admin</h4>
+                        <p
