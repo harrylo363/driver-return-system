@@ -3,7 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Driver Status Portal</title>
+    <title>FleetForce Driver Portal | Professional Status Management</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
     <style>
         * {
             margin: 0;
@@ -11,34 +17,92 @@
             box-sizing: border-box;
         }
         
+        :root {
+            --bg-primary: #0B0F1A;
+            --bg-secondary: #1A1F2E;
+            --bg-tertiary: #242B3D;
+            --bg-elevated: #2A3441;
+            --bg-card: #1E2532;
+            --accent-blue: #0EA5E9;
+            --accent-green: #10B981;
+            --accent-orange: #F59E0B;
+            --accent-red: #EF4444;
+            --accent-purple: #8B5CF6;
+            --text-primary: #F8FAFC;
+            --text-secondary: #CBD5E1;
+            --text-tertiary: #94A3B8;
+            --text-muted: #64748B;
+            --border-primary: #334155;
+            --border-secondary: #475569;
+            --gradient-primary: linear-gradient(135deg, #0EA5E9 0%, #8B5CF6 100%);
+            --gradient-secondary: linear-gradient(135deg, #1E2532 0%, #242B3D 100%);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
+            --transition-fast: 0.15s ease;
+            --transition-normal: 0.3s ease;
+        }
+        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 15% 20%, rgba(14, 165, 233, 0.15) 0%, transparent 45%),
+                radial-gradient(circle at 85% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 45%),
+                linear-gradient(145deg, rgba(11, 15, 26, 0.95) 0%, rgba(26, 31, 46, 0.98) 100%);
+            z-index: -1;
         }
         
         .container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-width: 500px;
+            background: var(--gradient-secondary);
+            border: 1px solid var(--border-primary);
+            border-radius: 24px;
+            box-shadow: var(--shadow-xl);
+            max-width: 480px;
             width: 100%;
-            padding: 40px;
-            animation: fadeIn 0.5s ease;
+            padding: 48px;
+            backdrop-filter: blur(20px);
+            animation: fadeIn 0.6s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+            z-index: 1;
         }
         
         @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(30px) scale(0.95);
             }
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: translateY(0) scale(1);
             }
         }
         
@@ -62,294 +126,444 @@
         
         .header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 48px;
         }
         
-        .logo {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 20px;
+        .brand-logo {
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 40px;
-            margin: 0 auto 20px;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        
+        .logo-icon {
+            width: 72px;
+            height: 72px;
+            background: var(--gradient-primary);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
             color: white;
+            box-shadow: 0 8px 20px rgba(14, 165, 233, 0.4);
+            animation: pulse 3s infinite;
         }
         
-        h1 {
-            color: #1a202c;
+        @keyframes pulse {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 0 8px 20px rgba(14, 165, 233, 0.4);
+            }
+            50% { 
+                transform: scale(1.05);
+                box-shadow: 0 12px 30px rgba(14, 165, 233, 0.6);
+            }
+        }
+        
+        .brand-text h1 {
             font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 10px;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
         }
         
-        .subtitle {
-            color: #718096;
-            font-size: 16px;
+        .brand-text p {
+            font-size: 14px;
+            color: var(--text-tertiary);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
         }
         
-        /* Login Form */
+        /* Form Styles */
         .form-group {
-            margin-bottom: 25px;
+            margin-bottom: 32px;
         }
         
         .form-label {
             display: block;
-            color: #4a5568;
+            color: var(--text-primary);
             font-size: 14px;
             font-weight: 600;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+            letter-spacing: 0.02em;
         }
         
         .driver-select {
             width: 100%;
-            padding: 15px;
+            padding: 18px 20px;
             font-size: 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            background: #f7fafc;
-            color: #2d3748;
+            font-weight: 500;
+            border: 1px solid var(--border-primary);
+            border-radius: 14px;
+            background: var(--bg-elevated);
+            color: var(--text-primary);
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all var(--transition-normal);
             appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234a5568' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23CBD5E1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
             background-repeat: no-repeat;
-            background-position: right 15px center;
+            background-position: right 20px center;
             background-size: 20px;
+            font-family: inherit;
         }
         
         .driver-select:focus {
             outline: none;
-            border-color: #667eea;
-            background-color: white;
+            border-color: var(--accent-blue);
+            background: var(--bg-tertiary);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+        }
+        
+        .driver-select:hover {
+            border-color: var(--border-secondary);
+            background: var(--bg-tertiary);
         }
         
         .login-btn {
             width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 18px 24px;
+            background: var(--gradient-primary);
             color: white;
             border: none;
-            border-radius: 12px;
-            font-size: 18px;
+            border-radius: 14px;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            transition: all var(--transition-normal);
+            box-shadow: 0 8px 20px rgba(14, 165, 233, 0.3);
+            font-family: inherit;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
         
         .login-btn:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 12px 30px rgba(14, 165, 233, 0.4);
+        }
+        
+        .login-btn:active:not(:disabled) {
+            transform: translateY(0);
         }
         
         .login-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
-        }
-        
-        .refresh-btn {
-            background: rgba(102, 126, 234, 0.1);
-            color: #667eea;
-            border: 2px solid #667eea;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-left: 10px;
-        }
-        
-        .refresh-btn:hover {
-            background: #667eea;
-            color: white;
+            transform: none;
+            box-shadow: 0 4px 10px rgba(14, 165, 233, 0.2);
         }
         
         /* Driver Info */
         .driver-info {
-            background: #f7fafc;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 30px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-primary);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 32px;
             text-align: center;
         }
         
+        .driver-avatar {
+            width: 64px;
+            height: 64px;
+            background: var(--gradient-primary);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+            margin: 0 auto 16px;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+        }
+        
         .driver-name {
-            font-size: 20px;
-            font-weight: 600;
-            color: #2d3748;
-            margin-bottom: 5px;
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 6px;
         }
         
         .vehicle-id {
-            color: #718096;
+            color: var(--text-tertiary);
             font-size: 14px;
+            font-weight: 500;
         }
         
         /* Connection Status */
         .connection-status {
             text-align: center;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 12px;
+            padding: 12px 20px;
+            border-radius: 24px;
+            font-size: 13px;
             font-weight: 600;
-            margin: 20px auto;
-            display: inline-block;
+            margin: 24px auto;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all var(--transition-normal);
         }
         
         .status-connected {
-            background: rgba(16, 185, 129, 0.1);
-            color: #10b981;
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--accent-green);
             border: 1px solid rgba(16, 185, 129, 0.3);
         }
         
         .status-disconnected {
-            background: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--accent-red);
             border: 1px solid rgba(239, 68, 68, 0.3);
         }
         
-        /* Returns Question Section */
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: statusPulse 2s infinite;
+        }
+        
+        .status-connected .status-dot {
+            background: var(--accent-green);
+        }
+        
+        .status-disconnected .status-dot {
+            background: var(--accent-red);
+        }
+        
+        @keyframes statusPulse {
+            0%, 100% { 
+                opacity: 1; 
+                transform: scale(1); 
+            }
+            50% { 
+                opacity: 0.6; 
+                transform: scale(1.2); 
+            }
+        }
+        
+        /* Returns Section */
         .returns-section {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            border: 2px solid #fbbf24;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(251, 191, 36, 0.05) 100%);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
         }
         
         .returns-question {
-            color: #92400e;
+            color: var(--text-primary);
             font-size: 18px;
             font-weight: 600;
             text-align: center;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        
+        .returns-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 0;
+        }
+        
+        .returns-btn {
+            padding: 16px 20px;
+            border: 1px solid var(--border-primary);
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            background: var(--bg-elevated);
+            color: var(--text-secondary);
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-        }
-        
-        .returns-buttons {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-        }
-        
-        .returns-btn {
-            flex: 1;
-            padding: 12px 24px;
-            border: 2px solid transparent;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: white;
-            color: #4a5568;
+            font-family: inherit;
         }
         
         .returns-btn:hover {
             transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
         }
         
         .returns-btn.selected {
-            border-color: #667eea;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: var(--accent-blue);
+            background: var(--gradient-primary);
             color: white;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        }
-        
-        .returns-btn.yes {
-            border-color: #10b981;
-        }
-        
-        .returns-btn.no {
-            border-color: #ef4444;
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
         }
         
         .returns-btn.yes.selected {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            border-color: #10b981;
+            background: linear-gradient(135deg, var(--accent-green) 0%, #059669 100%);
+            border-color: var(--accent-green);
             box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
         }
         
         .returns-btn.no.selected {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            border-color: #ef4444;
+            background: linear-gradient(135deg, var(--accent-red) 0%, #dc2626 100%);
+            border-color: var(--accent-red);
             box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+        }
+        
+        /* Returns Count Input */
+        .returns-count {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-primary);
+            border-radius: 12px;
+            animation: slideDown 0.3s ease;
+        }
+        
+        .returns-count.visible {
+            display: block;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .returns-count-label {
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: block;
+        }
+        
+        .returns-count-input {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 16px;
+            font-weight: 500;
+            border: 1px solid var(--border-primary);
+            border-radius: 10px;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            text-align: center;
+            transition: all var(--transition-normal);
+            font-family: inherit;
+        }
+        
+        .returns-count-input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
         }
         
         /* Status Section */
         .status-section {
-            margin-bottom: 30px;
+            margin-bottom: 32px;
         }
         
         .section-title {
-            color: #4a5568;
+            color: var(--text-primary);
             font-size: 16px;
             font-weight: 600;
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
         
         .status-buttons {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 16px;
         }
         
         .status-btn {
-            padding: 20px;
+            padding: 20px 24px;
             border: none;
-            border-radius: 12px;
-            font-size: 18px;
+            border-radius: 14px;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all var(--transition-normal);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 12px;
             color: white;
             position: relative;
+            overflow: hidden;
+            font-family: inherit;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+        
+        .status-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .status-btn:hover:not(:disabled)::before {
+            left: 100%;
         }
         
         .status-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+        }
+        
+        .status-btn:active:not(:disabled) {
+            transform: translateY(-1px);
         }
         
         .status-btn:disabled {
             opacity: 0.7;
             cursor: not-allowed;
+            transform: none;
         }
         
         .btn-30min {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+            background: linear-gradient(135deg, var(--accent-orange) 0%, #d97706 100%);
+            box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
         }
         
         .btn-30min:hover:not(:disabled) {
-            box-shadow: 0 6px 25px rgba(245, 158, 11, 0.4);
+            box-shadow: 0 12px 30px rgba(245, 158, 11, 0.4);
         }
         
         .btn-arrived {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            background: linear-gradient(135deg, var(--accent-green) 0%, #059669 100%);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
         }
         
         .btn-arrived:hover:not(:disabled) {
-            box-shadow: 0 6px 25px rgba(16, 185, 129, 0.4);
+            box-shadow: 0 12px 30px rgba(16, 185, 129, 0.4);
         }
         
         /* Loading Spinner */
         .loading {
             display: none;
-            width: 20px;
-            height: 20px;
+            width: 24px;
+            height: 24px;
             border: 3px solid rgba(255,255,255,0.3);
             border-radius: 50%;
             border-top-color: white;
@@ -371,130 +585,156 @@
         /* Notification */
         .notification {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            background: white;
-            padding: 16px 24px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            top: 32px;
+            right: 32px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-primary);
+            padding: 20px 24px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-xl);
             z-index: 9999;
-            animation: slideIn 0.3s ease;
-            min-width: 250px;
+            animation: slideIn 0.4s ease;
+            min-width: 320px;
+            max-width: 400px;
         }
         
         .notification.success {
-            border-left: 4px solid #10b981;
+            border-left: 4px solid var(--accent-green);
         }
         
         .notification.error {
-            border-left: 4px solid #ef4444;
+            border-left: 4px solid var(--accent-red);
         }
         
         .notification.warning {
-            border-left: 4px solid #f59e0b;
+            border-left: 4px solid var(--accent-orange);
+        }
+        
+        .notification-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+        
+        .notification-message {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.4;
         }
         
         @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+            from { 
+                transform: translateX(100%) translateY(-50%); 
+                opacity: 0; 
+            }
+            to { 
+                transform: translateX(0) translateY(0); 
+                opacity: 1; 
+            }
         }
         
         @keyframes slideOut {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(100%); opacity: 0; }
+            from { 
+                transform: translateX(0) translateY(0); 
+                opacity: 1; 
+            }
+            to { 
+                transform: translateX(100%) translateY(-50%); 
+                opacity: 0; 
+            }
         }
         
         /* Sign Out */
         .signout-section {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #e2e8f0;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-primary);
             text-align: center;
         }
         
         .signout-btn {
             background: transparent;
-            color: #667eea;
-            border: 2px solid #667eea;
-            padding: 10px 30px;
-            border-radius: 8px;
-            font-size: 14px;
+            color: var(--text-tertiary);
+            border: 1px solid var(--border-primary);
+            padding: 12px 32px;
+            border-radius: 10px;
+            font-size: 13px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all var(--transition-normal);
+            font-family: inherit;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
         
         .signout-btn:hover {
-            background: #667eea;
-            color: white;
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+            border-color: var(--border-secondary);
         }
         
-        /* Returns Count Input */
-        .returns-count {
-            display: none;
-            margin-top: 15px;
-            padding: 15px;
-            background: white;
-            border-radius: 10px;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        .returns-count.visible {
-            display: block;
-        }
-        
-        .returns-count-label {
-            color: #4a5568;
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            display: block;
-        }
-        
-        .returns-count-input {
-            width: 100%;
-            padding: 10px;
-            font-size: 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
+        /* Loading State */
+        .loading-state {
             text-align: center;
-            transition: all 0.3s ease;
+            padding: 24px;
+            color: var(--text-tertiary);
         }
         
-        .returns-count-input:focus {
-            outline: none;
-            border-color: #667eea;
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--border-primary);
+            border-radius: 50%;
+            border-top-color: var(--accent-blue);
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
         }
         
-        /* Debug Panel */
-        .debug-panel {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            background: rgba(0,0,0,0.9);
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
-            font-size: 12px;
-            max-width: 300px;
-            z-index: 1000;
-            font-family: monospace;
+        /* Mobile Responsiveness */
+        @media (max-width: 640px) {
+            .container {
+                padding: 32px 24px;
+                margin: 10px;
+            }
+            
+            .brand-text h1 {
+                font-size: 24px;
+            }
+            
+            .logo-icon {
+                width: 64px;
+                height: 64px;
+                font-size: 32px;
+            }
+            
+            .driver-select,
+            .login-btn {
+                padding: 16px 18px;
+                font-size: 15px;
+            }
+            
+            .status-btn {
+                padding: 18px 20px;
+                font-size: 15px;
+            }
+            
+            .notification {
+                top: 20px;
+                right: 20px;
+                left: 20px;
+                min-width: auto;
+            }
         }
         
-        .debug-title {
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #667eea;
+        /* Reduced Motion */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
         }
-        
-        .debug-item {
-            margin: 5px 0;
-            padding: 2px 0;
-        }
-        
-        .debug-success { color: #10b981; }
-        .debug-error { color: #ef4444; }
-        .debug-warning { color: #f59e0b; }
     </style>
 </head>
 <body>
@@ -502,43 +742,48 @@
         <!-- Login Screen -->
         <div class="login-screen" id="loginScreen">
             <div class="header">
-                <div class="logo">🚚</div>
-                <h1>Driver Portal</h1>
-                <p class="subtitle">Warehouse Status Updates</p>
+                <div class="brand-logo">
+                    <div class="logo-icon">⚡</div>
+                    <div class="brand-text">
+                        <h1>FleetForce</h1>
+                        <p>Driver Operations</p>
+                    </div>
+                </div>
             </div>
             
             <div class="form-group">
-                <label class="form-label" for="driverSelect">
-                    Select Your Name
-                    <button class="refresh-btn" onclick="loadDriversFromDatabase()" id="refreshBtn">
-                        🔄 Refresh
-                    </button>
-                </label>
+                <label class="form-label" for="driverSelect">Select Your Profile</label>
                 <select class="driver-select" id="driverSelect">
-                    <option value="">-- Loading drivers... --</option>
+                    <option value="">Loading driver profiles...</option>
                 </select>
             </div>
             
             <button class="login-btn" onclick="login()" disabled id="loginBtn">
-                Continue
+                Access Portal
             </button>
         </div>
         
         <!-- Main Screen -->
         <div class="main-screen" id="mainScreen">
             <div class="header">
-                <div class="logo">🚚</div>
-                <h1>Status Update</h1>
-                <p class="subtitle">Send Warehouse Notifications</p>
+                <div class="brand-logo">
+                    <div class="logo-icon">⚡</div>
+                    <div class="brand-text">
+                        <h1>FleetForce</h1>
+                        <p>Status Management</p>
+                    </div>
+                </div>
             </div>
             
             <div class="driver-info">
+                <div class="driver-avatar" id="driverAvatar">JD</div>
                 <div class="driver-name" id="driverName">Driver Name</div>
-                <div class="vehicle-id" id="vehicleId">Vehicle: TRUCK-001</div>
+                <div class="vehicle-id" id="vehicleId">Vehicle Assignment</div>
             </div>
             
             <div style="text-align: center;">
                 <div class="connection-status" id="connectionStatus">
+                    <div class="status-dot"></div>
                     <span>Checking connection...</span>
                 </div>
             </div>
@@ -547,24 +792,26 @@
             <div class="returns-section">
                 <div class="returns-question">
                     <span>📦</span>
-                    <span>Do you have any returns?</span>
+                    <span>Returns Status</span>
                 </div>
                 <div class="returns-buttons">
                     <button class="returns-btn yes" onclick="setReturns(true)" id="returnsYes">
-                        <span>✅ Yes</span>
+                        <span>✅</span>
+                        <span>Have Returns</span>
                     </button>
                     <button class="returns-btn no" onclick="setReturns(false)" id="returnsNo">
-                        <span>❌ No</span>
+                        <span>❌</span>
+                        <span>No Returns</span>
                     </button>
                 </div>
                 <div class="returns-count" id="returnsCount">
-                    <label class="returns-count-label" for="returnsCountInput">How many returns?</label>
-                    <input type="number" class="returns-count-input" id="returnsCountInput" min="1" placeholder="Enter number of returns">
+                    <label class="returns-count-label" for="returnsCountInput">Number of Returns</label>
+                    <input type="number" class="returns-count-input" id="returnsCountInput" min="1" max="999" placeholder="Enter quantity">
                 </div>
             </div>
             
             <div class="status-section">
-                <div class="section-title">Select Your Status</div>
+                <div class="section-title">Warehouse Status Update</div>
                 <div class="status-buttons">
                     <button class="status-btn btn-30min" onclick="sendUpdate('30min')" id="btn30min">
                         <span class="btn-text">
@@ -576,7 +823,7 @@
                     
                     <button class="status-btn btn-arrived" onclick="sendUpdate('arrived')" id="btnArrived">
                         <span class="btn-text">
-                            <span>✅</span>
+                            <span>📍</span>
                             <span>Arrived at Warehouse</span>
                         </span>
                         <span class="loading"></span>
@@ -590,52 +837,22 @@
         </div>
     </div>
 
-    <!-- Debug Panel -->
-    <div class="debug-panel" id="debugPanel">
-        <div class="debug-title">🔍 Debug Status</div>
-        <div class="debug-item" id="debugDB">Database: Checking...</div>
-        <div class="debug-item" id="debugUsers">Users API: Not called</div>
-        <div class="debug-item" id="debugDrivers">Active Drivers: 0</div>
-        <div class="debug-item" id="debugLastUpdate">Last Update: Never</div>
-    </div>
-
     <script>
         let currentDriver = null;
         let currentVehicle = null;
         let currentDriverId = null;
         let hasReturns = null;
         let returnsCount = 0;
-        let allDriverUsers = [];
-        
-        // Debug logging
-        function debugLog(category, message, type = 'info') {
-            const colors = {
-                info: '#667eea',
-                success: '#10b981',
-                error: '#ef4444',
-                warning: '#f59e0b'
-            };
-            
-            console.log(`%c[${category}] ${message}`, `color: ${colors[type]}`);
-            
-            // Update debug panel
-            const now = new Date().toLocaleTimeString();
-            document.getElementById('debugLastUpdate').textContent = `Last Update: ${now}`;
-            
-            if (category === 'Database') {
-                document.getElementById('debugDB').innerHTML = `Database: <span class="debug-${type}">${message}</span>`;
-            } else if (category === 'Users') {
-                document.getElementById('debugUsers').innerHTML = `Users API: <span class="debug-${type}">${message}</span>`;
-            } else if (category === 'Drivers') {
-                document.getElementById('debugDrivers').innerHTML = `Active Drivers: <span class="debug-${type}">${message}</span>`;
-            }
-        }
+        let autoRefreshInterval = null;
         
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            debugLog('System', 'Driver Portal Initialized', 'info');
+            console.log('FleetForce Driver Portal Initialized');
             loadDriversFromDatabase();
             checkConnection();
+            
+            // Auto-refresh drivers every 30 seconds for real-time sync
+            autoRefreshInterval = setInterval(loadDriversFromDatabase, 30000);
             
             // Check connection every 30 seconds
             setInterval(checkConnection, 30000);
@@ -651,21 +868,13 @@
             });
         });
         
-        // Load drivers from the SAME endpoint as admin panel
+        // Load drivers from the same endpoint as admin panel with auto-sync
         async function loadDriversFromDatabase() {
-            debugLog('Users', 'Loading from /api/users?role=driver', 'info');
-            
-            const refreshBtn = document.getElementById('refreshBtn');
-            refreshBtn.textContent = '⏳ Loading...';
-            refreshBtn.disabled = true;
-            
             try {
-                // Use the EXACT same endpoint as admin panel
                 const response = await fetch('/api/users?role=driver');
                 
                 if (response.ok) {
                     const result = await response.json();
-                    debugLog('Users', `Response received: ${JSON.stringify(result)}`, 'success');
                     
                     // Handle both array and object responses
                     let users = [];
@@ -677,65 +886,56 @@
                         users = result.users;
                     }
                     
-                    debugLog('Users', `Found ${users.length} total users`, 'info');
-                    
                     // Filter for active drivers (same logic as admin panel)
                     const drivers = users.filter(user => {
                         const isDriver = user.role === 'driver';
-                        const isActive = user.active !== false; // Default to active if not specified
-                        debugLog('Filter', `User ${user.name}: role=${user.role}, active=${user.active}, isDriver=${isDriver}, isActive=${isActive}`, 'info');
+                        const isActive = user.active !== false;
                         return isDriver && isActive;
                     });
                     
-                    allDriverUsers = drivers;
-                    debugLog('Drivers', `${drivers.length} active drivers found`, 'success');
-                    
                     const select = document.getElementById('driverSelect');
+                    const currentValue = select.value; // Preserve selection if refreshing
                     
                     if (drivers.length === 0) {
-                        select.innerHTML = '<option value="">No active drivers found</option>';
-                        debugLog('Drivers', 'No active drivers available', 'warning');
+                        select.innerHTML = '<option value="">No active drivers available</option>';
                         return;
                     }
                     
                     // Populate dropdown
-                    select.innerHTML = '<option value="">-- Choose your name --</option>';
+                    select.innerHTML = '<option value="">-- Select your profile --</option>';
                     
                     drivers.forEach((driver, index) => {
                         const option = document.createElement('option');
                         option.value = driver._id;
                         option.textContent = driver.name;
-                        option.dataset.vehicle = driver.vehicleId || `TRUCK-${String(index + 1).padStart(3, '0')}`;
+                        option.dataset.vehicle = driver.vehicleId || `FLEET-${String(index + 1).padStart(3, '0')}`;
                         option.dataset.name = driver.name;
-                        select.appendChild(option);
                         
-                        debugLog('Drivers', `Added driver: ${driver.name} (${driver._id})`, 'info');
+                        // Restore selection if this was the previously selected driver
+                        if (driver._id === currentValue) {
+                            option.selected = true;
+                        }
+                        
+                        select.appendChild(option);
                     });
                     
-                    debugLog('Drivers', 'Driver list populated successfully', 'success');
+                    // Re-enable login button if a driver was previously selected
+                    document.getElementById('loginBtn').disabled = !select.value;
                     
                 } else {
-                    const errorText = await response.text();
-                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                    throw new Error(`HTTP ${response.status}: Failed to load drivers`);
                 }
             } catch (error) {
-                debugLog('Users', `Error: ${error.message}`, 'error');
                 console.error('Error loading drivers:', error);
                 
-                // Fallback to sample drivers
+                // Fallback to ensure system remains functional
                 const select = document.getElementById('driverSelect');
-                select.innerHTML = `
-                    <option value="">-- Choose your name --</option>
-                    <option value="sample1" data-vehicle="TRUCK-001" data-name="John Smith">John Smith (Sample)</option>
-                    <option value="sample2" data-vehicle="TRUCK-002" data-name="Sarah Johnson">Sarah Johnson (Sample)</option>
-                    <option value="sample3" data-vehicle="TRUCK-003" data-name="Mike Wilson">Mike Wilson (Sample)</option>
-                `;
-                
-                debugLog('Drivers', 'Using fallback sample drivers', 'warning');
-                showNotification('⚠️ Database Error', 'Using sample drivers. Check connection.', 'warning');
-            } finally {
-                refreshBtn.textContent = '🔄 Refresh';
-                refreshBtn.disabled = false;
+                if (select.children.length <= 1) { // Only show fallback if no drivers loaded
+                    select.innerHTML = `
+                        <option value="">-- Connection issue --</option>
+                        <option value="demo1" data-vehicle="DEMO-001" data-name="Demo Driver">Demo Driver (Offline Mode)</option>
+                    `;
+                }
             }
         }
         
@@ -752,22 +952,19 @@
                                       (data.status === 'ok');
                     
                     if (isConnected) {
-                        statusEl.innerHTML = '<span class="status-connected">✅ Connected to Database</span>';
+                        statusEl.innerHTML = '<div class="status-dot"></div><span>System Online</span>';
                         statusEl.className = 'connection-status status-connected';
-                        debugLog('Database', 'Connected successfully', 'success');
                     } else {
-                        statusEl.innerHTML = '<span class="status-disconnected">⚠️ Database Offline</span>';
+                        statusEl.innerHTML = '<div class="status-dot"></div><span>Limited Connectivity</span>';
                         statusEl.className = 'connection-status status-disconnected';
-                        debugLog('Database', 'Database offline', 'warning');
                     }
                 } else {
                     throw new Error('Health check failed');
                 }
             } catch (error) {
                 const statusEl = document.getElementById('connectionStatus');
-                statusEl.innerHTML = '<span class="status-disconnected">❌ No Connection</span>';
+                statusEl.innerHTML = '<div class="status-dot"></div><span>Offline Mode</span>';
                 statusEl.className = 'connection-status status-disconnected';
-                debugLog('Database', 'Connection failed', 'error');
             }
         }
         
@@ -777,7 +974,7 @@
             const selectedOption = select.options[select.selectedIndex];
             
             if (!select.value) {
-                alert('Please select your name');
+                showNotification('Selection Required', 'Please select your driver profile to continue', 'warning');
                 return;
             }
             
@@ -785,7 +982,12 @@
             currentDriver = selectedOption.dataset.name;
             currentVehicle = selectedOption.dataset.vehicle;
             
-            debugLog('Login', `Logged in as ${currentDriver} (${currentDriverId})`, 'success');
+            // Stop auto-refresh when logged in to prevent disruption
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = null;
+            }
+            
             showMainScreen();
         }
         
@@ -793,12 +995,19 @@
         function showMainScreen() {
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('mainScreen').classList.add('visible');
+            
+            // Update driver info
             document.getElementById('driverName').textContent = currentDriver;
             document.getElementById('vehicleId').textContent = `Vehicle: ${currentVehicle}`;
+            
+            // Set driver avatar initials
+            const initials = currentDriver.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+            document.getElementById('driverAvatar').textContent = initials;
         }
         
         // Sign out
         function signOut() {
+            // Reset all state
             currentDriver = null;
             currentVehicle = null;
             currentDriverId = null;
@@ -811,12 +1020,18 @@
             document.getElementById('returnsCount').classList.remove('visible');
             document.getElementById('returnsCountInput').value = '';
             
+            // Return to login screen
             document.getElementById('loginScreen').classList.remove('hidden');
             document.getElementById('mainScreen').classList.remove('visible');
             document.getElementById('driverSelect').value = '';
             document.getElementById('loginBtn').disabled = true;
             
-            debugLog('Login', 'Signed out successfully', 'info');
+            // Restart auto-refresh
+            if (!autoRefreshInterval) {
+                autoRefreshInterval = setInterval(loadDriversFromDatabase, 30000);
+            }
+            
+            showNotification('Session Ended', 'You have been signed out successfully', 'success');
         }
         
         // Set returns status
@@ -842,22 +1057,21 @@
         
         // Send update to MongoDB
         async function sendUpdate(type) {
-            // Check if returns question is answered
+            // Validation
             if (hasReturns === null) {
-                showNotification('⚠️ Required', 'Please answer the returns question first', 'warning');
+                showNotification('Returns Status Required', 'Please indicate whether you have returns before proceeding', 'warning');
                 return;
             }
             
-            // Check if returns count is provided when has returns
             if (hasReturns === true && (!returnsCount || returnsCount < 1)) {
-                showNotification('⚠️ Required', 'Please enter the number of returns', 'warning');
+                showNotification('Returns Count Required', 'Please enter the number of returns', 'warning');
                 document.getElementById('returnsCountInput').focus();
                 return;
             }
             
             const button = type === '30min' ? document.getElementById('btn30min') : document.getElementById('btnArrived');
             
-            // Show loading
+            // Show loading state
             button.classList.add('sending');
             button.disabled = true;
             
@@ -872,14 +1086,13 @@
                 message = `${currentDriver} has arrived at warehouse`;
             }
             
-            // Add returns info to message
+            // Add returns information
             if (hasReturns) {
                 message += ` with ${returnsCount} return${returnsCount > 1 ? 's' : ''}`;
             } else {
                 message += ' with no returns';
             }
             
-            // Create notification data
             const notificationData = {
                 driver: currentDriver,
                 driverId: currentDriverId,
@@ -893,10 +1106,7 @@
                 returnsCount: hasReturns ? returnsCount : 0
             };
             
-            debugLog('Notification', `Sending: ${JSON.stringify(notificationData)}`, 'info');
-            
             try {
-                // Send to MongoDB via API
                 const response = await fetch('/api/notifications', {
                     method: 'POST',
                     headers: {
@@ -907,8 +1117,7 @@
                 
                 if (response.ok) {
                     const result = await response.json();
-                    debugLog('Notification', 'Status sent successfully', 'success');
-                    showNotification('✅ Status Sent', message, 'success');
+                    showNotification('Status Updated', `${status === 'arrived' ? 'Arrival' : 'ETA'} notification sent successfully`, 'success');
                     
                     // Reset returns selection after successful send
                     hasReturns = null;
@@ -919,39 +1128,49 @@
                     document.getElementById('returnsCountInput').value = '';
                 } else {
                     const errorText = await response.text();
-                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                    throw new Error(`Server Error: ${errorText}`);
                 }
                 
             } catch (error) {
-                debugLog('Notification', `Send failed: ${error.message}`, 'error');
-                showNotification('❌ Error', 'Failed to send status. Please try again.', 'error');
+                console.error('Error sending status update:', error);
+                showNotification('Update Failed', 'Unable to send status update. Please check your connection and try again.', 'error');
             } finally {
                 // Remove loading state
                 setTimeout(() => {
                     button.classList.remove('sending');
                     button.disabled = false;
-                }, 1000);
+                }, 1500);
             }
         }
         
         // Show notification
         function showNotification(title, message, type = 'success') {
+            // Remove existing notification
             const existing = document.querySelector('.notification');
             if (existing) existing.remove();
             
             const notification = document.createElement('div');
             notification.className = `notification ${type}`;
             notification.innerHTML = `
-                <div style="font-weight: bold; margin-bottom: 4px;">${title}</div>
-                <div style="font-size: 14px; color: #4a5568;">${message}</div>
+                <div class="notification-title">${title}</div>
+                <div class="notification-message">${message}</div>
             `;
+            
             document.body.appendChild(notification);
             
+            // Auto-remove after 5 seconds
             setTimeout(() => {
-                notification.style.animation = 'slideOut 0.3s ease';
-                setTimeout(() => notification.remove(), 300);
-            }, 4000);
+                notification.style.animation = 'slideOut 0.4s ease';
+                setTimeout(() => notification.remove(), 400);
+            }, 5000);
         }
+        
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+            }
+        });
     </script>
 </body>
 </html>
