@@ -602,8 +602,8 @@
             <div class="kpi-card">
                 <div class="kpi-icon">🚚</div>
                 <div class="kpi-value" id="activeCount">0</div>
-                <div class="kpi-label">Active Drivers</div>
-                <div class="kpi-sublabel">Currently on duty</div>
+                <div class="kpi-label">Active Updates</div>
+                <div class="kpi-sublabel">En route + arrived</div>
             </div>
             
             <div class="kpi-card">
@@ -1088,29 +1088,32 @@
                         totalReturns += (driver.returnsCount || 0);
                     }
                     
-                    // Track status
+                    // Track status - Updated logic to better categorize drivers
                     if (driver.status === 'completed') {
                         completed++;
                         console.log(`✅ ${driver.driver}: completed`);
                     } else if (driver.status === '30 minutes away' || driver.status === 'en-route' || driver.status === 'en route') {
                         enroute++;
-                        active++;
+                        active++; // En route drivers are considered active
                         console.log(`🚚 ${driver.driver}: en route`);
                     } else if (driver.status === 'arrived' || driver.status === 'Arrived') {
                         arrived++;
-                        active++;
+                        active++; // Arrived drivers are considered active
                         console.log(`📍 ${driver.driver}: arrived`);
                     } else {
+                        // All other statuses (including 'working') go to working count
                         working++;
-                        active++;
                         console.log(`⚡ ${driver.driver}: working`);
                     }
                 }
             });
             
+            // Active count should only include drivers with status updates (en route + arrived)
+            // Working drivers are separate and don't count as "active" in the activity feed
+            
             console.log('📈 KPI Summary:', { active, enroute, arrived, completed, working, totalReturns, driversWithReturns });
             
-            document.getElementById('activeCount').textContent = active;
+            document.getElementById('activeCount').textContent = active; // Only en route + arrived
             document.getElementById('enrouteCount').textContent = enroute;
             document.getElementById('arrivedCount').textContent = arrived;
             document.getElementById('completedCount').textContent = completed;
@@ -1156,9 +1159,13 @@
             
             // Apply filter
             if (currentFilter === 'overview') {
-                // Overview: show all ACTIVE drivers (exclude completed)
-                filtered = allDrivers.filter(d => d.status !== 'completed');
-                console.log('👁️ Overview filter: hiding completed drivers');
+                // Overview: show only drivers with active status updates (exclude completed AND working)
+                filtered = allDrivers.filter(d => 
+                    d.status !== 'completed' && 
+                    d.status !== 'working' &&
+                    !['working', 'Still Working'].includes(d.status)
+                );
+                console.log('👁️ Overview filter: showing only drivers with active status updates (excluding completed and working)');
             } else if (currentFilter === 'en-route') {
                 filtered = allDrivers.filter(d => 
                     d.status === '30 minutes away' || d.status === 'en-route' || d.status === 'en route'
@@ -1171,7 +1178,9 @@
                 // Only show completed drivers
                 filtered = allDrivers.filter(d => d.status === 'completed');
             } else if (currentFilter === 'working') {
+                // Only show drivers with "working" status or default working status
                 filtered = allDrivers.filter(d => 
+                    d.status === 'working' ||
                     !['30 minutes away', 'en-route', 'en route', 'arrived', 'Arrived', 'completed'].includes(d.status)
                 );
             }
@@ -1179,11 +1188,20 @@
             console.log('📝 Filtered drivers:', filtered.map(d => ({ name: d.driver, status: d.status })));
             
             // Update count and label
-            let filterLabel = currentFilter === 'overview' ? 'active drivers' : currentFilter.replace('-', ' ');
-            let countLabel = `${filtered.length} ${filterLabel}`;
+            let filterLabel, countLabel;
             
-            if (currentFilter === 'completed') {
+            if (currentFilter === 'overview') {
+                filterLabel = 'drivers with status updates';
+                countLabel = `${filtered.length} active status updates`;
+            } else if (currentFilter === 'working') {
+                filterLabel = 'working drivers';
+                countLabel = `${filtered.length} still working`;
+            } else if (currentFilter === 'completed') {
+                filterLabel = 'completed drivers';
                 countLabel = `${filtered.length} completed today`;
+            } else {
+                filterLabel = currentFilter.replace('-', ' ');
+                countLabel = `${filtered.length} ${filterLabel}`;
             }
             
             document.getElementById('activityCount').textContent = countLabel;
@@ -1191,9 +1209,11 @@
             if (filtered.length === 0) {
                 let emptyMessage;
                 if (currentFilter === 'overview') {
-                    emptyMessage = 'No active drivers - all drivers have completed check-in or no activity today';
+                    emptyMessage = 'No active status updates - drivers are either working or completed';
                 } else if (currentFilter === 'completed') {
                     emptyMessage = 'No completed check-ins today';
+                } else if (currentFilter === 'working') {
+                    emptyMessage = 'No drivers currently working';
                 } else {
                     emptyMessage = `No ${filterLabel} found`;
                 }
