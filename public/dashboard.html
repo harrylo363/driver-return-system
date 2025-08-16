@@ -932,6 +932,12 @@
             try {
                 log('🌙 Starting nightly archive with equipment issues...');
                 
+                // Stop auto-refresh to prevent data from reloading
+                if (refreshInterval) {
+                    clearInterval(refreshInterval);
+                    refreshInterval = null;
+                }
+                
                 // Show loading toast
                 showToast('📊 Sending daily report to Google Sheets...', 'info');
                 
@@ -997,7 +1003,7 @@
                 // Step 2: Send to Google Sheets with all issue details
                 await sendDetailedReportToGoogleSheets(dailyReport);
                 
-                // Step 3: Clear today's data - THIS IS THE FIXED PART
+                // Step 3: Clear today's data completely
                 await clearDailyData();
                 
                 showToast('✅ Daily report sent! Dashboard has been reset.', 'success');
@@ -1011,6 +1017,8 @@
             } catch (error) {
                 log('❌ Daily reset failed: ' + error.message, 'error');
                 showToast('Daily reset failed: ' + error.message, 'error');
+                // Restart auto-refresh if reset failed
+                startAutoRefresh();
             }
         }
         
@@ -1135,15 +1143,19 @@
             try {
                 log('🧹 Clearing daily data...');
                 
-                // Clear local storage first (this always works)
+                // Step 1: Clear local storage first
                 completedDrivers.clear();
                 localStorage.removeItem('completedDrivers');
                 localStorage.setItem('lastResetDate', new Date().toDateString());
                 
-                // Clear the allDrivers array
+                // Step 2: Clear the allDrivers array completely
                 allDrivers = [];
+                driverMap.clear();
                 
-                // Try to clear MongoDB daily data (optional - may not have endpoint)
+                // Step 3: Set a flag to prevent reloading old data
+                localStorage.setItem('dataCleared', 'true');
+                
+                // Step 4: Try to clear MongoDB daily data
                 try {
                     const response = await fetch(`${API_BASE}/api/drivers/clear`, {
                         method: 'POST',
@@ -1159,14 +1171,25 @@
                     log('⚠️ MongoDB clear failed (continuing): ' + error.message);
                 }
                 
-                // Update the UI immediately to show the reset
-                updateKPIs();
-                updateActivityFeed();
+                // Step 5: Force update the UI to show zeros
+                document.getElementById('activeCount').textContent = '0';
+                document.getElementById('enrouteCount').textContent = '0';
+                document.getElementById('arrivedCount').textContent = '0';
+                document.getElementById('completedCount').textContent = '0';
+                document.getElementById('workingCount').textContent = '0';
+                document.getElementById('returnsKpiCount').textContent = '0';
+                document.getElementById('returnsSublabel').textContent = 'From 0 drivers';
                 
-                // Reset all issue counters
+                document.getElementById('totalReturnsToday').textContent = '0';
+                document.getElementById('driversWithReturns').textContent = '0';
+                document.getElementById('avgReturns').textContent = '0';
+                
                 document.getElementById('tractorIssues').textContent = '0';
                 document.getElementById('trailerIssues').textContent = '0';
                 document.getElementById('moffettIssues').textContent = '0';
+                
+                // Step 6: Clear the activity feed
+                showEmptyState();
                 
                 log('✅ Daily data cleared successfully');
                 
@@ -1288,6 +1311,17 @@
         // Process MongoDB data
         function processMongoData(results) {
             try {
+                // Check if data was just cleared - don't reload old data
+                const dataCleared = localStorage.getItem('dataCleared');
+                if (dataCleared === 'true') {
+                    log('📊 Data was recently cleared, skipping old data reload');
+                    localStorage.removeItem('dataCleared');
+                    allDrivers = [];
+                    updateKPIs();
+                    showEmptyState();
+                    return;
+                }
+                
                 let notifications = [];
                 if (results['/api/notifications'] && !results['/api/notifications'].error) {
                     const notifData = results['/api/notifications'];
@@ -1302,7 +1336,12 @@
                     name: n.driver_name || n.name || `Driver ${index + 1}`,
                     status: n.status || 'working',
                     returns: n.returns || 0,
-                    timestamp: n.timestamp || new Date()
+                    timestamp: n.timestamp || new Date(),
+                    equipmentIssues: n.equipmentIssues || {},
+                    tractorNumber: n.tractorNumber || '',
+                    trailerNumber: n.trailerNumber || '',
+                    moffettNumber: n.moffettNumber || '',
+                    completedAt: n.completedAt || n.timestamp
                 }));
                 
                 updateKPIs();
@@ -1449,9 +1488,28 @@
             if (confirm('Are you sure you want to clear all daily check-ins?')) {
                 completedDrivers.clear();
                 localStorage.removeItem('completedDrivers');
+                localStorage.setItem('dataCleared', 'true'); // Set flag to prevent reload
                 allDrivers = [];
-                updateKPIs();
-                updateActivityFeed();
+                driverMap.clear();
+                
+                // Force all KPIs to zero immediately
+                document.getElementById('activeCount').textContent = '0';
+                document.getElementById('enrouteCount').textContent = '0';
+                document.getElementById('arrivedCount').textContent = '0';
+                document.getElementById('completedCount').textContent = '0';
+                document.getElementById('workingCount').textContent = '0';
+                document.getElementById('returnsKpiCount').textContent = '0';
+                document.getElementById('returnsSublabel').textContent = 'From 0 drivers';
+                
+                document.getElementById('totalReturnsToday').textContent = '0';
+                document.getElementById('driversWithReturns').textContent = '0';
+                document.getElementById('avgReturns').textContent = '0';
+                
+                document.getElementById('tractorIssues').textContent = '0';
+                document.getElementById('trailerIssues').textContent = '0';
+                document.getElementById('moffettIssues').textContent = '0';
+                
+                showEmptyState();
                 showToast('Daily check-ins have been cleared', 'info');
             }
         }
