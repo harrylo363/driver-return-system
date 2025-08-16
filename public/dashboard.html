@@ -543,6 +543,454 @@
             opacity: 0.3;
         }
         
+        /* Equipment Check-In Modal Styles */
+        .checkin-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .checkin-modal-overlay.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .checkin-modal {
+            background: linear-gradient(145deg, #1A1F2E 0%, #0F172A 100%);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 24px;
+            width: 95%;
+            max-width: 1200px;
+            max-height: 90vh;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.4s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .checkin-header {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+            padding: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .checkin-header-left {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        
+        .checkin-logo {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #3B82F6 0%, #10B981 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+        }
+        
+        .checkin-title h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #F8FAFC;
+            margin: 0 0 4px 0;
+            letter-spacing: -0.02em;
+        }
+        
+        .checkin-title p {
+            font-size: 0.875rem;
+            color: #94A3B8;
+            margin: 0;
+        }
+        
+        .checkin-close {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #EF4444;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .checkin-close:hover {
+            background: rgba(239, 68, 68, 0.2);
+            transform: rotate(90deg);
+        }
+        
+        .checkin-body {
+            padding: 2rem;
+            max-height: calc(90vh - 200px);
+            overflow-y: auto;
+        }
+        
+        /* Custom Scrollbar */
+        .checkin-body::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .checkin-body::-webkit-scrollbar-track {
+            background: rgba(100, 116, 139, 0.1);
+            border-radius: 4px;
+        }
+        
+        .checkin-body::-webkit-scrollbar-thumb {
+            background: rgba(59, 130, 246, 0.3);
+            border-radius: 4px;
+        }
+        
+        .checkin-body::-webkit-scrollbar-thumb:hover {
+            background: rgba(59, 130, 246, 0.5);
+        }
+        
+        /* Driver Info Card */
+        .driver-info-card {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .driver-details {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        
+        .driver-avatar-modal {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+            box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+        }
+        
+        .driver-name-modal {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #F8FAFC;
+            margin-bottom: 4px;
+        }
+        
+        .driver-meta {
+            display: flex;
+            gap: 1.5rem;
+            font-size: 0.875rem;
+            color: #94A3B8;
+        }
+        
+        .driver-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        /* Equipment Section */
+        .equipment-section {
+            background: rgba(30, 37, 50, 0.5);
+            border: 1px solid rgba(100, 116, 139, 0.2);
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .equipment-section:hover {
+            border-color: rgba(59, 130, 246, 0.3);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+        
+        .equipment-header {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid rgba(100, 116, 139, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .equipment-header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .equipment-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        
+        .equipment-icon.tractor {
+            background: rgba(59, 130, 246, 0.15);
+        }
+        
+        .equipment-icon.trailer {
+            background: rgba(245, 158, 11, 0.15);
+        }
+        
+        .equipment-icon.moffett {
+            background: rgba(16, 185, 129, 0.15);
+        }
+        
+        .equipment-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #F8FAFC;
+            margin: 0;
+        }
+        
+        .equipment-subtitle {
+            font-size: 0.75rem;
+            color: #94A3B8;
+            margin: 2px 0 0 0;
+        }
+        
+        .section-status {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .status-pending {
+            background: rgba(100, 116, 139, 0.15);
+            color: #94A3B8;
+        }
+        
+        .status-complete {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10B981;
+        }
+        
+        .equipment-body {
+            padding: 1.5rem;
+        }
+        
+        .equipment-number-field {
+            margin-bottom: 1.5rem;
+        }
+        
+        .equipment-number-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #F8FAFC;
+            margin-bottom: 0.5rem;
+        }
+        
+        .equipment-number-input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: rgba(15, 23, 42, 0.8);
+            border: 2px solid rgba(100, 116, 139, 0.3);
+            border-radius: 12px;
+            color: #F8FAFC;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .equipment-number-input:focus {
+            outline: none;
+            border-color: #3B82F6;
+            background: rgba(15, 23, 42, 1);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+        
+        .equipment-number-input::placeholder {
+            color: #64748B;
+        }
+        
+        .inspection-items {
+            display: grid;
+            gap: 0.75rem;
+        }
+        
+        .inspection-item {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(100, 116, 139, 0.2);
+            border-radius: 12px;
+            padding: 1rem;
+            transition: all 0.2s ease;
+        }
+        
+        .inspection-item:hover {
+            background: rgba(15, 23, 42, 0.8);
+            border-color: rgba(59, 130, 246, 0.2);
+        }
+        
+        .inspection-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0;
+        }
+        
+        .inspection-item-name {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #F8FAFC;
+        }
+        
+        .inspection-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .inspection-btn {
+            padding: 6px 12px;
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            background: rgba(30, 37, 50, 0.8);
+            border-radius: 8px;
+            color: #94A3B8;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .inspection-btn:hover {
+            border-color: rgba(59, 130, 246, 0.3);
+            background: rgba(59, 130, 246, 0.1);
+            color: #F8FAFC;
+        }
+        
+        .inspection-btn.active-pass {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: rgba(16, 185, 129, 0.3);
+            color: #10B981;
+        }
+        
+        .inspection-btn.active-fail {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #EF4444;
+        }
+        
+        /* Action Footer */
+        .checkin-footer {
+            background: rgba(30, 37, 50, 0.8);
+            border-top: 1px solid rgba(100, 116, 139, 0.2);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .footer-stats {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .footer-stat {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .footer-stat.pass {
+            color: #10B981;
+        }
+        
+        .footer-stat.fail {
+            color: #EF4444;
+        }
+        
+        .footer-actions {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .btn-cancel {
+            padding: 0.875rem 1.75rem;
+            background: rgba(100, 116, 139, 0.15);
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            border-radius: 12px;
+            color: #F8FAFC;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-cancel:hover {
+            background: rgba(100, 116, 139, 0.25);
+            transform: translateY(-2px);
+        }
+        
+        .btn-submit {
+            padding: 0.875rem 1.75rem;
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+        }
+        
+        .btn-submit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         /* Toast notification styles */
         .toast {
             position: fixed;
@@ -802,6 +1250,147 @@
                             🚪 Logout
                         </button>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Equipment Check-In Modal -->
+    <div id="equipmentCheckInModal" class="checkin-modal-overlay">
+        <div class="checkin-modal">
+            <!-- Header -->
+            <div class="checkin-header">
+                <div class="checkin-header-left">
+                    <div class="checkin-logo">📋</div>
+                    <div class="checkin-title">
+                        <h2>Equipment Inspection Check-In</h2>
+                        <p>Complete pre-trip inspection for all equipment</p>
+                    </div>
+                </div>
+                <button class="checkin-close" onclick="closeEquipmentModal()">&times;</button>
+            </div>
+            
+            <!-- Body -->
+            <div class="checkin-body">
+                <!-- Driver Info Card -->
+                <div class="driver-info-card">
+                    <div class="driver-details">
+                        <div class="driver-avatar-modal" id="modalDriverAvatar">JD</div>
+                        <div>
+                            <div class="driver-name-modal" id="modalDriverName">Driver Name</div>
+                            <div class="driver-meta">
+                                <span>🕐 <span id="modalCheckTime">6:45 AM</span></span>
+                                <span>📍 Apollo Beach, FL</span>
+                                <span id="modalReturnsInfo" style="display: none;">📦 <span id="modalReturnsCount">0</span> Returns</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <form id="equipmentCheckInForm">
+                    <input type="hidden" id="modalDriverId">
+                    
+                    <!-- Tractor Section -->
+                    <div class="equipment-section">
+                        <div class="equipment-header">
+                            <div class="equipment-header-left">
+                                <div class="equipment-icon tractor">🚛</div>
+                                <div>
+                                    <div class="equipment-title">Tractor Inspection</div>
+                                    <div class="equipment-subtitle">12 inspection points</div>
+                                </div>
+                            </div>
+                            <span class="section-status status-pending" id="tractorStatus">PENDING</span>
+                        </div>
+                        <div class="equipment-body">
+                            <div class="equipment-number-field">
+                                <label class="equipment-number-label">Tractor Number *</label>
+                                <input type="text" 
+                                       class="equipment-number-input" 
+                                       id="tractorNumber" 
+                                       placeholder="Enter tractor number (e.g., TRUCK-001)"
+                                       required>
+                            </div>
+                            <div class="inspection-items" id="tractorItems">
+                                <!-- Tractor inspection items will be generated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Trailer Section -->
+                    <div class="equipment-section">
+                        <div class="equipment-header">
+                            <div class="equipment-header-left">
+                                <div class="equipment-icon trailer">🚚</div>
+                                <div>
+                                    <div class="equipment-title">Trailer Inspection</div>
+                                    <div class="equipment-subtitle">6 inspection points</div>
+                                </div>
+                            </div>
+                            <span class="section-status status-pending" id="trailerStatus">PENDING</span>
+                        </div>
+                        <div class="equipment-body">
+                            <div class="equipment-number-field">
+                                <label class="equipment-number-label">Trailer Number *</label>
+                                <input type="text" 
+                                       class="equipment-number-input" 
+                                       id="trailerNumber" 
+                                       placeholder="Enter trailer number (e.g., TRL-001)"
+                                       required>
+                            </div>
+                            <div class="inspection-items" id="trailerItems">
+                                <!-- Trailer inspection items will be generated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Moffett Section -->
+                    <div class="equipment-section">
+                        <div class="equipment-header">
+                            <div class="equipment-header-left">
+                                <div class="equipment-icon moffett">🏗️</div>
+                                <div>
+                                    <div class="equipment-title">Moffett Inspection</div>
+                                    <div class="equipment-subtitle">5 inspection points</div>
+                                </div>
+                            </div>
+                            <span class="section-status status-pending" id="moffettStatus">PENDING</span>
+                        </div>
+                        <div class="equipment-body">
+                            <div class="equipment-number-field">
+                                <label class="equipment-number-label">Moffett Number *</label>
+                                <input type="text" 
+                                       class="equipment-number-input" 
+                                       id="moffettNumber" 
+                                       placeholder="Enter moffett number (e.g., MFT-001)"
+                                       required>
+                            </div>
+                            <div class="inspection-items" id="moffettItems">
+                                <!-- Moffett inspection items will be generated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Footer -->
+            <div class="checkin-footer">
+                <div class="footer-stats">
+                    <div class="footer-stat pass">
+                        <span>✅</span>
+                        <span>Passed: <span id="passedCount">0</span></span>
+                    </div>
+                    <div class="footer-stat fail">
+                        <span>❌</span>
+                        <span>Issues: <span id="failedCount">0</span></span>
+                    </div>
+                </div>
+                <div class="footer-actions">
+                    <button type="button" class="btn-cancel" onclick="closeEquipmentModal()">Cancel</button>
+                    <button type="submit" class="btn-submit" id="submitCheckInBtn" onclick="submitEquipmentCheckIn()" disabled>
+                        <span>✅</span>
+                        <span>Complete Check-In</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -1399,12 +1988,352 @@
         }
         
         // Equipment check-in functions
-        function openEquipmentCheckIn(driverId, driverName, returns) {
+        function openEquipmentCheckIn(driverId, driverName, returns = 0) {
             log(`📋 Opening equipment check-in for ${driverName}`);
-            // This would open the equipment check-in modal
-            // Implementation depends on your existing modal code
-            showToast(`Equipment check-in opened for ${driverName}`, 'info');
+            
+            // Set up modal data
+            currentEquipmentCheck = {
+                driverId: driverId,
+                driverName: driverName,
+                returns: returns,
+                inspections: {},
+                tractorNumber: '',
+                trailerNumber: '',
+                moffettNumber: '',
+                passedCount: 0,
+                failedCount: 0
+            };
+            
+            // Update modal header
+            document.getElementById('modalDriverName').textContent = driverName;
+            document.getElementById('modalDriverId').value = driverId;
+            document.getElementById('modalCheckTime').textContent = new Date().toLocaleTimeString();
+            
+            // Set driver avatar
+            const initials = driverName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+            document.getElementById('modalDriverAvatar').textContent = initials;
+            
+            // Show returns info if applicable
+            const returnsInfo = document.getElementById('modalReturnsInfo');
+            if (returns > 0) {
+                returnsInfo.style.display = 'block';
+                document.getElementById('modalReturnsCount').textContent = returns;
+            } else {
+                returnsInfo.style.display = 'none';
+            }
+            
+            // Generate inspection items
+            generateInspectionItems();
+            
+            // Show modal
+            document.getElementById('equipmentCheckInModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            
+            log(`✅ Equipment check-in modal opened for ${driverName}`);
         }
+        
+        function closeEquipmentModal() {
+            log('❌ Closing equipment check-in modal');
+            
+            // Hide modal
+            document.getElementById('equipmentCheckInModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+            
+            // Reset form
+            resetEquipmentForm();
+        }
+        
+        function generateInspectionItems() {
+            const inspectionItems = {
+                tractor: [
+                    'QR Code Scanned',
+                    'Samsara Device Present',
+                    'External Damages Check',
+                    'Windshield Condition',
+                    'Lights Functionality',
+                    'Tire Condition',
+                    'Air/Electrical Lines',
+                    'Cab Cleanliness',
+                    'Fire Extinguisher',
+                    'Safety Equipment',
+                    'Documentation Check',
+                    'Fluid Levels'
+                ],
+                trailer: [
+                    'Gladhands Connection',
+                    'Deck Condition',
+                    'Physical Damages',
+                    'Lights Functionality',
+                    'Tire Condition',
+                    'Straps & Securement'
+                ],
+                moffett: [
+                    'Physical Damages',
+                    'Safety Equipment',
+                    'Lights Functionality',
+                    'Electrical Systems',
+                    'Tire Condition'
+                ]
+            };
+            
+            // Generate tractor items
+            const tractorContainer = document.getElementById('tractorItems');
+            tractorContainer.innerHTML = inspectionItems.tractor.map((item, index) => 
+                createInspectionItem('tractor', item, index)
+            ).join('');
+            
+            // Generate trailer items
+            const trailerContainer = document.getElementById('trailerItems');
+            trailerContainer.innerHTML = inspectionItems.trailer.map((item, index) => 
+                createInspectionItem('trailer', item, index)
+            ).join('');
+            
+            // Generate moffett items
+            const moffettContainer = document.getElementById('moffettItems');
+            moffettContainer.innerHTML = inspectionItems.moffett.map((item, index) => 
+                createInspectionItem('moffett', item, index)
+            ).join('');
+            
+            log('📋 Inspection items generated');
+        }
+        
+        function createInspectionItem(section, itemName, index) {
+            const itemId = `${section}_${index}`;
+            return `
+                <div class="inspection-item" data-item="${itemId}">
+                    <div class="inspection-item-header">
+                        <span class="inspection-item-name">${itemName}</span>
+                        <div class="inspection-controls">
+                            <button type="button" class="inspection-btn" data-result="pass" 
+                                    onclick="setInspectionResult('${itemId}', 'pass', this)">
+                                ✅ Pass
+                            </button>
+                            <button type="button" class="inspection-btn" data-result="fail" 
+                                    onclick="setInspectionResult('${itemId}', 'fail', this)">
+                                ❌ Fail
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function setInspectionResult(itemId, result, buttonElement) {
+            log(`🔍 Setting inspection result: ${itemId} = ${result}`);
+            
+            // Update inspection data
+            if (!currentEquipmentCheck.inspections) {
+                currentEquipmentCheck.inspections = {};
+            }
+            
+            const previousResult = currentEquipmentCheck.inspections[itemId];
+            currentEquipmentCheck.inspections[itemId] = result;
+            
+            // Update button states
+            const itemElement = buttonElement.closest('.inspection-item');
+            const allButtons = itemElement.querySelectorAll('.inspection-btn');
+            
+            allButtons.forEach(btn => {
+                btn.classList.remove('active-pass', 'active-fail');
+            });
+            
+            if (result === 'pass') {
+                buttonElement.classList.add('active-pass');
+            } else {
+                buttonElement.classList.add('active-fail');
+            }
+            
+            // Update counters
+            updateInspectionCounters();
+            
+            // Update section status
+            updateSectionStatus();
+            
+            // Update submit button state
+            updateSubmitButtonState();
+        }
+        
+        function updateInspectionCounters() {
+            const inspections = currentEquipmentCheck.inspections || {};
+            const results = Object.values(inspections);
+            
+            currentEquipmentCheck.passedCount = results.filter(r => r === 'pass').length;
+            currentEquipmentCheck.failedCount = results.filter(r => r === 'fail').length;
+            
+            document.getElementById('passedCount').textContent = currentEquipmentCheck.passedCount;
+            document.getElementById('failedCount').textContent = currentEquipmentCheck.failedCount;
+            
+            log(`📊 Updated counters: ${currentEquipmentCheck.passedCount} passed, ${currentEquipmentCheck.failedCount} failed`);
+        }
+        
+        function updateSectionStatus() {
+            const sections = ['tractor', 'trailer', 'moffett'];
+            const inspections = currentEquipmentCheck.inspections || {};
+            
+            sections.forEach(section => {
+                const sectionItems = Object.keys(inspections).filter(key => key.startsWith(section));
+                const sectionResults = sectionItems.map(key => inspections[key]);
+                
+                const statusElement = document.getElementById(`${section}Status`);
+                
+                if (sectionResults.length === 0) {
+                    statusElement.textContent = 'PENDING';
+                    statusElement.className = 'section-status status-pending';
+                } else {
+                    const allComplete = getSectionItemCount(section) === sectionResults.length;
+                    
+                    if (allComplete) {
+                        statusElement.textContent = 'COMPLETE';
+                        statusElement.className = 'section-status status-complete';
+                    } else {
+                        statusElement.textContent = 'IN PROGRESS';
+                        statusElement.className = 'section-status status-pending';
+                    }
+                }
+            });
+        }
+        
+        function getSectionItemCount(section) {
+            const itemCounts = { tractor: 12, trailer: 6, moffett: 5 };
+            return itemCounts[section] || 0;
+        }
+        
+        function updateSubmitButtonState() {
+            const totalItems = 12 + 6 + 5; // tractor + trailer + moffett
+            const completedItems = Object.keys(currentEquipmentCheck.inspections || {}).length;
+            
+            const tractorNumber = document.getElementById('tractorNumber').value.trim();
+            const trailerNumber = document.getElementById('trailerNumber').value.trim();
+            const moffettNumber = document.getElementById('moffettNumber').value.trim();
+            
+            const allEquipmentNumbersEntered = tractorNumber && trailerNumber && moffettNumber;
+            const allInspectionsComplete = completedItems === totalItems;
+            
+            const submitBtn = document.getElementById('submitCheckInBtn');
+            submitBtn.disabled = !(allEquipmentNumbersEntered && allInspectionsComplete);
+            
+            log(`🔘 Submit button state: ${submitBtn.disabled ? 'disabled' : 'enabled'} (${completedItems}/${totalItems} items, equipment numbers: ${allEquipmentNumbersEntered})`);
+        }
+        
+        function resetEquipmentForm() {
+            log('🔄 Resetting equipment form');
+            
+            // Clear equipment numbers
+            document.getElementById('tractorNumber').value = '';
+            document.getElementById('trailerNumber').value = '';
+            document.getElementById('moffettNumber').value = '';
+            
+            // Reset section statuses
+            ['tractor', 'trailer', 'moffett'].forEach(section => {
+                const statusElement = document.getElementById(`${section}Status`);
+                statusElement.textContent = 'PENDING';
+                statusElement.className = 'section-status status-pending';
+            });
+            
+            // Reset counters
+            document.getElementById('passedCount').textContent = '0';
+            document.getElementById('failedCount').textContent = '0';
+            
+            // Reset submit button
+            document.getElementById('submitCheckInBtn').disabled = true;
+            
+            // Reset global state
+            currentEquipmentCheck = null;
+        }
+        
+        async function submitEquipmentCheckIn() {
+            log('📤 Submitting equipment check-in');
+            
+            if (!currentEquipmentCheck) {
+                showToast('Error: No check-in data available', 'error');
+                return;
+            }
+            
+            const submitBtn = document.getElementById('submitCheckInBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<div class="loading-spinner"></div><span>Processing...</span>';
+            
+            const checkInData = {
+                driverId: currentEquipmentCheck.driverId,
+                driverName: currentEquipmentCheck.driverName,
+                timestamp: new Date().toISOString(),
+                equipmentNumbers: {
+                    tractor: document.getElementById('tractorNumber').value.trim(),
+                    trailer: document.getElementById('trailerNumber').value.trim(),
+                    moffett: document.getElementById('moffettNumber').value.trim()
+                },
+                inspections: currentEquipmentCheck.inspections,
+                summary: {
+                    totalItems: Object.keys(currentEquipmentCheck.inspections).length,
+                    passedItems: currentEquipmentCheck.passedCount,
+                    failedItems: currentEquipmentCheck.failedCount
+                },
+                returns: currentEquipmentCheck.returns,
+                location: WAREHOUSE_ADDRESS,
+                status: 'completed'
+            };
+            
+            try {
+                log('📡 Sending check-in data to MongoDB...');
+                
+                const response = await fetch(`${API_BASE}/api/checkins`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(checkInData)
+                });
+                
+                if (response.ok) {
+                    log('✅ Equipment check-in submitted successfully');
+                    
+                    // Mark driver as completed
+                    completedDrivers.add(currentEquipmentCheck.driverId);
+                    localStorage.setItem('completedDrivers', JSON.stringify([...completedDrivers]));
+                    
+                    // Update driver status in the UI
+                    const driver = allDrivers.find(d => d.id === currentEquipmentCheck.driverId);
+                    if (driver) {
+                        driver.status = 'completed';
+                    }
+                    
+                    // Refresh the UI
+                    updateKPIs();
+                    updateActivityFeed();
+                    
+                    showToast('Equipment Check-In Completed!', 'Equipment inspection submitted successfully', 'success');
+                    
+                    // Close modal
+                    closeEquipmentModal();
+                    
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+            } catch (error) {
+                log('❌ Error submitting equipment check-in: ' + error.message);
+                showToast('Submission Failed', `Unable to submit check-in: ${error.message}`, 'error');
+                
+                // Reset submit button
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>✅</span><span>Complete Check-In</span>';
+            }
+        }
+        
+        // Add equipment number validation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add event listeners for equipment number inputs
+            ['tractorNumber', 'trailerNumber', 'moffettNumber'].forEach(id => {
+                const input = document.getElementById(id);
+                if (input) {
+                    input.addEventListener('input', updateSubmitButtonState);
+                }
+            });
+        });
+        
+        // Global variable for current equipment check data
+        let currentEquipmentCheck = null;
         
         // Clear daily check-ins
         function clearDailyCheckIns() {
