@@ -416,7 +416,7 @@
             padding-left: 2rem;
         }
         
-        .activity-item.en-route::before { background: var(--warning); }
+        .activity-item.enroute::before { background: var(--warning); }
         .activity-item.arrived::before { background: var(--success); }
         .activity-item.completed::before { background: var(--success); }
         .activity-item.working::before { background: var(--text-muted); }
@@ -452,7 +452,7 @@
             letter-spacing: 0.05em;
         }
         
-        .status-en-route {
+        .status-enroute {
             background: rgba(245, 158, 11, 0.1);
             color: var(--warning);
             border: 1px solid rgba(245, 158, 11, 0.3);
@@ -1000,7 +1000,7 @@
             border-radius: 10px;
             color: white;
             font-weight: 600;
-            z-index: 1000;
+            z-index: 10000;
             animation: slideIn 0.3s ease;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
             display: flex;
@@ -1387,7 +1387,7 @@
                 </div>
                 <div class="footer-actions">
                     <button type="button" class="btn-cancel" onclick="closeEquipmentModal()">Cancel</button>
-                    <button type="submit" class="btn-submit" id="submitCheckInBtn" onclick="submitEquipmentCheckIn()" disabled>
+                    <button type="button" class="btn-submit" id="submitCheckInBtn" onclick="submitEquipmentCheckIn()" disabled>
                         <span>✅</span>
                         <span>Complete Check-In</span>
                     </button>
@@ -1410,6 +1410,7 @@
         let refreshInterval = null;
         let debugMode = false;
         let debugInfo = [];
+        let currentEquipmentCheck = null;
         
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
@@ -1418,6 +1419,7 @@
             log('📍 Warehouse: ' + WAREHOUSE_ADDRESS);
             
             initializeDashboard();
+            setupEquipmentInputListeners();
         });
         
         // Debug logging function
@@ -1847,12 +1849,18 @@
                 
                 // Filter drivers based on current filter
                 let filteredDrivers = allDrivers;
-                if (currentFilter !== 'overview') {
+                if (currentFilter === 'overview') {
+                    // In overview, show all non-completed drivers
+                    filteredDrivers = allDrivers.filter(driver => driver.status !== 'completed');
+                } else if (currentFilter === 'completed') {
+                    // Show only completed drivers
+                    filteredDrivers = allDrivers.filter(driver => driver.status === 'completed');
+                } else {
+                    // For other filters, show specific status
                     filteredDrivers = allDrivers.filter(driver => {
                         switch (currentFilter) {
                             case 'en-route': return driver.status === 'en-route';
                             case 'arrived': return driver.status === 'arrived';
-                            case 'completed': return driver.status === 'completed';
                             case 'working': return driver.status === 'working';
                             default: return true;
                         }
@@ -1860,6 +1868,16 @@
                 }
                 
                 activityCount.textContent = `${filteredDrivers.length} drivers`;
+                
+                if (filteredDrivers.length === 0) {
+                    activityList.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">📭</div>
+                            <p>No drivers in this category</p>
+                        </div>
+                    `;
+                    return;
+                }
                 
                 // Generate activity items with enhanced returns badge styling
                 activityList.innerHTML = filteredDrivers.map(driver => {
@@ -2302,7 +2320,7 @@
                     updateKPIs();
                     updateActivityFeed();
                     
-                    showToast('Equipment Check-In Completed!', 'Equipment inspection submitted successfully', 'success');
+                    showToast('Equipment Check-In Completed Successfully!', 'success');
                     
                     // Close modal
                     closeEquipmentModal();
@@ -2313,7 +2331,7 @@
                 
             } catch (error) {
                 log('❌ Error submitting equipment check-in: ' + error.message);
-                showToast('Submission Failed', `Unable to submit check-in: ${error.message}`, 'error');
+                showToast('Submission Failed: ' + error.message, 'error');
                 
                 // Reset submit button
                 submitBtn.disabled = false;
@@ -2322,7 +2340,7 @@
         }
         
         // Add equipment number validation
-        document.addEventListener('DOMContentLoaded', function() {
+        function setupEquipmentInputListeners() {
             // Add event listeners for equipment number inputs
             ['tractorNumber', 'trailerNumber', 'moffettNumber'].forEach(id => {
                 const input = document.getElementById(id);
@@ -2330,10 +2348,7 @@
                     input.addEventListener('input', updateSubmitButtonState);
                 }
             });
-        });
-        
-        // Global variable for current equipment check data
-        let currentEquipmentCheck = null;
+        }
         
         // Clear daily check-ins
         function clearDailyCheckIns() {
@@ -2341,8 +2356,18 @@
                 completedDrivers.clear();
                 localStorage.removeItem('completedDrivers');
                 
+                // Reset all completed drivers to their original status
+                allDrivers.forEach(driver => {
+                    if (driver.status === 'completed') {
+                        // Restore original status based on notifications
+                        const originalStatus = determineStatus(driver.raw || {});
+                        driver.status = originalStatus;
+                    }
+                });
+                
                 // Reload data to refresh UI
-                loadDataFromMongoDB();
+                updateKPIs();
+                updateActivityFeed();
                 
                 log('🗑️ Daily check-ins cleared');
                 showToast('Daily check-ins have been cleared', 'info');
