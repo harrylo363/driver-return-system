@@ -673,6 +673,16 @@
             background: rgba(239, 68, 68, 0.2);
         }
         
+        .btn-warning {
+            background: rgba(245, 158, 11, 0.12);
+            color: var(--accent-orange);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+        
+        .btn-warning:hover {
+            background: rgba(245, 158, 11, 0.2);
+        }
+        
         .btn-sm {
             padding: 8px 16px;
             font-size: 12px;
@@ -883,6 +893,99 @@
             color: var(--text-primary);
         }
         
+        /* Modal Dialog */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 5000;
+            animation: fadeIn 0.2s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal-dialog {
+            background: linear-gradient(145deg, #1E2532 0%, #242B3D 100%);
+            border: 1px solid var(--border-primary);
+            border-radius: 20px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: var(--shadow-xl);
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .modal-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .modal-icon {
+            font-size: 32px;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+        }
+        
+        .modal-content {
+            margin-bottom: 32px;
+        }
+        
+        .modal-content p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+        
+        .warning-box {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 16px 0;
+        }
+        
+        .warning-box ul {
+            list-style: none;
+            padding: 0;
+            margin: 8px 0 0 0;
+        }
+        
+        .warning-box li {
+            padding: 4px 0;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .modal-footer {
+            display: flex;
+            gap: 16px;
+            justify-content: flex-end;
+        }
+        
         /* Toast */
         .toast {
             position: fixed;
@@ -1004,6 +1107,10 @@
                     <button class="nav-item" onclick="exportAllUsers()">
                         <span class="nav-icon">📤</span>
                         <span>Export Data</span>
+                    </button>
+                    <button class="nav-item" onclick="showClearDashboardDialog()">
+                        <span class="nav-icon">🧹</span>
+                        <span>Clear Dashboard Data</span>
                     </button>
                 </div>
             </nav>
@@ -1617,6 +1724,169 @@
             return 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
         }
         
+        // Clear Dashboard Data Functions
+        function showClearDashboardDialog() {
+            // Create modal overlay
+            const modalOverlay = document.createElement('div');
+            modalOverlay.className = 'modal-overlay';
+            modalOverlay.id = 'clearDashboardModal';
+            
+            modalOverlay.innerHTML = `
+                <div class="modal-dialog">
+                    <div class="modal-header">
+                        <div class="modal-icon">⚠️</div>
+                        <h2 class="modal-title">Clear Dashboard Data</h2>
+                    </div>
+                    
+                    <div class="modal-content">
+                        <p>This action will permanently delete all data from the dashboard, including:</p>
+                        
+                        <div class="warning-box">
+                            <ul>
+                                <li><span>🚚</span> All vehicle tracking data</li>
+                                <li><span>📍</span> Location history and routes</li>
+                                <li><span>📊</span> Performance metrics and analytics</li>
+                                <li><span>📦</span> Delivery records and statuses</li>
+                                <li><span>🔔</span> Alert history</li>
+                                <li><span>⏱️</span> Real-time tracking information</li>
+                            </ul>
+                        </div>
+                        
+                        <p style="color: var(--accent-orange); font-weight: 600; margin-top: 16px;">
+                            ⚠️ This action cannot be undone!
+                        </p>
+                        
+                        <p style="color: var(--text-tertiary); font-size: 13px;">
+                            Note: User accounts will NOT be affected. Only dashboard operational data will be cleared.
+                        </p>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" onclick="closeClearDashboardDialog()">
+                            <span>❌</span>
+                            <span>Cancel</span>
+                        </button>
+                        <button class="btn btn-danger" onclick="confirmClearDashboard()">
+                            <span>🗑️</span>
+                            <span>Clear All Dashboard Data</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modalOverlay);
+            
+            // Close on overlay click
+            modalOverlay.addEventListener('click', function(e) {
+                if (e.target === modalOverlay) {
+                    closeClearDashboardDialog();
+                }
+            });
+        }
+        
+        function closeClearDashboardDialog() {
+            const modal = document.getElementById('clearDashboardModal');
+            if (modal) {
+                modal.style.animation = 'fadeIn 0.2s ease reverse';
+                setTimeout(() => modal.remove(), 200);
+            }
+        }
+        
+        function confirmClearDashboard() {
+            // Close the first dialog
+            closeClearDashboardDialog();
+            
+            // Show final confirmation
+            setTimeout(() => {
+                const finalConfirm = confirm(
+                    '🚨 FINAL CONFIRMATION 🚨\n\n' +
+                    'You are about to DELETE ALL DASHBOARD DATA.\n\n' +
+                    'Type "DELETE" to confirm this action.'
+                );
+                
+                if (finalConfirm) {
+                    const userInput = prompt('Type DELETE to confirm:');
+                    if (userInput === 'DELETE') {
+                        clearAllDashboardData();
+                    } else if (userInput) {
+                        showToast('Cancelled', 'Data deletion cancelled - incorrect confirmation', 'info');
+                    }
+                }
+            }, 100);
+        }
+        
+        function clearAllDashboardData() {
+            showToast('Processing', 'Clearing all dashboard data...', 'info');
+            
+            // List of all dashboard-related localStorage keys
+            const dashboardKeys = [
+                'fleetforce_vehicles',
+                'fleetforce_deliveries',
+                'fleetforce_routes',
+                'fleetforce_alerts',
+                'fleetforce_performance',
+                'fleetforce_metrics',
+                'fleetforce_tracking',
+                'fleetforce_history',
+                'fleetforce_analytics',
+                'fleetforce_realtime',
+                'vehiclePositions',
+                'deliveryData',
+                'routeData',
+                'performanceData',
+                'alertsData',
+                'trackingData'
+            ];
+            
+            // Clear each dashboard-related item
+            let clearedCount = 0;
+            dashboardKeys.forEach(key => {
+                if (localStorage.getItem(key)) {
+                    localStorage.removeItem(key);
+                    clearedCount++;
+                }
+            });
+            
+            // Also clear any session storage related to dashboard
+            const sessionKeys = [
+                'currentRoute',
+                'activeVehicles',
+                'liveTracking',
+                'tempMetrics'
+            ];
+            
+            sessionKeys.forEach(key => {
+                if (sessionStorage.getItem(key)) {
+                    sessionStorage.removeItem(key);
+                    clearedCount++;
+                }
+            });
+            
+            // Show success message
+            setTimeout(() => {
+                showToast(
+                    'Success', 
+                    `Dashboard data cleared successfully. ${clearedCount} data sets removed.`, 
+                    'success'
+                );
+                
+                // Log the action
+                const clearLog = {
+                    action: 'DASHBOARD_DATA_CLEARED',
+                    timestamp: new Date().toISOString(),
+                    clearedItems: clearedCount,
+                    performedBy: 'System Admin'
+                };
+                
+                // Store in audit log
+                let auditLog = JSON.parse(localStorage.getItem('fleetforce_audit_log')) || [];
+                auditLog.push(clearLog);
+                localStorage.setItem('fleetforce_audit_log', JSON.stringify(auditLog));
+                
+                console.log('Dashboard data cleared:', clearLog);
+            }, 1000);
+        }
+        
         // Save users to localStorage
         function saveUsers() {
             localStorage.setItem('fleetforce_users', JSON.stringify(allUsers));
@@ -2212,6 +2482,3 @@
                 document.getElementById('globalNotifications').checked = settings.global;
             });
         }
-    </script>
-</body>
-</html>
