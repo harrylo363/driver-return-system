@@ -1660,7 +1660,8 @@
                 }
                 
                 const returnsInfo = driver.hasReturns ? 
-                    `<span class="returns-badge">📦 ${driver.returnsCount} return${driver.returnsCount > 1 ? 's' : ''}</span>` : '';
+                    `<span class="returns-badge">📦 ${driver.returnsCount} return${driver.returnsCount > 1 ? 's' : ''}</span>` : 
+                    `<span class="returns-badge" style="background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3);">📦 No returns</span>`;
                 
                 return `
                     <div class="activity-item ${statusClass}">
