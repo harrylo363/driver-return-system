@@ -607,13 +607,27 @@
             background: var(--text-muted);
         }
         
+        /* Force green toggle for ALL checked toggles */
+        .toggle-switch input[type="checkbox"]:checked + .toggle-slider {
+            background: var(--accent-green) !important;
+            background-color: var(--accent-green) !important;
+        }
+        
         /* Ensure green toggle for user table notification switches */
         .user-table .toggle-switch input:checked + .toggle-slider {
             background: var(--accent-green) !important;
+            background-color: var(--accent-green) !important;
         }
         
         .user-table .toggle-switch input:checked + .toggle-slider:before {
             background: white !important;
+            background-color: white !important;
+        }
+        
+        /* Additional specificity for table toggles */
+        table.user-table td .toggle-switch input[type="checkbox"]:checked + .toggle-slider {
+            background: var(--accent-green) !important;
+            background-color: var(--accent-green) !important;
         }
         
         /* Buttons */
