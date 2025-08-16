@@ -1453,7 +1453,7 @@
         // DAILY RESET CONFIGURATION
         const DAILY_RESET_CONFIG = {
             RESET_TIME: { hour: 23, minute: 55 }, // 11:55 PM
-            GOOGLE_WEBHOOK_URL: 'https://script.google.com/macros/s/AKfycbzp0av9VPNYixJrzQ-u2W1fz1wtEeyEXCeZ_tsR7GiU8FDt2yAEPgLTA9Yzryat4sZObA/exec', // Replace with your Google Apps Script URL
+            GOOGLE_WEBHOOK_URL: 'YOUR_GOOGLE_APPS_SCRIPT_URL', // Replace with your Google Apps Script URL
             ENABLE_AUTO_RESET: true // Set to false to disable automatic daily reset
         };
         
@@ -1577,14 +1577,7 @@
                         driversWithReturns: allDrivers.filter(d => d.returns > 0).map(d => ({
                             name: d.name,
                             returnCount: d.returns
-                        }
-                        
-                        // Store equipment issues in driver data for later reporting
-                        if (Object.keys(currentEquipmentCheck.issues || {}).length > 0) {
-                            allDrivers[driverIndex].equipmentIssues = currentEquipmentCheck.issues;
-                            allDrivers[driverIndex].tractorNumber = document.getElementById('tractorNumber').value.trim();
-                            allDrivers[driverIndex].trailerNumber = document.getElementById('trailerNumber').value.trim();
-                            allDrivers[driverIndex].moffettNumber = document.getElementById('moffettNumber').value.trim();))
+                        }))
                     },
                     
                     // EQUIPMENT ISSUES - Detailed breakdown
