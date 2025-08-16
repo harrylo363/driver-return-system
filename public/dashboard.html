@@ -927,10 +927,13 @@
             log(`✅ Daily reset scheduled for ${DAILY_RESET_CONFIG.RESET_TIME.hour}:${DAILY_RESET_CONFIG.RESET_TIME.minute.toString().padStart(2, '0')}`);
         }
         
-        // Perform daily reset with equipment issue reporting
+        // FIXED: Perform daily reset with equipment issue reporting
         async function performDailyReset() {
             try {
                 log('🌙 Starting nightly archive with equipment issues...');
+                
+                // Show loading toast
+                showToast('📊 Sending daily report to Google Sheets...', 'info');
                 
                 // Collect ALL equipment issues from today
                 const equipmentIssues = collectAllEquipmentIssues();
@@ -984,19 +987,26 @@
                     }))
                 };
                 
-                // Step 1: Archive to MongoDB
-                await archiveToMongoDB(dailyReport);
+                // Step 1: Try to archive to MongoDB (optional)
+                try {
+                    await archiveToMongoDB(dailyReport);
+                } catch (error) {
+                    log('⚠️ MongoDB archive skipped: ' + error.message);
+                }
                 
                 // Step 2: Send to Google Sheets with all issue details
                 await sendDetailedReportToGoogleSheets(dailyReport);
                 
-                // Step 3: Clear today's data
+                // Step 3: Clear today's data - THIS IS THE FIXED PART
                 await clearDailyData();
                 
-                showToast('✅ Daily report sent! Equipment issues documented.', 'success');
+                showToast('✅ Daily report sent! Dashboard has been reset.', 'success');
                 
-                // Reload dashboard for fresh start
-                setTimeout(() => window.location.reload(), 3000);
+                // Step 4: Reload the page after a short delay
+                log('🔄 Reloading dashboard in 2 seconds...');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
                 
             } catch (error) {
                 log('❌ Daily reset failed: ' + error.message, 'error');
@@ -1120,27 +1130,49 @@
             }
         }
         
-        // Clear daily data
+        // FIXED: Clear daily data - Now properly resets the dashboard
         async function clearDailyData() {
             try {
-                // Clear local storage
+                log('🧹 Clearing daily data...');
+                
+                // Clear local storage first (this always works)
                 completedDrivers.clear();
                 localStorage.removeItem('completedDrivers');
                 localStorage.setItem('lastResetDate', new Date().toDateString());
                 
-                // Clear MongoDB daily data
-                const response = await fetch(`${API_BASE}/api/drivers/clear`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
+                // Clear the allDrivers array
+                allDrivers = [];
                 
-                if (!response.ok) {
-                    throw new Error('Failed to clear MongoDB data');
+                // Try to clear MongoDB daily data (optional - may not have endpoint)
+                try {
+                    const response = await fetch(`${API_BASE}/api/drivers/clear`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    
+                    if (response.ok) {
+                        log('✅ MongoDB daily data cleared');
+                    } else {
+                        log('⚠️ MongoDB clear endpoint not available (continuing)');
+                    }
+                } catch (error) {
+                    log('⚠️ MongoDB clear failed (continuing): ' + error.message);
                 }
                 
-                log('✅ Daily data cleared');
+                // Update the UI immediately to show the reset
+                updateKPIs();
+                updateActivityFeed();
+                
+                // Reset all issue counters
+                document.getElementById('tractorIssues').textContent = '0';
+                document.getElementById('trailerIssues').textContent = '0';
+                document.getElementById('moffettIssues').textContent = '0';
+                
+                log('✅ Daily data cleared successfully');
+                
             } catch (error) {
-                log('⚠️ Failed to clear data (continuing): ' + error.message);
+                log('❌ Error clearing data: ' + error.message);
+                throw error;
             }
         }
         
@@ -1306,11 +1338,6 @@
             document.getElementById('avgReturns').textContent = 
                 stats.driversWithReturns > 0 ? 
                 Math.round((stats.totalReturns / stats.driversWithReturns) * 10) / 10 : 0;
-            
-            // Reset equipment issues (would be populated from actual data)
-            document.getElementById('tractorIssues').textContent = '0';
-            document.getElementById('trailerIssues').textContent = '0';
-            document.getElementById('moffettIssues').textContent = '0';
         }
         
         // Update activity feed
@@ -1359,11 +1386,15 @@
         // Show empty state
         function showEmptyState() {
             const activityList = document.getElementById('activityList');
+            const activityCount = document.getElementById('activityCount');
+            
+            activityCount.textContent = '0 drivers';
+            
             activityList.innerHTML = `
                 <div class="empty-state">
                     <div class="empty-icon">📭</div>
                     <p>No driver activity available</p>
-                    <p style="font-size: 0.875rem; margin-top: 1rem;">Check MongoDB connection</p>
+                    <p style="font-size: 0.875rem; margin-top: 1rem;">Dashboard has been reset</p>
                 </div>
             `;
         }
@@ -1418,6 +1449,7 @@
             if (confirm('Are you sure you want to clear all daily check-ins?')) {
                 completedDrivers.clear();
                 localStorage.removeItem('completedDrivers');
+                allDrivers = [];
                 updateKPIs();
                 updateActivityFeed();
                 showToast('Daily check-ins have been cleared', 'info');
