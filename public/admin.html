@@ -1135,11 +1135,6 @@
                                     </div>
                                     
                                     <div class="form-group">
-                                        <label class="form-label">Vehicle ID</label>
-                                        <input type="text" class="form-input" id="userVehicle" name="vehicleId" placeholder="e.g., TRUCK-001">
-                                    </div>
-                                    
-                                    <div class="form-group">
                                         <label class="form-label">Account Status</label>
                                         <select class="form-select" id="userStatus" name="status">
                                             <option value="active">Active</option>
@@ -1296,7 +1291,6 @@
                                         <th>Contact</th>
                                         <th>Role</th>
                                         <th>Status</th>
-                                        <th>Vehicle</th>
                                         <th>Notifications</th>
                                         <th>Created</th>
                                         <th>Actions</th>
@@ -1673,7 +1667,6 @@
                         </td>
                         <td><span class="status-badge role-${user.role}">${user.role}</span></td>
                         <td><span class="status-badge ${user.active !== false ? 'status-active' : 'status-inactive'}">${user.active !== false ? 'Active' : 'Inactive'}</span></td>
-                        <td>${user.vehicleId || '-'}</td>
                         <td>
                             <label class="toggle-switch">
                                 <input type="checkbox" ${notificationsEnabled ? 'checked' : ''} onchange="toggleUserNotifications('${user.id}', this.checked)">
@@ -1721,7 +1714,6 @@
                 document.getElementById('userEmail').value = user.email || '';
                 document.getElementById('userPhone').value = user.phoneNumber || '';
                 document.getElementById('userRole').value = user.role || '';
-                document.getElementById('userVehicle').value = user.vehicleId || '';
                 document.getElementById('userStatus').value = user.active !== false ? 'active' : 'inactive';
                 
                 // Toggle password field based on role
@@ -1848,7 +1840,6 @@
                     phoneNumber: row['Phone'] || row['phoneNumber'] || '',
                     role: row['Role'] || row['role'] || 'driver',
                     password: row['Password'] || row['password'] || '',
-                    vehicleId: row['Vehicle ID'] || row['vehicleId'] || '',
                     active: row['Status'] !== 'inactive' && row['active'] !== false,
                     pushNotifications: row['Notifications'] !== 'false' && row['pushNotifications'] !== false
                 })).filter(user => user.name);
@@ -1877,7 +1868,6 @@
                     <td>${user.phoneNumber || '-'}</td>
                     <td>${user.role}</td>
                     <td>${(user.role === 'dispatcher' || user.role === 'admin') ? (user.password ? '••••••••' : '❌ Missing') : 'Not required'}</td>
-                    <td>${user.vehicleId || '-'}</td>
                     <td>${user.active ? 'Active' : 'Inactive'}</td>
                     <td>${user.pushNotifications ? 'Yes' : 'No'}</td>
                 </tr>
@@ -1942,7 +1932,7 @@
         }
         
         function downloadTemplate(type) {
-            const headers = ['Name', 'Username', 'Email', 'Phone', 'Role', 'Password', 'Vehicle ID', 'Status', 'Notifications'];
+            const headers = ['Name', 'Username', 'Email', 'Phone', 'Role', 'Password', 'Status', 'Notifications'];
             const sampleData = [
                 ['John Doe', 'jdoe', 'john@example.com', '+1234567890', 'driver', '', 'TRUCK-001', 'active', 'true'],
                 ['Jane Smith', 'jsmith', 'jane@example.com', '+0987654321', 'dispatcher', 'SecurePass123!', '', 'active', 'true'],
@@ -2057,7 +2047,7 @@
             
             if (format === 'csv') {
                 const csv = [
-                    ['Name', 'Username', 'Email', 'Phone', 'Role', 'Password', 'Vehicle ID', 'Status', 'Notifications'].join(','),
+                    ['Name', 'Username', 'Email', 'Phone', 'Role', 'Password', 'Status', 'Notifications'].join(','),
                     ...allUsers.map(user => [
                         `"${user.name}"`,
                         `"${user.username || ''}"`,
@@ -2065,7 +2055,6 @@
                         `"${user.phoneNumber || ''}"`,
                         `"${user.role}"`,
                         `"${(user.role === 'dispatcher' || user.role === 'admin') ? '[Protected]' : 'Not required'}"`,
-                        `"${user.vehicleId || ''}"`,
                         `"${user.active !== false ? 'Active' : 'Inactive'}"`,
                         `"${user.pushNotifications !== false ? 'Yes' : 'No'}"`
                     ].join(','))
@@ -2088,7 +2077,6 @@
                     'Phone': user.phoneNumber || '',
                     'Role': user.role,
                     'Password': (user.role === 'dispatcher' || user.role === 'admin') ? '[Protected]' : 'Not required',
-                    'Vehicle ID': user.vehicleId || '',
                     'Status': user.active !== false ? 'Active' : 'Inactive',
                     'Notifications': user.pushNotifications !== false ? 'Yes' : 'No'
                 }));
