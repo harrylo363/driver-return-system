@@ -1,514 +1,413 @@
 const express = require('express');
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
+const cors = require('cors');
 const path = require('path');
+require('dotenv').config();
 
 const app = express();
-const port = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
 
-// MongoDB connection
-const mongoUri = process.env.MONGODB_URI || 'your-mongodb-connection-string';
+// MongoDB Atlas connection
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://your-connection-string';
+const DB_NAME = 'fleet_management';
+
+let db;
 let client;
 
 // Middleware
+app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
-// CORS middleware
-app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-    next();
-});
-
-// Connect to MongoDB
+// Connect to MongoDB Atlas
 async function connectToMongoDB() {
     try {
-        client = new MongoClient(mongoUri);
-        await client.connect();
-        console.log('✅ Connected to MongoDB Atlas');
+        client = new MongoClient(MONGODB_URI, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+        });
         
-        // Create default users if none exist
-        await createDefaultUsers();
+        await client.connect();
+        db = client.db(DB_NAME);
+        
+        // Create collections if they don't exist
+        await db.createCollection('daily_operations').catch(() => {});
+        await db.createCollection('archived_operations').catch(() => {});
+        await db.createCollection('users').catch(() => {});
+        
+        console.log('✅ Connected to MongoDB Atlas');
+        return true;
     } catch (error) {
         console.error('❌ MongoDB connection failed:', error);
-        process.exit(1);
+        return false;
     }
 }
 
-// Create default users
-async function createDefaultUsers() {
-    try {
-        const db = client.db('fleet_management');
-        const users = db.collection('users');
-        
-        const userCount = await users.countDocuments();
-        if (userCount === 0) {
-            console.log('Creating default users...');
-            
-            const defaultUsers = [
-                {
-                    name: 'admin',
-                    email: 'admin@fleetforce.com',
-                    phoneNumber: '+1 (555) 123-4567',
-                    role: 'admin',
-                    vehicleId: '',
-                    active: true,
-                    password: 'Admin123!',
-                    pushNotifications: true,
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString()
-                },
-                {
-                    name: 'dispatcher',
-                    email: 'dispatcher@fleetforce.com',
-                    phoneNumber: '+1 (555) 123-4568',
-                    role: 'dispatcher',
-                    vehicleId: '',
-                    active: true,
-                    password: 'Dispatch123!',
-                    pushNotifications: true,
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString()
-                }
-            ];
-            
-            await users.insertMany(defaultUsers);
-            console.log('✅ Default users created');
-        }
-    } catch (error) {
-        console.error('Error creating default users:', error);
-    }
+// Initialize connection
+connectToMongoDB();
+
+// Helper function to get today's date in YYYY-MM-DD format
+function getTodayDate() {
+    return new Date().toISOString().split('T')[0];
 }
 
-// ====== HEALTH CHECK ENDPOINT (FIXED) ======
+// ============= ROUTES =============
 
+// Health check endpoint
 app.get('/api/health', async (req, res) => {
     try {
-        let dbStatus = 'disconnected';
-        
-        if (client) {
-            try {
-                await client.db('fleet_management').admin().ping();
-                dbStatus = 'connected';
-            } catch (dbError) {
-                console.error('Database ping failed:', dbError);
-                dbStatus = 'disconnected';
-            }
+        if (!db) {
+            return res.status(503).json({ 
+                status: 'error', 
+                message: 'Database not connected' 
+            });
         }
         
-        res.json({
+        // Ping the database
+        await db.admin().ping();
+        
+        res.json({ 
             status: 'healthy',
-            timestamp: new Date().toISOString(),
-            mongodb: dbStatus,
-            data: {
-                database: dbStatus  // This is what admin panel looks for
-            }
+            database: 'connected',
+            timestamp: new Date(),
+            environment: process.env.NODE_ENV || 'development'
         });
     } catch (error) {
-        console.error('Health check error:', error);
-        res.status(500).json({
-            status: 'error',
-            timestamp: new Date().toISOString(),
-            mongodb: 'disconnected',
-            data: {
-                database: 'disconnected'
-            }
+        res.status(503).json({ 
+            status: 'error', 
+            message: error.message 
         });
     }
 });
 
-// ====== AUTHENTICATION ENDPOINTS ======
-
-// Authentication endpoint
-app.post('/api/auth/login', async (req, res) => {
-    console.log('Login attempt received:', req.body);
-    
-    try {
-        const { username, password } = req.body;
-        
-        if (!username || !password) {
-            return res.status(400).json({
-                success: false,
-                message: 'Username and password are required'
-            });
-        }
-
-        const db = client.db('fleet_management');
-        const users = db.collection('users');
-        
-        // Try to find user by username (name field) or email
-        const user = await users.findOne({
-            $or: [
-                { name: username },
-                { email: username }
-            ]
-        });
-        
-        console.log('User found:', user ? user.name : 'None');
-        console.log('User password field exists:', user ? !!user.password : 'N/A');
-        
-        if (!user) {
-            return res.status(401).json({
-                success: false,
-                message: 'Invalid username or password'
-            });
-        }
-        
-        // Check if user is active
-        if (!user.active) {
-            return res.status(401).json({
-                success: false,
-                message: 'Account is deactivated. Please contact administrator.'
-            });
-        }
-        
-        // For admin and dispatcher roles, check password
-        if (user.role === 'admin' || user.role === 'dispatcher') {
-            if (!user.password) {
-                console.log('No password set for user:', user.name);
-                return res.status(401).json({
-                    success: false,
-                    message: 'Password not set for this account. Please contact administrator.'
-                });
-            }
-            
-            // Simple password comparison (you should use bcrypt in production)
-            if (user.password !== password) {
-                console.log('Password mismatch for user:', user.name);
-                return res.status(401).json({
-                    success: false,
-                    message: 'Invalid username or password'
-                });
-            }
-        }
-        
-        // Authentication successful
-        console.log('Authentication successful for:', user.name);
-        
-        // Don't send password back to client
-        const userResponse = {
-            id: user._id,
-            name: user.name,
-            email: user.email,
-            role: user.role,
-            phoneNumber: user.phoneNumber,
-            vehicleId: user.vehicleId
-        };
-        
-        res.json({
-            success: true,
-            message: 'Login successful',
-            user: userResponse
-        });
-        
-    } catch (error) {
-        console.error('Login error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Server error during authentication'
-        });
-    }
-});
-
-// Test endpoint for debugging
-app.get('/api/auth/test', async (req, res) => {
-    try {
-        const db = client.db('fleet_management');
-        const users = db.collection('users');
-        const allUsers = await users.find({}).toArray();
-        
-        const userSummary = allUsers.map(user => ({
-            name: user.name,
-            email: user.email,
-            role: user.role,
-            hasPassword: !!user.password,
-            active: user.active
-        }));
-        
-        res.json({
-            success: true,
-            userCount: allUsers.length,
-            users: userSummary
-        });
-    } catch (error) {
-        console.error('Test endpoint error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error retrieving users'
-        });
-    }
-});
-
-// ====== USER MANAGEMENT ENDPOINTS ======
-
-// Get all users
-app.get('/api/users', async (req, res) => {
-    try {
-        const db = client.db('fleet_management');
-        const users = db.collection('users');
-        const allUsers = await users.find({}).toArray();
-        res.json(allUsers);
-    } catch (error) {
-        console.error('Error fetching users:', error);
-        res.status(500).json({ error: 'Failed to fetch users' });
-    }
-});
-
-// Create new user
-app.post('/api/users', async (req, res) => {
-    try {
-        const db = client.db('fleet_management');
-        const users = db.collection('users');
-        
-        const userData = {
-            ...req.body,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            active: true
-        };
-        
-        const result = await users.insertOne(userData);
-        res.json({ success: true, userId: result.insertedId });
-    } catch (error) {
-        console.error('Error creating user:', error);
-        res.status(500).json({ error: 'Failed to create user' });
-    }
-});
-
-// Update user
-app.put('/api/users/:id', async (req, res) => {
-    try {
-        const db = client.db('fleet_management');
-        const users = db.collection('users');
-        const { ObjectId } = require('mongodb');
-        
-        const updateData = {
-            ...req.body,
-            updatedAt: new Date().toISOString()
-        };
-        
-        const result = await users.updateOne(
-            { _id: new ObjectId(req.params.id) },
-            { $set: updateData }
-        );
-        
-        res.json({ success: true, modifiedCount: result.modifiedCount });
-    } catch (error) {
-        console.error('Error updating user:', error);
-        res.status(500).json({ error: 'Failed to update user' });
-    }
-});
-
-// Update user (PATCH for partial updates)
-app.patch('/api/users/:id', async (req, res) => {
-    try {
-        const db = client.db('fleet_management');
-        const users = db.collection('users');
-        const { ObjectId } = require('mongodb');
-        
-        const updateData = {
-            ...req.body,
-            updatedAt: new Date().toISOString()
-        };
-        
-        const result = await users.updateOne(
-            { _id: new ObjectId(req.params.id) },
-            { $set: updateData }
-        );
-        
-        res.json({ success: true, modifiedCount: result.modifiedCount });
-    } catch (error) {
-        console.error('Error updating user:', error);
-        res.status(500).json({ error: 'Failed to update user' });
-    }
-});
-
-// Delete user
-app.delete('/api/users/:id', async (req, res) => {
-    try {
-        const db = client.db('fleet_management');
-        const users = db.collection('users');
-        const { ObjectId } = require('mongodb');
-        
-        const result = await users.deleteOne({ _id: new ObjectId(req.params.id) });
-        res.json({ success: true, deletedCount: result.deletedCount });
-    } catch (error) {
-        console.error('Error deleting user:', error);
-        res.status(500).json({ error: 'Failed to delete user' });
-    }
-});
-
-// ====== NOTIFICATION ENDPOINTS (FIXED) ======
-
-// Get all notifications
+// Get today's notifications/operations (dashboard data)
 app.get('/api/notifications', async (req, res) => {
     try {
-        const db = client.db('fleet_management');
-        const notifications = db.collection('notifications');
-        const allNotifications = await notifications.find({}).sort({ timestamp: -1 }).toArray();
-        res.json(allNotifications);
+        if (!db) {
+            return res.status(503).json({ error: 'Database not connected' });
+        }
+        
+        const today = getTodayDate();
+        
+        // Only fetch today's data from daily_operations
+        const notifications = await db.collection('daily_operations')
+            .find({ 
+                date: today
+            })
+            .sort({ timestamp: -1 })
+            .toArray();
+        
+        console.log(`📊 Returning ${notifications.length} notifications for ${today}`);
+        res.json(notifications);
+        
     } catch (error) {
         console.error('Error fetching notifications:', error);
-        res.status(500).json({ error: 'Failed to fetch notifications' });
+        res.status(500).json({ error: error.message });
     }
 });
 
-// Create notification - FIXED to handle duplicate _id issue
-app.post('/api/notifications', async (req, res) => {
+// Driver check-in endpoint
+app.post('/api/checkin', async (req, res) => {
     try {
-        const db = client.db('fleet_management');
-        const notifications = db.collection('notifications');
+        if (!db) {
+            return res.status(503).json({ error: 'Database not connected' });
+        }
         
-        // Remove _id, id, and any other fields that might conflict with MongoDB's _id
-        const { _id, id, ...cleanData } = req.body;
-        
-        // Create the notification with a timestamp and let MongoDB generate its own _id
-        const notificationData = {
-            ...cleanData,
-            timestamp: cleanData.timestamp || new Date().toISOString(),
-            created_at: new Date().toISOString()
+        const today = getTodayDate();
+        const checkInData = {
+            ...req.body,
+            date: today,
+            timestamp: new Date(),
+            _id: new ObjectId()
         };
         
-        // Log the clean data for debugging
-        console.log('Creating notification with data:', JSON.stringify(notificationData, null, 2));
+        // Insert into daily_operations
+        const result = await db.collection('daily_operations').insertOne(checkInData);
         
-        const result = await notifications.insertOne(notificationData);
-        
-        res.status(201).json({ 
+        console.log(`✅ Driver check-in recorded: ${checkInData.driver_name || 'Unknown'}`);
+        res.json({ 
             success: true, 
-            notificationId: result.insertedId,
-            message: 'Notification created successfully'
+            id: result.insertedId,
+            message: 'Check-in recorded successfully' 
         });
         
     } catch (error) {
-        console.error('Error creating notification:', error);
-        res.status(500).json({ error: 'Failed to create notification' });
+        console.error('Error recording check-in:', error);
+        res.status(500).json({ error: error.message });
     }
 });
 
-// ====== VEHICLE MANAGEMENT ENDPOINTS ======
-
-// Get all vehicles
-app.get('/api/vehicles', async (req, res) => {
+// Update driver status
+app.put('/api/driver/:id', async (req, res) => {
     try {
-        const db = client.db('fleet_management');
-        const vehicles = db.collection('vehicles');
-        const allVehicles = await vehicles.find({}).toArray();
-        res.json(allVehicles);
-    } catch (error) {
-        console.error('Error fetching vehicles:', error);
-        res.status(500).json({ error: 'Failed to fetch vehicles' });
-    }
-});
-
-// Create new vehicle
-app.post('/api/vehicles', async (req, res) => {
-    try {
-        const db = client.db('fleet_management');
-        const vehicles = db.collection('vehicles');
+        if (!db) {
+            return res.status(503).json({ error: 'Database not connected' });
+        }
         
-        const vehicleData = {
+        const driverId = req.params.id;
+        const updateData = {
             ...req.body,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
+            lastUpdated: new Date()
         };
         
-        const result = await vehicles.insertOne(vehicleData);
-        res.json({ success: true, vehicleId: result.insertedId });
+        const result = await db.collection('daily_operations').updateOne(
+            { _id: new ObjectId(driverId) },
+            { $set: updateData }
+        );
+        
+        if (result.matchedCount === 0) {
+            return res.status(404).json({ error: 'Driver not found' });
+        }
+        
+        res.json({ 
+            success: true, 
+            message: 'Driver status updated' 
+        });
+        
     } catch (error) {
-        console.error('Error creating vehicle:', error);
-        res.status(500).json({ error: 'Failed to create vehicle' });
+        console.error('Error updating driver:', error);
+        res.status(500).json({ error: error.message });
     }
 });
 
-// ====== CHECK-IN ENDPOINTS ======
+// Archive endpoint - moves today's data to archive and clears daily
+app.post('/api/archive', async (req, res) => {
+    try {
+        if (!db) {
+            return res.status(503).json({ error: 'Database not connected' });
+        }
+        
+        const archiveData = req.body;
+        const archiveDate = archiveData.date || getTodayDate();
+        
+        // Step 1: Get all of today's data before archiving
+        const todayData = await db.collection('daily_operations')
+            .find({ date: archiveDate })
+            .toArray();
+        
+        // Step 2: Save complete archive with metadata
+        const archiveRecord = {
+            ...archiveData,
+            archivedAt: new Date(),
+            archiveDate: archiveDate,
+            totalRecords: todayData.length,
+            rawData: todayData // Keep the raw operational data too
+        };
+        
+        await db.collection('archived_operations').insertOne(archiveRecord);
+        console.log(`📦 Archived ${todayData.length} records for ${archiveDate}`);
+        
+        // Step 3: Clear the daily_operations collection for this date
+        const deleteResult = await db.collection('daily_operations').deleteMany({
+            date: archiveDate
+        });
+        
+        console.log(`🧹 Cleared ${deleteResult.deletedCount} records from daily operations`);
+        
+        res.json({ 
+            success: true,
+            message: `Archived ${todayData.length} records and cleared daily operations`,
+            archivedCount: todayData.length,
+            clearedCount: deleteResult.deletedCount
+        });
+        
+    } catch (error) {
+        console.error('Error archiving data:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
 
-// Get all check-ins
+// Clear daily data endpoint
+app.post('/api/drivers/clear', async (req, res) => {
+    try {
+        if (!db) {
+            return res.status(503).json({ error: 'Database not connected' });
+        }
+        
+        const { date, clearAll } = req.body;
+        const targetDate = date || getTodayDate();
+        
+        let deleteQuery = { date: targetDate };
+        
+        // If clearAll is true, clear everything from daily_operations
+        if (clearAll === true) {
+            deleteQuery = {};
+        }
+        
+        const result = await db.collection('daily_operations').deleteMany(deleteQuery);
+        
+        console.log(`🗑️ Cleared ${result.deletedCount} records from daily operations`);
+        
+        res.json({ 
+            success: true, 
+            message: `Cleared ${result.deletedCount} daily records`,
+            deletedCount: result.deletedCount
+        });
+        
+    } catch (error) {
+        console.error('Error clearing data:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Retrieve archived data for a specific date
+app.get('/api/archive/:date', async (req, res) => {
+    try {
+        if (!db) {
+            return res.status(503).json({ error: 'Database not connected' });
+        }
+        
+        const requestedDate = req.params.date;
+        
+        const archiveData = await db.collection('archived_operations')
+            .findOne({ archiveDate: requestedDate });
+        
+        if (!archiveData) {
+            return res.status(404).json({ 
+                message: `No archive found for ${requestedDate}` 
+            });
+        }
+        
+        res.json(archiveData);
+        
+    } catch (error) {
+        console.error('Error retrieving archive:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get list of available archive dates
+app.get('/api/archive-dates', async (req, res) => {
+    try {
+        if (!db) {
+            return res.status(503).json({ error: 'Database not connected' });
+        }
+        
+        const dates = await db.collection('archived_operations')
+            .distinct('archiveDate');
+        
+        res.json({ 
+            dates: dates.sort().reverse(),
+            count: dates.length 
+        });
+        
+    } catch (error) {
+        console.error('Error fetching archive dates:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get all check-ins (legacy endpoint for compatibility)
 app.get('/api/checkins', async (req, res) => {
     try {
-        const db = client.db('fleet_management');
-        const checkins = db.collection('checkins');
-        const allCheckins = await checkins.find({}).sort({ timestamp: -1 }).toArray();
-        res.json(allCheckins);
+        if (!db) {
+            return res.status(503).json({ error: 'Database not connected' });
+        }
+        
+        const today = getTodayDate();
+        
+        const checkins = await db.collection('daily_operations')
+            .find({ 
+                date: today,
+                status: 'completed'
+            })
+            .toArray();
+        
+        res.json(checkins);
+        
     } catch (error) {
         console.error('Error fetching check-ins:', error);
-        res.status(500).json({ error: 'Failed to fetch check-ins' });
+        res.status(500).json({ error: error.message });
     }
 });
 
-// Create check-in
-app.post('/api/checkins', async (req, res) => {
+// User management endpoints
+app.get('/api/users', async (req, res) => {
     try {
-        const db = client.db('fleet_management');
-        const checkins = db.collection('checkins');
+        if (!db) {
+            return res.status(503).json({ error: 'Database not connected' });
+        }
         
-        // Remove any _id field that might be sent
-        const { _id, ...cleanData } = req.body;
+        const users = await db.collection('users').find({}).toArray();
+        res.json(users);
         
-        const checkinData = {
-            ...cleanData,
-            timestamp: cleanData.timestamp || new Date().toISOString()
-        };
-        
-        const result = await checkins.insertOne(checkinData);
-        res.json({ success: true, checkinId: result.insertedId });
     } catch (error) {
-        console.error('Error creating check-in:', error);
-        res.status(500).json({ error: 'Failed to create check-in' });
+        console.error('Error fetching users:', error);
+        res.status(500).json({ error: error.message });
     }
 });
 
-// ====== STATIC FILE ROUTES ======
+// Login endpoint
+app.post('/api/login', async (req, res) => {
+    try {
+        if (!db) {
+            return res.status(503).json({ error: 'Database not connected' });
+        }
+        
+        const { username, password } = req.body;
+        
+        // In production, use proper password hashing!
+        const user = await db.collection('users').findOne({ 
+            username: username,
+            password: password // Use bcrypt in production!
+        });
+        
+        if (!user) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+        
+        res.json({ 
+            success: true, 
+            user: {
+                id: user._id,
+                username: user.username,
+                role: user.role || 'driver'
+            }
+        });
+        
+    } catch (error) {
+        console.error('Error during login:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
 
-// Serve login page as default
+// Serve HTML files
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// Serve admin panel
-app.get('/admin', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
-});
-
-// Serve dashboard
-app.get('/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
-// Serve driver portal
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
 app.get('/driver', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'driver.html'));
 });
 
-// 404 handler
-app.use((req, res) => {
-    res.status(404).json({ error: 'Route not found' });
-});
-
-// Error handler
-app.use((error, req, res, next) => {
-    console.error('Server error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error('Error:', err);
+    res.status(500).json({ 
+        error: 'Internal server error',
+        message: err.message 
+    });
 });
 
 // Start server
-connectToMongoDB().then(() => {
-    app.listen(port, () => {
-        console.log(`🚀 FleetForce server running on port ${port}`);
-        console.log(`📊 Admin Panel: http://localhost:${port}/admin`);
-        console.log(`🔐 Login Portal: http://localhost:${port}/`);
-    });
-}).catch(error => {
-    console.error('Failed to start server:', error);
-    process.exit(1);
+app.listen(PORT, () => {
+    console.log(`🚀 Fleet Management Server running on port ${PORT}`);
+    console.log(`📍 Dashboard: http://localhost:${PORT}`);
+    console.log(`🔗 MongoDB: ${MONGODB_URI ? 'Configured' : 'Not configured'}`);
 });
 
 // Graceful shutdown
 process.on('SIGINT', async () => {
-    console.log('Shutting down gracefully...');
+    console.log('\n👋 Shutting down gracefully...');
     if (client) {
         await client.close();
+        console.log('MongoDB connection closed');
     }
     process.exit(0);
 });
+
+module.exports = app;
