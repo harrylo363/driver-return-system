@@ -339,7 +339,7 @@ app.delete('/api/users/:id', async (req, res) => {
     }
 });
 
-// ====== NOTIFICATION ENDPOINTS ======
+// ====== NOTIFICATION ENDPOINTS (FIXED) ======
 
 // Get all notifications
 app.get('/api/notifications', async (req, res) => {
@@ -354,19 +354,33 @@ app.get('/api/notifications', async (req, res) => {
     }
 });
 
-// Create notification
+// Create notification - FIXED to handle duplicate _id issue
 app.post('/api/notifications', async (req, res) => {
     try {
         const db = client.db('fleet_management');
         const notifications = db.collection('notifications');
         
+        // Remove _id, id, and any other fields that might conflict with MongoDB's _id
+        const { _id, id, ...cleanData } = req.body;
+        
+        // Create the notification with a timestamp and let MongoDB generate its own _id
         const notificationData = {
-            ...req.body,
-            timestamp: new Date().toISOString()
+            ...cleanData,
+            timestamp: cleanData.timestamp || new Date().toISOString(),
+            created_at: new Date().toISOString()
         };
         
+        // Log the clean data for debugging
+        console.log('Creating notification with data:', JSON.stringify(notificationData, null, 2));
+        
         const result = await notifications.insertOne(notificationData);
-        res.json({ success: true, notificationId: result.insertedId });
+        
+        res.status(201).json({ 
+            success: true, 
+            notificationId: result.insertedId,
+            message: 'Notification created successfully'
+        });
+        
     } catch (error) {
         console.error('Error creating notification:', error);
         res.status(500).json({ error: 'Failed to create notification' });
@@ -429,9 +443,12 @@ app.post('/api/checkins', async (req, res) => {
         const db = client.db('fleet_management');
         const checkins = db.collection('checkins');
         
+        // Remove any _id field that might be sent
+        const { _id, ...cleanData } = req.body;
+        
         const checkinData = {
-            ...req.body,
-            timestamp: new Date().toISOString()
+            ...cleanData,
+            timestamp: cleanData.timestamp || new Date().toISOString()
         };
         
         const result = await checkins.insertOne(checkinData);
