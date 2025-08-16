@@ -887,6 +887,28 @@
 
             <div>
                 <div class="analytics-panel">
+                    <h3 class="analytics-title">🔧 Equipment Status</h3>
+                    <div class="metric-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 0.875rem; color: var(--text-secondary);">🚛 Tractor Issues</span>
+                            <span style="font-size: 1.5rem; font-weight: 700;" id="tractorIssues">0</span>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 0.875rem; color: var(--text-secondary);">🚚 Trailer Issues</span>
+                            <span style="font-size: 1.5rem; font-weight: 700;" id="trailerIssues">0</span>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 0.875rem; color: var(--text-secondary);">🏗️ Moffett Issues</span>
+                            <span style="font-size: 1.5rem; font-weight: 700;" id="moffettIssues">0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="analytics-panel">
                     <h3 class="analytics-title">📦 Returns Summary</h3>
                     <div class="metric-card">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -1140,7 +1162,7 @@
                 updateConnectionStatus('loading');
                 
                 // Fetch data from multiple endpoints
-                const [notificationsResponse, usersResponse, healthResponse] = await Promise.allSettled([
+                const [notificationsResponse, usersResponse, healthResponse, checkinsResponse] = await Promise.allSettled([
                     fetch(`${API_BASE}/api/notifications?limit=100`, {
                         headers: { 'Accept': 'application/json' }
                     }).catch(err => ({ ok: false, error: err })),
@@ -1151,12 +1173,17 @@
                     
                     fetch(`${API_BASE}/api/health`, {
                         headers: { 'Accept': 'application/json' }
+                    }).catch(err => ({ ok: false, error: err })),
+                    
+                    fetch(`${API_BASE}/api/checkins`, {
+                        headers: { 'Accept': 'application/json' }
                     }).catch(err => ({ ok: false, error: err }))
                 ]);
                 
                 let notifications = [];
                 let users = [];
                 let dbConnected = false;
+                let checkins = [];
                 
                 // Process notifications (driver status updates)
                 if (notificationsResponse.status === 'fulfilled' && notificationsResponse.value.ok) {
@@ -1199,6 +1226,18 @@
                     console.log('✅ Health check result:', dbConnected ? 'Connected' : 'Issues detected');
                 } else {
                     console.log('⚠️ Health endpoint failed');
+                }
+                
+                // Process check-ins (equipment inspections)
+                if (checkinsResponse.status === 'fulfilled' && checkinsResponse.value.ok) {
+                    const result = await checkinsResponse.value.json();
+                    checkins = Array.isArray(result) ? result : (result.data || result.checkins || []);
+                    console.log('✅ Check-ins loaded:', checkins.length);
+                    
+                    // Update equipment issue counts
+                    updateEquipmentIssues(checkins);
+                } else {
+                    console.log('⚠️ Check-ins endpoint failed');
                 }
                 
                 // Merge notifications with user data for complete driver profiles
@@ -1471,6 +1510,51 @@
                 document.getElementById('driversWithReturns').textContent = driversWithReturns;
                 document.getElementById('avgReturns').textContent = avgReturns;
             }
+        }
+        
+        // Update equipment issues from check-ins data
+        function updateEquipmentIssues(checkins) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            let tractorCount = 0, trailerCount = 0, moffettCount = 0;
+            
+            console.log('🔧 Processing equipment issues from check-ins...');
+            
+            checkins.forEach(checkin => {
+                const checkinDate = new Date(checkin.timestamp || checkin.completedAt || checkin.createdAt);
+                
+                // Only count today's check-ins
+                if (checkinDate >= today) {
+                    // Count issues based on equipment condition
+                    if (checkin.tractorCondition && checkin.tractorCondition !== 'good') {
+                        tractorCount++;
+                        console.log(`🚛 Tractor issue found: ${checkin.driverName} - ${checkin.tractorCondition}`);
+                    }
+                    
+                    if (checkin.trailerCondition && checkin.trailerCondition !== 'good') {
+                        trailerCount++;
+                        console.log(`🚚 Trailer issue found: ${checkin.driverName} - ${checkin.trailerCondition}`);
+                    }
+                    
+                    if (checkin.moffettCondition && checkin.moffettCondition !== 'good' && checkin.moffettCondition !== 'na') {
+                        moffettCount++;
+                        console.log(`🏗️ Moffett issue found: ${checkin.driverName} - ${checkin.moffettCondition}`);
+                    }
+                    
+                    // Also check for legacy issue flags
+                    if (checkin.tractorIssue) tractorCount++;
+                    if (checkin.trailerIssue) trailerCount++;
+                    if (checkin.moffettIssue) moffettCount++;
+                }
+            });
+            
+            console.log('🔧 Equipment issues summary:', { tractorCount, trailerCount, moffettCount });
+            
+            // Update the display
+            document.getElementById('tractorIssues').textContent = tractorCount;
+            document.getElementById('trailerIssues').textContent = trailerCount;
+            document.getElementById('moffettIssues').textContent = moffettCount;
         }
         
         // Update activity list with proper filtering
