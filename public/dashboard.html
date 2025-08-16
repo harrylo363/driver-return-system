@@ -803,7 +803,7 @@
         const DAILY_RESET_CONFIG = {
             RESET_TIME: { hour: 23, minute: 55 }, // 11:55 PM
             GOOGLE_WEBHOOK_URL: 'https://script.google.com/macros/s/AKfycbzp0av9VPNYixJrzQ-u2W1fz1wtEeyEXCeZ_tsR7GiU8FDt2yAEPgLTA9Yzryat4sZObA/exec',
-            ENABLE_AUTO_RESET: true // Set to false to disable automatic daily reset
+            ENABLE_AUTO_RESET: false // Disabled since server handles it now
         };
         
         // Global variables
@@ -816,7 +816,6 @@
         let debugMode = false;
         let debugInfo = [];
         let currentEquipmentCheck = null;
-        let dailyResetInterval = null;
         
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
@@ -824,9 +823,9 @@
             log('🔗 API Base: ' + API_BASE);
             log('📍 Warehouse: ' + WAREHOUSE_ADDRESS);
             log('📊 Google Sheets Integration: Enabled');
+            log('⏰ Server handles automatic archive at 11:55 PM');
             
             initializeDashboard();
-            setupDailyResetTimer();
         });
         
         // Debug logging function
@@ -890,66 +889,36 @@
         function checkDailyReset() {
             const today = new Date().toDateString();
             if (lastResetDate !== today) {
-                log('🌅 New day detected, resetting check-ins');
+                log('🌅 New day detected, resetting local storage');
                 completedDrivers.clear();
                 localStorage.removeItem('completedDrivers');
                 localStorage.setItem('lastResetDate', today);
                 lastResetDate = today;
-                showToast('New day detected - check-ins have been reset', 'info');
             }
         }
         
-        // Setup daily reset timer
-        function setupDailyResetTimer() {
-            if (!DAILY_RESET_CONFIG.ENABLE_AUTO_RESET) {
-                log('⏰ Automatic daily reset is disabled');
-                return;
-            }
-            
-            // Clear any existing interval
-            if (dailyResetInterval) {
-                clearInterval(dailyResetInterval);
-            }
-            
-            // Check every minute for reset time
-            dailyResetInterval = setInterval(() => {
-                const now = new Date();
-                const currentHour = now.getHours();
-                const currentMinute = now.getMinutes();
-                
-                if (currentHour === DAILY_RESET_CONFIG.RESET_TIME.hour && 
-                    currentMinute === DAILY_RESET_CONFIG.RESET_TIME.minute) {
-                    log('⏰ Daily reset time reached - starting automated reset');
-                    performDailyReset();
-                }
-            }, 60000); // Check every minute
-            
-            log(`✅ Daily reset scheduled for ${DAILY_RESET_CONFIG.RESET_TIME.hour}:${DAILY_RESET_CONFIG.RESET_TIME.minute.toString().padStart(2, '0')}`);
-        }
-        
-        // FIXED: Perform daily reset with equipment issue reporting
+        // Perform daily reset
         async function performDailyReset() {
             try {
-                log('🌙 Starting nightly archive with equipment issues...');
+                log('🌙 Starting daily archive...');
                 
-                // Stop auto-refresh to prevent data from reloading
+                // Stop auto-refresh
                 if (refreshInterval) {
                     clearInterval(refreshInterval);
                     refreshInterval = null;
                 }
                 
                 // Show loading toast
-                showToast('📊 Sending daily report to Google Sheets...', 'info');
+                showToast('📊 Sending daily report...', 'info');
                 
-                // Collect ALL equipment issues from today
+                // Collect equipment issues
                 const equipmentIssues = collectAllEquipmentIssues();
                 
-                // Prepare complete daily report
+                // Prepare daily report
                 const dailyReport = {
                     date: new Date().toISOString().split('T')[0],
                     time: new Date().toLocaleTimeString(),
                     
-                    // Driver Statistics
                     driverStats: {
                         totalDrivers: allDrivers.length,
                         completed: allDrivers.filter(d => d.status === 'completed').length,
@@ -958,7 +927,6 @@
                         stillWorking: allDrivers.filter(d => d.status === 'working').length
                     },
                     
-                    // Returns Information
                     returns: {
                         totalReturns: allDrivers.reduce((sum, d) => sum + (d.returns || 0), 0),
                         driversWithReturns: allDrivers.filter(d => d.returns > 0).map(d => ({
@@ -967,13 +935,10 @@
                         }))
                     },
                     
-                    // EQUIPMENT ISSUES - Detailed breakdown
                     equipmentIssues: {
                         tractorIssues: equipmentIssues.tractor,
                         trailerIssues: equipmentIssues.trailer,
                         moffettIssues: equipmentIssues.moffett,
-                        
-                        // Summary counts
                         summary: {
                             totalTractorIssues: equipmentIssues.tractor.length,
                             totalTrailerIssues: equipmentIssues.trailer.length,
@@ -984,7 +949,6 @@
                         }
                     },
                     
-                    // Individual driver check-ins with their issues
                     driverCheckIns: allDrivers.filter(d => d.status === 'completed').map(d => ({
                         name: d.name,
                         completedAt: d.completedAt,
@@ -993,23 +957,18 @@
                     }))
                 };
                 
-                // Step 1: Try to archive to MongoDB (optional)
-                try {
-                    await archiveToMongoDB(dailyReport);
-                } catch (error) {
-                    log('⚠️ MongoDB archive skipped: ' + error.message);
-                }
+                // Archive to MongoDB
+                await archiveToMongoDB(dailyReport);
                 
-                // Step 2: Send to Google Sheets with all issue details
+                // Send to Google Sheets
                 await sendDetailedReportToGoogleSheets(dailyReport);
                 
-                // Step 3: Clear today's data completely
+                // Clear daily data
                 await clearDailyData();
                 
-                showToast('✅ Daily report sent! Dashboard has been reset.', 'success');
+                showToast('✅ Daily report sent and data archived!', 'success');
                 
-                // Step 4: Reload the page after a short delay
-                log('🔄 Reloading dashboard in 2 seconds...');
+                // Reload after 2 seconds
                 setTimeout(() => {
                     window.location.reload();
                 }, 2000);
@@ -1017,7 +976,6 @@
             } catch (error) {
                 log('❌ Daily reset failed: ' + error.message, 'error');
                 showToast('Daily reset failed: ' + error.message, 'error');
-                // Restart auto-refresh if reset failed
                 startAutoRefresh();
             }
         }
@@ -1030,7 +988,6 @@
                 moffett: []
             };
             
-            // Collect issues from all completed check-ins
             allDrivers.forEach(driver => {
                 if (driver.equipmentIssues) {
                     Object.entries(driver.equipmentIssues).forEach(([itemId, description]) => {
@@ -1095,17 +1052,14 @@
                 
                 log('✅ Daily report archived to MongoDB');
             } catch (error) {
-                log('⚠️ MongoDB archive failed (continuing): ' + error.message);
-                // Continue even if MongoDB fails - Google Sheets is the backup
+                log('⚠️ MongoDB archive failed: ' + error.message);
             }
         }
         
-        // Send detailed report to Google Sheets
+        // Send report to Google Sheets
         async function sendDetailedReportToGoogleSheets(report) {
             try {
-                // Format for Google Sheets
                 const sheetData = {
-                    // Summary Row
                     summary: [
                         report.date,
                         report.time,
@@ -1114,13 +1068,9 @@
                         report.returns.totalReturns,
                         report.equipmentIssues.summary.totalIssues
                     ],
-                    
-                    // Equipment Issues Details
                     tractorIssues: report.equipmentIssues.tractorIssues,
                     trailerIssues: report.equipmentIssues.trailerIssues,
                     moffettIssues: report.equipmentIssues.moffettIssues,
-                    
-                    // Driver Details
                     drivers: report.driverCheckIns
                 };
                 
@@ -1138,60 +1088,43 @@
             }
         }
         
-        // FIXED: Clear daily data - Now properly resets the dashboard
+        // Clear daily data - SIMPLIFIED
         async function clearDailyData() {
             try {
                 log('🧹 Clearing daily data...');
                 
-                // Step 1: Clear local storage first
+                // Clear local storage
                 completedDrivers.clear();
                 localStorage.removeItem('completedDrivers');
                 localStorage.setItem('lastResetDate', new Date().toDateString());
                 
-                // Step 2: Clear the allDrivers array completely
+                // Clear arrays
                 allDrivers = [];
                 driverMap.clear();
                 
-                // Step 3: Set a timestamp for when data was cleared (prevents reload for 5 minutes)
-                localStorage.setItem('dataClearedTime', new Date().toISOString());
-                
-                // Step 4: Try to clear MongoDB daily data
+                // Clear MongoDB daily data
                 try {
                     const response = await fetch(`${API_BASE}/api/drivers/clear`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' }
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            date: new Date().toISOString().split('T')[0],
+                            clearAll: false 
+                        })
                     });
                     
                     if (response.ok) {
                         log('✅ MongoDB daily data cleared');
-                    } else {
-                        log('⚠️ MongoDB clear endpoint not available (continuing)');
                     }
                 } catch (error) {
-                    log('⚠️ MongoDB clear failed (continuing): ' + error.message);
+                    log('⚠️ MongoDB clear failed: ' + error.message);
                 }
                 
-                // Step 5: Force update the UI to show zeros
-                document.getElementById('activeCount').textContent = '0';
-                document.getElementById('enrouteCount').textContent = '0';
-                document.getElementById('arrivedCount').textContent = '0';
-                document.getElementById('completedCount').textContent = '0';
-                document.getElementById('workingCount').textContent = '0';
-                document.getElementById('returnsKpiCount').textContent = '0';
-                document.getElementById('returnsSublabel').textContent = 'From 0 drivers';
-                
-                document.getElementById('totalReturnsToday').textContent = '0';
-                document.getElementById('driversWithReturns').textContent = '0';
-                document.getElementById('avgReturns').textContent = '0';
-                
-                document.getElementById('tractorIssues').textContent = '0';
-                document.getElementById('trailerIssues').textContent = '0';
-                document.getElementById('moffettIssues').textContent = '0';
-                
-                // Step 6: Clear the activity feed
+                // Update UI
+                updateKPIs();
                 showEmptyState();
                 
-                log('✅ Daily data cleared successfully - will stay cleared for 5 minutes');
+                log('✅ Daily data cleared successfully');
                 
             } catch (error) {
                 log('❌ Error clearing data: ' + error.message);
@@ -1199,37 +1132,16 @@
             }
         }
         
-        // Manual daily reset (button click)
+        // Manual daily reset
         async function manualDailyReset() {
-            if (confirm('Are you sure you want to end the day and archive all data? This will send the report to Google Sheets and clear the dashboard.')) {
+            if (confirm('Are you sure you want to end the day and archive all data?')) {
                 await performDailyReset();
             }
         }
         
-        // Load data from MongoDB
+        // Load data from MongoDB - SIMPLIFIED
         async function loadDataFromMongoDB() {
             try {
-                // Check if data was recently cleared - skip loading for a period after clearing
-                const dataClearedTime = localStorage.getItem('dataClearedTime');
-                if (dataClearedTime) {
-                    const clearTime = new Date(dataClearedTime);
-                    const now = new Date();
-                    const minutesSinceCleared = (now - clearTime) / (1000 * 60);
-                    
-                    // Skip loading for 5 minutes after clearing to prevent old data from returning
-                    if (minutesSinceCleared < 5) {
-                        log('📊 Data was cleared ' + Math.round(minutesSinceCleared) + ' minutes ago, skipping MongoDB load');
-                        updateConnectionStatus('connected', 'Dashboard Reset - Waiting for new data');
-                        allDrivers = [];
-                        updateKPIs();
-                        showEmptyState();
-                        return;
-                    } else {
-                        // Clear the flag after 5 minutes
-                        localStorage.removeItem('dataClearedTime');
-                    }
-                }
-                
                 log('📡 Loading data from MongoDB Atlas...');
                 updateConnectionStatus('loading');
                 
@@ -1245,7 +1157,6 @@
                 
                 for (const endpoint of endpoints) {
                     try {
-                        log(`🔍 Testing endpoint: ${endpoint}`);
                         const response = await fetch(`${API_BASE}${endpoint}`, {
                             method: 'GET',
                             headers: { 
@@ -1258,13 +1169,11 @@
                             const data = await response.json();
                             results[endpoint] = data;
                             hasConnection = true;
-                            log(`✅ ${endpoint} responded successfully`);
+                            log(`✅ ${endpoint} responded`);
                         } else {
-                            log(`⚠️ ${endpoint} returned status: ${response.status}`);
                             results[endpoint] = { error: `HTTP ${response.status}` };
                         }
                     } catch (error) {
-                        log(`❌ ${endpoint} failed: ${error.message}`);
                         results[endpoint] = { error: error.message };
                     }
                 }
@@ -1273,7 +1182,7 @@
                     updateConnectionStatus('connected');
                     processMongoData(results);
                 } else {
-                    updateConnectionStatus('error', 'All endpoints failed');
+                    updateConnectionStatus('error', 'Connection failed');
                     showEmptyState();
                 }
                 
@@ -1281,10 +1190,9 @@
                     'Last updated: ' + new Date().toLocaleTimeString();
                 
             } catch (error) {
-                log('❌ MongoDB connection failed: ' + error.message, 'error');
+                log('❌ MongoDB connection failed: ' + error.message);
                 updateConnectionStatus('error');
                 showEmptyState();
-                showToast('Failed to connect to MongoDB', 'error');
             }
         }
         
@@ -1295,9 +1203,8 @@
             }
             
             refreshInterval = setInterval(() => {
-                log('🔄 Auto-refreshing from MongoDB...');
                 loadDataFromMongoDB();
-            }, 30000);
+            }, 30000); // Refresh every 30 seconds
         }
         
         // Update connection status
@@ -1329,22 +1236,9 @@
             }
         }
         
-        // Process MongoDB data
+        // Process MongoDB data - SIMPLIFIED
         function processMongoData(results) {
             try {
-                // Don't process any data if we're in the clear period
-                const dataClearedTime = localStorage.getItem('dataClearedTime');
-                if (dataClearedTime) {
-                    const clearTime = new Date(dataClearedTime);
-                    const now = new Date();
-                    const minutesSinceCleared = (now - clearTime) / (1000 * 60);
-                    
-                    if (minutesSinceCleared < 5) {
-                        log('📊 Skipping data processing - in clear period');
-                        return;
-                    }
-                }
-                
                 let notifications = [];
                 if (results['/api/notifications'] && !results['/api/notifications'].error) {
                     const notifData = results['/api/notifications'];
@@ -1371,7 +1265,7 @@
                 updateActivityFeed();
                 
             } catch (error) {
-                log('❌ Error processing MongoDB data: ' + error.message, 'error');
+                log('❌ Error processing data: ' + error.message);
                 showEmptyState();
             }
         }
@@ -1400,6 +1294,11 @@
             document.getElementById('avgReturns').textContent = 
                 stats.driversWithReturns > 0 ? 
                 Math.round((stats.totalReturns / stats.driversWithReturns) * 10) / 10 : 0;
+            
+            // Reset equipment issues (would need to be calculated from driver data)
+            document.getElementById('tractorIssues').textContent = '0';
+            document.getElementById('trailerIssues').textContent = '0';
+            document.getElementById('moffettIssues').textContent = '0';
         }
         
         // Update activity feed
@@ -1455,8 +1354,8 @@
             activityList.innerHTML = `
                 <div class="empty-state">
                     <div class="empty-icon">📭</div>
-                    <p>No driver activity available</p>
-                    <p style="font-size: 0.875rem; margin-top: 1rem;">Dashboard has been reset</p>
+                    <p>No driver activity today</p>
+                    <p style="font-size: 0.875rem; margin-top: 1rem;">Ready for new check-ins</p>
                 </div>
             `;
         }
@@ -1489,51 +1388,45 @@
         async function testMongoConnection() {
             try {
                 log('🧪 Testing MongoDB connection...');
-                updateConnectionStatus('loading', 'Testing connection...');
+                updateConnectionStatus('loading', 'Testing...');
                 
                 const response = await fetch(`${API_BASE}/api/health`);
                 
                 if (response.ok) {
-                    updateConnectionStatus('connected', 'Connection test passed');
-                    showToast('MongoDB connection test successful!', 'success');
+                    const data = await response.json();
+                    updateConnectionStatus('connected', 'Test passed');
+                    showToast('✅ MongoDB connection successful!', 'success');
+                    log(`Server reports: Next archive at ${data.nextArchive || '11:55 PM'}`);
                 } else {
-                    updateConnectionStatus('error', 'Connection test failed');
-                    showToast('MongoDB connection test failed', 'error');
+                    updateConnectionStatus('error', 'Test failed');
+                    showToast('Connection test failed', 'error');
                 }
             } catch (error) {
-                updateConnectionStatus('error', 'Connection test error');
-                showToast('MongoDB connection test error', 'error');
+                updateConnectionStatus('error', 'Test error');
+                showToast('Connection test error', 'error');
             }
         }
         
-        // Clear daily check-ins
+        // Clear daily check-ins - SIMPLIFIED
         function clearDailyCheckIns() {
             if (confirm('Are you sure you want to clear all daily check-ins?')) {
-                completedDrivers.clear();
-                localStorage.removeItem('completedDrivers');
-                localStorage.setItem('dataClearedTime', new Date().toISOString()); // Set timestamp instead of flag
                 allDrivers = [];
                 driverMap.clear();
+                completedDrivers.clear();
+                localStorage.removeItem('completedDrivers');
                 
-                // Force all KPIs to zero immediately
-                document.getElementById('activeCount').textContent = '0';
-                document.getElementById('enrouteCount').textContent = '0';
-                document.getElementById('arrivedCount').textContent = '0';
-                document.getElementById('completedCount').textContent = '0';
-                document.getElementById('workingCount').textContent = '0';
-                document.getElementById('returnsKpiCount').textContent = '0';
-                document.getElementById('returnsSublabel').textContent = 'From 0 drivers';
-                
-                document.getElementById('totalReturnsToday').textContent = '0';
-                document.getElementById('driversWithReturns').textContent = '0';
-                document.getElementById('avgReturns').textContent = '0';
-                
-                document.getElementById('tractorIssues').textContent = '0';
-                document.getElementById('trailerIssues').textContent = '0';
-                document.getElementById('moffettIssues').textContent = '0';
-                
+                updateKPIs();
                 showEmptyState();
-                showToast('Daily check-ins have been cleared - will stay cleared for 5 minutes', 'info');
+                showToast('Daily check-ins cleared', 'info');
+                
+                // Also clear on server
+                fetch(`${API_BASE}/api/drivers/clear`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        date: new Date().toISOString().split('T')[0]
+                    })
+                });
             }
         }
         
