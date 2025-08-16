@@ -1818,7 +1818,22 @@
         function clearAllDashboardData() {
             showToast('Processing', 'Clearing all dashboard data...', 'info');
             
-            // List of all dashboard-related localStorage keys
+            // Get ALL localStorage keys
+            const allKeys = Object.keys(localStorage);
+            let clearedCount = 0;
+            let preservedKeys = ['fleetforce_users', 'fleetforce_audit_log', 'notificationSettings', 'globalNotifications'];
+            
+            // Clear ALL localStorage items except user-related ones
+            allKeys.forEach(key => {
+                // Skip user management and audit log keys
+                if (!preservedKeys.includes(key) && !key.includes('user')) {
+                    localStorage.removeItem(key);
+                    clearedCount++;
+                    console.log('Removed localStorage key:', key);
+                }
+            });
+            
+            // Specifically clear known dashboard keys (in case they were missed)
             const dashboardKeys = [
                 'fleetforce_vehicles',
                 'fleetforce_deliveries',
@@ -1835,38 +1850,40 @@
                 'routeData',
                 'performanceData',
                 'alertsData',
-                'trackingData'
+                'trackingData',
+                'completedDrivers',
+                'lastResetDate',
+                'checkoutUrls',
+                'checkedOutDrivers',
+                'driverCheckouts',
+                'notifications',
+                'drivers',
+                'checkins',
+                'equipment',
+                'health'
             ];
             
-            // Clear each dashboard-related item
-            let clearedCount = 0;
             dashboardKeys.forEach(key => {
                 if (localStorage.getItem(key)) {
                     localStorage.removeItem(key);
                     clearedCount++;
+                    console.log('Removed dashboard key:', key);
                 }
             });
             
-            // Also clear any session storage related to dashboard
-            const sessionKeys = [
-                'currentRoute',
-                'activeVehicles',
-                'liveTracking',
-                'tempMetrics'
-            ];
-            
+            // Clear ALL sessionStorage
+            const sessionKeys = Object.keys(sessionStorage);
             sessionKeys.forEach(key => {
-                if (sessionStorage.getItem(key)) {
-                    sessionStorage.removeItem(key);
-                    clearedCount++;
-                }
+                sessionStorage.removeItem(key);
+                clearedCount++;
+                console.log('Removed sessionStorage key:', key);
             });
             
             // Show success message
             setTimeout(() => {
                 showToast(
                     'Success', 
-                    `Dashboard data cleared successfully. ${clearedCount} data sets removed.`, 
+                    `Dashboard data cleared successfully. ${clearedCount} data sets removed. Please refresh the dashboard page.`, 
                     'success'
                 );
                 
@@ -1875,7 +1892,8 @@
                     action: 'DASHBOARD_DATA_CLEARED',
                     timestamp: new Date().toISOString(),
                     clearedItems: clearedCount,
-                    performedBy: 'System Admin'
+                    performedBy: 'System Admin',
+                    details: 'Cleared all non-user localStorage and sessionStorage'
                 };
                 
                 // Store in audit log
@@ -1884,6 +1902,7 @@
                 localStorage.setItem('fleetforce_audit_log', JSON.stringify(auditLog));
                 
                 console.log('Dashboard data cleared:', clearLog);
+                console.log('Remaining localStorage keys:', Object.keys(localStorage));
             }, 1000);
         }
         
