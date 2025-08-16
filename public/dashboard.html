@@ -486,32 +486,6 @@
             border: 1px solid rgba(100, 116, 139, 0.3);
         }
         
-        .checkin-btn {
-            padding: 0.5rem 1rem;
-            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            animation: pulseGreen 2s infinite;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
-        
-        @keyframes pulseGreen {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
-            50% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
-        }
-        
-        .checkin-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
-        }
-        
         .analytics-panel {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -551,490 +525,6 @@
             font-size: 4rem;
             margin-bottom: 1rem;
             opacity: 0.3;
-        }
-        
-        /* Equipment Check-In Modal Styles */
-        .checkin-modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(8px);
-            z-index: 9999;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        .checkin-modal-overlay.active {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .checkin-modal {
-            background: linear-gradient(145deg, #1A1F2E 0%, #0F172A 100%);
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            border-radius: 24px;
-            width: 95%;
-            max-width: 1200px;
-            max-height: 90vh;
-            overflow: hidden;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            animation: slideUp 0.4s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        @keyframes slideUp {
-            from { transform: translateY(100px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        
-        .checkin-header {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
-            border-bottom: 1px solid rgba(59, 130, 246, 0.2);
-            padding: 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .checkin-header-left {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-        
-        .checkin-logo {
-            width: 56px;
-            height: 56px;
-            background: linear-gradient(135deg, #3B82F6 0%, #10B981 100%);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
-        }
-        
-        .checkin-title h2 {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: #F8FAFC;
-            margin: 0 0 4px 0;
-            letter-spacing: -0.02em;
-        }
-        
-        .checkin-title p {
-            font-size: 0.875rem;
-            color: #94A3B8;
-            margin: 0;
-        }
-        
-        .checkin-close {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.2);
-            color: #EF4444;
-            font-size: 1.5rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-        }
-        
-        .checkin-close:hover {
-            background: rgba(239, 68, 68, 0.2);
-            transform: rotate(90deg);
-        }
-        
-        .checkin-body {
-            padding: 2rem;
-            max-height: calc(90vh - 200px);
-            overflow-y: auto;
-        }
-        
-        /* Custom Scrollbar */
-        .checkin-body::-webkit-scrollbar {
-            width: 8px;
-        }
-        
-        .checkin-body::-webkit-scrollbar-track {
-            background: rgba(100, 116, 139, 0.1);
-            border-radius: 4px;
-        }
-        
-        .checkin-body::-webkit-scrollbar-thumb {
-            background: rgba(59, 130, 246, 0.3);
-            border-radius: 4px;
-        }
-        
-        .checkin-body::-webkit-scrollbar-thumb:hover {
-            background: rgba(59, 130, 246, 0.5);
-        }
-        
-        /* Driver Info Card */
-        .driver-info-card {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            border-radius: 16px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .driver-details {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-        
-        .driver-avatar-modal {
-            width: 64px;
-            height: 64px;
-            background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            font-weight: 700;
-            color: white;
-            box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
-        }
-        
-        .driver-name-modal {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: #F8FAFC;
-            margin-bottom: 4px;
-        }
-        
-        .driver-meta {
-            display: flex;
-            gap: 1.5rem;
-            font-size: 0.875rem;
-            color: #94A3B8;
-        }
-        
-        .driver-meta span {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        /* Equipment Section */
-        .equipment-section {
-            background: rgba(30, 37, 50, 0.5);
-            border: 1px solid rgba(100, 116, 139, 0.2);
-            border-radius: 16px;
-            overflow: hidden;
-            margin-bottom: 1.5rem;
-            transition: all 0.3s ease;
-        }
-        
-        .equipment-section:hover {
-            border-color: rgba(59, 130, 246, 0.3);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-        }
-        
-        .equipment-header {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
-            padding: 1.25rem 1.5rem;
-            border-bottom: 1px solid rgba(100, 116, 139, 0.2);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .equipment-header-left {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-        
-        .equipment-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-        }
-        
-        .equipment-icon.tractor {
-            background: rgba(59, 130, 246, 0.15);
-        }
-        
-        .equipment-icon.trailer {
-            background: rgba(245, 158, 11, 0.15);
-        }
-        
-        .equipment-icon.moffett {
-            background: rgba(16, 185, 129, 0.15);
-        }
-        
-        .equipment-title {
-            font-size: 1rem;
-            font-weight: 700;
-            color: #F8FAFC;
-            margin: 0;
-        }
-        
-        .equipment-subtitle {
-            font-size: 0.75rem;
-            color: #94A3B8;
-            margin: 2px 0 0 0;
-        }
-        
-        .section-status {
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        
-        .status-pending {
-            background: rgba(100, 116, 139, 0.15);
-            color: #94A3B8;
-        }
-        
-        .status-complete {
-            background: rgba(16, 185, 129, 0.15);
-            color: #10B981;
-        }
-        
-        .equipment-body {
-            padding: 1.5rem;
-        }
-        
-        .equipment-number-field {
-            margin-bottom: 1.5rem;
-        }
-        
-        .equipment-number-label {
-            display: block;
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: #F8FAFC;
-            margin-bottom: 0.5rem;
-        }
-        
-        .equipment-number-input {
-            width: 100%;
-            padding: 0.875rem 1rem;
-            background: rgba(15, 23, 42, 0.8);
-            border: 2px solid rgba(100, 116, 139, 0.3);
-            border-radius: 12px;
-            color: #F8FAFC;
-            font-size: 1rem;
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-        
-        .equipment-number-input:focus {
-            outline: none;
-            border-color: #3B82F6;
-            background: rgba(15, 23, 42, 1);
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
-        }
-        
-        .equipment-number-input::placeholder {
-            color: #64748B;
-        }
-        
-        .inspection-items {
-            display: grid;
-            gap: 0.75rem;
-        }
-        
-        .inspection-item {
-            background: rgba(15, 23, 42, 0.5);
-            border: 1px solid rgba(100, 116, 139, 0.2);
-            border-radius: 12px;
-            padding: 1rem;
-            transition: all 0.2s ease;
-        }
-        
-        .inspection-item:hover {
-            background: rgba(15, 23, 42, 0.8);
-            border-color: rgba(59, 130, 246, 0.2);
-        }
-        
-        .inspection-item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0;
-        }
-        
-        .inspection-item-name {
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: #F8FAFC;
-        }
-        
-        .inspection-controls {
-            display: flex;
-            gap: 0.5rem;
-        }
-        
-        .inspection-btn {
-            padding: 6px 12px;
-            border: 2px solid rgba(100, 116, 139, 0.3);
-            background: rgba(30, 37, 50, 0.8);
-            border-radius: 8px;
-            color: #94A3B8;
-            font-size: 0.75rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .inspection-btn:hover {
-            border-color: rgba(59, 130, 246, 0.5);
-            background: rgba(59, 130, 246, 0.2);
-            color: #F8FAFC;
-            transform: scale(1.05);
-        }
-        
-        .inspection-btn.active-pass {
-            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-            border-color: #10B981;
-            color: white;
-            font-weight: 700;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
-        }
-        
-        .inspection-btn.active-fail {
-            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
-            border-color: #EF4444;
-            color: white;
-            font-weight: 700;
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
-        }
-        
-        .issue-description {
-            margin-top: 0.75rem;
-            display: none;
-        }
-        
-        .issue-description.show {
-            display: block;
-        }
-        
-        .issue-input {
-            width: 100%;
-            padding: 0.5rem 0.75rem;
-            background: rgba(15, 23, 42, 0.8);
-            border: 2px solid rgba(239, 68, 68, 0.3);
-            border-radius: 8px;
-            color: #F8FAFC;
-            font-size: 0.875rem;
-            transition: all 0.2s ease;
-        }
-        
-        .issue-input:focus {
-            outline: none;
-            border-color: #EF4444;
-            background: rgba(15, 23, 42, 1);
-            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
-        }
-        
-        .issue-input::placeholder {
-            color: #64748B;
-        }
-        
-        /* Action Footer */
-        .checkin-footer {
-            background: rgba(30, 37, 50, 0.8);
-            border-top: 1px solid rgba(100, 116, 139, 0.2);
-            padding: 1.5rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .footer-stats {
-            display: flex;
-            gap: 2rem;
-        }
-        
-        .footer-stat {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.875rem;
-            font-weight: 600;
-        }
-        
-        .footer-stat.pass {
-            color: #10B981;
-        }
-        
-        .footer-stat.fail {
-            color: #EF4444;
-        }
-        
-        .footer-actions {
-            display: flex;
-            gap: 1rem;
-        }
-        
-        .btn-cancel {
-            padding: 0.875rem 1.75rem;
-            background: rgba(100, 116, 139, 0.15);
-            border: 1px solid rgba(100, 116, 139, 0.3);
-            border-radius: 12px;
-            color: #F8FAFC;
-            font-size: 0.875rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .btn-cancel:hover {
-            background: rgba(100, 116, 139, 0.25);
-            transform: translateY(-2px);
-        }
-        
-        .btn-submit {
-            padding: 0.875rem 1.75rem;
-            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-size: 0.875rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-        }
-        
-        .btn-submit:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
-        }
-        
-        .btn-submit:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
         }
 
         /* Toast notification styles */
@@ -1304,156 +794,15 @@
         </div>
     </div>
 
-    <!-- Equipment Check-In Modal -->
-    <div id="equipmentCheckInModal" class="checkin-modal-overlay">
-        <div class="checkin-modal">
-            <!-- Header -->
-            <div class="checkin-header">
-                <div class="checkin-header-left">
-                    <div class="checkin-logo">📋</div>
-                    <div class="checkin-title">
-                        <h2>Equipment Inspection Check-In</h2>
-                        <p>Complete pre-trip inspection for all equipment</p>
-                    </div>
-                </div>
-                <button class="checkin-close" onclick="closeEquipmentModal()">&times;</button>
-            </div>
-            
-            <!-- Body -->
-            <div class="checkin-body">
-                <!-- Driver Info Card -->
-                <div class="driver-info-card">
-                    <div class="driver-details">
-                        <div class="driver-avatar-modal" id="modalDriverAvatar">JD</div>
-                        <div>
-                            <div class="driver-name-modal" id="modalDriverName">Driver Name</div>
-                            <div class="driver-meta">
-                                <span>🕐 <span id="modalCheckTime">6:45 AM</span></span>
-                                <span>📍 Apollo Beach, FL</span>
-                                <span id="modalReturnsInfo" style="display: none;">📦 <span id="modalReturnsCount">0</span> Returns</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <form id="equipmentCheckInForm">
-                    <input type="hidden" id="modalDriverId">
-                    
-                    <!-- Tractor Section -->
-                    <div class="equipment-section">
-                        <div class="equipment-header">
-                            <div class="equipment-header-left">
-                                <div class="equipment-icon tractor">🚛</div>
-                                <div>
-                                    <div class="equipment-title">Tractor Inspection</div>
-                                    <div class="equipment-subtitle">12 inspection points</div>
-                                </div>
-                            </div>
-                            <span class="section-status status-pending" id="tractorStatus">PENDING</span>
-                        </div>
-                        <div class="equipment-body">
-                            <div class="equipment-number-field">
-                                <label class="equipment-number-label">Tractor Number *</label>
-                                <input type="text" 
-                                       class="equipment-number-input" 
-                                       id="tractorNumber" 
-                                       placeholder="Enter tractor number (e.g., TRUCK-001)"
-                                       required>
-                            </div>
-                            <div class="inspection-items" id="tractorItems">
-                                <!-- Tractor inspection items will be generated by JavaScript -->
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Trailer Section -->
-                    <div class="equipment-section">
-                        <div class="equipment-header">
-                            <div class="equipment-header-left">
-                                <div class="equipment-icon trailer">🚚</div>
-                                <div>
-                                    <div class="equipment-title">Trailer Inspection</div>
-                                    <div class="equipment-subtitle">6 inspection points</div>
-                                </div>
-                            </div>
-                            <span class="section-status status-pending" id="trailerStatus">PENDING</span>
-                        </div>
-                        <div class="equipment-body">
-                            <div class="equipment-number-field">
-                                <label class="equipment-number-label">Trailer Number *</label>
-                                <input type="text" 
-                                       class="equipment-number-input" 
-                                       id="trailerNumber" 
-                                       placeholder="Enter trailer number (e.g., TRL-001)"
-                                       required>
-                            </div>
-                            <div class="inspection-items" id="trailerItems">
-                                <!-- Trailer inspection items will be generated by JavaScript -->
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Moffett Section -->
-                    <div class="equipment-section">
-                        <div class="equipment-header">
-                            <div class="equipment-header-left">
-                                <div class="equipment-icon moffett">🏗️</div>
-                                <div>
-                                    <div class="equipment-title">Moffett Inspection</div>
-                                    <div class="equipment-subtitle">5 inspection points</div>
-                                </div>
-                            </div>
-                            <span class="section-status status-pending" id="moffettStatus">PENDING</span>
-                        </div>
-                        <div class="equipment-body">
-                            <div class="equipment-number-field">
-                                <label class="equipment-number-label">Moffett Number *</label>
-                                <input type="text" 
-                                       class="equipment-number-input" 
-                                       id="moffettNumber" 
-                                       placeholder="Enter moffett number (e.g., MFT-001)"
-                                       required>
-                            </div>
-                            <div class="inspection-items" id="moffettItems">
-                                <!-- Moffett inspection items will be generated by JavaScript -->
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            
-            <!-- Footer -->
-            <div class="checkin-footer">
-                <div class="footer-stats">
-                    <div class="footer-stat pass">
-                        <span>✅</span>
-                        <span>Passed: <span id="passedCount">0</span></span>
-                    </div>
-                    <div class="footer-stat fail">
-                        <span>❌</span>
-                        <span>Issues: <span id="failedCount">0</span></span>
-                    </div>
-                </div>
-                <div class="footer-actions">
-                    <button type="button" class="btn-cancel" onclick="closeEquipmentModal()">Cancel</button>
-                    <button type="button" class="btn-submit" id="submitCheckInBtn" onclick="submitEquipmentCheckIn()" disabled>
-                        <span>✅</span>
-                        <span>Complete Check-In</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script>
         // Configuration for Railway + MongoDB Atlas
         const API_BASE = window.location.origin;
         const WAREHOUSE_ADDRESS = "6995 N US-41, Apollo Beach, FL 33572";
         
-        // DAILY RESET CONFIGURATION
+        // DAILY RESET CONFIGURATION WITH YOUR GOOGLE SCRIPT URL
         const DAILY_RESET_CONFIG = {
             RESET_TIME: { hour: 23, minute: 55 }, // 11:55 PM
-            GOOGLE_WEBHOOK_URL: 'YOUR_GOOGLE_APPS_SCRIPT_URL', // Replace with your Google Apps Script URL
+            GOOGLE_WEBHOOK_URL: 'https://script.google.com/macros/s/AKfycbzp0av9VPNYixJrzQ-u2W1fz1wtEeyEXCeZ_tsR7GiU8FDt2yAEPgLTA9Yzryat4sZObA/exec',
             ENABLE_AUTO_RESET: true // Set to false to disable automatic daily reset
         };
         
@@ -1474,10 +823,10 @@
             log('🚀 Fleet Command Center - MongoDB Atlas Integration');
             log('🔗 API Base: ' + API_BASE);
             log('📍 Warehouse: ' + WAREHOUSE_ADDRESS);
+            log('📊 Google Sheets Integration: Enabled');
             
             initializeDashboard();
-            setupEquipmentInputListeners();
-            setupDailyResetTimer(); // NEW: Setup daily reset timer
+            setupDailyResetTimer();
         });
         
         // Debug logging function
@@ -1521,7 +870,36 @@
             startAutoRefresh();
         }
         
-        // NEW: Setup daily reset timer
+        // Load stored state from localStorage
+        function loadStoredState() {
+            const storedCompleted = localStorage.getItem('completedDrivers');
+            if (storedCompleted) {
+                try {
+                    completedDrivers = new Set(JSON.parse(storedCompleted));
+                    log('📂 Loaded completed drivers: ' + [...completedDrivers].length);
+                } catch (e) {
+                    log('❌ Error loading completed drivers: ' + e.message, 'error');
+                    completedDrivers = new Set();
+                }
+            }
+            
+            lastResetDate = localStorage.getItem('lastResetDate');
+        }
+        
+        // Check if it's a new day and reset if needed
+        function checkDailyReset() {
+            const today = new Date().toDateString();
+            if (lastResetDate !== today) {
+                log('🌅 New day detected, resetting check-ins');
+                completedDrivers.clear();
+                localStorage.removeItem('completedDrivers');
+                localStorage.setItem('lastResetDate', today);
+                lastResetDate = today;
+                showToast('New day detected - check-ins have been reset', 'info');
+            }
+        }
+        
+        // Setup daily reset timer
         function setupDailyResetTimer() {
             if (!DAILY_RESET_CONFIG.ENABLE_AUTO_RESET) {
                 log('⏰ Automatic daily reset is disabled');
@@ -1549,87 +927,84 @@
             log(`✅ Daily reset scheduled for ${DAILY_RESET_CONFIG.RESET_TIME.hour}:${DAILY_RESET_CONFIG.RESET_TIME.minute.toString().padStart(2, '0')}`);
         }
         
-        // NEW: Perform daily reset with equipment issue reporting
-async function performDailyReset() {
-    try {
-        log('🌙 Starting nightly archive with equipment issues...');
-        
-        // Collect ALL equipment issues from today
-        const equipmentIssues = collectAllEquipmentIssues();
-        
-        // Prepare complete daily report
-        const dailyReport = {
-            date: new Date().toISOString().split('T')[0],
-            time: new Date().toLocaleTimeString(),
-            
-            // Driver Statistics
-            driverStats: {
-                totalDrivers: allDrivers.length,
-                completed: allDrivers.filter(d => d.status === 'completed').length,
-                arrived: allDrivers.filter(d => d.status === 'arrived').length,
-                enRoute: allDrivers.filter(d => d.status === 'en-route').length,
-                stillWorking: allDrivers.filter(d => d.status === 'working').length
-            },
-            
-            // Returns Information
-            returns: {
-                totalReturns: allDrivers.reduce((sum, d) => sum + (d.returns || 0), 0),
-                driversWithReturns: allDrivers.filter(d => d.returns > 0).map(d => ({
-                    name: d.name,
-                    returnCount: d.returns
-                }))
-            },
-            
-            // EQUIPMENT ISSUES - Detailed breakdown
-            equipmentIssues: {
-                tractorIssues: equipmentIssues.tractor,
-                trailerIssues: equipmentIssues.trailer,
-                moffettIssues: equipmentIssues.moffett,
+        // Perform daily reset with equipment issue reporting
+        async function performDailyReset() {
+            try {
+                log('🌙 Starting nightly archive with equipment issues...');
                 
-                // Summary counts
-                summary: {
-                    totalTractorIssues: equipmentIssues.tractor.length,
-                    totalTrailerIssues: equipmentIssues.trailer.length,
-                    totalMoffettIssues: equipmentIssues.moffett.length,
-                    totalIssues: equipmentIssues.tractor.length + 
-                                equipmentIssues.trailer.length + 
-                                equipmentIssues.moffett.length
-                }
-            },
-            
-            // Individual driver check-ins with their issues
-            driverCheckIns: allDrivers.filter(d => d.status === 'completed').map(d => ({
-                name: d.name,
-                completedAt: d.completedAt,
-                returns: d.returns || 0,
-                equipmentIssues: d.equipmentIssues || {}
-            }))
-        };
-        
-        // Step 1: Archive to MongoDB
-        await archiveToMongoDB(dailyReport);
-        
-        // Step 2: Send to Google Sheets with all issue details
-        if (DAILY_RESET_CONFIG.GOOGLE_WEBHOOK_URL && 
-            DAILY_RESET_CONFIG.GOOGLE_WEBHOOK_URL !== 'YOUR_GOOGLE_APPS_SCRIPT_URL') {
-            await sendDetailedReportToGoogleSheets(dailyReport);
+                // Collect ALL equipment issues from today
+                const equipmentIssues = collectAllEquipmentIssues();
+                
+                // Prepare complete daily report
+                const dailyReport = {
+                    date: new Date().toISOString().split('T')[0],
+                    time: new Date().toLocaleTimeString(),
+                    
+                    // Driver Statistics
+                    driverStats: {
+                        totalDrivers: allDrivers.length,
+                        completed: allDrivers.filter(d => d.status === 'completed').length,
+                        arrived: allDrivers.filter(d => d.status === 'arrived').length,
+                        enRoute: allDrivers.filter(d => d.status === 'en-route').length,
+                        stillWorking: allDrivers.filter(d => d.status === 'working').length
+                    },
+                    
+                    // Returns Information
+                    returns: {
+                        totalReturns: allDrivers.reduce((sum, d) => sum + (d.returns || 0), 0),
+                        driversWithReturns: allDrivers.filter(d => d.returns > 0).map(d => ({
+                            name: d.name,
+                            returnCount: d.returns
+                        }))
+                    },
+                    
+                    // EQUIPMENT ISSUES - Detailed breakdown
+                    equipmentIssues: {
+                        tractorIssues: equipmentIssues.tractor,
+                        trailerIssues: equipmentIssues.trailer,
+                        moffettIssues: equipmentIssues.moffett,
+                        
+                        // Summary counts
+                        summary: {
+                            totalTractorIssues: equipmentIssues.tractor.length,
+                            totalTrailerIssues: equipmentIssues.trailer.length,
+                            totalMoffettIssues: equipmentIssues.moffett.length,
+                            totalIssues: equipmentIssues.tractor.length + 
+                                        equipmentIssues.trailer.length + 
+                                        equipmentIssues.moffett.length
+                        }
+                    },
+                    
+                    // Individual driver check-ins with their issues
+                    driverCheckIns: allDrivers.filter(d => d.status === 'completed').map(d => ({
+                        name: d.name,
+                        completedAt: d.completedAt,
+                        returns: d.returns || 0,
+                        equipmentIssues: d.equipmentIssues || {}
+                    }))
+                };
+                
+                // Step 1: Archive to MongoDB
+                await archiveToMongoDB(dailyReport);
+                
+                // Step 2: Send to Google Sheets with all issue details
+                await sendDetailedReportToGoogleSheets(dailyReport);
+                
+                // Step 3: Clear today's data
+                await clearDailyData();
+                
+                showToast('✅ Daily report sent! Equipment issues documented.', 'success');
+                
+                // Reload dashboard for fresh start
+                setTimeout(() => window.location.reload(), 3000);
+                
+            } catch (error) {
+                log('❌ Daily reset failed: ' + error.message, 'error');
+                showToast('Daily reset failed: ' + error.message, 'error');
+            }
         }
         
-        // Step 3: Clear today's data
-        await clearDailyData();
-        
-        showToast('✅ Daily report sent! Equipment issues documented.', 'success');
-        
-        // Reload dashboard for fresh start
-        setTimeout(() => window.location.reload(), 3000);
-        
-    } catch (error) {
-        log('❌ Daily reset failed: ' + error.message, 'error');
-        showToast('Daily reset failed: ' + error.message, 'error');
-    }
-}
-        
-        // NEW: Collect all equipment issues
+        // Collect all equipment issues
         function collectAllEquipmentIssues() {
             const issues = {
                 tractor: [],
@@ -1665,7 +1040,7 @@ async function performDailyReset() {
             return issues;
         }
         
-        // NEW: Get inspection item name
+        // Get inspection item name
         function getInspectionItemName(type, index) {
             const inspectionItems = {
                 tractor: [
@@ -1687,7 +1062,7 @@ async function performDailyReset() {
             return inspectionItems[type]?.[index] || `Item ${index}`;
         }
         
-        // NEW: Archive to MongoDB
+        // Archive to MongoDB
         async function archiveToMongoDB(report) {
             try {
                 const response = await fetch(`${API_BASE}/api/archive`, {
@@ -1707,7 +1082,7 @@ async function performDailyReset() {
             }
         }
         
-        // NEW: Send detailed report to Google Sheets
+        // Send detailed report to Google Sheets
         async function sendDetailedReportToGoogleSheets(report) {
             try {
                 // Format for Google Sheets
@@ -1745,7 +1120,7 @@ async function performDailyReset() {
             }
         }
         
-        // NEW: Clear daily data
+        // Clear daily data
         async function clearDailyData() {
             try {
                 // Clear local storage
@@ -1769,9 +1144,312 @@ async function performDailyReset() {
             }
         }
         
-        // NEW: Manual daily reset (button click)
+        // Manual daily reset (button click)
         async function manualDailyReset() {
             if (confirm('Are you sure you want to end the day and archive all data? This will send the report to Google Sheets and clear the dashboard.')) {
                 await performDailyReset();
             }
         }
+        
+        // Load data from MongoDB
+        async function loadDataFromMongoDB() {
+            try {
+                log('📡 Loading data from MongoDB Atlas...');
+                updateConnectionStatus('loading');
+                
+                const endpoints = [
+                    '/api/health',
+                    '/api/notifications',
+                    '/api/users',
+                    '/api/checkins'
+                ];
+                
+                const results = {};
+                let hasConnection = false;
+                
+                for (const endpoint of endpoints) {
+                    try {
+                        log(`🔍 Testing endpoint: ${endpoint}`);
+                        const response = await fetch(`${API_BASE}${endpoint}`, {
+                            method: 'GET',
+                            headers: { 
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json'
+                            }
+                        });
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            results[endpoint] = data;
+                            hasConnection = true;
+                            log(`✅ ${endpoint} responded successfully`);
+                        } else {
+                            log(`⚠️ ${endpoint} returned status: ${response.status}`);
+                            results[endpoint] = { error: `HTTP ${response.status}` };
+                        }
+                    } catch (error) {
+                        log(`❌ ${endpoint} failed: ${error.message}`);
+                        results[endpoint] = { error: error.message };
+                    }
+                }
+                
+                if (hasConnection) {
+                    updateConnectionStatus('connected');
+                    processMongoData(results);
+                } else {
+                    updateConnectionStatus('error', 'All endpoints failed');
+                    showEmptyState();
+                }
+                
+                document.getElementById('lastUpdate').textContent = 
+                    'Last updated: ' + new Date().toLocaleTimeString();
+                
+            } catch (error) {
+                log('❌ MongoDB connection failed: ' + error.message, 'error');
+                updateConnectionStatus('error');
+                showEmptyState();
+                showToast('Failed to connect to MongoDB', 'error');
+            }
+        }
+        
+        // Start auto-refresh
+        function startAutoRefresh() {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+            
+            refreshInterval = setInterval(() => {
+                log('🔄 Auto-refreshing from MongoDB...');
+                loadDataFromMongoDB();
+            }, 30000);
+        }
+        
+        // Update connection status
+        function updateConnectionStatus(status, message = null) {
+            const indicator = document.getElementById('connectionIndicator');
+            const statusText = document.getElementById('connectionStatus');
+            const pulse = indicator.querySelector('.pulse');
+            
+            indicator.classList.remove('connected', 'connecting', 'error');
+            pulse.classList.remove('success', 'warning', 'error');
+            
+            switch (status) {
+                case 'connected':
+                    indicator.classList.add('connected');
+                    pulse.classList.add('success');
+                    statusText.textContent = message || 'MongoDB Connected';
+                    break;
+                case 'connecting':
+                case 'loading':
+                    indicator.classList.add('connecting');
+                    pulse.classList.add('warning');
+                    statusText.textContent = message || 'Connecting to MongoDB...';
+                    break;
+                case 'error':
+                    indicator.classList.add('error');
+                    pulse.classList.add('error');
+                    statusText.textContent = message || 'MongoDB Connection Error';
+                    break;
+            }
+        }
+        
+        // Process MongoDB data
+        function processMongoData(results) {
+            try {
+                let notifications = [];
+                if (results['/api/notifications'] && !results['/api/notifications'].error) {
+                    const notifData = results['/api/notifications'];
+                    notifications = Array.isArray(notifData) ? notifData : 
+                                  (notifData.data || notifData.notifications || []);
+                }
+                
+                log(`📊 Processing ${notifications.length} notifications`);
+                
+                allDrivers = notifications.map((n, index) => ({
+                    id: n.id || n._id || `driver-${index}`,
+                    name: n.driver_name || n.name || `Driver ${index + 1}`,
+                    status: n.status || 'working',
+                    returns: n.returns || 0,
+                    timestamp: n.timestamp || new Date()
+                }));
+                
+                updateKPIs();
+                updateActivityFeed();
+                
+            } catch (error) {
+                log('❌ Error processing MongoDB data: ' + error.message, 'error');
+                showEmptyState();
+            }
+        }
+        
+        // Update KPIs
+        function updateKPIs() {
+            const stats = {
+                enRoute: allDrivers.filter(d => d.status === 'en-route').length,
+                arrived: allDrivers.filter(d => d.status === 'arrived').length,
+                completed: allDrivers.filter(d => d.status === 'completed').length,
+                working: allDrivers.filter(d => d.status === 'working').length,
+                totalReturns: allDrivers.reduce((sum, d) => sum + (d.returns || 0), 0),
+                driversWithReturns: allDrivers.filter(d => (d.returns || 0) > 0).length
+            };
+            
+            document.getElementById('activeCount').textContent = stats.enRoute + stats.arrived;
+            document.getElementById('enrouteCount').textContent = stats.enRoute;
+            document.getElementById('arrivedCount').textContent = stats.arrived;
+            document.getElementById('completedCount').textContent = stats.completed;
+            document.getElementById('workingCount').textContent = stats.working;
+            document.getElementById('returnsKpiCount').textContent = stats.totalReturns;
+            document.getElementById('returnsSublabel').textContent = `From ${stats.driversWithReturns} drivers`;
+            
+            document.getElementById('totalReturnsToday').textContent = stats.totalReturns;
+            document.getElementById('driversWithReturns').textContent = stats.driversWithReturns;
+            document.getElementById('avgReturns').textContent = 
+                stats.driversWithReturns > 0 ? 
+                Math.round((stats.totalReturns / stats.driversWithReturns) * 10) / 10 : 0;
+            
+            // Reset equipment issues (would be populated from actual data)
+            document.getElementById('tractorIssues').textContent = '0';
+            document.getElementById('trailerIssues').textContent = '0';
+            document.getElementById('moffettIssues').textContent = '0';
+        }
+        
+        // Update activity feed
+        function updateActivityFeed() {
+            const activityList = document.getElementById('activityList');
+            const activityCount = document.getElementById('activityCount');
+            
+            if (allDrivers.length === 0) {
+                showEmptyState();
+                return;
+            }
+            
+            let filteredDrivers = allDrivers;
+            if (currentFilter !== 'overview') {
+                filteredDrivers = allDrivers.filter(d => d.status === currentFilter);
+            }
+            
+            activityCount.textContent = `${filteredDrivers.length} drivers`;
+            
+            if (filteredDrivers.length === 0) {
+                activityList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📭</div>
+                        <p>No drivers in this category</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            activityList.innerHTML = filteredDrivers.map(driver => `
+                <div class="activity-item ${driver.status.replace('-', '')}">
+                    <div class="activity-content">
+                        <div>
+                            <div class="activity-driver">${driver.name}</div>
+                            <div class="activity-details">
+                                <span>🕐 ${new Date(driver.timestamp).toLocaleTimeString()}</span>
+                                <span>📦 ${driver.returns} returns</span>
+                            </div>
+                        </div>
+                        <span class="status-badge status-${driver.status.replace('-', '')}">${driver.status}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Show empty state
+        function showEmptyState() {
+            const activityList = document.getElementById('activityList');
+            activityList.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">📭</div>
+                    <p>No driver activity available</p>
+                    <p style="font-size: 0.875rem; margin-top: 1rem;">Check MongoDB connection</p>
+                </div>
+            `;
+        }
+        
+        // Filter drivers
+        function filterDrivers(filter, buttonElement) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            buttonElement.classList.add('active');
+            updateActivityFeed();
+        }
+        
+        // Refresh dashboard
+        function refreshDashboard() {
+            const refreshIcon = document.getElementById('refreshIcon');
+            const refreshText = document.getElementById('refreshText');
+            
+            refreshIcon.style.animation = 'spin 1s linear infinite';
+            refreshText.textContent = 'Refreshing...';
+            
+            loadDataFromMongoDB().finally(() => {
+                setTimeout(() => {
+                    refreshIcon.style.animation = '';
+                    refreshText.textContent = 'Refresh';
+                }, 1000);
+            });
+        }
+        
+        // Test MongoDB connection
+        async function testMongoConnection() {
+            try {
+                log('🧪 Testing MongoDB connection...');
+                updateConnectionStatus('loading', 'Testing connection...');
+                
+                const response = await fetch(`${API_BASE}/api/health`);
+                
+                if (response.ok) {
+                    updateConnectionStatus('connected', 'Connection test passed');
+                    showToast('MongoDB connection test successful!', 'success');
+                } else {
+                    updateConnectionStatus('error', 'Connection test failed');
+                    showToast('MongoDB connection test failed', 'error');
+                }
+            } catch (error) {
+                updateConnectionStatus('error', 'Connection test error');
+                showToast('MongoDB connection test error', 'error');
+            }
+        }
+        
+        // Clear daily check-ins
+        function clearDailyCheckIns() {
+            if (confirm('Are you sure you want to clear all daily check-ins?')) {
+                completedDrivers.clear();
+                localStorage.removeItem('completedDrivers');
+                updateKPIs();
+                updateActivityFeed();
+                showToast('Daily check-ins have been cleared', 'info');
+            }
+        }
+        
+        // Logout
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = '/login.html';
+            }
+        }
+        
+        // Show toast notification
+        function showToast(message, type = 'info') {
+            const existingToast = document.querySelector('.toast');
+            if (existingToast) {
+                existingToast.remove();
+            }
+            
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
