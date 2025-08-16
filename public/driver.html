@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FleetForce Driver Portal | Professional Status Management</title>
+    <title>Fleet Command Center - MongoDB Connected</title>
     
-    <!-- Fonts -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
         * {
@@ -18,44 +18,32 @@
         }
         
         :root {
-            --bg-primary: #0B0F1A;
-            --bg-secondary: #1A1F2E;
-            --bg-tertiary: #242B3D;
-            --bg-elevated: #2A3441;
-            --bg-card: #1E2532;
-            --accent-blue: #0EA5E9;
-            --accent-green: #10B981;
-            --accent-orange: #F59E0B;
-            --accent-red: #EF4444;
-            --accent-purple: #8B5CF6;
-            --text-primary: #F8FAFC;
-            --text-secondary: #CBD5E1;
-            --text-tertiary: #94A3B8;
+            --primary: #0F172A;
+            --primary-light: #1E293B;
+            --accent: #3B82F6;
+            --accent-hover: #2563EB;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --text-primary: #F1F5F9;
+            --text-secondary: #94A3B8;
             --text-muted: #64748B;
-            --border-primary: #334155;
-            --border-secondary: #475569;
-            --gradient-primary: linear-gradient(135deg, #0EA5E9 0%, #8B5CF6 100%);
-            --gradient-secondary: linear-gradient(135deg, #1E2532 0%, #242B3D 100%);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
-            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
-            --transition-fast: 0.15s ease;
-            --transition-normal: 0.3s ease;
+            --bg-dark: #0F172A;
+            --bg-card: #1E293B;
+            --bg-hover: #334155;
+            --border: #334155;
+            --gradient-primary: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
         }
         
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-primary);
+            background: var(--bg-dark);
             color: var(--text-primary);
             line-height: 1.6;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
             overflow-x: hidden;
         }
         
+        /* Background gradient */
         body::before {
             content: '';
             position: fixed;
@@ -64,1203 +52,1344 @@
             width: 100%;
             height: 100%;
             background: 
-                radial-gradient(circle at 15% 20%, rgba(14, 165, 233, 0.15) 0%, transparent 45%),
-                radial-gradient(circle at 85% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 45%),
-                linear-gradient(145deg, rgba(11, 15, 26, 0.95) 0%, rgba(26, 31, 46, 0.98) 100%);
+                radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
             z-index: -1;
         }
         
-        .container {
-            background: var(--gradient-secondary);
-            border: 1px solid var(--border-primary);
-            border-radius: 24px;
-            box-shadow: var(--shadow-xl);
-            max-width: 480px;
-            width: 100%;
-            padding: 48px;
-            backdrop-filter: blur(20px);
-            animation: fadeIn 0.6s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: var(--gradient-primary);
-            z-index: 1;
-        }
-        
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(30px) scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-        
-        /* Login Screen */
-        .login-screen {
-            display: block;
-        }
-        
-        .login-screen.hidden {
-            display: none;
-        }
-        
-        /* Main Screen */
-        .main-screen {
-            display: none;
-        }
-        
-        .main-screen.visible {
-            display: block;
-        }
-        
         .header {
-            text-align: center;
-            margin-bottom: 48px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 1rem 2rem;
         }
         
-        .brand-logo {
+        .header-content {
+            max-width: 1920px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .brand {
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 16px;
-            margin-bottom: 32px;
+            gap: 1rem;
         }
         
-        .logo-icon {
-            width: 72px;
-            height: 72px;
+        .logo {
+            width: 48px;
+            height: 48px;
             background: var(--gradient-primary);
-            border-radius: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 36px;
-            color: white;
-            box-shadow: 0 8px 20px rgba(14, 165, 233, 0.4);
-            animation: pulse 3s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { 
-                transform: scale(1);
-                box-shadow: 0 8px 20px rgba(14, 165, 233, 0.4);
-            }
-            50% { 
-                transform: scale(1.05);
-                box-shadow: 0 12px 30px rgba(14, 165, 233, 0.6);
-            }
-        }
-        
-        .brand-text h1 {
-            font-size: 28px;
-            font-weight: 800;
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 8px;
-        }
-        
-        .brand-text p {
-            font-size: 14px;
-            color: var(--text-tertiary);
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-        }
-        
-        /* Form Styles */
-        .form-group {
-            margin-bottom: 32px;
-        }
-        
-        .form-label {
-            display: block;
-            color: var(--text-primary);
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 12px;
-            letter-spacing: 0.02em;
-        }
-        
-        .driver-select {
-            width: 100%;
-            padding: 18px 20px;
-            font-size: 16px;
-            font-weight: 500;
-            border: 1px solid var(--border-primary);
-            border-radius: 14px;
-            background: var(--bg-elevated);
-            color: var(--text-primary);
-            cursor: pointer;
-            transition: all var(--transition-normal);
-            appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23CBD5E1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 20px center;
-            background-size: 20px;
-            font-family: inherit;
-        }
-        
-        .driver-select:focus {
-            outline: none;
-            border-color: var(--accent-blue);
-            background: var(--bg-tertiary);
-            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
-        }
-        
-        .driver-select:hover {
-            border-color: var(--border-secondary);
-            background: var(--bg-tertiary);
-        }
-        
-        .login-btn {
-            width: 100%;
-            padding: 18px 24px;
-            background: var(--gradient-primary);
-            color: white;
-            border: none;
-            border-radius: 14px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all var(--transition-normal);
-            box-shadow: 0 8px 20px rgba(14, 165, 233, 0.3);
-            font-family: inherit;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        
-        .login-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 30px rgba(14, 165, 233, 0.4);
-        }
-        
-        .login-btn:active:not(:disabled) {
-            transform: translateY(0);
-        }
-        
-        .login-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: 0 4px 10px rgba(14, 165, 233, 0.2);
-        }
-        
-        /* Driver Info */
-        .driver-info {
-            background: var(--bg-elevated);
-            border: 1px solid var(--border-primary);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 32px;
-            text-align: center;
-        }
-        
-        .driver-avatar {
-            width: 64px;
-            height: 64px;
-            background: var(--gradient-primary);
-            border-radius: 16px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 24px;
             font-weight: 700;
             color: white;
-            margin: 0 auto 16px;
-            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
         
-        .driver-name {
-            font-size: 22px;
+        .brand-text h1 {
+            font-size: 1.5rem;
             font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 6px;
+            background: var(--gradient-primary);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0;
         }
         
-        .vehicle-id {
-            color: var(--text-tertiary);
-            font-size: 14px;
-            font-weight: 500;
+        .brand-text p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin: 0;
         }
         
-        /* Connection Status */
-        .connection-status {
-            text-align: center;
-            padding: 12px 20px;
-            border-radius: 24px;
-            font-size: 13px;
-            font-weight: 600;
-            margin: 24px auto;
-            display: inline-flex;
+        .header-actions {
+            display: flex;
             align-items: center;
-            gap: 8px;
-            transition: all var(--transition-normal);
+            gap: 1.5rem;
         }
         
-        .status-connected {
-            background: rgba(16, 185, 129, 0.15);
-            color: var(--accent-green);
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 100px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .status-indicator.connected {
+            background: rgba(16, 185, 129, 0.1);
             border: 1px solid rgba(16, 185, 129, 0.3);
+            color: var(--success);
         }
         
-        .status-disconnected {
-            background: rgba(239, 68, 68, 0.15);
-            color: var(--accent-red);
+        .status-indicator.connecting {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: var(--warning);
+        }
+        
+        .status-indicator.error {
+            background: rgba(239, 68, 68, 0.1);
             border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--danger);
         }
         
-        .status-dot {
+        .pulse {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            animation: statusPulse 2s infinite;
+            animation: pulse 2s infinite;
         }
         
-        .status-connected .status-dot {
-            background: var(--accent-green);
+        .pulse.success {
+            background: var(--success);
         }
         
-        .status-disconnected .status-dot {
-            background: var(--accent-red);
+        .pulse.warning {
+            background: var(--warning);
         }
         
-        @keyframes statusPulse {
-            0%, 100% { 
-                opacity: 1; 
-                transform: scale(1); 
-            }
-            50% { 
-                opacity: 0.6; 
-                transform: scale(1.2); 
-            }
+        .pulse.error {
+            background: var(--danger);
         }
         
-        /* Returns Section */
-        .returns-section {
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(251, 191, 36, 0.05) 100%);
-            border: 1px solid rgba(245, 158, 11, 0.3);
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.5); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        
+        .container {
+            max-width: 1920px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .debug-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
             border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 24px;
-        }
-        
-        .returns-question {
-            color: var(--text-primary);
-            font-size: 18px;
-            font-weight: 600;
-            text-align: center;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-        }
-        
-        .returns-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-bottom: 0;
-        }
-        
-        .returns-btn {
-            padding: 16px 20px;
-            border: 1px solid var(--border-primary);
-            border-radius: 12px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all var(--transition-normal);
-            background: var(--bg-elevated);
-            color: var(--text-secondary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            font-family: inherit;
-        }
-        
-        .returns-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
-        
-        .returns-btn.selected {
-            border-color: var(--accent-blue);
-            background: var(--gradient-primary);
-            color: white;
-            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
-        }
-        
-        .returns-btn.yes.selected {
-            background: linear-gradient(135deg, var(--accent-green) 0%, #059669 100%);
-            border-color: var(--accent-green);
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-        }
-        
-        .returns-btn.no.selected {
-            background: linear-gradient(135deg, var(--accent-red) 0%, #dc2626 100%);
-            border-color: var(--accent-red);
-            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
-        }
-        
-        /* Returns Count Input */
-        .returns-count {
+            padding: 1.5rem;
+            margin-bottom: 2rem;
             display: none;
-            margin-top: 20px;
-            padding: 20px;
-            background: var(--bg-elevated);
-            border: 1px solid var(--border-primary);
+        }
+        
+        .debug-panel.show {
+            display: block;
+        }
+        
+        .debug-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .debug-info {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .kpi-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .kpi-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            border-color: var(--accent);
+        }
+        
+        .kpi-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(59, 130, 246, 0.1);
             border-radius: 12px;
-            animation: slideDown 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 1rem;
         }
         
-        .returns-count.visible {
-            display: block;
-        }
-        
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .returns-count-label {
+        .kpi-value {
+            font-size: 2.5rem;
+            font-weight: 800;
             color: var(--text-primary);
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 12px;
-            display: block;
+            line-height: 1;
+            margin-bottom: 0.5rem;
         }
         
-        .returns-count-input {
-            width: 100%;
-            padding: 14px 16px;
-            font-size: 16px;
+        .kpi-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
             font-weight: 500;
-            border: 1px solid var(--border-primary);
-            border-radius: 10px;
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-            text-align: center;
-            transition: all var(--transition-normal);
-            font-family: inherit;
-        }
-        
-        .returns-count-input:focus {
-            outline: none;
-            border-color: var(--accent-blue);
-            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
-        }
-        
-        /* Status Section */
-        .status-section {
-            margin-bottom: 32px;
-        }
-        
-        .section-title {
-            color: var(--text-primary);
-            font-size: 16px;
-            font-weight: 600;
-            text-align: center;
-            margin-bottom: 24px;
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
         
-        .status-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
+        .kpi-sublabel {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
         }
         
-        .status-btn {
-            padding: 20px 24px;
+        .control-panel {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
             border: none;
-            border-radius: 14px;
-            font-size: 16px;
+            border-radius: 10px;
+            font-size: 0.875rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all var(--transition-normal);
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-secondary {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+        }
+        
+        .filter-group {
+            display: flex;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .filter-btn {
+            padding: 0.75rem 1.25rem;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .filter-btn:not(:last-child) {
+            border-right: 1px solid var(--border);
+        }
+        
+        .filter-btn:hover {
+            color: var(--text-primary);
+            background: var(--bg-hover);
+        }
+        
+        .filter-btn.active {
+            color: white;
+            background: var(--accent);
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+        
+        .activity-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        
+        .section-header {
+            padding: 1.5rem;
+            background: rgba(15, 23, 42, 0.5);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 12px;
-            color: white;
+            gap: 0.75rem;
+        }
+        
+        .activity-list {
+            max-height: 600px;
+            overflow-y: auto;
+            padding: 0;
+        }
+        
+        .activity-item {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            transition: all 0.2s ease;
+            cursor: pointer;
             position: relative;
             overflow: hidden;
-            font-family: inherit;
-            text-transform: uppercase;
-            letter-spacing: 0.02em;
         }
         
-        .status-btn::before {
+        .activity-item::before {
             content: '';
             position: absolute;
+            left: 0;
             top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
+            bottom: 0;
+            width: 3px;
+            background: transparent;
+            transition: all 0.2s ease;
         }
         
-        .status-btn:hover:not(:disabled)::before {
-            left: 100%;
+        .activity-item:hover {
+            background: var(--bg-hover);
+            padding-left: 2rem;
         }
         
-        .status-btn:hover:not(:disabled) {
-            transform: translateY(-3px);
+        .activity-item.en-route::before { background: var(--warning); }
+        .activity-item.arrived::before { background: var(--success); }
+        .activity-item.completed::before { background: var(--success); }
+        .activity-item.working::before { background: var(--text-muted); }
+        
+        .activity-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
         }
         
-        .status-btn:active:not(:disabled) {
-            transform: translateY(-1px);
+        .activity-driver {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+            font-size: 1rem;
         }
         
-        .status-btn:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-            transform: none;
+        .activity-details {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            flex-wrap: wrap;
         }
         
-        .btn-30min {
-            background: linear-gradient(135deg, var(--accent-orange) 0%, #d97706 100%);
-            box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
+        .status-badge {
+            padding: 0.375rem 0.875rem;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
         
-        .btn-30min:hover:not(:disabled) {
-            box-shadow: 0 12px 30px rgba(245, 158, 11, 0.4);
+        .status-en-route {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.3);
         }
         
-        .btn-arrived {
-            background: linear-gradient(135deg, var(--accent-green) 0%, #059669 100%);
-            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+        .status-arrived {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
         }
         
-        .btn-arrived:hover:not(:disabled) {
-            box-shadow: 0 12px 30px rgba(16, 185, 129, 0.4);
+        .status-completed {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
         }
         
-        /* Loading Spinner */
-        .loading {
-            display: none;
-            width: 24px;
-            height: 24px;
-            border: 3px solid rgba(255,255,255,0.3);
+        .status-working {
+            background: rgba(100, 116, 139, 0.1);
+            color: var(--text-muted);
+            border: 1px solid rgba(100, 116, 139, 0.3);
+        }
+        
+        .checkin-btn {
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            animation: pulseGreen 2s infinite;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        @keyframes pulseGreen {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+        }
+        
+        .checkin-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+        
+        .analytics-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .analytics-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+        }
+        
+        .metric-card {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            transition: all 0.2s ease;
+        }
+        
+        .metric-card:hover {
+            border-color: var(--accent);
+            transform: translateX(4px);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-muted);
+        }
+        
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+        
+        /* Toast notification styles */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            max-width: 400px;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .toast-success {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+        }
+        
+        .toast-error {
+            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+        }
+        
+        .toast-info {
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
             border-top-color: white;
-            animation: spin 1s ease-in-out infinite;
+            animation: spin 0.8s linear infinite;
         }
         
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
         
-        .status-btn.sending .btn-text {
-            display: none;
-        }
-        
-        .status-btn.sending .loading {
-            display: inline-block;
-        }
-        
-        /* Notification */
-        .notification {
-            position: fixed;
-            top: 32px;
-            right: 32px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-primary);
-            padding: 20px 24px;
-            border-radius: 16px;
-            box-shadow: var(--shadow-xl);
-            z-index: 9999;
-            animation: slideIn 0.4s ease;
-            min-width: 320px;
-            max-width: 400px;
-        }
-        
-        .notification.success {
-            border-left: 4px solid var(--accent-green);
-        }
-        
-        .notification.error {
-            border-left: 4px solid var(--accent-red);
-        }
-        
-        .notification.warning {
-            border-left: 4px solid var(--accent-orange);
-        }
-        
-        .notification-title {
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 6px;
-            font-size: 14px;
-        }
-        
-        .notification-message {
-            font-size: 13px;
-            color: var(--text-secondary);
-            line-height: 1.4;
-        }
-        
-        @keyframes slideIn {
-            from { 
-                transform: translateX(100%) translateY(-50%); 
-                opacity: 0; 
-            }
-            to { 
-                transform: translateX(0) translateY(0); 
-                opacity: 1; 
+        @media (max-width: 1400px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
             }
         }
         
-        @keyframes slideOut {
-            from { 
-                transform: translateX(0) translateY(0); 
-                opacity: 1; 
-            }
-            to { 
-                transform: translateX(100%) translateY(-50%); 
-                opacity: 0; 
-            }
-        }
-        
-        /* Sign Out */
-        .signout-section {
-            margin-top: 32px;
-            padding-top: 24px;
-            border-top: 1px solid var(--border-primary);
-            text-align: center;
-        }
-        
-        .signout-btn {
-            background: transparent;
-            color: var(--text-tertiary);
-            border: 1px solid var(--border-primary);
-            padding: 12px 32px;
-            border-radius: 10px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all var(--transition-normal);
-            font-family: inherit;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        
-        .signout-btn:hover {
-            background: var(--bg-elevated);
-            color: var(--text-primary);
-            border-color: var(--border-secondary);
-        }
-        
-        /* Loading State */
-        .loading-state {
-            text-align: center;
-            padding: 24px;
-            color: var(--text-tertiary);
-        }
-        
-        .spinner {
-            width: 32px;
-            height: 32px;
-            border: 3px solid var(--border-primary);
-            border-radius: 50%;
-            border-top-color: var(--accent-blue);
-            animation: spin 1s linear infinite;
-            margin: 0 auto 16px;
-        }
-        
-        /* Mobile Responsiveness */
-        @media (max-width: 640px) {
-            .container {
-                padding: 32px 24px;
-                margin: 10px;
+        @media (max-width: 768px) {
+            .kpi-grid {
+                grid-template-columns: 1fr;
             }
             
-            .brand-text h1 {
-                font-size: 24px;
-            }
-            
-            .logo-icon {
-                width: 64px;
-                height: 64px;
-                font-size: 32px;
-            }
-            
-            .driver-select,
-            .login-btn {
-                padding: 16px 18px;
-                font-size: 15px;
-            }
-            
-            .status-btn {
-                padding: 18px 20px;
-                font-size: 15px;
-            }
-            
-            .notification {
-                top: 20px;
-                right: 20px;
-                left: 20px;
-                min-width: auto;
-            }
-        }
-        
-        /* Reduced Motion */
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
+            .header-actions {
+                flex-direction: column;
+                gap: 0.75rem;
+                align-items: flex-end;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Login Screen -->
-        <div class="login-screen" id="loginScreen">
-            <div class="header">
-                <div class="brand-logo">
-                    <div class="logo-icon">⚡</div>
-                    <div class="brand-text">
-                        <h1>FleetForce</h1>
-                        <p>Driver Operations</p>
-                    </div>
+    <header class="header">
+        <div class="header-content">
+            <div class="brand">
+                <div class="logo">⚡</div>
+                <div class="brand-text">
+                    <h1>Fleet Command Center</h1>
+                    <p>MongoDB Atlas + Railway Integration</p>
                 </div>
             </div>
-            
-            <div class="form-group">
-                <label class="form-label" for="driverSelect">Select Your Name</label>
-                <select class="driver-select" id="driverSelect">
-                    <option value="">Loading driver profiles...</option>
-                </select>
+            <div class="header-actions">
+                <div class="status-indicator connecting" id="connectionIndicator">
+                    <div class="pulse warning"></div>
+                    <span id="connectionStatus">Connecting to MongoDB...</span>
+                </div>
+                <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); color: var(--accent); padding: 0.5rem 1rem; border-radius: 100px; font-size: 0.875rem; font-weight: 500;">
+                    6995 N US-41, Apollo Beach, FL 33572
+                </div>
+                <button class="btn btn-danger" onclick="logout()">
+                    🚪 Logout
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Debug Panel -->
+        <div class="debug-panel" id="debugPanel">
+            <div class="debug-title">
+                <span>🔧</span>
+                <span>Debug Information</span>
+                <button class="btn btn-secondary" onclick="toggleDebug()" style="margin-left: auto; padding: 0.5rem 1rem; font-size: 0.75rem;">Hide</button>
+            </div>
+            <div class="debug-info" id="debugInfo">
+                Initializing debug panel...
+            </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-icon">🚚</div>
+                <div class="kpi-value" id="activeCount">0</div>
+                <div class="kpi-label">Active Updates</div>
+                <div class="kpi-sublabel">En route + arrived</div>
             </div>
             
-            <button class="login-btn" onclick="login()" disabled id="loginBtn">
-                Access Portal
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: rgba(245, 158, 11, 0.1);">📍</div>
+                <div class="kpi-value" id="enrouteCount">0</div>
+                <div class="kpi-label">En Route</div>
+                <div class="kpi-sublabel">30 min away</div>
+            </div>
+            
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: rgba(16, 185, 129, 0.1);">🏁</div>
+                <div class="kpi-value" id="arrivedCount">0</div>
+                <div class="kpi-label">Arrived</div>
+                <div class="kpi-sublabel">At warehouse</div>
+            </div>
+            
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: rgba(16, 185, 129, 0.1);">✅</div>
+                <div class="kpi-value" id="completedCount">0</div>
+                <div class="kpi-label">Completed</div>
+                <div class="kpi-sublabel">Checked in today</div>
+            </div>
+            
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: rgba(100, 116, 139, 0.1);">📦</div>
+                <div class="kpi-value" id="workingCount">0</div>
+                <div class="kpi-label">Still Working</div>
+                <div class="kpi-sublabel">Out on routes</div>
+            </div>
+            
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: rgba(239, 68, 68, 0.1);">📦</div>
+                <div class="kpi-value" id="returnsKpiCount">0</div>
+                <div class="kpi-label">Returns Today</div>
+                <div class="kpi-sublabel" id="returnsSublabel">From 0 drivers</div>
+            </div>
+        </div>
+
+        <!-- Filter Controls -->
+        <div class="control-panel">
+            <div class="filter-group" style="flex: 1;">
+                <button class="filter-btn active" onclick="filterDrivers('overview', this)">Overview</button>
+                <button class="filter-btn" onclick="filterDrivers('en-route', this)">En Route</button>
+                <button class="filter-btn" onclick="filterDrivers('arrived', this)">Arrived</button>
+                <button class="filter-btn" onclick="filterDrivers('completed', this)">✓ Completed</button>
+                <button class="filter-btn" onclick="filterDrivers('working', this)">Still Working</button>
+            </div>
+            <button class="btn btn-secondary" onclick="toggleDebug()">
+                🔧 Debug
+            </button>
+            <button class="btn btn-secondary" id="refreshButton" onclick="refreshDashboard()">
+                <span id="refreshIcon">🔄</span>
+                <span id="refreshText">Refresh</span>
+            </button>
+            <button class="btn btn-danger" onclick="clearDailyCheckIns()">
+                🗑️ Clear Check-ins
             </button>
         </div>
-        
-        <!-- Main Screen -->
-        <div class="main-screen" id="mainScreen">
-            <div class="header">
-                <div class="brand-logo">
-                    <div class="logo-icon">⚡</div>
-                    <div class="brand-text">
-                        <h1>FleetForce</h1>
-                        <p>Status Management</p>
+
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+            <div class="activity-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        📡 MongoDB Real-Time Activity Feed
+                    </h2>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <span id="activityCount" style="font-size: 0.875rem; color: var(--text-secondary);"></span>
+                        <span id="lastUpdate" style="font-size: 0.875rem; color: var(--text-secondary);">
+                            Loading from MongoDB...
+                        </span>
+                    </div>
+                </div>
+                <div class="activity-list" id="activityList">
+                    <div class="empty-state">
+                        <div class="empty-icon">📭</div>
+                        <p>Loading driver activity from MongoDB Atlas...</p>
+                        <p style="font-size: 0.875rem; margin-top: 1rem;">Drivers can update status at /driver</p>
                     </div>
                 </div>
             </div>
-            
-            <div class="driver-info">
-                <div class="driver-avatar" id="driverAvatar">JD</div>
-                <div class="driver-name" id="driverName">Driver Name</div>
-                <div class="vehicle-id" id="vehicleId">Vehicle Assignment</div>
-            </div>
-            
-            <div style="text-align: center;">
-                <div class="connection-status" id="connectionStatus">
-                    <div class="status-dot"></div>
-                    <span>Connecting to MongoDB...</span>
+
+            <div>
+                <div class="analytics-panel">
+                    <h3 class="analytics-title">🔧 Equipment Status</h3>
+                    <div class="metric-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 0.875rem; color: var(--text-secondary);">🚛 Tractor Issues</span>
+                            <span style="font-size: 1.5rem; font-weight: 700;" id="tractorIssues">0</span>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 0.875rem; color: var(--text-secondary);">🚚 Trailer Issues</span>
+                            <span style="font-size: 1.5rem; font-weight: 700;" id="trailerIssues">0</span>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 0.875rem; color: var(--text-secondary);">🏗️ Moffett Issues</span>
+                            <span style="font-size: 1.5rem; font-weight: 700;" id="moffettIssues">0</span>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            
-            <!-- Returns Question Section -->
-            <div class="returns-section">
-                <div class="returns-question">
-                    <span>📦</span>
-                    <span>Returns Status</span>
+                
+                <div class="analytics-panel">
+                    <h3 class="analytics-title">📦 Returns Summary</h3>
+                    <div class="metric-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 0.875rem; color: var(--text-secondary);">📥 Total Returns</span>
+                            <span style="font-size: 1.5rem; font-weight: 700;" id="totalReturnsToday">0</span>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 0.875rem; color: var(--text-secondary);">🚚 Drivers w/ Returns</span>
+                            <span style="font-size: 1.5rem; font-weight: 700;" id="driversWithReturns">0</span>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 0.875rem; color: var(--text-secondary);">📊 Avg Returns/Driver</span>
+                            <span style="font-size: 1.5rem; font-weight: 700;" id="avgReturns">0</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="returns-buttons">
-                    <button class="returns-btn yes" onclick="setReturns(true)" id="returnsYes">
-                        <span>✅</span>
-                        <span>Have Returns</span>
-                    </button>
-                    <button class="returns-btn no" onclick="setReturns(false)" id="returnsNo">
-                        <span>❌</span>
-                        <span>No Returns</span>
-                    </button>
+                
+                <div class="analytics-panel">
+                    <h3 class="analytics-title">⚡ Quick Actions</h3>
+                    <div style="display: grid; gap: 1rem;">
+                        <button class="btn btn-primary" style="width: 100%;" onclick="testMongoConnection()">
+                            📡 Test MongoDB Connection
+                        </button>
+                        <button class="btn btn-secondary" style="width: 100%;" onclick="window.open('driver.html', '_blank')">
+                            🚚 Driver Portal
+                        </button>
+                        <button class="btn btn-danger" style="width: 100%;" onclick="logout()">
+                            🚪 Logout
+                        </button>
+                    </div>
                 </div>
-                <div class="returns-count" id="returnsCount">
-                    <label class="returns-count-label" for="returnsCountInput">Number of Returns</label>
-                    <input type="number" class="returns-count-input" id="returnsCountInput" min="1" max="999" placeholder="Enter quantity">
-                </div>
-            </div>
-            
-            <div class="status-section">
-                <div class="section-title">Warehouse Status Update</div>
-                <div class="status-buttons">
-                    <button class="status-btn btn-30min" onclick="sendUpdate('30min')" id="btn30min">
-                        <span class="btn-text">
-                            <span>🕐</span>
-                            <span>30 Minutes Away</span>
-                        </span>
-                        <span class="loading"></span>
-                    </button>
-                    
-                    <button class="status-btn btn-arrived" onclick="sendUpdate('arrived')" id="btnArrived">
-                        <span class="btn-text">
-                            <span>📍</span>
-                            <span>Arrived at Warehouse</span>
-                        </span>
-                        <span class="loading"></span>
-                    </button>
-                </div>
-            </div>
-            
-            <div class="signout-section">
-                <button class="signout-btn" onclick="signOut()">Sign Out</button>
             </div>
         </div>
     </div>
 
     <script>
         // Configuration for Railway + MongoDB Atlas
-        const API_BASE = window.location.origin; // Railway will handle this automatically
+        const API_BASE = window.location.origin;
         const WAREHOUSE_ADDRESS = "6995 N US-41, Apollo Beach, FL 33572";
         
-        // Global state
-        let currentDriver = null;
-        let currentVehicle = null;
-        let currentDriverId = null;
-        let hasReturns = null;
-        let returnsCount = 0;
-        let autoRefreshInterval = null;
+        // Global variables
+        let allDrivers = [];
+        let currentFilter = 'overview';
+        let driverMap = new Map();
+        let completedDrivers = new Set();
+        let lastResetDate = null;
+        let refreshInterval = null;
+        let debugMode = false;
+        let debugInfo = [];
         
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 FleetForce Driver Portal - MongoDB Atlas + Railway');
-            console.log('API Base:', API_BASE);
+            log('🚀 Fleet Command Center - MongoDB Atlas Integration');
+            log('🔗 API Base: ' + API_BASE);
+            log('📍 Warehouse: ' + WAREHOUSE_ADDRESS);
             
-            loadDriversFromMongoDB();
-            checkConnectionStatus();
-            
-            // Auto-refresh drivers every 30 seconds
-            autoRefreshInterval = setInterval(loadDriversFromMongoDB, 30000);
-            
-            // Check connection every 30 seconds  
-            setInterval(checkConnectionStatus, 30000);
-            
-            // Enable login button when driver selected
-            document.getElementById('driverSelect').addEventListener('change', function() {
-                const isSelected = this.value !== '';
-                document.getElementById('loginBtn').disabled = !isSelected;
-                console.log('Driver selection changed:', this.value, 'Enabled:', isSelected);
-            });
-            
-            // Returns count input handler
-            document.getElementById('returnsCountInput').addEventListener('input', function() {
-                returnsCount = parseInt(this.value) || 0;
-                console.log('Returns count updated:', returnsCount);
-            });
+            initializeDashboard();
         });
         
-        // Load drivers from MongoDB Atlas via Railway API
-        async function loadDriversFromMongoDB() {
-            console.log('🔄 Loading drivers from MongoDB Atlas...');
+        // Debug logging function
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
             
+            console.log(logEntry);
+            debugInfo.push(logEntry);
+            
+            // Keep only last 50 entries
+            if (debugInfo.length > 50) {
+                debugInfo = debugInfo.slice(-50);
+            }
+            
+            updateDebugPanel();
+        }
+        
+        function updateDebugPanel() {
+            const debugElement = document.getElementById('debugInfo');
+            if (debugElement) {
+                debugElement.textContent = debugInfo.join('\n');
+                debugElement.scrollTop = debugElement.scrollHeight;
+            }
+        }
+        
+        function toggleDebug() {
+            debugMode = !debugMode;
+            const panel = document.getElementById('debugPanel');
+            if (debugMode) {
+                panel.classList.add('show');
+            } else {
+                panel.classList.remove('show');
+            }
+        }
+        
+        function initializeDashboard() {
+            loadStoredState();
+            checkDailyReset();
+            loadDataFromMongoDB();
+            startAutoRefresh();
+        }
+        
+        // Load stored state from localStorage
+        function loadStoredState() {
+            const storedCompleted = localStorage.getItem('completedDrivers');
+            if (storedCompleted) {
+                try {
+                    completedDrivers = new Set(JSON.parse(storedCompleted));
+                    log('📂 Loaded completed drivers: ' + [...completedDrivers].length);
+                } catch (e) {
+                    log('❌ Error loading completed drivers: ' + e.message, 'error');
+                    completedDrivers = new Set();
+                }
+            }
+            
+            lastResetDate = localStorage.getItem('lastResetDate');
+        }
+        
+        // Check if it's a new day and reset if needed
+        function checkDailyReset() {
+            const today = new Date().toDateString();
+            if (lastResetDate !== today) {
+                log('🌅 New day detected, resetting check-ins');
+                completedDrivers.clear();
+                localStorage.removeItem('completedDrivers');
+                localStorage.setItem('lastResetDate', today);
+                lastResetDate = today;
+                showToast('New day detected - check-ins have been reset', 'info');
+            }
+        }
+        
+        // Set up auto-refresh
+        function startAutoRefresh() {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+            
+            // Refresh every 30 seconds for real-time updates
+            refreshInterval = setInterval(() => {
+                log('🔄 Auto-refreshing from MongoDB...');
+                loadDataFromMongoDB();
+            }, 30000);
+            
+            // Check for day change every minute
+            setInterval(() => {
+                checkDailyReset();
+            }, 60000);
+        }
+        
+        // Update connection status indicator
+        function updateConnectionStatus(status, message = null) {
+            const indicator = document.getElementById('connectionIndicator');
+            const statusText = document.getElementById('connectionStatus');
+            const pulse = indicator.querySelector('.pulse');
+            
+            // Remove all status classes
+            indicator.classList.remove('connected', 'connecting', 'error');
+            pulse.classList.remove('success', 'warning', 'error');
+            
+            switch (status) {
+                case 'connected':
+                    indicator.classList.add('connected');
+                    pulse.classList.add('success');
+                    statusText.textContent = message || 'MongoDB Connected';
+                    break;
+                case 'connecting':
+                case 'loading':
+                    indicator.classList.add('connecting');
+                    pulse.classList.add('warning');
+                    statusText.textContent = message || 'Connecting to MongoDB...';
+                    break;
+                case 'error':
+                    indicator.classList.add('error');
+                    pulse.classList.add('error');
+                    statusText.textContent = message || 'MongoDB Connection Error';
+                    break;
+            }
+        }
+        
+        // Load data from MongoDB Atlas via Railway API
+        async function loadDataFromMongoDB() {
             try {
-                const response = await fetch(`${API_BASE}/api/users`, {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
+                log('📡 Loading data from MongoDB Atlas...');
+                updateConnectionStatus('loading');
+                
+                // Test basic connectivity first
+                const endpoints = [
+                    '/api/health',
+                    '/api/notifications',
+                    '/api/users',
+                    '/api/checkins'
+                ];
+                
+                const results = {};
+                let hasConnection = false;
+                
+                for (const endpoint of endpoints) {
+                    try {
+                        log(`🔍 Testing endpoint: ${endpoint}`);
+                        const response = await fetch(`${API_BASE}${endpoint}`, {
+                            method: 'GET',
+                            headers: { 
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json'
+                            },
+                            timeout: 10000
+                        });
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            results[endpoint] = data;
+                            hasConnection = true;
+                            log(`✅ ${endpoint} responded successfully`);
+                        } else {
+                            log(`⚠️ ${endpoint} returned status: ${response.status}`);
+                            results[endpoint] = { error: `HTTP ${response.status}` };
+                        }
+                    } catch (error) {
+                        log(`❌ ${endpoint} failed: ${error.message}`);
+                        results[endpoint] = { error: error.message };
+                    }
+                }
+                
+                // Process the results
+                if (hasConnection) {
+                    updateConnectionStatus('connected');
+                    processMongoData(results);
+                } else {
+                    updateConnectionStatus('error', 'All endpoints failed');
+                    showEmptyState();
+                }
+                
+                // Update last refresh time
+                document.getElementById('lastUpdate').textContent = 
+                    'Last updated: ' + new Date().toLocaleTimeString();
+                
+                log('📊 Data processing complete');
+                
+            } catch (error) {
+                log('❌ MongoDB connection failed: ' + error.message, 'error');
+                updateConnectionStatus('error');
+                showEmptyState();
+                showToast('Failed to connect to MongoDB', 'error');
+            }
+        }
+        
+        function processMongoData(results) {
+            try {
+                // Extract notifications (driver updates)
+                let notifications = [];
+                if (results['/api/notifications'] && !results['/api/notifications'].error) {
+                    const notifData = results['/api/notifications'];
+                    notifications = Array.isArray(notifData) ? notifData : 
+                                  (notifData.data || notifData.notifications || []);
+                }
+                
+                // Extract users (driver profiles)
+                let users = [];
+                if (results['/api/users'] && !results['/api/users'].error) {
+                    const userData = results['/api/users'];
+                    users = Array.isArray(userData) ? userData : 
+                           (userData.data || userData.users || []);
+                }
+                
+                // Extract checkins
+                let checkins = [];
+                if (results['/api/checkins'] && !results['/api/checkins'].error) {
+                    const checkinData = results['/api/checkins'];
+                    checkins = Array.isArray(checkinData) ? checkinData : 
+                              (checkinData.data || checkinData.checkins || []);
+                }
+                
+                log(`📊 Processing data: ${notifications.length} notifications, ${users.length} users, ${checkins.length} checkins`);
+                
+                // Create driver map from users
+                driverMap.clear();
+                users.forEach(user => {
+                    if (user && (user.name || user.username || user.id)) {
+                        driverMap.set(user.id || user._id || user.username, user);
                     }
                 });
                 
-                console.log('API Response status:', response.status);
+                // Process notifications into driver activities
+                allDrivers = processNotifications(notifications);
                 
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                
-                const result = await response.json();
-                console.log('Raw API response:', result);
-                
-                // Handle different response formats
-                let users = [];
-                if (Array.isArray(result)) {
-                    users = result;
-                } else if (result.data && Array.isArray(result.data)) {
-                    users = result.data;
-                } else if (result.users && Array.isArray(result.users)) {
-                    users = result.users;
-                } else {
-                    console.warn('Unexpected response format:', result);
-                    users = [];
-                }
-                
-                console.log('Processed users:', users.length);
-                
-                // Filter for active drivers only
-                const drivers = users.filter(user => {
-                    const isDriver = user.role === 'driver';
-                    const isActive = user.active !== false && user.status !== 'inactive';
-                    console.log(`User ${user.name}: role=${user.role}, active=${user.active}, isDriver=${isDriver}, isActive=${isActive}`);
-                    return isDriver && isActive;
+                // Apply completed status from localStorage
+                allDrivers.forEach(driver => {
+                    if (completedDrivers.has(driver.id)) {
+                        driver.status = 'completed';
+                    }
                 });
                 
-                console.log('✅ Active drivers found:', drivers.length);
+                // Update UI
+                updateKPIs();
+                updateActivityFeed();
                 
-                const select = document.getElementById('driverSelect');
-                const currentValue = select.value; // Preserve selection
+                log('✅ UI updated successfully');
                 
-                if (drivers.length === 0) {
-                    select.innerHTML = '<option value="">No active drivers available</option>';
-                    console.log('⚠️ No active drivers found');
+            } catch (error) {
+                log('❌ Error processing MongoDB data: ' + error.message, 'error');
+                showEmptyState();
+            }
+        }
+        
+        function processNotifications(notifications) {
+            const drivers = [];
+            const driverStatusMap = new Map();
+            
+            // Sort notifications by timestamp (newest first)
+            const sortedNotifications = notifications
+                .filter(n => n && (n.driver_name || n.message))
+                .sort((a, b) => {
+                    const timeA = new Date(a.timestamp || a.created_at || a.time || 0);
+                    const timeB = new Date(b.timestamp || b.created_at || b.time || 0);
+                    return timeB - timeA;
+                });
+            
+            // Process notifications to get latest status per driver
+            sortedNotifications.forEach(notification => {
+                try {
+                    const driverName = notification.driver_name || 
+                                     notification.name || 
+                                     extractDriverName(notification.message || '');
+                    
+                    if (!driverName) return;
+                    
+                    const driverId = notification.driver_id || 
+                                   notification.id || 
+                                   driverName.toLowerCase().replace(/\s+/g, '_');
+                    
+                    // Only keep the latest status for each driver
+                    if (!driverStatusMap.has(driverId)) {
+                        const status = determineStatus(notification);
+                        const returns = extractReturns(notification);
+                        
+                        driverStatusMap.set(driverId, {
+                            id: driverId,
+                            name: driverName,
+                            status: status,
+                            returns: returns,
+                            timestamp: notification.timestamp || notification.created_at || new Date(),
+                            raw: notification
+                        });
+                    }
+                } catch (error) {
+                    log(`⚠️ Error processing notification: ${error.message}`);
+                }
+            });
+            
+            return Array.from(driverStatusMap.values());
+        }
+        
+        function extractDriverName(message) {
+            if (!message) return null;
+            
+            // Try various patterns to extract driver name
+            const patterns = [
+                /Driver\s+([A-Za-z\s]+)\s+/i,
+                /([A-Za-z\s]+)\s+is\s+/i,
+                /([A-Za-z\s]+)\s+has\s+/i,
+                /^([A-Za-z\s]+)\s+-\s+/i
+            ];
+            
+            for (const pattern of patterns) {
+                const match = message.match(pattern);
+                if (match && match[1]) {
+                    return match[1].trim();
+                }
+            }
+            
+            return null;
+        }
+        
+        function determineStatus(notification) {
+            const message = (notification.message || '').toLowerCase();
+            const status = (notification.status || '').toLowerCase();
+            
+            if (message.includes('arrived') || status === 'arrived') {
+                return 'arrived';
+            } else if (message.includes('en route') || message.includes('enroute') || status === 'en-route') {
+                return 'en-route';
+            } else if (message.includes('completed') || status === 'completed') {
+                return 'completed';
+            } else {
+                return 'working';
+            }
+        }
+        
+        function extractReturns(notification) {
+            const message = notification.message || '';
+            const returnsMatch = message.match(/(\d+)\s*returns?/i);
+            return returnsMatch ? parseInt(returnsMatch[1]) : 0;
+        }
+        
+        function updateKPIs() {
+            try {
+                const stats = {
+                    enRoute: allDrivers.filter(d => d.status === 'en-route').length,
+                    arrived: allDrivers.filter(d => d.status === 'arrived').length,
+                    completed: allDrivers.filter(d => d.status === 'completed').length,
+                    working: allDrivers.filter(d => d.status === 'working').length,
+                    totalReturns: allDrivers.reduce((sum, d) => sum + (d.returns || 0), 0),
+                    driversWithReturns: allDrivers.filter(d => (d.returns || 0) > 0).length
+                };
+                
+                // Update KPI values
+                document.getElementById('activeCount').textContent = stats.enRoute + stats.arrived;
+                document.getElementById('enrouteCount').textContent = stats.enRoute;
+                document.getElementById('arrivedCount').textContent = stats.arrived;
+                document.getElementById('completedCount').textContent = stats.completed;
+                document.getElementById('workingCount').textContent = stats.working;
+                document.getElementById('returnsKpiCount').textContent = stats.totalReturns;
+                document.getElementById('returnsSublabel').textContent = `From ${stats.driversWithReturns} drivers`;
+                
+                // Update right panel analytics
+                document.getElementById('totalReturnsToday').textContent = stats.totalReturns;
+                document.getElementById('driversWithReturns').textContent = stats.driversWithReturns;
+                document.getElementById('avgReturns').textContent = 
+                    stats.driversWithReturns > 0 ? 
+                    Math.round((stats.totalReturns / stats.driversWithReturns) * 10) / 10 : 0;
+                
+                log(`📊 KPIs updated: ${stats.enRoute} en-route, ${stats.arrived} arrived, ${stats.completed} completed`);
+                
+            } catch (error) {
+                log('❌ Error updating KPIs: ' + error.message, 'error');
+            }
+        }
+        
+        function updateActivityFeed() {
+            try {
+                const activityList = document.getElementById('activityList');
+                const activityCount = document.getElementById('activityCount');
+                
+                if (allDrivers.length === 0) {
+                    showEmptyState();
                     return;
                 }
                 
-                // Populate dropdown
-                select.innerHTML = '<option value="">-- Select your name --</option>';
+                // Filter drivers based on current filter
+                let filteredDrivers = allDrivers;
+                if (currentFilter !== 'overview') {
+                    filteredDrivers = allDrivers.filter(driver => {
+                        switch (currentFilter) {
+                            case 'en-route': return driver.status === 'en-route';
+                            case 'arrived': return driver.status === 'arrived';
+                            case 'completed': return driver.status === 'completed';
+                            case 'working': return driver.status === 'working';
+                            default: return true;
+                        }
+                    });
+                }
                 
-                drivers.forEach((driver, index) => {
-                    const option = document.createElement('option');
-                    option.value = driver._id || driver.id;
-                    option.textContent = driver.name;
-                    option.dataset.vehicle = driver.vehicleId || `FLEET-${String(index + 1).padStart(3, '0')}`;
-                    option.dataset.name = driver.name;
+                activityCount.textContent = `${filteredDrivers.length} drivers`;
+                
+                // Generate activity items
+                activityList.innerHTML = filteredDrivers.map(driver => {
+                    const statusClass = driver.status.replace('-', '');
+                    const statusText = driver.status.charAt(0).toUpperCase() + driver.status.slice(1);
+                    const timeAgo = getTimeAgo(driver.timestamp);
                     
-                    // Restore previous selection
-                    if ((driver._id || driver.id) === currentValue) {
-                        option.selected = true;
-                    }
-                    
-                    select.appendChild(option);
-                    console.log(`Added driver: ${driver.name} (${option.value})`);
-                });
-                
-                // Re-enable login button if driver was previously selected
-                document.getElementById('loginBtn').disabled = !select.value;
-                
-                console.log('✅ Driver dropdown populated successfully');
-                
-            } catch (error) {
-                console.error('❌ Error loading drivers from MongoDB:', error);
-                
-                const select = document.getElementById('driverSelect');
-                if (select.children.length <= 1) {
-                    select.innerHTML = `
-                        <option value="">-- Connection error --</option>
-                        <option value="demo1" data-vehicle="DEMO-001" data-name="Demo Driver">Demo Driver (Offline Mode)</option>
+                    return `
+                        <div class="activity-item ${statusClass}">
+                            <div class="activity-content">
+                                <div>
+                                    <div class="activity-driver">${driver.name}</div>
+                                    <div class="activity-details">
+                                        <span>🕐 ${timeAgo}</span>
+                                        ${driver.returns > 0 ? `<span class="returns-badge">${driver.returns} returns</span>` : ''}
+                                        <span>📍 Apollo Beach, FL</span>
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 1rem;">
+                                    <span class="status-badge status-${statusClass}">${statusText}</span>
+                                    ${driver.status === 'arrived' ? 
+                                        `<button class="checkin-btn" onclick="openEquipmentCheckIn('${driver.id}', '${driver.name}', ${driver.returns})">
+                                            📋 Check In
+                                        </button>` : ''}
+                                </div>
+                            </div>
+                        </div>
                     `;
-                }
+                }).join('');
                 
-                showNotification('Connection Error', `Failed to load drivers: ${error.message}`, 'error');
-            }
-        }
-        
-        // Check MongoDB connection via Railway health endpoint
-        async function checkConnectionStatus() {
-            try {
-                const response = await fetch(`${API_BASE}/api/health`, {
-                    method: 'GET',
-                    headers: { 'Accept': 'application/json' }
-                });
-                
-                const statusEl = document.getElementById('connectionStatus');
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('Health check response:', data);
-                    
-                    const isConnected = data.status === 'ok' || 
-                                      data.database === 'connected' || 
-                                      (data.data && data.data.database === 'connected');
-                    
-                    if (isConnected) {
-                        statusEl.innerHTML = '<div class="status-dot"></div><span>MongoDB Connected</span>';
-                        statusEl.className = 'connection-status status-connected';
-                        console.log('✅ MongoDB connection verified');
-                    } else {
-                        statusEl.innerHTML = '<div class="status-dot"></div><span>Database Issues</span>';
-                        statusEl.className = 'connection-status status-disconnected';
-                        console.log('⚠️ Database connection issues');
-                    }
-                } else {
-                    throw new Error(`Health check failed: ${response.status}`);
-                }
+                log(`📋 Activity feed updated: ${filteredDrivers.length} drivers shown`);
                 
             } catch (error) {
-                console.error('❌ Health check failed:', error);
-                const statusEl = document.getElementById('connectionStatus');
-                statusEl.innerHTML = '<div class="status-dot"></div><span>Connection Failed</span>';
-                statusEl.className = 'connection-status status-disconnected';
+                log('❌ Error updating activity feed: ' + error.message, 'error');
+                showEmptyState();
             }
         }
         
-        // Login function
-        function login() {
-            const select = document.getElementById('driverSelect');
-            const selectedOption = select.options[select.selectedIndex];
+        function showEmptyState() {
+            const activityList = document.getElementById('activityList');
+            const activityCount = document.getElementById('activityCount');
             
-            if (!select.value) {
-                showNotification('Selection Required', 'Please select your name to continue', 'warning');
-                return;
-            }
-            
-            currentDriverId = select.value;
-            currentDriver = selectedOption.dataset.name;
-            currentVehicle = selectedOption.dataset.vehicle;
-            
-            console.log('✅ Login successful:', {
-                id: currentDriverId,
-                name: currentDriver,
-                vehicle: currentVehicle
-            });
-            
-            // Stop auto-refresh when logged in
-            if (autoRefreshInterval) {
-                clearInterval(autoRefreshInterval);
-                autoRefreshInterval = null;
-            }
-            
-            showMainScreen();
+            activityCount.textContent = '0 drivers';
+            activityList.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">📭</div>
+                    <p>No driver activity available</p>
+                    <p style="font-size: 0.875rem; margin-top: 1rem;">Check MongoDB connection or add test data</p>
+                </div>
+            `;
         }
         
-        // Show main screen
-        function showMainScreen() {
-            document.getElementById('loginScreen').classList.add('hidden');
-            document.getElementById('mainScreen').classList.add('visible');
-            
-            // Update driver info
-            document.getElementById('driverName').textContent = currentDriver;
-            document.getElementById('vehicleId').textContent = `Vehicle: ${currentVehicle}`;
-            
-            // Set driver avatar initials
-            const initials = currentDriver.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-            document.getElementById('driverAvatar').textContent = initials;
-            
-            console.log('📱 Main screen displayed for:', currentDriver);
-        }
-        
-        // Sign out
-        function signOut() {
-            console.log('👋 Signing out:', currentDriver);
-            
-            // Reset state
-            currentDriver = null;
-            currentVehicle = null;
-            currentDriverId = null;
-            hasReturns = null;
-            returnsCount = 0;
-            
-            // Reset UI
-            resetReturnsSelection();
-            
-            // Return to login screen
-            document.getElementById('loginScreen').classList.remove('hidden');
-            document.getElementById('mainScreen').classList.remove('visible');
-            document.getElementById('driverSelect').value = '';
-            document.getElementById('loginBtn').disabled = true;
-            
-            // Restart auto-refresh
-            if (!autoRefreshInterval) {
-                autoRefreshInterval = setInterval(loadDriversFromMongoDB, 30000);
-            }
-            
-            showNotification('Session Ended', 'You have been signed out successfully', 'success');
-        }
-        
-        // Set returns status
-        function setReturns(value) {
-            hasReturns = value;
-            const yesBtn = document.getElementById('returnsYes');
-            const noBtn = document.getElementById('returnsNo');
-            const returnsCountDiv = document.getElementById('returnsCount');
-            
-            console.log('Returns status set to:', value);
-            
-            if (value === true) {
-                yesBtn.classList.add('selected');
-                noBtn.classList.remove('selected');
-                returnsCountDiv.classList.add('visible');
-                document.getElementById('returnsCountInput').focus();
-            } else {
-                yesBtn.classList.remove('selected');
-                noBtn.classList.add('selected');
-                returnsCountDiv.classList.remove('visible');
-                returnsCount = 0;
-                document.getElementById('returnsCountInput').value = '';
-            }
-        }
-        
-        // Reset returns selection
-        function resetReturnsSelection() {
-            hasReturns = null;
-            returnsCount = 0;
-            document.getElementById('returnsYes').classList.remove('selected');
-            document.getElementById('returnsNo').classList.remove('selected');
-            document.getElementById('returnsCount').classList.remove('visible');
-            document.getElementById('returnsCountInput').value = '';
-        }
-        
-        // Send update to MongoDB Atlas via Railway API
-        async function sendUpdate(type) {
-            console.log('📡 Sending update to MongoDB:', type);
-            
-            // Validation
-            if (hasReturns === null) {
-                showNotification('Returns Status Required', 'Please indicate whether you have returns before proceeding', 'warning');
-                return;
-            }
-            
-            if (hasReturns === true && (!returnsCount || returnsCount < 1)) {
-                showNotification('Returns Count Required', 'Please enter the number of returns', 'warning');
-                document.getElementById('returnsCountInput').focus();
-                return;
-            }
-            
-            const button = type === '30min' ? document.getElementById('btn30min') : document.getElementById('btnArrived');
-            
-            // Show loading state
-            button.classList.add('sending');
-            button.disabled = true;
-            
-            const now = new Date();
-            let status, message;
-            
-            if (type === '30min') {
-                status = '30 minutes away';
-                message = `${currentDriver} is 30 minutes away from warehouse`;
-            } else {
-                status = 'arrived';
-                message = `${currentDriver} has arrived at warehouse`;
-            }
-            
-            // Add returns information
-            if (hasReturns) {
-                message += ` with ${returnsCount} return${returnsCount > 1 ? 's' : ''}`;
-            } else {
-                message += ' with no returns';
-            }
-            
-            const notificationData = {
-                driver: currentDriver,
-                driverId: currentDriverId,
-                vehicleId: currentVehicle,
-                status: status,
-                message: message,
-                warehouse: WAREHOUSE_ADDRESS,
-                location: 'Driver Location',
-                timestamp: now.toISOString(),
-                hasReturns: hasReturns,
-                returnsCount: hasReturns ? returnsCount : 0,
-                // Additional fields for better tracking
-                type: type,
-                source: 'driver_portal'
-            };
-            
-            console.log('Sending notification data:', notificationData);
-            
+        function getTimeAgo(timestamp) {
             try {
-                const response = await fetch(`${API_BASE}/api/notifications`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(notificationData)
-                });
+                const date = new Date(timestamp);
+                const now = new Date();
+                const diffMs = now - date;
+                const diffMins = Math.floor(diffMs / 60000);
                 
-                console.log('API response status:', response.status);
-                
-                if (response.ok) {
-                    const result = await response.json();
-                    console.log('✅ Notification sent successfully:', result);
-                    
-                    showNotification(
-                        'Status Updated', 
-                        `${status === 'arrived' ? 'Arrival' : 'ETA'} notification sent to command center`,
-                        'success'
-                    );
-                    
-                    // Reset returns selection after successful send
-                    resetReturnsSelection();
-                    
-                } else {
-                    const errorText = await response.text();
-                    console.error('❌ API error response:', errorText);
-                    throw new Error(`Server responded with ${response.status}: ${errorText}`);
-                }
-                
+                if (diffMins < 1) return 'Just now';
+                if (diffMins < 60) return `${diffMins}m ago`;
+                const diffHours = Math.floor(diffMins / 60);
+                if (diffHours < 24) return `${diffHours}h ago`;
+                const diffDays = Math.floor(diffHours / 24);
+                return `${diffDays}d ago`;
             } catch (error) {
-                console.error('❌ Error sending notification:', error);
-                showNotification(
-                    'Update Failed', 
-                    `Unable to send status update: ${error.message}. Please try again.`,
-                    'error'
-                );
-            } finally {
-                // Remove loading state
+                return 'Unknown';
+            }
+        }
+        
+        // Filter functions
+        function filterDrivers(filter, buttonElement) {
+            currentFilter = filter;
+            
+            // Update active button
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            buttonElement.classList.add('active');
+            
+            updateActivityFeed();
+            log(`🔍 Filter changed to: ${filter}`);
+        }
+        
+        // Refresh function
+        function refreshDashboard() {
+            const refreshIcon = document.getElementById('refreshIcon');
+            const refreshText = document.getElementById('refreshText');
+            
+            refreshIcon.style.animation = 'spin 1s linear infinite';
+            refreshText.textContent = 'Refreshing...';
+            
+            loadDataFromMongoDB().finally(() => {
                 setTimeout(() => {
-                    button.classList.remove('sending');
-                    button.disabled = false;
-                }, 1500);
+                    refreshIcon.style.animation = '';
+                    refreshText.textContent = 'Refresh';
+                }, 1000);
+            });
+        }
+        
+        // Test MongoDB connection
+        async function testMongoConnection() {
+            try {
+                log('🧪 Testing MongoDB connection...');
+                updateConnectionStatus('loading', 'Testing connection...');
+                
+                const response = await fetch(`${API_BASE}/api/health`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    log('✅ MongoDB connection test successful');
+                    updateConnectionStatus('connected', 'Connection test passed');
+                    showToast('MongoDB connection test successful!', 'success');
+                } else {
+                    log('❌ MongoDB connection test failed: ' + data.error);
+                    updateConnectionStatus('error', 'Connection test failed');
+                    showToast('MongoDB connection test failed', 'error');
+                }
+            } catch (error) {
+                log('❌ MongoDB connection test error: ' + error.message);
+                updateConnectionStatus('error', 'Connection test error');
+                showToast('MongoDB connection test error', 'error');
             }
         }
         
-        // Show notification
-        function showNotification(title, message, type = 'success') {
-            // Remove existing notification
-            const existing = document.querySelector('.notification');
-            if (existing) existing.remove();
-            
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            notification.innerHTML = `
-                <div class="notification-title">${title}</div>
-                <div class="notification-message">${message}</div>
+        // Equipment check-in functions
+        function openEquipmentCheckIn(driverId, driverName, returns) {
+            log(`📋 Opening equipment check-in for ${driverName}`);
+            // This would open the equipment check-in modal
+            // Implementation depends on your existing modal code
+            showToast(`Equipment check-in opened for ${driverName}`, 'info');
+        }
+        
+        // Clear daily check-ins
+        function clearDailyCheckIns() {
+            if (confirm('Are you sure you want to clear all daily check-ins? This action cannot be undone.')) {
+                completedDrivers.clear();
+                localStorage.removeItem('completedDrivers');
+                
+                // Reload data to refresh UI
+                loadDataFromMongoDB();
+                
+                log('🗑️ Daily check-ins cleared');
+                showToast('Daily check-ins have been cleared', 'info');
+            }
+        }
+        
+        // Logout function
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = '/login.html';
+            }
+        }
+        
+        // Toast notification function
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
+                <span>${message}</span>
             `;
             
-            document.body.appendChild(notification);
-            console.log(`📢 Notification: ${title} - ${message}`);
+            document.body.appendChild(toast);
             
-            // Auto-remove after 5 seconds
             setTimeout(() => {
-                notification.style.animation = 'slideOut 0.4s ease';
-                setTimeout(() => notification.remove(), 400);
+                toast.remove();
             }, 5000);
         }
-        
-        // Cleanup on page unload
-        window.addEventListener('beforeunload', function() {
-            if (autoRefreshInterval) {
-                clearInterval(autoRefreshInterval);
-            }
-        });
-        
-        // Debug information
-        console.log('🔧 Debug Information:');
-        console.log('- Current URL:', window.location.href);
-        console.log('- API Base:', API_BASE);
-        console.log('- Expected endpoints:');
-        console.log('  - Users: /api/users');
-        console.log('  - Notifications: /api/notifications');
-        console.log('  - Health: /api/health');
     </script>
 </body>
 </html>
