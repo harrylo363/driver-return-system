@@ -544,216 +544,6 @@
             to { transform: rotate(360deg); }
         }
         
-        .tab-content {
-            display: none;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(5px);
-        }
-        
-        .modal.active {
-            display: flex;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        .modal-content {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            max-width: 600px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-            animation: slideUp 0.3s ease;
-        }
-        
-        @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        
-        .modal-header {
-            padding: 2rem;
-            background: rgba(15, 23, 42, 0.5);
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .modal-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        
-        .modal-close {
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
-            background: var(--bg-hover);
-            border: 1px solid var(--border);
-            color: var(--text-secondary);
-            font-size: 1.25rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-        }
-        
-        .modal-close:hover {
-            background: var(--danger);
-            color: white;
-            transform: rotate(90deg);
-        }
-        
-        .modal-body {
-            padding: 2rem;
-        }
-        
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-        
-        .form-label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            font-size: 0.875rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        
-        .form-input, .form-select, .form-textarea {
-            width: 100%;
-            padding: 0.875rem;
-            background: var(--bg-dark);
-            border: 2px solid var(--border);
-            border-radius: 10px;
-            color: var(--text-primary);
-            font-size: 1rem;
-            transition: all 0.2s ease;
-        }
-        
-        .form-input:focus, .form-select:focus, .form-textarea:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-        
-        .form-textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-        
-        .form-radio-group {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-        
-        .form-radio-label {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1.25rem;
-            background: var(--bg-dark);
-            border: 2px solid var(--border);
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .form-radio-label:hover {
-            border-color: var(--accent);
-        }
-        
-        .form-radio-label.selected {
-            background: var(--accent);
-            border-color: var(--accent);
-            color: white;
-        }
-        
-        .form-radio-label input[type="radio"] {
-            display: none;
-        }
-        
-        .issue-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-        }
-        
-        .issue-indicator.no-issues {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--success);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-        
-        .issue-indicator.has-issues {
-            background: rgba(245, 158, 11, 0.1);
-            color: var(--warning);
-            border: 1px solid rgba(245, 158, 11, 0.3);
-        }
-        
-        .form-actions {
-            display: flex;
-            gap: 1rem;
-            margin-top: 2rem;
-            padding-top: 2rem;
-            border-top: 1px solid var(--border);
-        }
-        
-        .form-actions .btn {
-            flex: 1;
-        }
-        
-        /* Returns Info Box */
-        .returns-info-box {
-            background: rgba(245, 158, 11, 0.1);
-            border: 1px solid rgba(245, 158, 11, 0.3);
-            border-radius: 8px;
-            padding: 0.75rem;
-            margin-bottom: 1rem;
-            color: var(--warning);
-            font-size: 0.875rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
         @media (max-width: 1400px) {
             .dashboard-grid {
                 grid-template-columns: 1fr;
@@ -769,6 +559,585 @@
                 flex-direction: column;
                 gap: 0.75rem;
                 align-items: flex-end;
+            }
+        }
+        
+        /* Professional Check-In Modal Styles */
+        .checkin-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .checkin-modal-overlay.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .checkin-modal {
+            background: linear-gradient(145deg, #1A1F2E 0%, #0F172A 100%);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 24px;
+            width: 95%;
+            max-width: 1200px;
+            max-height: 90vh;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.4s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .checkin-header {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+            padding: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .checkin-header-left {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        
+        .checkin-logo {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #3B82F6 0%, #10B981 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+        }
+        
+        .checkin-title h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #F8FAFC;
+            margin: 0 0 4px 0;
+            letter-spacing: -0.02em;
+        }
+        
+        .checkin-title p {
+            font-size: 0.875rem;
+            color: #94A3B8;
+            margin: 0;
+        }
+        
+        .checkin-close {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #EF4444;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .checkin-close:hover {
+            background: rgba(239, 68, 68, 0.2);
+            transform: rotate(90deg);
+        }
+        
+        .checkin-body {
+            padding: 2rem;
+            max-height: calc(90vh - 200px);
+            overflow-y: auto;
+        }
+        
+        /* Custom Scrollbar */
+        .checkin-body::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .checkin-body::-webkit-scrollbar-track {
+            background: rgba(100, 116, 139, 0.1);
+            border-radius: 4px;
+        }
+        
+        .checkin-body::-webkit-scrollbar-thumb {
+            background: rgba(59, 130, 246, 0.3);
+            border-radius: 4px;
+        }
+        
+        .checkin-body::-webkit-scrollbar-thumb:hover {
+            background: rgba(59, 130, 246, 0.5);
+        }
+        
+        /* Driver Info Card */
+        .driver-info-card {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .driver-details {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        
+        .driver-avatar {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+            box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+        }
+        
+        .driver-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #F8FAFC;
+            margin-bottom: 4px;
+        }
+        
+        .driver-meta {
+            display: flex;
+            gap: 1.5rem;
+            font-size: 0.875rem;
+            color: #94A3B8;
+        }
+        
+        .driver-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        /* Progress Indicator */
+        .progress-section {
+            margin-bottom: 2rem;
+        }
+        
+        .progress-bar-container {
+            background: rgba(100, 116, 139, 0.1);
+            border-radius: 12px;
+            height: 12px;
+            overflow: hidden;
+            margin-bottom: 0.75rem;
+        }
+        
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3B82F6 0%, #10B981 100%);
+            border-radius: 12px;
+            width: 0%;
+            transition: width 0.5s ease;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+        }
+        
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.875rem;
+            color: #94A3B8;
+            font-weight: 600;
+        }
+        
+        /* Equipment Sections */
+        .equipment-sections {
+            display: grid;
+            gap: 1.5rem;
+        }
+        
+        .equipment-section {
+            background: rgba(30, 37, 50, 0.5);
+            border: 1px solid rgba(100, 116, 139, 0.2);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .equipment-section:hover {
+            border-color: rgba(59, 130, 246, 0.3);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+        
+        .equipment-header {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid rgba(100, 116, 139, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .equipment-header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .equipment-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        
+        .equipment-icon.tractor {
+            background: rgba(59, 130, 246, 0.15);
+        }
+        
+        .equipment-icon.trailer {
+            background: rgba(245, 158, 11, 0.15);
+        }
+        
+        .equipment-icon.moffett {
+            background: rgba(16, 185, 129, 0.15);
+        }
+        
+        .equipment-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #F8FAFC;
+            margin: 0;
+        }
+        
+        .equipment-subtitle {
+            font-size: 0.75rem;
+            color: #94A3B8;
+            margin: 2px 0 0 0;
+        }
+        
+        .section-status {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .status-pending {
+            background: rgba(100, 116, 139, 0.15);
+            color: #94A3B8;
+        }
+        
+        .status-complete {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10B981;
+        }
+        
+        .status-issues {
+            background: rgba(245, 158, 11, 0.15);
+            color: #F59E0B;
+        }
+        
+        .equipment-body {
+            padding: 1.5rem;
+        }
+        
+        /* Equipment Number Input */
+        .equipment-number-field {
+            margin-bottom: 1.5rem;
+        }
+        
+        .equipment-number-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #F8FAFC;
+            margin-bottom: 0.5rem;
+        }
+        
+        .equipment-number-input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: rgba(15, 23, 42, 0.8);
+            border: 2px solid rgba(100, 116, 139, 0.3);
+            border-radius: 12px;
+            color: #F8FAFC;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .equipment-number-input:focus {
+            outline: none;
+            border-color: #3B82F6;
+            background: rgba(15, 23, 42, 1);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+        
+        .equipment-number-input::placeholder {
+            color: #64748B;
+        }
+        
+        /* Inspection Items Grid */
+        .inspection-items {
+            display: grid;
+            gap: 0.75rem;
+        }
+        
+        .inspection-item {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(100, 116, 139, 0.2);
+            border-radius: 12px;
+            padding: 1rem;
+            transition: all 0.2s ease;
+        }
+        
+        .inspection-item:hover {
+            background: rgba(15, 23, 42, 0.8);
+            border-color: rgba(59, 130, 246, 0.2);
+        }
+        
+        .inspection-item.has-issue {
+            background: rgba(245, 158, 11, 0.05);
+            border-color: rgba(245, 158, 11, 0.3);
+        }
+        
+        .inspection-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0;
+        }
+        
+        .inspection-item-name {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #F8FAFC;
+        }
+        
+        .inspection-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .inspection-btn {
+            padding: 6px 12px;
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            background: rgba(30, 37, 50, 0.8);
+            border-radius: 8px;
+            color: #94A3B8;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .inspection-btn:hover {
+            border-color: rgba(59, 130, 246, 0.3);
+            background: rgba(59, 130, 246, 0.1);
+            color: #F8FAFC;
+        }
+        
+        .inspection-btn.active-pass {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: rgba(16, 185, 129, 0.3);
+            color: #10B981;
+        }
+        
+        .inspection-btn.active-fail {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #EF4444;
+        }
+        
+        .issue-details {
+            display: none;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(100, 116, 139, 0.2);
+        }
+        
+        .issue-details.show {
+            display: block;
+        }
+        
+        .issue-textarea {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            border-radius: 8px;
+            color: #F8FAFC;
+            font-size: 0.875rem;
+            resize: vertical;
+            min-height: 60px;
+            margin-bottom: 0.75rem;
+            font-family: inherit;
+        }
+        
+        .issue-textarea:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .issue-textarea::placeholder {
+            color: #64748B;
+        }
+        
+        .photo-upload-area {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .photo-btn {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .photo-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        }
+        
+        .photo-count {
+            font-size: 0.75rem;
+            color: #94A3B8;
+        }
+        
+        /* Action Footer */
+        .checkin-footer {
+            background: rgba(30, 37, 50, 0.8);
+            border-top: 1px solid rgba(100, 116, 139, 0.2);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .footer-stats {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .footer-stat {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .footer-stat.pass {
+            color: #10B981;
+        }
+        
+        .footer-stat.fail {
+            color: #EF4444;
+        }
+        
+        .footer-actions {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .btn-cancel {
+            padding: 0.875rem 1.75rem;
+            background: rgba(100, 116, 139, 0.15);
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            border-radius: 12px;
+            color: #F8FAFC;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-cancel:hover {
+            background: rgba(100, 116, 139, 0.25);
+            transform: translateY(-2px);
+        }
+        
+        .btn-submit {
+            padding: 0.875rem 1.75rem;
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+        }
+        
+        .btn-submit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        @media (max-width: 768px) {
+            .checkin-modal {
+                width: 100%;
+                max-width: 100%;
+                height: 100%;
+                max-height: 100%;
+                border-radius: 0;
+            }
+            
+            .driver-info-card {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .footer-stats {
+                display: none;
             }
         }
     </style>
@@ -951,124 +1320,160 @@
         </div>
     </div>
 
-    <!-- Check-in Modal -->
-    <div id="checkInModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">
-                    <span>📋</span>
-                    <span>Equipment Check-In Form</span>
-                </h2>
-                <button class="modal-close" onclick="closeCheckInModal()">&times;</button>
+    <!-- Professional Equipment Check-In Modal -->
+    <div id="equipmentCheckInModal" class="checkin-modal-overlay">
+        <div class="checkin-modal">
+            <!-- Header -->
+            <div class="checkin-header">
+                <div class="checkin-header-left">
+                    <div class="checkin-logo">📋</div>
+                    <div class="checkin-title">
+                        <h2>Equipment Inspection Check-In</h2>
+                        <p>Complete pre-trip inspection for all equipment</p>
+                    </div>
+                </div>
+                <button class="checkin-close" onclick="closeEquipmentModal()">&times;</button>
             </div>
-            <div class="modal-body">
-                <form id="checkInForm" onsubmit="submitCheckIn(event)">
-                    <!-- Driver Information -->
-                    <div class="form-group">
-                        <label class="form-label">Driver Name</label>
-                        <input type="text" class="form-input" id="modalDriverName" readonly>
-                        <input type="hidden" id="modalDriverId">
-                    </div>
-                    
-                    <!-- Returns Info Display -->
-                    <div id="modalReturnsInfo" class="returns-info-box" style="display: none;">
-                        <span>📦</span>
-                        <span id="modalReturnsText">Driver has returns</span>
-                    </div>
-                    
-                    <!-- Tractor Inspection -->
-                    <div class="form-group">
-                        <label class="form-label">🚛 Tractor Condition</label>
-                        <div class="issue-indicator no-issues" id="tractorIndicator">
-                            <span>✓</span>
-                            <span>No Issues</span>
+            
+            <!-- Body -->
+            <div class="checkin-body">
+                <!-- Driver Info Card -->
+                <div class="driver-info-card">
+                    <div class="driver-details">
+                        <div class="driver-avatar" id="modalDriverAvatar">JD</div>
+                        <div>
+                            <div class="driver-name" id="modalDriverName">Driver Name</div>
+                            <div class="driver-meta">
+                                <span>🕐 <span id="modalCheckTime">6:45 AM</span></span>
+                                <span>📍 Apollo Beach, FL</span>
+                                <span id="modalReturnsInfo" style="display: none;">📦 <span id="modalReturnsCount">0</span> Returns</span>
+                            </div>
                         </div>
-                        <div class="form-radio-group">
-                            <label class="form-radio-label selected">
-                                <input type="radio" name="tractorCondition" value="good" checked onchange="updateIssueIndicator('tractor', this.value)">
-                                <span>✅ Good</span>
-                            </label>
-                            <label class="form-radio-label">
-                                <input type="radio" name="tractorCondition" value="minor" onchange="updateIssueIndicator('tractor', this.value)">
-                                <span>⚠️ Minor Issues</span>
-                            </label>
-                            <label class="form-radio-label">
-                                <input type="radio" name="tractorCondition" value="major" onchange="updateIssueIndicator('tractor', this.value)">
-                                <span>🔴 Major Issues</span>
-                            </label>
-                        </div>
-                        <textarea class="form-textarea" id="tractorIssuesText" placeholder="Describe any tractor issues (optional)..." style="margin-top: 1rem; display: none;"></textarea>
                     </div>
-                    
-                    <!-- Trailer Inspection -->
-                    <div class="form-group">
-                        <label class="form-label">🚚 Trailer Condition</label>
-                        <div class="issue-indicator no-issues" id="trailerIndicator">
-                            <span>✓</span>
-                            <span>No Issues</span>
-                        </div>
-                        <div class="form-radio-group">
-                            <label class="form-radio-label selected">
-                                <input type="radio" name="trailerCondition" value="good" checked onchange="updateIssueIndicator('trailer', this.value)">
-                                <span>✅ Good</span>
-                            </label>
-                            <label class="form-radio-label">
-                                <input type="radio" name="trailerCondition" value="minor" onchange="updateIssueIndicator('trailer', this.value)">
-                                <span>⚠️ Minor Issues</span>
-                            </label>
-                            <label class="form-radio-label">
-                                <input type="radio" name="trailerCondition" value="major" onchange="updateIssueIndicator('trailer', this.value)">
-                                <span>🔴 Major Issues</span>
-                            </label>
-                        </div>
-                        <textarea class="form-textarea" id="trailerIssuesText" placeholder="Describe any trailer issues (optional)..." style="margin-top: 1rem; display: none;"></textarea>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <span style="font-size: 0.875rem; color: #94A3B8;">Status:</span>
+                        <span class="section-status status-pending" id="overallStatus">IN PROGRESS</span>
                     </div>
-                    
-                    <!-- Moffett Inspection -->
-                    <div class="form-group">
-                        <label class="form-label">🏗️ Moffett Condition</label>
-                        <div class="issue-indicator no-issues" id="moffettIndicator">
-                            <span>✓</span>
-                            <span>No Issues</span>
-                        </div>
-                        <div class="form-radio-group">
-                            <label class="form-radio-label selected">
-                                <input type="radio" name="moffettCondition" value="good" checked onchange="updateIssueIndicator('moffett', this.value)">
-                                <span>✅ Good</span>
-                            </label>
-                            <label class="form-radio-label">
-                                <input type="radio" name="moffettCondition" value="minor" onchange="updateIssueIndicator('moffett', this.value)">
-                                <span>⚠️ Minor Issues</span>
-                            </label>
-                            <label class="form-radio-label">
-                                <input type="radio" name="moffettCondition" value="major" onchange="updateIssueIndicator('moffett', this.value)">
-                                <span>🔴 Major Issues</span>
-                            </label>
-                            <label class="form-radio-label">
-                                <input type="radio" name="moffettCondition" value="na" onchange="updateIssueIndicator('moffett', this.value)">
-                                <span>➖ N/A</span>
-                            </label>
-                        </div>
-                        <textarea class="form-textarea" id="moffettIssuesText" placeholder="Describe any moffett issues (optional)..." style="margin-top: 1rem; display: none;"></textarea>
+                </div>
+                
+                <!-- Progress Section -->
+                <div class="progress-section">
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" id="progressBarFill"></div>
                     </div>
-                    
-                    <!-- Additional Notes -->
-                    <div class="form-group">
-                        <label class="form-label">📝 Additional Notes (Optional)</label>
-                        <textarea class="form-textarea" id="additionalNotes" placeholder="Any other observations or concerns..."></textarea>
+                    <div class="progress-text">
+                        <span id="progressTextLeft">0% Complete</span>
+                        <span id="progressTextRight">0 of 26 items checked</span>
                     </div>
+                </div>
+                
+                <form id="equipmentCheckInForm">
+                    <input type="hidden" id="modalDriverId">
                     
-                    <!-- Form Actions -->
-                    <div class="form-actions">
-                        <button type="button" class="btn btn-secondary" onclick="closeCheckInModal()">
-                            Cancel
-                        </button>
-                        <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #10B981 0%, #059669 100%);">
-                            <span>✅</span>
-                            <span>Complete Check-In</span>
-                        </button>
+                    <div class="equipment-sections">
+                        <!-- Tractor Section -->
+                        <div class="equipment-section">
+                            <div class="equipment-header">
+                                <div class="equipment-header-left">
+                                    <div class="equipment-icon tractor">🚛</div>
+                                    <div>
+                                        <div class="equipment-title">Tractor Inspection</div>
+                                        <div class="equipment-subtitle">13 inspection points</div>
+                                    </div>
+                                </div>
+                                <span class="section-status status-pending" id="tractorStatus">PENDING</span>
+                            </div>
+                            <div class="equipment-body">
+                                <div class="equipment-number-field">
+                                    <label class="equipment-number-label">Tractor Number *</label>
+                                    <input type="text" 
+                                           class="equipment-number-input" 
+                                           id="tractorNumber" 
+                                           placeholder="Enter tractor number (e.g., TRUCK-001)"
+                                           required>
+                                </div>
+                                <div class="inspection-items" id="tractorItems">
+                                    <!-- Items will be generated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Trailer Section -->
+                        <div class="equipment-section">
+                            <div class="equipment-header">
+                                <div class="equipment-header-left">
+                                    <div class="equipment-icon trailer">🚚</div>
+                                    <div>
+                                        <div class="equipment-title">Trailer Inspection</div>
+                                        <div class="equipment-subtitle">7 inspection points</div>
+                                    </div>
+                                </div>
+                                <span class="section-status status-pending" id="trailerStatus">PENDING</span>
+                            </div>
+                            <div class="equipment-body">
+                                <div class="equipment-number-field">
+                                    <label class="equipment-number-label">Trailer Number *</label>
+                                    <input type="text" 
+                                           class="equipment-number-input" 
+                                           id="trailerNumber" 
+                                           placeholder="Enter trailer number (e.g., TRL-001)"
+                                           required>
+                                </div>
+                                <div class="inspection-items" id="trailerItems">
+                                    <!-- Items will be generated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Moffett Section -->
+                        <div class="equipment-section">
+                            <div class="equipment-header">
+                                <div class="equipment-header-left">
+                                    <div class="equipment-icon moffett">🏗️</div>
+                                    <div>
+                                        <div class="equipment-title">Moffett Inspection</div>
+                                        <div class="equipment-subtitle">6 inspection points</div>
+                                    </div>
+                                </div>
+                                <span class="section-status status-pending" id="moffettStatus">PENDING</span>
+                            </div>
+                            <div class="equipment-body">
+                                <div class="equipment-number-field">
+                                    <label class="equipment-number-label">Moffett Number *</label>
+                                    <input type="text" 
+                                           class="equipment-number-input" 
+                                           id="moffettNumber" 
+                                           placeholder="Enter moffett number (e.g., MFT-001)"
+                                           required>
+                                </div>
+                                <div class="inspection-items" id="moffettItems">
+                                    <!-- Items will be generated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </form>
+            </div>
+            
+            <!-- Footer -->
+            <div class="checkin-footer">
+                <div class="footer-stats">
+                    <div class="footer-stat pass">
+                        <span>✅</span>
+                        <span>Passed: <span id="passedCount">0</span></span>
+                    </div>
+                    <div class="footer-stat fail">
+                        <span>❌</span>
+                        <span>Issues: <span id="failedCount">0</span></span>
+                    </div>
+                </div>
+                <div class="footer-actions">
+                    <button type="button" class="btn-cancel" onclick="closeEquipmentModal()">Cancel</button>
+                    <button type="submit" class="btn-submit" id="submitCheckInBtn" onclick="submitEquipmentCheckIn()" disabled>
+                        <span>✅</span>
+                        <span>Complete Check-In</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -1086,15 +1491,57 @@
         let lastResetDate = null;
         let refreshInterval = null;
         
+        // Equipment Check-In Form Data
+        const inspectionItems = {
+            tractor: [
+                'QR Completed',
+                'Samsara present and operational',
+                'Damages present',
+                'Windshield',
+                'Lights',
+                'Tires',
+                'Air/Electrical lines',
+                'Cab clean',
+                'Fire extinguisher',
+                'Safety cones',
+                'Documents',
+                'Tires (detailed check)'
+            ],
+            trailer: [
+                'Gladhands',
+                'Deck clean and free of debris',
+                'Physical damages',
+                'Lights',
+                'Tires',
+                'Straps'
+            ],
+            moffett: [
+                'Damages',
+                'Seatbelt unbuckled',
+                'Lights',
+                'Electrical cable',
+                'Tires'
+            ]
+        };
+
+        let equipmentData = {
+            driverName: '',
+            driverId: '',
+            tractorNumber: '',
+            trailerNumber: '',
+            moffettNumber: '',
+            completedItems: 0,
+            totalItems: 26, // 13 + 7 + 6 inspection items
+            passedItems: 0,
+            failedItems: 0,
+            inspections: {}
+        };
+        
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🚀 Fleet Command Center - MongoDB Atlas Integration');
             console.log('🔗 API Base:', API_BASE);
             console.log('📍 Warehouse:', WAREHOUSE_ADDRESS);
-            console.log('🔌 Expected MongoDB Endpoints:');
-            console.log('  - GET /api/notifications (driver status updates)');
-            console.log('  - GET /api/users (driver profiles)');
-            console.log('  - GET /api/health (connection status)');
             
             initializeDashboard();
         });
@@ -1190,16 +1637,6 @@
                     const result = await notificationsResponse.value.json();
                     notifications = Array.isArray(result) ? result : (result.data || result.notifications || []);
                     console.log('✅ Notifications loaded:', notifications.length);
-                    
-                    if (notifications.length > 0) {
-                        console.log('📄 Sample notification:', {
-                            driver: notifications[0].driver,
-                            status: notifications[0].status,
-                            timestamp: notifications[0].timestamp,
-                            hasReturns: notifications[0].hasReturns,
-                            returnsCount: notifications[0].returnsCount
-                        });
-                    }
                 } else {
                     console.log('⚠️ Notifications endpoint failed');
                 }
@@ -1209,10 +1646,6 @@
                     const result = await usersResponse.value.json();
                     users = Array.isArray(result) ? result : (result.data || result.users || []);
                     console.log('✅ Users loaded:', users.length);
-                    
-                    // Filter for drivers only
-                    const drivers = users.filter(user => user.role === 'driver' && user.active !== false);
-                    console.log('👨‍💼 Active drivers found:', drivers.length);
                 } else {
                     console.log('⚠️ Users endpoint failed');
                 }
@@ -1225,790 +1658,4 @@
                                  (healthData.data && healthData.data.database === 'connected');
                     console.log('✅ Health check result:', dbConnected ? 'Connected' : 'Issues detected');
                 } else {
-                    console.log('⚠️ Health endpoint failed');
-                }
-                
-                // Process check-ins (equipment inspections)
-                if (checkinsResponse.status === 'fulfilled' && checkinsResponse.value.ok) {
-                    const result = await checkinsResponse.value.json();
-                    checkins = Array.isArray(result) ? result : (result.data || result.checkins || []);
-                    console.log('✅ Check-ins loaded:', checkins.length);
-                    
-                    // Update equipment issue counts
-                    updateEquipmentIssues(checkins);
-                } else {
-                    console.log('⚠️ Check-ins endpoint failed');
-                }
-                
-                // Merge notifications with user data for complete driver profiles
-                const driverData = mergeDriverData(notifications, users);
-                
-                if (driverData.length === 0) {
-                    showEmptyState();
-                } else {
-                    processDriverData(driverData);
-                    updateDashboard();
-                }
-                
-                updateConnectionStatus(dbConnected ? 'connected' : 'disconnected');
-                
-            } catch (error) {
-                console.error('❌ Critical error loading from MongoDB:', error);
-                updateConnectionStatus('error');
-                showToast(`Database error: ${error.message}`, 'error');
-                showEmptyState();
-            }
-        }
-        
-        // Merge notifications with user profiles
-        function mergeDriverData(notifications, users) {
-            console.log('🔄 Merging driver data...');
-            
-            const merged = [];
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            
-            // Create a map of users for quick lookup
-            const userMap = new Map();
-            users.forEach(user => {
-                if (user.role === 'driver') {
-                    userMap.set(user.name, user);
-                    userMap.set(user._id || user.id, user);
-                }
-            });
-            
-            // Process notifications
-            notifications.forEach(notification => {
-                const notificationDate = new Date(notification.timestamp);
-                
-                // Only include today's notifications
-                if (notificationDate >= today) {
-                    const driver = userMap.get(notification.driver) || userMap.get(notification.driverId);
-                    
-                    merged.push({
-                        driver: notification.driver,
-                        driverId: notification.driverId,
-                        status: notification.status,
-                        message: notification.message,
-                        timestamp: notification.timestamp,
-                        vehicleId: notification.vehicleId || (driver && driver.vehicleId),
-                        warehouse: notification.warehouse,
-                        hasReturns: notification.hasReturns === true || notification.hasReturns === 'true',
-                        returnsCount: parseInt(notification.returnsCount) || 0,
-                        // Additional fields from user profile
-                        email: driver && driver.email,
-                        phoneNumber: driver && driver.phoneNumber,
-                        active: driver ? driver.active !== false : true
-                    });
-                }
-            });
-            
-            // Add drivers who haven't sent notifications today but are active
-            users.forEach(user => {
-                if (user.role === 'driver' && user.active !== false) {
-                    const hasNotification = merged.find(m => 
-                        m.driver === user.name || m.driverId === (user._id || user.id)
-                    );
-                    
-                    if (!hasNotification) {
-                        merged.push({
-                            driver: user.name,
-                            driverId: user._id || user.id,
-                            status: 'working',
-                            message: `${user.name} is working`,
-                            timestamp: new Date().toISOString(),
-                            vehicleId: user.vehicleId,
-                            warehouse: WAREHOUSE_ADDRESS,
-                            hasReturns: false,
-                            returnsCount: 0,
-                            email: user.email,
-                            phoneNumber: user.phoneNumber,
-                            active: true
-                        });
-                    }
-                }
-            });
-            
-            console.log('🔀 Merged driver data:', merged.length);
-            return merged;
-        }
-        
-        function showEmptyState() {
-            document.getElementById('activityList').innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-icon">📡</div>
-                    <p>Waiting for driver activity from MongoDB...</p>
-                    <p style="font-size: 0.875rem; margin-top: 1rem;">Drivers can update their status at /driver</p>
-                </div>
-            `;
-        }
-        
-        // Process driver data to keep only latest status per driver
-        function processDriverData(data) {
-            console.log('⚙️ Processing driver data:', data.length);
-            
-            // Clear the map for fresh data
-            driverMap.clear();
-            
-            // Sort by timestamp (newest first)
-            data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            
-            // Keep only the most recent status for each driver
-            data.forEach(driver => {
-                const driverName = driver.driver || 'Unknown Driver';
-                
-                // Check if driver is in completed set and update status
-                if (completedDrivers.has(driverName)) {
-                    console.log(`✅ Driver ${driverName} is marked as completed`);
-                    driver.status = 'completed';
-                }
-                
-                // Only add if we haven't seen this driver yet (most recent)
-                if (!driverMap.has(driverName)) {
-                    const processedDriver = {
-                        ...driver,
-                        hasReturns: driver.hasReturns === true || driver.hasReturns === 'true',
-                        returnsCount: parseInt(driver.returnsCount) || 0
-                    };
-                    driverMap.set(driverName, processedDriver);
-                    console.log(`➕ Added driver ${driverName} with status: ${processedDriver.status}`);
-                }
-            });
-            
-            // Convert map values to array
-            allDrivers = Array.from(driverMap.values());
-            console.log('📊 Final processed drivers:', allDrivers.length);
-            console.log('✅ Completed drivers tracked:', [...completedDrivers]);
-            
-            updateReturnsAnalytics();
-        }
-        
-        // Update dashboard
-        function updateDashboard() {
-            updateKPIs();
-            updateActivityList();
-            document.getElementById('lastUpdate').textContent = 
-                'Updated: ' + new Date().toLocaleTimeString();
-        }
-        
-        // Update connection status indicator
-        function updateConnectionStatus(status) {
-            const indicator = document.getElementById('connectionIndicator');
-            const statusText = document.getElementById('connectionStatus');
-            
-            switch (status) {
-                case 'connected':
-                    indicator.style.background = 'rgba(16, 185, 129, 0.1)';
-                    indicator.style.borderColor = 'rgba(16, 185, 129, 0.3)';
-                    indicator.querySelector('.pulse').style.background = 'var(--success)';
-                    statusText.textContent = 'MongoDB Connected';
-                    console.log('🟢 Connection status: Connected');
-                    break;
-                    
-                case 'loading':
-                    indicator.style.background = 'rgba(59, 130, 246, 0.1)';
-                    indicator.style.borderColor = 'rgba(59, 130, 246, 0.3)';
-                    indicator.querySelector('.pulse').style.background = 'var(--accent)';
-                    statusText.textContent = 'Syncing with MongoDB...';
-                    break;
-                    
-                case 'disconnected':
-                    indicator.style.background = 'rgba(245, 158, 11, 0.1)';
-                    indicator.style.borderColor = 'rgba(245, 158, 11, 0.3)';
-                    indicator.querySelector('.pulse').style.background = 'var(--warning)';
-                    statusText.textContent = 'Connection Issues';
-                    console.log('🟡 Connection status: Issues');
-                    break;
-                    
-                case 'error':
-                default:
-                    indicator.style.background = 'rgba(239, 68, 68, 0.1)';
-                    indicator.style.borderColor = 'rgba(239, 68, 68, 0.3)';
-                    indicator.querySelector('.pulse').style.background = 'var(--danger)';
-                    statusText.textContent = 'Database Offline';
-                    console.log('🔴 Connection status: Error');
-                    break;
-            }
-        }
-        
-        // Update KPI cards with returns tracking
-        function updateKPIs() {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            
-            let active = 0, enroute = 0, arrived = 0, completed = 0, working = 0;
-            let totalReturns = 0;
-            let driversWithReturns = 0;
-            
-            console.log('📊 Updating KPIs for', allDrivers.length, 'drivers');
-            
-            allDrivers.forEach(driver => {
-                const driverTime = new Date(driver.timestamp);
-                if (driverTime >= today) {
-                    // Track returns
-                    if (driver.hasReturns) {
-                        driversWithReturns++;
-                        totalReturns += (driver.returnsCount || 0);
-                    }
-                    
-                    // Track status - Updated logic to better categorize drivers
-                    if (driver.status === 'completed') {
-                        completed++;
-                        console.log(`✅ ${driver.driver}: completed`);
-                    } else if (driver.status === '30 minutes away' || driver.status === 'en-route' || driver.status === 'en route') {
-                        enroute++;
-                        active++; // En route drivers are considered active
-                        console.log(`🚚 ${driver.driver}: en route`);
-                    } else if (driver.status === 'arrived' || driver.status === 'Arrived') {
-                        arrived++;
-                        active++; // Arrived drivers are considered active
-                        console.log(`📍 ${driver.driver}: arrived`);
-                    } else {
-                        // All other statuses (including 'working') go to working count
-                        working++;
-                        console.log(`⚡ ${driver.driver}: working`);
-                    }
-                }
-            });
-            
-            // Active count should only include drivers with status updates (en route + arrived)
-            // Working drivers are separate and don't count as "active" in the activity feed
-            
-            console.log('📈 KPI Summary:', { active, enroute, arrived, completed, working, totalReturns, driversWithReturns });
-            
-            document.getElementById('activeCount').textContent = active; // Only en route + arrived
-            document.getElementById('enrouteCount').textContent = enroute;
-            document.getElementById('arrivedCount').textContent = arrived;
-            document.getElementById('completedCount').textContent = completed;
-            document.getElementById('workingCount').textContent = working;
-            
-            // Update returns KPI
-            document.getElementById('returnsKpiCount').textContent = totalReturns;
-            document.getElementById('returnsSublabel').textContent = `From ${driversWithReturns} driver${driversWithReturns !== 1 ? 's' : ''}`;
-        }
-        
-        // Update returns analytics panel
-        function updateReturnsAnalytics() {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            
-            let totalReturns = 0;
-            let driversWithReturns = 0;
-            
-            allDrivers.forEach(driver => {
-                const driverTime = new Date(driver.timestamp);
-                if (driverTime >= today && driver.hasReturns) {
-                    driversWithReturns++;
-                    totalReturns += (driver.returnsCount || 0);
-                }
-            });
-            
-            const avgReturns = driversWithReturns > 0 ? (totalReturns / driversWithReturns).toFixed(1) : 0;
-            
-            if (document.getElementById('totalReturnsToday')) {
-                document.getElementById('totalReturnsToday').textContent = totalReturns;
-                document.getElementById('driversWithReturns').textContent = driversWithReturns;
-                document.getElementById('avgReturns').textContent = avgReturns;
-            }
-        }
-        
-        // Update equipment issues from check-ins data
-        function updateEquipmentIssues(checkins) {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            
-            let tractorCount = 0, trailerCount = 0, moffettCount = 0;
-            
-            console.log('🔧 Processing equipment issues from check-ins...');
-            
-            checkins.forEach(checkin => {
-                const checkinDate = new Date(checkin.timestamp || checkin.completedAt || checkin.createdAt);
-                
-                // Only count today's check-ins
-                if (checkinDate >= today) {
-                    // Count issues based on equipment condition
-                    if (checkin.tractorCondition && checkin.tractorCondition !== 'good') {
-                        tractorCount++;
-                        console.log(`🚛 Tractor issue found: ${checkin.driverName} - ${checkin.tractorCondition}`);
-                    }
-                    
-                    if (checkin.trailerCondition && checkin.trailerCondition !== 'good') {
-                        trailerCount++;
-                        console.log(`🚚 Trailer issue found: ${checkin.driverName} - ${checkin.trailerCondition}`);
-                    }
-                    
-                    if (checkin.moffettCondition && checkin.moffettCondition !== 'good' && checkin.moffettCondition !== 'na') {
-                        moffettCount++;
-                        console.log(`🏗️ Moffett issue found: ${checkin.driverName} - ${checkin.moffettCondition}`);
-                    }
-                    
-                    // Also check for legacy issue flags
-                    if (checkin.tractorIssue) tractorCount++;
-                    if (checkin.trailerIssue) trailerCount++;
-                    if (checkin.moffettIssue) moffettCount++;
-                }
-            });
-            
-            console.log('🔧 Equipment issues summary:', { tractorCount, trailerCount, moffettCount });
-            
-            // Update the display
-            document.getElementById('tractorIssues').textContent = tractorCount;
-            document.getElementById('trailerIssues').textContent = trailerCount;
-            document.getElementById('moffettIssues').textContent = moffettCount;
-        }
-        
-        // Update activity list with proper filtering
-        function updateActivityList() {
-            const list = document.getElementById('activityList');
-            let filtered = allDrivers;
-            
-            console.log('📋 Updating activity list, current filter:', currentFilter);
-            console.log('🔍 All drivers status:', allDrivers.map(d => ({ name: d.driver, status: d.status })));
-            
-            // Apply filter
-            if (currentFilter === 'overview') {
-                // Overview: show only drivers with active status updates (exclude completed AND working)
-                filtered = allDrivers.filter(d => 
-                    d.status !== 'completed' && 
-                    d.status !== 'working' &&
-                    !['working', 'Still Working'].includes(d.status)
-                );
-                console.log('👁️ Overview filter: showing only drivers with active status updates (excluding completed and working)');
-            } else if (currentFilter === 'en-route') {
-                filtered = allDrivers.filter(d => 
-                    d.status === '30 minutes away' || d.status === 'en-route' || d.status === 'en route'
-                );
-            } else if (currentFilter === 'arrived') {
-                filtered = allDrivers.filter(d => 
-                    d.status === 'arrived' || d.status === 'Arrived'
-                );
-            } else if (currentFilter === 'completed') {
-                // Only show completed drivers
-                filtered = allDrivers.filter(d => d.status === 'completed');
-            } else if (currentFilter === 'working') {
-                // Only show drivers with "working" status or default working status
-                filtered = allDrivers.filter(d => 
-                    d.status === 'working' ||
-                    !['30 minutes away', 'en-route', 'en route', 'arrived', 'Arrived', 'completed'].includes(d.status)
-                );
-            }
-            
-            console.log('📝 Filtered drivers:', filtered.map(d => ({ name: d.driver, status: d.status })));
-            
-            // Update count and label
-            let filterLabel, countLabel;
-            
-            if (currentFilter === 'overview') {
-                filterLabel = 'drivers with status updates';
-                countLabel = `${filtered.length} active status updates`;
-            } else if (currentFilter === 'working') {
-                filterLabel = 'working drivers';
-                countLabel = `${filtered.length} still working`;
-            } else if (currentFilter === 'completed') {
-                filterLabel = 'completed drivers';
-                countLabel = `${filtered.length} completed today`;
-            } else {
-                filterLabel = currentFilter.replace('-', ' ');
-                countLabel = `${filtered.length} ${filterLabel}`;
-            }
-            
-            document.getElementById('activityCount').textContent = countLabel;
-            
-            if (filtered.length === 0) {
-                let emptyMessage;
-                if (currentFilter === 'overview') {
-                    emptyMessage = 'No active status updates - drivers are either working or completed';
-                } else if (currentFilter === 'completed') {
-                    emptyMessage = 'No completed check-ins today';
-                } else if (currentFilter === 'working') {
-                    emptyMessage = 'No drivers currently working';
-                } else {
-                    emptyMessage = `No ${filterLabel} found`;
-                }
-                
-                list.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">📭</div>
-                        <p>${emptyMessage}</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            // Generate activity items
-            list.innerHTML = filtered.map(driver => {
-                const time = new Date(driver.timestamp).toLocaleTimeString();
-                const isCompleted = driver.status === 'completed';
-                const canCheckIn = !isCompleted && (driver.status === 'arrived' || driver.status === 'Arrived');
-                
-                let statusClass = 'working';
-                let statusText = driver.status;
-                let statusBadgeClass = 'status-working';
-                
-                if (driver.status === '30 minutes away' || driver.status === 'en-route' || driver.status === 'en route') {
-                    statusClass = 'en-route';
-                    statusText = 'En Route (30 min)';
-                    statusBadgeClass = 'status-en-route';
-                } else if (driver.status === 'arrived' || driver.status === 'Arrived') {
-                    statusClass = 'arrived';
-                    statusText = 'Arrived';
-                    statusBadgeClass = 'status-arrived';
-                } else if (driver.status === 'completed') {
-                    statusClass = 'completed';
-                    statusText = 'Completed';
-                    statusBadgeClass = 'status-completed';
-                }
-                
-                const returnsInfo = driver.hasReturns ? 
-                    `<span class="returns-badge">📦 ${driver.returnsCount} return${driver.returnsCount > 1 ? 's' : ''}</span>` : 
-                    `<span class="returns-badge" style="background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3);">📦 No returns</span>`;
-                
-                return `
-                    <div class="activity-item ${statusClass}">
-                        <div class="activity-content">
-                            <div>
-                                <div class="activity-driver">${driver.driver}</div>
-                                <div class="activity-details">
-                                    <span>🚚 ${driver.vehicleId || 'No vehicle'}</span>
-                                    <span>🕐 ${time}</span>
-                                    ${returnsInfo}
-                                </div>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                <span class="status-badge ${statusBadgeClass}">${statusText}</span>
-                                ${canCheckIn ? `<button class="checkin-btn" onclick="openCheckInModal('${driver.driver}', '${driver.driverId || driver.driver}')">✅ Check In</button>` : ''}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-        
-        // Filter drivers
-        function filterDrivers(filter, button) {
-            currentFilter = filter;
-            
-            // Update button states
-            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-            button.classList.add('active');
-            
-            console.log('🔍 Filter changed to:', filter);
-            updateActivityList();
-        }
-        
-        // Mark driver as completed
-        function markComplete(driverName) {
-            if (confirm(`Mark ${driverName} as completed for today?`)) {
-                completedDrivers.add(driverName);
-                localStorage.setItem('completedDrivers', JSON.stringify([...completedDrivers]));
-                
-                // Update the driver's status in our data
-                const driver = allDrivers.find(d => d.driver === driverName);
-                if (driver) {
-                    driver.status = 'completed';
-                }
-                
-                console.log('✅ Marked as completed:', driverName);
-                updateDashboard();
-                showToast(`${driverName} marked as completed`, 'success');
-            }
-        }
-        
-        // Refresh dashboard
-        function refreshDashboard() {
-            const refreshIcon = document.getElementById('refreshIcon');
-            const refreshText = document.getElementById('refreshText');
-            
-            refreshIcon.textContent = '⏳';
-            refreshText.textContent = 'Refreshing...';
-            
-            loadDataFromMongoDB().then(() => {
-                refreshIcon.textContent = '✅';
-                refreshText.textContent = 'Updated';
-                
-                setTimeout(() => {
-                    refreshIcon.textContent = '🔄';
-                    refreshText.textContent = 'Refresh';
-                }, 2000);
-            });
-        }
-        
-        // Clear daily check-ins
-        function clearDailyCheckIns() {
-            if (confirm('Clear all check-ins for today? This will reset all completed status.')) {
-                completedDrivers.clear();
-                localStorage.removeItem('completedDrivers');
-                
-                // Reset status in current data
-                allDrivers.forEach(driver => {
-                    if (driver.status === 'completed') {
-                        driver.status = driver.originalStatus || 'working';
-                    }
-                });
-                
-                updateDashboard();
-                showToast('All check-ins cleared', 'success');
-                console.log('🗑️ All check-ins cleared');
-            }
-        }
-        
-        // Test MongoDB connection
-        async function testMongoConnection() {
-            showToast('Testing MongoDB connection...', 'info');
-            
-            try {
-                const response = await fetch(`${API_BASE}/api/health`);
-                const data = await response.json();
-                
-                if (response.ok) {
-                    showToast('MongoDB connection successful!', 'success');
-                    console.log('✅ MongoDB test successful:', data);
-                } else {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-            } catch (error) {
-                showToast(`MongoDB connection failed: ${error.message}`, 'error');
-                console.error('❌ MongoDB test failed:', error);
-            }
-        }
-        
-        // Logout function
-        function logout() {
-            if (confirm('Are you sure you want to logout?')) {
-                showToast('Logged out successfully', 'success');
-                setTimeout(() => {
-                    window.location.href = '/';
-                }, 1000);
-            }
-        }
-        
-        // Show toast notification
-        function showToast(message, type = 'info') {
-            const existingToast = document.querySelector('.toast');
-            if (existingToast) existingToast.remove();
-            
-            const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-            
-            const icons = {
-                success: '✅',
-                error: '❌',
-                info: 'ℹ️',
-                warning: '⚠️'
-            };
-            
-            toast.innerHTML = `
-                <span>${icons[type] || 'ℹ️'}</span>
-                <span>${message}</span>
-            `;
-            
-            document.body.appendChild(toast);
-            console.log(`📢 Toast: ${message}`);
-            
-            setTimeout(() => {
-                toast.style.animation = 'slideIn 0.3s ease reverse';
-                setTimeout(() => toast.remove(), 300);
-            }, 5000);
-        }
-        
-        // Cleanup on page unload
-        window.addEventListener('beforeunload', function() {
-            if (refreshInterval) {
-                clearInterval(refreshInterval);
-            }
-        });
-        
-        // Debug information
-        console.log('🔧 Debug Information:');
-        console.log('- Environment: Railway + MongoDB Atlas');
-        console.log('- Current URL:', window.location.href);
-        console.log('- API Base:', API_BASE);
-        console.log('- Warehouse:', WAREHOUSE_ADDRESS);
-        console.log('- Auto-refresh: Every 15 seconds');
-        console.log('- Ready to receive driver updates!');
-        
-        // Check-in Modal Functions
-        let currentCheckInDriver = null;
-        
-        function openCheckInModal(driverName, driverId) {
-            currentCheckInDriver = { name: driverName, id: driverId };
-            
-            // Find driver data for returns info
-            const driver = allDrivers.find(d => d.driver === driverName);
-            
-            // Populate modal
-            document.getElementById('modalDriverName').value = driverName;
-            document.getElementById('modalDriverId').value = driverId;
-            
-            // Show returns info if applicable
-            const returnsInfo = document.getElementById('modalReturnsInfo');
-            const returnsText = document.getElementById('modalReturnsText');
-            
-            if (driver && driver.hasReturns) {
-                returnsText.textContent = `Driver has ${driver.returnsCount} return${driver.returnsCount > 1 ? 's' : ''}`;
-                returnsInfo.style.display = 'flex';
-            } else {
-                returnsInfo.style.display = 'none';
-            }
-            
-            // Reset form
-            resetCheckInForm();
-            
-            // Show modal
-            document.getElementById('checkInModal').classList.add('active');
-            console.log('📋 Check-in modal opened for:', driverName);
-        }
-        
-        function closeCheckInModal() {
-            document.getElementById('checkInModal').classList.remove('active');
-            currentCheckInDriver = null;
-            console.log('📋 Check-in modal closed');
-        }
-        
-        function resetCheckInForm() {
-            // Reset all radio buttons to "good"
-            document.querySelectorAll('input[name="tractorCondition"]')[0].checked = true;
-            document.querySelectorAll('input[name="trailerCondition"]')[0].checked = true;
-            document.querySelectorAll('input[name="moffettCondition"]')[0].checked = true;
-            
-            // Reset radio button styles
-            document.querySelectorAll('.form-radio-label').forEach(label => {
-                label.classList.remove('selected');
-            });
-            document.querySelectorAll('input[type="radio"]:checked').forEach(radio => {
-                radio.closest('.form-radio-label').classList.add('selected');
-            });
-            
-            // Hide and clear text areas
-            document.getElementById('tractorIssuesText').style.display = 'none';
-            document.getElementById('trailerIssuesText').style.display = 'none';
-            document.getElementById('moffettIssuesText').style.display = 'none';
-            
-            document.getElementById('tractorIssuesText').value = '';
-            document.getElementById('trailerIssuesText').value = '';
-            document.getElementById('moffettIssuesText').value = '';
-            document.getElementById('additionalNotes').value = '';
-            
-            // Reset issue indicators
-            updateIssueIndicator('tractor', 'good');
-            updateIssueIndicator('trailer', 'good');
-            updateIssueIndicator('moffett', 'good');
-        }
-        
-        function updateIssueIndicator(equipment, condition) {
-            const indicator = document.getElementById(`${equipment}Indicator`);
-            const textArea = document.getElementById(`${equipment}IssuesText`);
-            
-            // Update radio button selection styles
-            document.querySelectorAll(`input[name="${equipment}Condition"]`).forEach(radio => {
-                radio.closest('.form-radio-label').classList.remove('selected');
-            });
-            document.querySelector(`input[name="${equipment}Condition"][value="${condition}"]`).closest('.form-radio-label').classList.add('selected');
-            
-            if (condition === 'good' || condition === 'na') {
-                indicator.className = 'issue-indicator no-issues';
-                indicator.innerHTML = '<span>✓</span><span>No Issues</span>';
-                textArea.style.display = 'none';
-            } else {
-                indicator.className = 'issue-indicator has-issues';
-                indicator.innerHTML = `<span>⚠️</span><span>${condition === 'minor' ? 'Minor Issues' : 'Major Issues'}</span>`;
-                textArea.style.display = 'block';
-            }
-        }
-        
-        async function submitCheckIn(event) {
-            event.preventDefault();
-            
-            if (!currentCheckInDriver) {
-                showToast('Error: No driver selected', 'error');
-                return;
-            }
-            
-            // Collect form data
-            const formData = {
-                driverName: currentCheckInDriver.name,
-                driverId: currentCheckInDriver.id,
-                status: 'completed',
-                warehouse: WAREHOUSE_ADDRESS,
-                timestamp: new Date().toISOString(),
-                completedAt: new Date().toISOString(),
-                
-                // Equipment conditions
-                tractorCondition: document.querySelector('input[name="tractorCondition"]:checked').value,
-                trailerCondition: document.querySelector('input[name="trailerCondition"]:checked').value,
-                moffettCondition: document.querySelector('input[name="moffettCondition"]:checked').value,
-                
-                // Issue descriptions
-                tractorIssues: document.getElementById('tractorIssuesText').value.trim() || null,
-                trailerIssues: document.getElementById('trailerIssuesText').value.trim() || null,
-                moffettIssues: document.getElementById('moffettIssuesText').value.trim() || null,
-                
-                // Additional notes
-                additionalNotes: document.getElementById('additionalNotes').value.trim() || null,
-                
-                // Issue flags for counting
-                tractorIssue: document.querySelector('input[name="tractorCondition"]:checked').value !== 'good' ? 
-                            document.querySelector('input[name="tractorCondition"]:checked').value + ' issues reported' : null,
-                trailerIssue: document.querySelector('input[name="trailerCondition"]:checked').value !== 'good' ? 
-                            document.querySelector('input[name="trailerCondition"]:checked').value + ' issues reported' : null,
-                moffettIssue: document.querySelector('input[name="moffettCondition"]:checked').value !== 'good' && 
-                            document.querySelector('input[name="moffettCondition"]:checked').value !== 'na' ? 
-                            document.querySelector('input[name="moffettCondition"]:checked').value + ' issues reported' : null
-            };
-            
-            console.log('📋 Submitting check-in data:', formData);
-            
-            try {
-                // Submit to check-ins endpoint
-                const response = await fetch(`${API_BASE}/api/checkins`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(formData)
-                });
-                
-                if (response.ok) {
-                    // Mark driver as completed locally
-                    markComplete(currentCheckInDriver.name);
-                    
-                    // Count issues for success message
-                    let issueCount = 0;
-                    if (formData.tractorIssue) issueCount++;
-                    if (formData.trailerIssue) issueCount++;
-                    if (formData.moffettIssue) issueCount++;
-                    
-                    const message = issueCount > 0 ? 
-                        `Check-in completed with ${issueCount} equipment issue${issueCount > 1 ? 's' : ''} reported` :
-                        'Check-in completed - all equipment in good condition';
-                    
-                    showToast(message, 'success');
-                    closeCheckInModal();
-                    
-                    console.log('✅ Check-in submitted successfully');
-                } else {
-                    const errorText = await response.text();
-                    throw new Error(`Server error: ${response.status} - ${errorText}`);
-                }
-                
-            } catch (error) {
-                console.error('❌ Check-in submission failed:', error);
-                
-                // Fallback: Just mark as completed locally
-                markComplete(currentCheckInDriver.name);
-                showToast(`Check-in completed locally (${error.message})`, 'success');
-                closeCheckInModal();
-            }
-        }
-        
-        // Close modal when clicking outside
-        document.addEventListener('click', function(event) {
-            const modal = document.getElementById('checkInModal');
-            if (event.target === modal) {
-                closeCheckInModal();
-            }
-        });
-    </script>
-</body>
-</html>
+                    console.log('
