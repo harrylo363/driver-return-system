@@ -552,6 +552,208 @@
             display: block;
         }
         
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .modal-header {
+            padding: 2rem;
+            background: rgba(15, 23, 42, 0.5);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: var(--bg-hover);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 1.25rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .modal-close:hover {
+            background: var(--danger);
+            color: white;
+            transform: rotate(90deg);
+        }
+        
+        .modal-body {
+            padding: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 0.875rem;
+            background: var(--bg-dark);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+        
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .form-radio-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .form-radio-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            background: var(--bg-dark);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .form-radio-label:hover {
+            border-color: var(--accent);
+        }
+        
+        .form-radio-label.selected {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+        
+        .form-radio-label input[type="radio"] {
+            display: none;
+        }
+        
+        .issue-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .issue-indicator.no-issues {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .issue-indicator.has-issues {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+        
+        .form-actions .btn {
+            flex: 1;
+        }
+        
+        /* Returns Info Box */
+        .returns-info-box {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            color: var(--warning);
+            font-size: 0.875rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
         @media (max-width: 1400px) {
             .dashboard-grid {
                 grid-template-columns: 1fr;
@@ -723,6 +925,128 @@
                         </button>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Check-in Modal -->
+    <div id="checkInModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <span>📋</span>
+                    <span>Equipment Check-In Form</span>
+                </h2>
+                <button class="modal-close" onclick="closeCheckInModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="checkInForm" onsubmit="submitCheckIn(event)">
+                    <!-- Driver Information -->
+                    <div class="form-group">
+                        <label class="form-label">Driver Name</label>
+                        <input type="text" class="form-input" id="modalDriverName" readonly>
+                        <input type="hidden" id="modalDriverId">
+                    </div>
+                    
+                    <!-- Returns Info Display -->
+                    <div id="modalReturnsInfo" class="returns-info-box" style="display: none;">
+                        <span>📦</span>
+                        <span id="modalReturnsText">Driver has returns</span>
+                    </div>
+                    
+                    <!-- Tractor Inspection -->
+                    <div class="form-group">
+                        <label class="form-label">🚛 Tractor Condition</label>
+                        <div class="issue-indicator no-issues" id="tractorIndicator">
+                            <span>✓</span>
+                            <span>No Issues</span>
+                        </div>
+                        <div class="form-radio-group">
+                            <label class="form-radio-label selected">
+                                <input type="radio" name="tractorCondition" value="good" checked onchange="updateIssueIndicator('tractor', this.value)">
+                                <span>✅ Good</span>
+                            </label>
+                            <label class="form-radio-label">
+                                <input type="radio" name="tractorCondition" value="minor" onchange="updateIssueIndicator('tractor', this.value)">
+                                <span>⚠️ Minor Issues</span>
+                            </label>
+                            <label class="form-radio-label">
+                                <input type="radio" name="tractorCondition" value="major" onchange="updateIssueIndicator('tractor', this.value)">
+                                <span>🔴 Major Issues</span>
+                            </label>
+                        </div>
+                        <textarea class="form-textarea" id="tractorIssuesText" placeholder="Describe any tractor issues (optional)..." style="margin-top: 1rem; display: none;"></textarea>
+                    </div>
+                    
+                    <!-- Trailer Inspection -->
+                    <div class="form-group">
+                        <label class="form-label">🚚 Trailer Condition</label>
+                        <div class="issue-indicator no-issues" id="trailerIndicator">
+                            <span>✓</span>
+                            <span>No Issues</span>
+                        </div>
+                        <div class="form-radio-group">
+                            <label class="form-radio-label selected">
+                                <input type="radio" name="trailerCondition" value="good" checked onchange="updateIssueIndicator('trailer', this.value)">
+                                <span>✅ Good</span>
+                            </label>
+                            <label class="form-radio-label">
+                                <input type="radio" name="trailerCondition" value="minor" onchange="updateIssueIndicator('trailer', this.value)">
+                                <span>⚠️ Minor Issues</span>
+                            </label>
+                            <label class="form-radio-label">
+                                <input type="radio" name="trailerCondition" value="major" onchange="updateIssueIndicator('trailer', this.value)">
+                                <span>🔴 Major Issues</span>
+                            </label>
+                        </div>
+                        <textarea class="form-textarea" id="trailerIssuesText" placeholder="Describe any trailer issues (optional)..." style="margin-top: 1rem; display: none;"></textarea>
+                    </div>
+                    
+                    <!-- Moffett Inspection -->
+                    <div class="form-group">
+                        <label class="form-label">🏗️ Moffett Condition</label>
+                        <div class="issue-indicator no-issues" id="moffettIndicator">
+                            <span>✓</span>
+                            <span>No Issues</span>
+                        </div>
+                        <div class="form-radio-group">
+                            <label class="form-radio-label selected">
+                                <input type="radio" name="moffettCondition" value="good" checked onchange="updateIssueIndicator('moffett', this.value)">
+                                <span>✅ Good</span>
+                            </label>
+                            <label class="form-radio-label">
+                                <input type="radio" name="moffettCondition" value="minor" onchange="updateIssueIndicator('moffett', this.value)">
+                                <span>⚠️ Minor Issues</span>
+                            </label>
+                            <label class="form-radio-label">
+                                <input type="radio" name="moffettCondition" value="major" onchange="updateIssueIndicator('moffett', this.value)">
+                                <span>🔴 Major Issues</span>
+                            </label>
+                            <label class="form-radio-label">
+                                <input type="radio" name="moffettCondition" value="na" onchange="updateIssueIndicator('moffett', this.value)">
+                                <span>➖ N/A</span>
+                            </label>
+                        </div>
+                        <textarea class="form-textarea" id="moffettIssuesText" placeholder="Describe any moffett issues (optional)..." style="margin-top: 1rem; display: none;"></textarea>
+                    </div>
+                    
+                    <!-- Additional Notes -->
+                    <div class="form-group">
+                        <label class="form-label">📝 Additional Notes (Optional)</label>
+                        <textarea class="form-textarea" id="additionalNotes" placeholder="Any other observations or concerns..."></textarea>
+                    </div>
+                    
+                    <!-- Form Actions -->
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeCheckInModal()">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #10B981 0%, #059669 100%);">
+                            <span>✅</span>
+                            <span>Complete Check-In</span>
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -1267,7 +1591,7 @@
                             </div>
                             <div style="display: flex; align-items: center; gap: 0.75rem;">
                                 <span class="status-badge ${statusBadgeClass}">${statusText}</span>
-                                ${canCheckIn ? `<button class="checkin-btn" onclick="markComplete('${driver.driver}')">✅ Check In</button>` : ''}
+                                ${canCheckIn ? `<button class="checkin-btn" onclick="openCheckInModal('${driver.driver}', '${driver.driverId || driver.driver}')">✅ Check In</button>` : ''}
                             </div>
                         </div>
                     </div>
@@ -1417,6 +1741,189 @@
         console.log('- Warehouse:', WAREHOUSE_ADDRESS);
         console.log('- Auto-refresh: Every 15 seconds');
         console.log('- Ready to receive driver updates!');
+        
+        // Check-in Modal Functions
+        let currentCheckInDriver = null;
+        
+        function openCheckInModal(driverName, driverId) {
+            currentCheckInDriver = { name: driverName, id: driverId };
+            
+            // Find driver data for returns info
+            const driver = allDrivers.find(d => d.driver === driverName);
+            
+            // Populate modal
+            document.getElementById('modalDriverName').value = driverName;
+            document.getElementById('modalDriverId').value = driverId;
+            
+            // Show returns info if applicable
+            const returnsInfo = document.getElementById('modalReturnsInfo');
+            const returnsText = document.getElementById('modalReturnsText');
+            
+            if (driver && driver.hasReturns) {
+                returnsText.textContent = `Driver has ${driver.returnsCount} return${driver.returnsCount > 1 ? 's' : ''}`;
+                returnsInfo.style.display = 'flex';
+            } else {
+                returnsInfo.style.display = 'none';
+            }
+            
+            // Reset form
+            resetCheckInForm();
+            
+            // Show modal
+            document.getElementById('checkInModal').classList.add('active');
+            console.log('📋 Check-in modal opened for:', driverName);
+        }
+        
+        function closeCheckInModal() {
+            document.getElementById('checkInModal').classList.remove('active');
+            currentCheckInDriver = null;
+            console.log('📋 Check-in modal closed');
+        }
+        
+        function resetCheckInForm() {
+            // Reset all radio buttons to "good"
+            document.querySelectorAll('input[name="tractorCondition"]')[0].checked = true;
+            document.querySelectorAll('input[name="trailerCondition"]')[0].checked = true;
+            document.querySelectorAll('input[name="moffettCondition"]')[0].checked = true;
+            
+            // Reset radio button styles
+            document.querySelectorAll('.form-radio-label').forEach(label => {
+                label.classList.remove('selected');
+            });
+            document.querySelectorAll('input[type="radio"]:checked').forEach(radio => {
+                radio.closest('.form-radio-label').classList.add('selected');
+            });
+            
+            // Hide and clear text areas
+            document.getElementById('tractorIssuesText').style.display = 'none';
+            document.getElementById('trailerIssuesText').style.display = 'none';
+            document.getElementById('moffettIssuesText').style.display = 'none';
+            
+            document.getElementById('tractorIssuesText').value = '';
+            document.getElementById('trailerIssuesText').value = '';
+            document.getElementById('moffettIssuesText').value = '';
+            document.getElementById('additionalNotes').value = '';
+            
+            // Reset issue indicators
+            updateIssueIndicator('tractor', 'good');
+            updateIssueIndicator('trailer', 'good');
+            updateIssueIndicator('moffett', 'good');
+        }
+        
+        function updateIssueIndicator(equipment, condition) {
+            const indicator = document.getElementById(`${equipment}Indicator`);
+            const textArea = document.getElementById(`${equipment}IssuesText`);
+            
+            // Update radio button selection styles
+            document.querySelectorAll(`input[name="${equipment}Condition"]`).forEach(radio => {
+                radio.closest('.form-radio-label').classList.remove('selected');
+            });
+            document.querySelector(`input[name="${equipment}Condition"][value="${condition}"]`).closest('.form-radio-label').classList.add('selected');
+            
+            if (condition === 'good' || condition === 'na') {
+                indicator.className = 'issue-indicator no-issues';
+                indicator.innerHTML = '<span>✓</span><span>No Issues</span>';
+                textArea.style.display = 'none';
+            } else {
+                indicator.className = 'issue-indicator has-issues';
+                indicator.innerHTML = `<span>⚠️</span><span>${condition === 'minor' ? 'Minor Issues' : 'Major Issues'}</span>`;
+                textArea.style.display = 'block';
+            }
+        }
+        
+        async function submitCheckIn(event) {
+            event.preventDefault();
+            
+            if (!currentCheckInDriver) {
+                showToast('Error: No driver selected', 'error');
+                return;
+            }
+            
+            // Collect form data
+            const formData = {
+                driverName: currentCheckInDriver.name,
+                driverId: currentCheckInDriver.id,
+                status: 'completed',
+                warehouse: WAREHOUSE_ADDRESS,
+                timestamp: new Date().toISOString(),
+                completedAt: new Date().toISOString(),
+                
+                // Equipment conditions
+                tractorCondition: document.querySelector('input[name="tractorCondition"]:checked').value,
+                trailerCondition: document.querySelector('input[name="trailerCondition"]:checked').value,
+                moffettCondition: document.querySelector('input[name="moffettCondition"]:checked').value,
+                
+                // Issue descriptions
+                tractorIssues: document.getElementById('tractorIssuesText').value.trim() || null,
+                trailerIssues: document.getElementById('trailerIssuesText').value.trim() || null,
+                moffettIssues: document.getElementById('moffettIssuesText').value.trim() || null,
+                
+                // Additional notes
+                additionalNotes: document.getElementById('additionalNotes').value.trim() || null,
+                
+                // Issue flags for counting
+                tractorIssue: document.querySelector('input[name="tractorCondition"]:checked').value !== 'good' ? 
+                            document.querySelector('input[name="tractorCondition"]:checked').value + ' issues reported' : null,
+                trailerIssue: document.querySelector('input[name="trailerCondition"]:checked').value !== 'good' ? 
+                            document.querySelector('input[name="trailerCondition"]:checked').value + ' issues reported' : null,
+                moffettIssue: document.querySelector('input[name="moffettCondition"]:checked').value !== 'good' && 
+                            document.querySelector('input[name="moffettCondition"]:checked').value !== 'na' ? 
+                            document.querySelector('input[name="moffettCondition"]:checked').value + ' issues reported' : null
+            };
+            
+            console.log('📋 Submitting check-in data:', formData);
+            
+            try {
+                // Submit to check-ins endpoint
+                const response = await fetch(`${API_BASE}/api/checkins`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (response.ok) {
+                    // Mark driver as completed locally
+                    markComplete(currentCheckInDriver.name);
+                    
+                    // Count issues for success message
+                    let issueCount = 0;
+                    if (formData.tractorIssue) issueCount++;
+                    if (formData.trailerIssue) issueCount++;
+                    if (formData.moffettIssue) issueCount++;
+                    
+                    const message = issueCount > 0 ? 
+                        `Check-in completed with ${issueCount} equipment issue${issueCount > 1 ? 's' : ''} reported` :
+                        'Check-in completed - all equipment in good condition';
+                    
+                    showToast(message, 'success');
+                    closeCheckInModal();
+                    
+                    console.log('✅ Check-in submitted successfully');
+                } else {
+                    const errorText = await response.text();
+                    throw new Error(`Server error: ${response.status} - ${errorText}`);
+                }
+                
+            } catch (error) {
+                console.error('❌ Check-in submission failed:', error);
+                
+                // Fallback: Just mark as completed locally
+                markComplete(currentCheckInDriver.name);
+                showToast(`Check-in completed locally (${error.message})`, 'success');
+                closeCheckInModal();
+            }
+        }
+        
+        // Close modal when clicking outside
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('checkInModal');
+            if (event.target === modal) {
+                closeCheckInModal();
+            }
+        });
     </script>
 </body>
 </html>
