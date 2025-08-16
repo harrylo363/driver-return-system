@@ -1152,8 +1152,8 @@
                 allDrivers = [];
                 driverMap.clear();
                 
-                // Step 3: Set a flag to prevent reloading old data
-                localStorage.setItem('dataCleared', 'true');
+                // Step 3: Set a timestamp for when data was cleared (prevents reload for 5 minutes)
+                localStorage.setItem('dataClearedTime', new Date().toISOString());
                 
                 // Step 4: Try to clear MongoDB daily data
                 try {
@@ -1191,7 +1191,7 @@
                 // Step 6: Clear the activity feed
                 showEmptyState();
                 
-                log('✅ Daily data cleared successfully');
+                log('✅ Daily data cleared successfully - will stay cleared for 5 minutes');
                 
             } catch (error) {
                 log('❌ Error clearing data: ' + error.message);
@@ -1209,6 +1209,27 @@
         // Load data from MongoDB
         async function loadDataFromMongoDB() {
             try {
+                // Check if data was recently cleared - skip loading for a period after clearing
+                const dataClearedTime = localStorage.getItem('dataClearedTime');
+                if (dataClearedTime) {
+                    const clearTime = new Date(dataClearedTime);
+                    const now = new Date();
+                    const minutesSinceCleared = (now - clearTime) / (1000 * 60);
+                    
+                    // Skip loading for 5 minutes after clearing to prevent old data from returning
+                    if (minutesSinceCleared < 5) {
+                        log('📊 Data was cleared ' + Math.round(minutesSinceCleared) + ' minutes ago, skipping MongoDB load');
+                        updateConnectionStatus('connected', 'Dashboard Reset - Waiting for new data');
+                        allDrivers = [];
+                        updateKPIs();
+                        showEmptyState();
+                        return;
+                    } else {
+                        // Clear the flag after 5 minutes
+                        localStorage.removeItem('dataClearedTime');
+                    }
+                }
+                
                 log('📡 Loading data from MongoDB Atlas...');
                 updateConnectionStatus('loading');
                 
@@ -1311,15 +1332,17 @@
         // Process MongoDB data
         function processMongoData(results) {
             try {
-                // Check if data was just cleared - don't reload old data
-                const dataCleared = localStorage.getItem('dataCleared');
-                if (dataCleared === 'true') {
-                    log('📊 Data was recently cleared, skipping old data reload');
-                    localStorage.removeItem('dataCleared');
-                    allDrivers = [];
-                    updateKPIs();
-                    showEmptyState();
-                    return;
+                // Don't process any data if we're in the clear period
+                const dataClearedTime = localStorage.getItem('dataClearedTime');
+                if (dataClearedTime) {
+                    const clearTime = new Date(dataClearedTime);
+                    const now = new Date();
+                    const minutesSinceCleared = (now - clearTime) / (1000 * 60);
+                    
+                    if (minutesSinceCleared < 5) {
+                        log('📊 Skipping data processing - in clear period');
+                        return;
+                    }
                 }
                 
                 let notifications = [];
@@ -1488,7 +1511,7 @@
             if (confirm('Are you sure you want to clear all daily check-ins?')) {
                 completedDrivers.clear();
                 localStorage.removeItem('completedDrivers');
-                localStorage.setItem('dataCleared', 'true'); // Set flag to prevent reload
+                localStorage.setItem('dataClearedTime', new Date().toISOString()); // Set timestamp instead of flag
                 allDrivers = [];
                 driverMap.clear();
                 
@@ -1510,7 +1533,7 @@
                 document.getElementById('moffettIssues').textContent = '0';
                 
                 showEmptyState();
-                showToast('Daily check-ins have been cleared', 'info');
+                showToast('Daily check-ins have been cleared - will stay cleared for 5 minutes', 'info');
             }
         }
         
