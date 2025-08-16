@@ -321,6 +321,16 @@
             box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
         }
         
+        .btn-warning {
+            background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+        }
+        
         .filter-group {
             display: flex;
             background: var(--bg-card);
@@ -1200,6 +1210,9 @@
                 <span id="refreshIcon">🔄</span>
                 <span id="refreshText">Refresh</span>
             </button>
+            <button class="btn btn-warning" onclick="manualDailyReset()">
+                📊 End Day & Archive
+            </button>
             <button class="btn btn-danger" onclick="clearDailyCheckIns()">
                 🗑️ Clear Check-ins
             </button>
@@ -1437,6 +1450,13 @@
         const API_BASE = window.location.origin;
         const WAREHOUSE_ADDRESS = "6995 N US-41, Apollo Beach, FL 33572";
         
+        // DAILY RESET CONFIGURATION
+        const DAILY_RESET_CONFIG = {
+            RESET_TIME: { hour: 23, minute: 55 }, // 11:55 PM
+            GOOGLE_WEBHOOK_URL: 'YOUR_GOOGLE_APPS_SCRIPT_URL', // Replace with your Google Apps Script URL
+            ENABLE_AUTO_RESET: true // Set to false to disable automatic daily reset
+        };
+        
         // Global variables
         let allDrivers = [];
         let currentFilter = 'overview';
@@ -1447,6 +1467,7 @@
         let debugMode = false;
         let debugInfo = [];
         let currentEquipmentCheck = null;
+        let dailyResetInterval = null;
         
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
@@ -1456,6 +1477,7 @@
             
             initializeDashboard();
             setupEquipmentInputListeners();
+            setupDailyResetTimer(); // NEW: Setup daily reset timer
         });
         
         // Debug logging function
@@ -1499,1017 +1521,264 @@
             startAutoRefresh();
         }
         
-        // Load stored state from localStorage
-        function loadStoredState() {
-            const storedCompleted = localStorage.getItem('completedDrivers');
-            if (storedCompleted) {
-                try {
-                    completedDrivers = new Set(JSON.parse(storedCompleted));
-                    log('📂 Loaded completed drivers: ' + [...completedDrivers].length);
-                } catch (e) {
-                    log('❌ Error loading completed drivers: ' + e.message, 'error');
-                    completedDrivers = new Set();
-                }
-            }
-            
-            lastResetDate = localStorage.getItem('lastResetDate');
-        }
-        
-        // Check if it's a new day and reset if needed
-        function checkDailyReset() {
-            const today = new Date().toDateString();
-            if (lastResetDate !== today) {
-                log('🌅 New day detected, resetting check-ins');
-                completedDrivers.clear();
-                localStorage.removeItem('completedDrivers');
-                localStorage.setItem('lastResetDate', today);
-                lastResetDate = today;
-                showToast('New day detected - check-ins have been reset', 'info');
-            }
-        }
-        
-        // Set up auto-refresh
-        function startAutoRefresh() {
-            if (refreshInterval) {
-                clearInterval(refreshInterval);
-            }
-            
-            // Refresh every 30 seconds for real-time updates
-            refreshInterval = setInterval(() => {
-                log('🔄 Auto-refreshing from MongoDB...');
-                loadDataFromMongoDB();
-            }, 30000);
-            
-            // Check for day change every minute
-            setInterval(() => {
-                checkDailyReset();
-            }, 60000);
-        }
-        
-        // Update connection status indicator
-        function updateConnectionStatus(status, message = null) {
-            const indicator = document.getElementById('connectionIndicator');
-            const statusText = document.getElementById('connectionStatus');
-            const pulse = indicator.querySelector('.pulse');
-            
-            // Remove all status classes
-            indicator.classList.remove('connected', 'connecting', 'error');
-            pulse.classList.remove('success', 'warning', 'error');
-            
-            switch (status) {
-                case 'connected':
-                    indicator.classList.add('connected');
-                    pulse.classList.add('success');
-                    statusText.textContent = message || 'MongoDB Connected';
-                    break;
-                case 'connecting':
-                case 'loading':
-                    indicator.classList.add('connecting');
-                    pulse.classList.add('warning');
-                    statusText.textContent = message || 'Connecting to MongoDB...';
-                    break;
-                case 'error':
-                    indicator.classList.add('error');
-                    pulse.classList.add('error');
-                    statusText.textContent = message || 'MongoDB Connection Error';
-                    break;
-            }
-        }
-        
-        // Load data from MongoDB Atlas via Railway API
-        async function loadDataFromMongoDB() {
-            try {
-                log('📡 Loading data from MongoDB Atlas...');
-                updateConnectionStatus('loading');
-                
-                // Test basic connectivity first
-                const endpoints = [
-                    '/api/health',
-                    '/api/notifications',
-                    '/api/users',
-                    '/api/checkins'
-                ];
-                
-                const results = {};
-                let hasConnection = false;
-                
-                for (const endpoint of endpoints) {
-                    try {
-                        log(`🔍 Testing endpoint: ${endpoint}`);
-                        const response = await fetch(`${API_BASE}${endpoint}`, {
-                            method: 'GET',
-                            headers: { 
-                                'Accept': 'application/json',
-                                'Content-Type': 'application/json'
-                            },
-                            timeout: 10000
-                        });
-                        
-                        if (response.ok) {
-                            const data = await response.json();
-                            results[endpoint] = data;
-                            hasConnection = true;
-                            log(`✅ ${endpoint} responded successfully`);
-                        } else {
-                            log(`⚠️ ${endpoint} returned status: ${response.status}`);
-                            results[endpoint] = { error: `HTTP ${response.status}` };
-                        }
-                    } catch (error) {
-                        log(`❌ ${endpoint} failed: ${error.message}`);
-                        results[endpoint] = { error: error.message };
-                    }
-                }
-                
-                // Process the results
-                if (hasConnection) {
-                    updateConnectionStatus('connected');
-                    processMongoData(results);
-                } else {
-                    updateConnectionStatus('error', 'All endpoints failed');
-                    showEmptyState();
-                }
-                
-                // Update last refresh time
-                document.getElementById('lastUpdate').textContent = 
-                    'Last updated: ' + new Date().toLocaleTimeString();
-                
-                log('📊 Data processing complete');
-                
-            } catch (error) {
-                log('❌ MongoDB connection failed: ' + error.message, 'error');
-                updateConnectionStatus('error');
-                showEmptyState();
-                showToast('Failed to connect to MongoDB', 'error');
-            }
-        }
-        
-        function processMongoData(results) {
-            try {
-                // Extract notifications (driver updates)
-                let notifications = [];
-                if (results['/api/notifications'] && !results['/api/notifications'].error) {
-                    const notifData = results['/api/notifications'];
-                    notifications = Array.isArray(notifData) ? notifData : 
-                                  (notifData.data || notifData.notifications || []);
-                }
-                
-                // Extract users (driver profiles)
-                let users = [];
-                if (results['/api/users'] && !results['/api/users'].error) {
-                    const userData = results['/api/users'];
-                    users = Array.isArray(userData) ? userData : 
-                           (userData.data || userData.users || []);
-                }
-                
-                // Extract checkins
-                let checkins = [];
-                if (results['/api/checkins'] && !results['/api/checkins'].error) {
-                    const checkinData = results['/api/checkins'];
-                    checkins = Array.isArray(checkinData) ? checkinData : 
-                              (checkinData.data || checkinData.checkins || []);
-                }
-                
-                log(`📊 Processing data: ${notifications.length} notifications, ${users.length} users, ${checkins.length} checkins`);
-                
-                // Create driver map from users
-                driverMap.clear();
-                users.forEach(user => {
-                    if (user && (user.name || user.username || user.id)) {
-                        driverMap.set(user.id || user._id || user.username, user);
-                    }
-                });
-                
-                // Process notifications into driver activities
-                allDrivers = processNotifications(notifications);
-                
-                // Apply completed status from localStorage
-                allDrivers.forEach(driver => {
-                    if (completedDrivers.has(driver.id)) {
-                        driver.status = 'completed';
-                    }
-                });
-                
-                // Update UI
-                updateKPIs();
-                updateActivityFeed();
-                
-                log('✅ UI updated successfully');
-                
-            } catch (error) {
-                log('❌ Error processing MongoDB data: ' + error.message, 'error');
-                showEmptyState();
-            }
-        }
-        
-        function processNotifications(notifications) {
-            const drivers = [];
-            const driverStatusMap = new Map();
-            
-            log(`🔍 Processing ${notifications.length} notifications`);
-            
-            // Sort notifications by timestamp (newest first)
-            const sortedNotifications = notifications
-                .filter(n => {
-                    const hasDriver = n && (n.driver_name || n.driver || n.name || n.message);
-                    if (!hasDriver) {
-                        log(`⚠️ Skipping notification without driver info: ${JSON.stringify(n)}`);
-                    }
-                    return hasDriver;
-                })
-                .sort((a, b) => {
-                    const timeA = new Date(a.timestamp || a.created_at || a.time || 0);
-                    const timeB = new Date(b.timestamp || b.created_at || b.time || 0);
-                    return timeB - timeA;
-                });
-            
-            log(`📋 Processing ${sortedNotifications.length} valid notifications`);
-            
-            // Process notifications to get latest status per driver
-            sortedNotifications.forEach((notification, index) => {
-                try {
-                    // Enhanced driver name extraction
-                    const driverName = notification.driver_name || 
-                                     notification.driver || 
-                                     notification.name || 
-                                     extractDriverName(notification.message || '');
-                    
-                    if (!driverName) {
-                        log(`⚠️ Could not extract driver name from: ${JSON.stringify(notification)}`);
-                        return;
-                    }
-                    
-                    // Enhanced driver ID extraction
-                    const driverId = notification.driver_id || 
-                                   notification.driverId ||
-                                   notification.id || 
-                                   notification._id ||
-                                   driverName.toLowerCase().replace(/\s+/g, '_');
-                    
-                    // Only keep the latest status for each driver
-                    if (!driverStatusMap.has(driverId)) {
-                        const status = determineStatus(notification);
-                        const returns = extractReturns(notification);
-                        
-                        log(`✅ Processing driver: ${driverName} (${driverId}) - Status: ${status}, Returns: ${returns}`);
-                        
-                        driverStatusMap.set(driverId, {
-                            id: driverId,
-                            name: driverName,
-                            status: status,
-                            returns: returns,
-                            timestamp: notification.timestamp || notification.created_at || notification.time || new Date(),
-                            vehicleId: notification.vehicleId || notification.vehicle || `FLEET-${index + 1}`,
-                            raw: notification
-                        });
-                    } else {
-                        log(`🔄 Skipping older notification for ${driverName}`);
-                    }
-                } catch (error) {
-                    log(`❌ Error processing notification: ${error.message}`);
-                }
-            });
-            
-            const result = Array.from(driverStatusMap.values());
-            log(`📊 Final driver count: ${result.length}`);
-            
-            return result;
-        }
-        
-        function extractDriverName(message) {
-            if (!message) return null;
-            
-            // Try various patterns to extract driver name
-            const patterns = [
-                /Driver\s+([A-Za-z\s]+)\s+/i,
-                /([A-Za-z\s]+)\s+is\s+/i,
-                /([A-Za-z\s]+)\s+has\s+/i,
-                /^([A-Za-z\s]+)\s+-\s+/i
-            ];
-            
-            for (const pattern of patterns) {
-                const match = message.match(pattern);
-                if (match && match[1]) {
-                    return match[1].trim();
-                }
-            }
-            
-            return null;
-        }
-        
-        function determineStatus(notification) {
-            const message = (notification.message || '').toLowerCase();
-            const status = (notification.status || '').toLowerCase();
-            
-            log(`🔍 Determining status from: "${message}" and "${status}"`);
-            
-            if (message.includes('arrived') || status === 'arrived') {
-                return 'arrived';
-            } else if (message.includes('30 minutes') || message.includes('30 min') || 
-                      message.includes('en route') || message.includes('enroute') || 
-                      status === 'en-route' || status === 'enroute') {
-                return 'en-route';
-            } else if (message.includes('completed') || status === 'completed') {
-                return 'completed';
-            } else {
-                return 'working';
-            }
-        }
-        
-        function extractReturns(notification) {
-            // Try multiple fields for returns data
-            if (notification.returnsCount !== undefined && notification.returnsCount !== null) {
-                return parseInt(notification.returnsCount) || 0;
-            }
-            if (notification.returns !== undefined && notification.returns !== null) {
-                return parseInt(notification.returns) || 0;
-            }
-            
-            // Try to extract from message
-            const message = notification.message || '';
-            const returnsMatch = message.match(/(\d+)\s*returns?/i);
-            const withMatch = message.match(/with\s+(\d+)\s+return/i);
-            
-            if (returnsMatch) {
-                return parseInt(returnsMatch[1]) || 0;
-            }
-            if (withMatch) {
-                return parseInt(withMatch[1]) || 0;
-            }
-            
-            return 0;
-        }
-        
-        function updateKPIs() {
-            try {
-                const stats = {
-                    enRoute: allDrivers.filter(d => d.status === 'en-route').length,
-                    arrived: allDrivers.filter(d => d.status === 'arrived').length,
-                    completed: allDrivers.filter(d => d.status === 'completed').length,
-                    working: allDrivers.filter(d => d.status === 'working').length,
-                    totalReturns: allDrivers.reduce((sum, d) => sum + (d.returns || 0), 0),
-                    driversWithReturns: allDrivers.filter(d => (d.returns || 0) > 0).length
-                };
-                
-                // Update KPI values
-                document.getElementById('activeCount').textContent = stats.enRoute + stats.arrived;
-                document.getElementById('enrouteCount').textContent = stats.enRoute;
-                document.getElementById('arrivedCount').textContent = stats.arrived;
-                document.getElementById('completedCount').textContent = stats.completed;
-                document.getElementById('workingCount').textContent = stats.working;
-                document.getElementById('returnsKpiCount').textContent = stats.totalReturns;
-                document.getElementById('returnsSublabel').textContent = `From ${stats.driversWithReturns} drivers`;
-                
-                // Update right panel analytics
-                document.getElementById('totalReturnsToday').textContent = stats.totalReturns;
-                document.getElementById('driversWithReturns').textContent = stats.driversWithReturns;
-                document.getElementById('avgReturns').textContent = 
-                    stats.driversWithReturns > 0 ? 
-                    Math.round((stats.totalReturns / stats.driversWithReturns) * 10) / 10 : 0;
-                
-                log(`📊 KPIs updated: ${stats.enRoute} en-route, ${stats.arrived} arrived, ${stats.completed} completed`);
-                
-            } catch (error) {
-                log('❌ Error updating KPIs: ' + error.message, 'error');
-            }
-        }
-        
-        function updateActivityFeed() {
-            try {
-                const activityList = document.getElementById('activityList');
-                const activityCount = document.getElementById('activityCount');
-                
-                if (allDrivers.length === 0) {
-                    showEmptyState();
-                    return;
-                }
-                
-                // Filter drivers based on current filter
-                let filteredDrivers = allDrivers;
-                if (currentFilter === 'overview') {
-                    // In overview, show all non-completed drivers
-                    filteredDrivers = allDrivers.filter(driver => driver.status !== 'completed');
-                } else if (currentFilter === 'completed') {
-                    // Show only completed drivers
-                    filteredDrivers = allDrivers.filter(driver => driver.status === 'completed');
-                } else {
-                    // For other filters, show specific status
-                    filteredDrivers = allDrivers.filter(driver => {
-                        switch (currentFilter) {
-                            case 'en-route': return driver.status === 'en-route';
-                            case 'arrived': return driver.status === 'arrived';
-                            case 'working': return driver.status === 'working';
-                            default: return true;
-                        }
-                    });
-                }
-                
-                activityCount.textContent = `${filteredDrivers.length} drivers`;
-                
-                if (filteredDrivers.length === 0) {
-                    activityList.innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-icon">📭</div>
-                            <p>No drivers in this category</p>
-                        </div>
-                    `;
-                    return;
-                }
-                
-                // Generate activity items with enhanced returns badge styling
-                activityList.innerHTML = filteredDrivers.map(driver => {
-                    const statusClass = driver.status.replace('-', '');
-                    const statusText = driver.status.charAt(0).toUpperCase() + driver.status.slice(1).replace('-', ' ');
-                    const timeAgo = getTimeAgo(driver.timestamp);
-                    
-                    return `
-                        <div class="activity-item ${statusClass}">
-                            <div class="activity-content">
-                                <div>
-                                    <div class="activity-driver">${driver.name}</div>
-                                    <div class="activity-details">
-                                        <span>🕐 ${timeAgo}</span>
-                                        ${driver.returns > 0 ? 
-                                            `<span style="background: rgba(245, 158, 11, 0.1); color: var(--warning); padding: 0.125rem 0.5rem; border-radius: 6px; font-weight: 600; font-size: 0.75rem;">${driver.returns} return${driver.returns > 1 ? 's' : ''}</span>` : 
-                                            '<span style="background: rgba(16, 185, 129, 0.1); color: var(--success); padding: 0.125rem 0.5rem; border-radius: 6px; font-weight: 600; font-size: 0.75rem;">No returns</span>'
-                                        }
-                                        <span>📍 Apollo Beach, FL</span>
-                                        ${driver.vehicleId ? `<span>🚚 ${driver.vehicleId}</span>` : ''}
-                                    </div>
-                                </div>
-                                <div style="display: flex; align-items: center; gap: 1rem;">
-                                    <span class="status-badge status-${statusClass}">${statusText}</span>
-                                    ${driver.status === 'arrived' ? 
-                                        `<button class="checkin-btn" onclick="openEquipmentCheckIn('${driver.id}', '${driver.name}', ${driver.returns})">
-                                            📋 Check In
-                                        </button>` : ''}
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-                
-                log(`📋 Activity feed updated: ${filteredDrivers.length} drivers shown`);
-                
-            } catch (error) {
-                log('❌ Error updating activity feed: ' + error.message, 'error');
-                showEmptyState();
-            }
-        }
-        
-        function showEmptyState() {
-            const activityList = document.getElementById('activityList');
-            const activityCount = document.getElementById('activityCount');
-            
-            activityCount.textContent = '0 drivers';
-            activityList.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-icon">📭</div>
-                    <p>No driver activity available</p>
-                    <p style="font-size: 0.875rem; margin-top: 1rem;">Check MongoDB connection or add test data</p>
-                </div>
-            `;
-        }
-        
-        function getTimeAgo(timestamp) {
-            try {
-                const date = new Date(timestamp);
-                const now = new Date();
-                const diffMs = now - date;
-                const diffMins = Math.floor(diffMs / 60000);
-                
-                if (diffMins < 1) return 'Just now';
-                if (diffMins < 60) return `${diffMins}m ago`;
-                const diffHours = Math.floor(diffMins / 60);
-                if (diffHours < 24) return `${diffHours}h ago`;
-                const diffDays = Math.floor(diffHours / 24);
-                return `${diffDays}d ago`;
-            } catch (error) {
-                return 'Unknown';
-            }
-        }
-        
-        // Filter functions
-        function filterDrivers(filter, buttonElement) {
-            currentFilter = filter;
-            
-            // Update active button
-            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-            buttonElement.classList.add('active');
-            
-            updateActivityFeed();
-            log(`🔍 Filter changed to: ${filter}`);
-        }
-        
-        // Refresh function
-        function refreshDashboard() {
-            const refreshIcon = document.getElementById('refreshIcon');
-            const refreshText = document.getElementById('refreshText');
-            
-            refreshIcon.style.animation = 'spin 1s linear infinite';
-            refreshText.textContent = 'Refreshing...';
-            
-            loadDataFromMongoDB().finally(() => {
-                setTimeout(() => {
-                    refreshIcon.style.animation = '';
-                    refreshText.textContent = 'Refresh';
-                }, 1000);
-            });
-        }
-        
-        // Test MongoDB connection
-        async function testMongoConnection() {
-            try {
-                log('🧪 Testing MongoDB connection...');
-                updateConnectionStatus('loading', 'Testing connection...');
-                
-                const response = await fetch(`${API_BASE}/api/health`);
-                const data = await response.json();
-                
-                if (response.ok) {
-                    log('✅ MongoDB connection test successful');
-                    updateConnectionStatus('connected', 'Connection test passed');
-                    showToast('MongoDB connection test successful!', 'success');
-                } else {
-                    log('❌ MongoDB connection test failed: ' + data.error);
-                    updateConnectionStatus('error', 'Connection test failed');
-                    showToast('MongoDB connection test failed', 'error');
-                }
-            } catch (error) {
-                log('❌ MongoDB connection test error: ' + error.message);
-                updateConnectionStatus('error', 'Connection test error');
-                showToast('MongoDB connection test error', 'error');
-            }
-        }
-        
-        // Equipment check-in functions
-        function openEquipmentCheckIn(driverId, driverName, returns = 0) {
-            log(`📋 Opening equipment check-in for ${driverName}`);
-            
-            // Set up modal data
-            currentEquipmentCheck = {
-                driverId: driverId,
-                driverName: driverName,
-                returns: returns,
-                inspections: {},
-                issues: {},
-                tractorNumber: '',
-                trailerNumber: '',
-                moffettNumber: '',
-                passedCount: 0,
-                failedCount: 0
-            };
-            
-            // Update modal header
-            document.getElementById('modalDriverName').textContent = driverName;
-            document.getElementById('modalDriverId').value = driverId;
-            document.getElementById('modalCheckTime').textContent = new Date().toLocaleTimeString();
-            
-            // Set driver avatar
-            const initials = driverName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-            document.getElementById('modalDriverAvatar').textContent = initials;
-            
-            // Show returns info if applicable
-            const returnsInfo = document.getElementById('modalReturnsInfo');
-            if (returns > 0) {
-                returnsInfo.style.display = 'block';
-                document.getElementById('modalReturnsCount').textContent = returns;
-            } else {
-                returnsInfo.style.display = 'none';
-            }
-            
-            // Generate inspection items
-            generateInspectionItems();
-            
-            // Show modal
-            document.getElementById('equipmentCheckInModal').classList.add('active');
-            document.body.style.overflow = 'hidden';
-            
-            log(`✅ Equipment check-in modal opened for ${driverName}`);
-        }
-        
-        function closeEquipmentModal() {
-            log('❌ Closing equipment check-in modal');
-            
-            // Hide modal
-            document.getElementById('equipmentCheckInModal').classList.remove('active');
-            document.body.style.overflow = 'auto';
-            
-            // Reset form
-            resetEquipmentForm();
-        }
-        
-        function generateInspectionItems() {
-            const inspectionItems = {
-                tractor: [
-                    'QR Code Scanned',
-                    'Samsara Device Present',
-                    'External Damages Check',
-                    'Windshield Condition',
-                    'Lights Functionality',
-                    'Tire Condition',
-                    'Air/Electrical Lines',
-                    'Cab Cleanliness',
-                    'Fire Extinguisher',
-                    'Safety Equipment',
-                    'Documentation Check',
-                    'Fluid Levels'
-                ],
-                trailer: [
-                    'Gladhands Connection',
-                    'Deck Condition',
-                    'Physical Damages',
-                    'Lights Functionality',
-                    'Tire Condition',
-                    'Straps & Securement'
-                ],
-                moffett: [
-                    'Physical Damages',
-                    'Safety Equipment',
-                    'Lights Functionality',
-                    'Electrical Systems',
-                    'Tire Condition'
-                ]
-            };
-            
-            // Generate tractor items
-            const tractorContainer = document.getElementById('tractorItems');
-            tractorContainer.innerHTML = inspectionItems.tractor.map((item, index) => 
-                createInspectionItem('tractor', item, index)
-            ).join('');
-            
-            // Generate trailer items
-            const trailerContainer = document.getElementById('trailerItems');
-            trailerContainer.innerHTML = inspectionItems.trailer.map((item, index) => 
-                createInspectionItem('trailer', item, index)
-            ).join('');
-            
-            // Generate moffett items
-            const moffettContainer = document.getElementById('moffettItems');
-            moffettContainer.innerHTML = inspectionItems.moffett.map((item, index) => 
-                createInspectionItem('moffett', item, index)
-            ).join('');
-            
-            log('📋 Inspection items generated');
-        }
-        
-        function createInspectionItem(section, itemName, index) {
-            const itemId = `${section}_${index}`;
-            return `
-                <div class="inspection-item" data-item="${itemId}">
-                    <div class="inspection-item-header">
-                        <span class="inspection-item-name">${itemName}</span>
-                        <div class="inspection-controls">
-                            <button type="button" class="inspection-btn" data-result="pass" 
-                                    onclick="setInspectionResult('${itemId}', 'pass', this)">
-                                ✅ Pass
-                            </button>
-                            <button type="button" class="inspection-btn" data-result="fail" 
-                                    onclick="setInspectionResult('${itemId}', 'fail', this)">
-                                ❌ Fail
-                            </button>
-                        </div>
-                    </div>
-                    <div class="issue-description" id="issue-${itemId}">
-                        <input type="text" 
-                               class="issue-input" 
-                               id="issue-input-${itemId}"
-                               placeholder="Describe the issue..."
-                               onchange="updateIssueDescription('${itemId}', this.value)">
-                    </div>
-                </div>
-            `;
-        }
-        
-        function setInspectionResult(itemId, result, buttonElement) {
-            log(`🔍 Setting inspection result: ${itemId} = ${result}`);
-            
-            // Update inspection data
-            if (!currentEquipmentCheck.inspections) {
-                currentEquipmentCheck.inspections = {};
-            }
-            
-            if (!currentEquipmentCheck.issues) {
-                currentEquipmentCheck.issues = {};
-            }
-            
-            const previousResult = currentEquipmentCheck.inspections[itemId];
-            currentEquipmentCheck.inspections[itemId] = result;
-            
-            // Update button states
-            const itemElement = buttonElement.closest('.inspection-item');
-            const allButtons = itemElement.querySelectorAll('.inspection-btn');
-            
-            allButtons.forEach(btn => {
-                btn.classList.remove('active-pass', 'active-fail');
-            });
-            
-            if (result === 'pass') {
-                buttonElement.classList.add('active-pass');
-                // Hide issue description field for pass
-                const issueField = document.getElementById(`issue-${itemId}`);
-                if (issueField) {
-                    issueField.classList.remove('show');
-                    // Clear issue description if switching from fail to pass
-                    delete currentEquipmentCheck.issues[itemId];
-                }
-            } else {
-                buttonElement.classList.add('active-fail');
-                // Show issue description field for fail
-                const issueField = document.getElementById(`issue-${itemId}`);
-                if (issueField) {
-                    issueField.classList.add('show');
-                    // Focus on the input field
-                    setTimeout(() => {
-                        const input = document.getElementById(`issue-input-${itemId}`);
-                        if (input) input.focus();
-                    }, 100);
-                }
-            }
-            
-            // Update counters
-            updateInspectionCounters();
-            
-            // Update section status
-            updateSectionStatus();
-            
-            // Update submit button state
-            updateSubmitButtonState();
-        }
-        
-        function updateIssueDescription(itemId, description) {
-            if (!currentEquipmentCheck.issues) {
-                currentEquipmentCheck.issues = {};
-            }
-            
-            if (description && description.trim()) {
-                currentEquipmentCheck.issues[itemId] = description.trim();
-                log(`📝 Issue description added for ${itemId}: ${description}`);
-            } else {
-                delete currentEquipmentCheck.issues[itemId];
-            }
-        }
-        
-        function updateInspectionCounters() {
-            const inspections = currentEquipmentCheck.inspections || {};
-            const results = Object.values(inspections);
-            
-            currentEquipmentCheck.passedCount = results.filter(r => r === 'pass').length;
-            currentEquipmentCheck.failedCount = results.filter(r => r === 'fail').length;
-            
-            document.getElementById('passedCount').textContent = currentEquipmentCheck.passedCount;
-            document.getElementById('failedCount').textContent = currentEquipmentCheck.failedCount;
-            
-            log(`📊 Updated counters: ${currentEquipmentCheck.passedCount} passed, ${currentEquipmentCheck.failedCount} failed`);
-        }
-        
-        function updateSectionStatus() {
-            const sections = ['tractor', 'trailer', 'moffett'];
-            const inspections = currentEquipmentCheck.inspections || {};
-            
-            sections.forEach(section => {
-                const sectionItems = Object.keys(inspections).filter(key => key.startsWith(section));
-                const sectionResults = sectionItems.map(key => inspections[key]);
-                
-                const statusElement = document.getElementById(`${section}Status`);
-                
-                if (sectionResults.length === 0) {
-                    statusElement.textContent = 'PENDING';
-                    statusElement.className = 'section-status status-pending';
-                } else {
-                    const allComplete = getSectionItemCount(section) === sectionResults.length;
-                    
-                    if (allComplete) {
-                        statusElement.textContent = 'COMPLETE';
-                        statusElement.className = 'section-status status-complete';
-                    } else {
-                        statusElement.textContent = 'IN PROGRESS';
-                        statusElement.className = 'section-status status-pending';
-                    }
-                }
-            });
-        }
-        
-        function getSectionItemCount(section) {
-            const itemCounts = { tractor: 12, trailer: 6, moffett: 5 };
-            return itemCounts[section] || 0;
-        }
-        
-        function updateSubmitButtonState() {
-            const totalItems = 12 + 6 + 5; // tractor + trailer + moffett
-            const completedItems = Object.keys(currentEquipmentCheck.inspections || {}).length;
-            
-            const tractorNumber = document.getElementById('tractorNumber').value.trim();
-            const trailerNumber = document.getElementById('trailerNumber').value.trim();
-            const moffettNumber = document.getElementById('moffettNumber').value.trim();
-            
-            const allEquipmentNumbersEntered = tractorNumber && trailerNumber && moffettNumber;
-            const allInspectionsComplete = completedItems === totalItems;
-            
-            const submitBtn = document.getElementById('submitCheckInBtn');
-            submitBtn.disabled = !(allEquipmentNumbersEntered && allInspectionsComplete);
-            
-            log(`🔘 Submit button state: ${submitBtn.disabled ? 'disabled' : 'enabled'} (${completedItems}/${totalItems} items, equipment numbers: ${allEquipmentNumbersEntered})`);
-        }
-        
-        function resetEquipmentForm() {
-            log('🔄 Resetting equipment form');
-            
-            // Clear equipment numbers
-            document.getElementById('tractorNumber').value = '';
-            document.getElementById('trailerNumber').value = '';
-            document.getElementById('moffettNumber').value = '';
-            
-            // Reset section statuses
-            ['tractor', 'trailer', 'moffett'].forEach(section => {
-                const statusElement = document.getElementById(`${section}Status`);
-                statusElement.textContent = 'PENDING';
-                statusElement.className = 'section-status status-pending';
-            });
-            
-            // Reset counters
-            document.getElementById('passedCount').textContent = '0';
-            document.getElementById('failedCount').textContent = '0';
-            
-            // Reset submit button
-            document.getElementById('submitCheckInBtn').disabled = true;
-            
-            // Reset global state
-            currentEquipmentCheck = null;
-        }
-        
-        async function submitEquipmentCheckIn() {
-            log('📤 Submitting equipment check-in');
-            
-            if (!currentEquipmentCheck) {
-                showToast('Error: No check-in data available', 'error');
+        // NEW: Setup daily reset timer
+        function setupDailyResetTimer() {
+            if (!DAILY_RESET_CONFIG.ENABLE_AUTO_RESET) {
+                log('⏰ Automatic daily reset is disabled');
                 return;
             }
             
-            const submitBtn = document.getElementById('submitCheckInBtn');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<div class="loading-spinner"></div><span>Processing...</span>';
+            // Clear any existing interval
+            if (dailyResetInterval) {
+                clearInterval(dailyResetInterval);
+            }
             
-            const checkInData = {
-                driverId: currentEquipmentCheck.driverId,
-                driverName: currentEquipmentCheck.driverName,
-                timestamp: new Date().toISOString(),
-                equipmentNumbers: {
-                    tractor: document.getElementById('tractorNumber').value.trim(),
-                    trailer: document.getElementById('trailerNumber').value.trim(),
-                    moffett: document.getElementById('moffettNumber').value.trim()
-                },
-                inspections: currentEquipmentCheck.inspections,
-                issues: currentEquipmentCheck.issues || {},
-                summary: {
-                    totalItems: Object.keys(currentEquipmentCheck.inspections).length,
-                    passedItems: currentEquipmentCheck.passedCount,
-                    failedItems: currentEquipmentCheck.failedCount,
-                    hasIssues: Object.keys(currentEquipmentCheck.issues || {}).length > 0
-                },
-                returns: currentEquipmentCheck.returns,
-                location: WAREHOUSE_ADDRESS,
-                status: 'completed'
-            };
+            // Check every minute for reset time
+            dailyResetInterval = setInterval(() => {
+                const now = new Date();
+                const currentHour = now.getHours();
+                const currentMinute = now.getMinutes();
+                
+                if (currentHour === DAILY_RESET_CONFIG.RESET_TIME.hour && 
+                    currentMinute === DAILY_RESET_CONFIG.RESET_TIME.minute) {
+                    log('⏰ Daily reset time reached - starting automated reset');
+                    performDailyReset();
+                }
+            }, 60000); // Check every minute
             
+            log(`✅ Daily reset scheduled for ${DAILY_RESET_CONFIG.RESET_TIME.hour}:${DAILY_RESET_CONFIG.RESET_TIME.minute.toString().padStart(2, '0')}`);
+        }
+        
+        // NEW: Perform daily reset with equipment issue reporting
+        async function performDailyReset() {
             try {
-                log('📡 Sending check-in data to MongoDB...');
+                log('🌙 Starting nightly archive with equipment issues...');
                 
-                const response = await fetch(`${API_BASE}/api/checkins`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
+                // Collect ALL equipment issues from today
+                const equipmentIssues = collectAllEquipmentIssues();
+                
+                // Prepare complete daily report
+                const dailyReport = {
+                    date: new Date().toISOString().split('T')[0],
+                    time: new Date().toLocaleTimeString(),
+                    
+                    // Driver Statistics
+                    driverStats: {
+                        totalDrivers: allDrivers.length,
+                        completed: allDrivers.filter(d => d.status === 'completed').length,
+                        arrived: allDrivers.filter(d => d.status === 'arrived').length,
+                        enRoute: allDrivers.filter(d => d.status === 'en-route').length,
+                        stillWorking: allDrivers.filter(d => d.status === 'working').length
                     },
-                    body: JSON.stringify(checkInData)
-                });
-                
-                if (response.ok) {
-                    log('✅ Equipment check-in submitted successfully');
                     
-                    // Mark driver as completed
-                    completedDrivers.add(currentEquipmentCheck.driverId);
-                    localStorage.setItem('completedDrivers', JSON.stringify([...completedDrivers]));
-                    
-                    // Update driver status in allDrivers array
-                    const driverIndex = allDrivers.findIndex(d => d.id === currentEquipmentCheck.driverId);
-                    if (driverIndex !== -1) {
-                        allDrivers[driverIndex].status = 'completed';
-                        allDrivers[driverIndex].completedAt = new Date().toISOString();
-                        
-                        // Store equipment issues if any
-                        if (Object.keys(currentEquipmentCheck.issues || {}).length > 0) {
-                            allDrivers[driverIndex].equipmentIssues = currentEquipmentCheck.issues;
-                            
-                            // Update equipment issue counters
-                            const tractorIssues = Object.keys(currentEquipmentCheck.issues).filter(k => k.startsWith('tractor')).length;
-                            const trailerIssues = Object.keys(currentEquipmentCheck.issues).filter(k => k.startsWith('trailer')).length;
-                            const moffettIssues = Object.keys(currentEquipmentCheck.issues).filter(k => k.startsWith('moffett')).length;
-                            
-                            // Update issue counters in the UI
-                            const currentTractorIssues = parseInt(document.getElementById('tractorIssues').textContent) || 0;
-                            const currentTrailerIssues = parseInt(document.getElementById('trailerIssues').textContent) || 0;
-                            const currentMoffettIssues = parseInt(document.getElementById('moffettIssues').textContent) || 0;
-                            
-                            document.getElementById('tractorIssues').textContent = currentTractorIssues + tractorIssues;
-                            document.getElementById('trailerIssues').textContent = currentTrailerIssues + trailerIssues;
-                            document.getElementById('moffettIssues').textContent = currentMoffettIssues + moffettIssues;
+                    // Returns Information
+                    returns: {
+                        totalReturns: allDrivers.reduce((sum, d) => sum + (d.returns || 0), 0),
+                        driversWithReturns: allDrivers.filter(d => d.returns > 0).map(d => ({
+                            name: d.name,
+                            returnCount: d.returns
                         }
                         
-                        log(`✅ Driver ${currentEquipmentCheck.driverName} moved to completed status`);
-                    }
+                        // Store equipment issues in driver data for later reporting
+                        if (Object.keys(currentEquipmentCheck.issues || {}).length > 0) {
+                            allDrivers[driverIndex].equipmentIssues = currentEquipmentCheck.issues;
+                            allDrivers[driverIndex].tractorNumber = document.getElementById('tractorNumber').value.trim();
+                            allDrivers[driverIndex].trailerNumber = document.getElementById('trailerNumber').value.trim();
+                            allDrivers[driverIndex].moffettNumber = document.getElementById('moffettNumber').value.trim();))
+                    },
                     
-                    // If we're currently viewing the overview or arrived tab, refresh to remove the completed driver
-                    if (currentFilter === 'overview' || currentFilter === 'arrived') {
-                        updateActivityFeed();
-                    }
+                    // EQUIPMENT ISSUES - Detailed breakdown
+                    equipmentIssues: {
+                        tractorIssues: equipmentIssues.tractor,
+                        trailerIssues: equipmentIssues.trailer,
+                        moffettIssues: equipmentIssues.moffett,
+                        
+                        // Summary counts
+                        summary: {
+                            totalTractorIssues: equipmentIssues.tractor.length,
+                            totalTrailerIssues: equipmentIssues.trailer.length,
+                            totalMoffettIssues: equipmentIssues.moffett.length,
+                            totalIssues: equipmentIssues.tractor.length + 
+                                        equipmentIssues.trailer.length + 
+                                        equipmentIssues.moffett.length
+                        }
+                    },
                     
-                    // Update KPIs to reflect the change
-                    updateKPIs();
-                    
-                    // Show success toast with more detail
-                    const issueCount = Object.keys(currentEquipmentCheck.issues || {}).length;
-                    if (issueCount > 0) {
-                        showToast(`Check-In Complete! ${currentEquipmentCheck.driverName} has been moved to Completed tab. ${issueCount} issue(s) recorded.`, 'success');
-                    } else {
-                        showToast(`Check-In Complete! ${currentEquipmentCheck.driverName} has been moved to Completed tab.`, 'success');
-                    }
-                    
-                    // Close modal after a short delay to show the success message
-                    setTimeout(() => {
-                        closeEquipmentModal();
-                    }, 500);
-                    
-                } else {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    // Individual driver check-ins with their issues
+                    driverCheckIns: allDrivers.filter(d => d.status === 'completed').map(d => ({
+                        name: d.name,
+                        completedAt: d.completedAt,
+                        returns: d.returns || 0,
+                        equipmentIssues: d.equipmentIssues || {}
+                    }))
+                };
+                
+                // Step 1: Archive to MongoDB
+                await archiveToMongoDB(dailyReport);
+                
+                // Step 2: Send to Google Sheets with all issue details
+                if (DAILY_RESET_CONFIG.GOOGLE_WEBHOOK_URL && 
+                    DAILY_RESET_CONFIG.GOOGLE_WEBHOOK_URL !== 'YOUR_GOOGLE_APPS_SCRIPT_URL') {
+                    await sendDetailedReportToGoogleSheets(dailyReport);
                 }
+                
+                // Step 3: Clear today's data
+                await clearDailyData();
+                
+                showToast('✅ Daily report sent! Equipment issues documented.', 'success');
+                
+                // Reload dashboard for fresh start
+                setTimeout(() => window.location.reload(), 3000);
                 
             } catch (error) {
-                log('❌ Error submitting equipment check-in: ' + error.message);
-                showToast('Submission Failed: ' + error.message, 'error');
-                
-                // Reset submit button
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<span>✅</span><span>Complete Check-In</span>';
+                log('❌ Daily reset failed: ' + error.message, 'error');
+                showToast('Daily reset failed: ' + error.message, 'error');
             }
         }
         
-        // Add equipment number validation
-        function setupEquipmentInputListeners() {
-            // Add event listeners for equipment number inputs
-            ['tractorNumber', 'trailerNumber', 'moffettNumber'].forEach(id => {
-                const input = document.getElementById(id);
-                if (input) {
-                    input.addEventListener('input', updateSubmitButtonState);
+        // NEW: Collect all equipment issues
+        function collectAllEquipmentIssues() {
+            const issues = {
+                tractor: [],
+                trailer: [],
+                moffett: []
+            };
+            
+            // Collect issues from all completed check-ins
+            allDrivers.forEach(driver => {
+                if (driver.equipmentIssues) {
+                    Object.entries(driver.equipmentIssues).forEach(([itemId, description]) => {
+                        const [equipmentType, itemIndex] = itemId.split('_');
+                        
+                        const issueRecord = {
+                            driver: driver.name,
+                            timestamp: driver.completedAt || new Date().toISOString(),
+                            equipmentNumber: driver[`${equipmentType}Number`] || 'Not recorded',
+                            issueDescription: description,
+                            itemInspected: getInspectionItemName(equipmentType, itemIndex)
+                        };
+                        
+                        if (equipmentType === 'tractor') {
+                            issues.tractor.push(issueRecord);
+                        } else if (equipmentType === 'trailer') {
+                            issues.trailer.push(issueRecord);
+                        } else if (equipmentType === 'moffett') {
+                            issues.moffett.push(issueRecord);
+                        }
+                    });
                 }
             });
+            
+            return issues;
         }
         
-        // Clear daily check-ins
-        function clearDailyCheckIns() {
-            if (confirm('Are you sure you want to clear all daily check-ins? This action cannot be undone.')) {
-                completedDrivers.clear();
-                localStorage.removeItem('completedDrivers');
-                
-                // Reset all completed drivers to their original status
-                allDrivers.forEach(driver => {
-                    if (driver.status === 'completed') {
-                        // Restore original status based on notifications
-                        const originalStatus = determineStatus(driver.raw || {});
-                        driver.status = originalStatus;
-                    }
+        // NEW: Get inspection item name
+        function getInspectionItemName(type, index) {
+            const inspectionItems = {
+                tractor: [
+                    'QR Code Scanned', 'Samsara Device', 'External Damages', 
+                    'Windshield', 'Lights', 'Tires', 'Air/Electrical Lines',
+                    'Cab Cleanliness', 'Fire Extinguisher', 'Safety Equipment',
+                    'Documentation', 'Fluid Levels'
+                ],
+                trailer: [
+                    'Gladhands Connection', 'Deck Condition', 'Physical Damages',
+                    'Lights', 'Tires', 'Straps & Securement'
+                ],
+                moffett: [
+                    'Physical Damages', 'Safety Equipment', 'Lights',
+                    'Electrical Systems', 'Tires'
+                ]
+            };
+            
+            return inspectionItems[type]?.[index] || `Item ${index}`;
+        }
+        
+        // NEW: Archive to MongoDB
+        async function archiveToMongoDB(report) {
+            try {
+                const response = await fetch(`${API_BASE}/api/archive`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(report)
                 });
                 
-                // Reload data to refresh UI
-                updateKPIs();
-                updateActivityFeed();
+                if (!response.ok) {
+                    throw new Error('Failed to archive to MongoDB');
+                }
                 
-                log('🗑️ Daily check-ins cleared');
-                showToast('Daily check-ins have been cleared', 'info');
+                log('✅ Daily report archived to MongoDB');
+            } catch (error) {
+                log('⚠️ MongoDB archive failed (continuing): ' + error.message);
+                // Continue even if MongoDB fails - Google Sheets is the backup
             }
         }
         
-        // Logout function
-        function logout() {
-            if (confirm('Are you sure you want to logout?')) {
-                window.location.href = '/login.html';
+        // NEW: Send detailed report to Google Sheets
+        async function sendDetailedReportToGoogleSheets(report) {
+            try {
+                // Format for Google Sheets
+                const sheetData = {
+                    // Summary Row
+                    summary: [
+                        report.date,
+                        report.time,
+                        report.driverStats.totalDrivers,
+                        report.driverStats.completed,
+                        report.returns.totalReturns,
+                        report.equipmentIssues.summary.totalIssues
+                    ],
+                    
+                    // Equipment Issues Details
+                    tractorIssues: report.equipmentIssues.tractorIssues,
+                    trailerIssues: report.equipmentIssues.trailerIssues,
+                    moffettIssues: report.equipmentIssues.moffettIssues,
+                    
+                    // Driver Details
+                    drivers: report.driverCheckIns
+                };
+                
+                await fetch(DAILY_RESET_CONFIG.GOOGLE_WEBHOOK_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(sheetData)
+                });
+                
+                log('✅ Daily report sent to Google Sheets');
+            } catch (error) {
+                log('❌ Failed to send to Google Sheets: ' + error.message);
+                throw error;
             }
         }
         
-        // Toast notification function
-        function showToast(message, type = 'info') {
-            const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-            toast.innerHTML = `
-                <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
-                <span>${message}</span>
-            `;
-            
-            document.body.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.remove();
-            }, 5000);
+        // NEW: Clear daily data
+        async function clearDailyData() {
+            try {
+                // Clear local storage
+                completedDrivers.clear();
+                localStorage.removeItem('completedDrivers');
+                localStorage.setItem('lastResetDate', new Date().toDateString());
+                
+                // Clear MongoDB daily data
+                const response = await fetch(`${API_BASE}/api/drivers/clear`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to clear MongoDB data');
+                }
+                
+                log('✅ Daily data cleared');
+            } catch (error) {
+                log('⚠️ Failed to clear data (continuing): ' + error.message);
+            }
         }
-    </script>
-</body>
-</html>
+        
+        // NEW: Manual daily reset (button click)
+        async function manualDailyReset() {
+            if (confirm('Are you sure you want to end the day and archive all data? This will send the report to Google Sheets and clear the dashboard.')) {
+                await performDailyReset();
+            }
+        }
