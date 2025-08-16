@@ -607,6 +607,15 @@
             background: var(--text-muted);
         }
         
+        /* Ensure green toggle for user table notification switches */
+        .user-table .toggle-switch input:checked + .toggle-slider {
+            background: var(--accent-green) !important;
+        }
+        
+        .user-table .toggle-switch input:checked + .toggle-slider:before {
+            background: white !important;
+        }
+        
         /* Buttons */
         .btn {
             padding: 14px 24px;
