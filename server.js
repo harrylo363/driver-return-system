@@ -19,13 +19,10 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
-// Connect to MongoDB Atlas
+// Connect to MongoDB Atlas (Updated - no deprecated options)
 async function connectToMongoDB() {
     try {
-        client = new MongoClient(MONGODB_URI, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        });
+        client = new MongoClient(MONGODB_URI);
         
         await client.connect();
         db = client.db(DB_NAME);
@@ -36,6 +33,7 @@ async function connectToMongoDB() {
         await db.createCollection('users').catch(() => {});
         
         console.log('✅ Connected to MongoDB Atlas');
+        console.log(`📊 Database: ${DB_NAME}`);
         return true;
     } catch (error) {
         console.error('❌ MongoDB connection failed:', error);
@@ -49,6 +47,16 @@ connectToMongoDB();
 // Helper function to get today's date in YYYY-MM-DD format
 function getTodayDate() {
     return new Date().toISOString().split('T')[0];
+}
+
+// Helper function to format timestamp
+function formatTimestamp(date) {
+    return new Date(date).toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
 }
 
 // ============= ROUTES =============
@@ -70,7 +78,8 @@ app.get('/api/health', async (req, res) => {
             status: 'healthy',
             database: 'connected',
             timestamp: new Date(),
-            environment: process.env.NODE_ENV || 'development'
+            environment: process.env.NODE_ENV || 'development',
+            date: getTodayDate()
         });
     } catch (error) {
         res.status(503).json({ 
@@ -124,7 +133,10 @@ app.post('/api/checkin', async (req, res) => {
         // Insert into daily_operations
         const result = await db.collection('daily_operations').insertOne(checkInData);
         
-        console.log(`✅ Driver check-in recorded: ${checkInData.driver_name || 'Unknown'}`);
+        console.log(`✅ Driver check-in recorded: ${checkInData.driver_name || checkInData.name || 'Unknown'}`);
+        console.log(`   Status: ${checkInData.status || 'Not specified'}`);
+        console.log(`   Returns: ${checkInData.returns || 0}`);
+        
         res.json({ 
             success: true, 
             id: result.insertedId,
@@ -159,6 +171,7 @@ app.put('/api/driver/:id', async (req, res) => {
             return res.status(404).json({ error: 'Driver not found' });
         }
         
+        console.log(`📝 Updated driver ${driverId}`);
         res.json({ 
             success: true, 
             message: 'Driver status updated' 
@@ -180,10 +193,14 @@ app.post('/api/archive', async (req, res) => {
         const archiveData = req.body;
         const archiveDate = archiveData.date || getTodayDate();
         
+        console.log(`📦 Starting archive process for ${archiveDate}...`);
+        
         // Step 1: Get all of today's data before archiving
         const todayData = await db.collection('daily_operations')
             .find({ date: archiveDate })
             .toArray();
+        
+        console.log(`   Found ${todayData.length} records to archive`);
         
         // Step 2: Save complete archive with metadata
         const archiveRecord = {
@@ -194,25 +211,27 @@ app.post('/api/archive', async (req, res) => {
             rawData: todayData // Keep the raw operational data too
         };
         
-        await db.collection('archived_operations').insertOne(archiveRecord);
-        console.log(`📦 Archived ${todayData.length} records for ${archiveDate}`);
+        const archiveResult = await db.collection('archived_operations').insertOne(archiveRecord);
+        console.log(`   ✅ Archived to document: ${archiveResult.insertedId}`);
         
         // Step 3: Clear the daily_operations collection for this date
         const deleteResult = await db.collection('daily_operations').deleteMany({
             date: archiveDate
         });
         
-        console.log(`🧹 Cleared ${deleteResult.deletedCount} records from daily operations`);
+        console.log(`   🧹 Cleared ${deleteResult.deletedCount} records from daily operations`);
+        console.log(`📦 Archive complete!`);
         
         res.json({ 
             success: true,
             message: `Archived ${todayData.length} records and cleared daily operations`,
             archivedCount: todayData.length,
-            clearedCount: deleteResult.deletedCount
+            clearedCount: deleteResult.deletedCount,
+            archiveId: archiveResult.insertedId
         });
         
     } catch (error) {
-        console.error('Error archiving data:', error);
+        console.error('❌ Error archiving data:', error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -232,11 +251,14 @@ app.post('/api/drivers/clear', async (req, res) => {
         // If clearAll is true, clear everything from daily_operations
         if (clearAll === true) {
             deleteQuery = {};
+            console.log('🗑️ Clearing ALL daily operations...');
+        } else {
+            console.log(`🗑️ Clearing daily operations for ${targetDate}...`);
         }
         
         const result = await db.collection('daily_operations').deleteMany(deleteQuery);
         
-        console.log(`🗑️ Cleared ${result.deletedCount} records from daily operations`);
+        console.log(`   ✅ Cleared ${result.deletedCount} records`);
         
         res.json({ 
             success: true, 
@@ -258,16 +280,19 @@ app.get('/api/archive/:date', async (req, res) => {
         }
         
         const requestedDate = req.params.date;
+        console.log(`📂 Retrieving archive for ${requestedDate}`);
         
         const archiveData = await db.collection('archived_operations')
             .findOne({ archiveDate: requestedDate });
         
         if (!archiveData) {
+            console.log(`   ❌ No archive found`);
             return res.status(404).json({ 
                 message: `No archive found for ${requestedDate}` 
             });
         }
         
+        console.log(`   ✅ Found archive with ${archiveData.totalRecords} records`);
         res.json(archiveData);
         
     } catch (error) {
@@ -285,6 +310,8 @@ app.get('/api/archive-dates', async (req, res) => {
         
         const dates = await db.collection('archived_operations')
             .distinct('archiveDate');
+        
+        console.log(`📅 Found ${dates.length} archived dates`);
         
         res.json({ 
             dates: dates.sort().reverse(),
@@ -313,6 +340,7 @@ app.get('/api/checkins', async (req, res) => {
             })
             .toArray();
         
+        console.log(`📋 Returning ${checkins.length} completed check-ins for today`);
         res.json(checkins);
         
     } catch (error) {
@@ -329,6 +357,7 @@ app.get('/api/users', async (req, res) => {
         }
         
         const users = await db.collection('users').find({}).toArray();
+        console.log(`👥 Found ${users.length} users`);
         res.json(users);
         
     } catch (error) {
@@ -346,16 +375,20 @@ app.post('/api/login', async (req, res) => {
         
         const { username, password } = req.body;
         
-        // In production, use proper password hashing!
+        console.log(`🔐 Login attempt for user: ${username}`);
+        
+        // WARNING: In production, use proper password hashing (bcrypt)!
         const user = await db.collection('users').findOne({ 
             username: username,
-            password: password // Use bcrypt in production!
+            password: password // Use bcrypt.compare() in production!
         });
         
         if (!user) {
+            console.log(`   ❌ Invalid credentials`);
             return res.status(401).json({ error: 'Invalid credentials' });
         }
         
+        console.log(`   ✅ Login successful`);
         res.json({ 
             success: true, 
             user: {
@@ -371,6 +404,27 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
+// Create default admin user if none exists
+async function createDefaultAdmin() {
+    if (!db) return;
+    
+    try {
+        const adminExists = await db.collection('users').findOne({ username: 'admin' });
+        if (!adminExists) {
+            await db.collection('users').insertOne({
+                username: 'admin',
+                password: 'admin123', // Change this immediately in production!
+                role: 'admin',
+                createdAt: new Date()
+            });
+            console.log('⚠️  Default admin user created (username: admin, password: admin123)');
+            console.log('⚠️  PLEASE CHANGE THE DEFAULT PASSWORD!');
+        }
+    } catch (error) {
+        console.error('Error creating default admin:', error);
+    }
+}
+
 // Serve HTML files
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
@@ -384,9 +438,21 @@ app.get('/driver', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'driver.html'));
 });
 
+app.get('/dashboard', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+});
+
+// 404 handler
+app.use((req, res) => {
+    res.status(404).json({ 
+        error: 'Not found',
+        message: `Cannot ${req.method} ${req.url}`
+    });
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
-    console.error('Error:', err);
+    console.error('❌ Error:', err);
     res.status(500).json({ 
         error: 'Internal server error',
         message: err.message 
@@ -394,10 +460,14 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
     console.log(`🚀 Fleet Management Server running on port ${PORT}`);
     console.log(`📍 Dashboard: http://localhost:${PORT}`);
     console.log(`🔗 MongoDB: ${MONGODB_URI ? 'Configured' : 'Not configured'}`);
+    console.log(`📅 Today's Date: ${getTodayDate()}`);
+    
+    // Create default admin after server starts
+    setTimeout(createDefaultAdmin, 2000);
 });
 
 // Graceful shutdown
@@ -405,7 +475,16 @@ process.on('SIGINT', async () => {
     console.log('\n👋 Shutting down gracefully...');
     if (client) {
         await client.close();
-        console.log('MongoDB connection closed');
+        console.log('   ✅ MongoDB connection closed');
+    }
+    process.exit(0);
+});
+
+process.on('SIGTERM', async () => {
+    console.log('\n👋 Received SIGTERM, shutting down gracefully...');
+    if (client) {
+        await client.close();
+        console.log('   ✅ MongoDB connection closed');
     }
     process.exit(0);
 });
