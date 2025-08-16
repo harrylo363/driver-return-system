@@ -1142,11 +1142,6 @@
                                     </div>
                                     
                                     <div class="form-group">
-                                        <label class="form-label">Vehicle ID</label>
-                                        <input type="text" class="form-input" id="vehicleId" name="vehicleId" placeholder="TRUCK-001">
-                                    </div>
-                                    
-                                    <div class="form-group">
                                         <label class="form-label">Account Status</label>
                                         <select class="form-select" id="userStatus" name="status">
                                             <option value="active">Active</option>
@@ -1588,7 +1583,6 @@
                 phoneNumber: formData.get('phoneNumber'),
                 role: role,
                 password: (role === 'dispatcher' || role === 'admin') ? password : undefined,
-                vehicleId: formData.get('vehicleId'),
                 active: formData.get('status') === 'active',
                 pushNotifications: formData.get('pushNotifications') === 'on',
                 createdAt: editingUserId ? allUsers.find(u => u.id === editingUserId)?.createdAt : new Date().toISOString()
@@ -1729,7 +1723,6 @@
                 document.getElementById('userEmail').value = user.email || '';
                 document.getElementById('userPhone').value = user.phoneNumber || '';
                 document.getElementById('userRole').value = user.role || '';
-                document.getElementById('vehicleId').value = user.vehicleId || '';
                 document.getElementById('userStatus').value = user.active !== false ? 'active' : 'inactive';
                 
                 // Toggle password field based on role
