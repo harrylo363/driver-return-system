@@ -37,6 +37,7 @@ async function connectToMongoDB() {
         await db.createCollection('daily_operations').catch(() => {});
         await db.createCollection('archived_operations').catch(() => {});
         await db.createCollection('users').catch(() => {});
+        await db.createCollection('notifications').catch(() => {});
         
         console.log('✅ Connected to MongoDB Atlas');
         console.log(`📊 Database: ${DB_NAME}`);
@@ -273,6 +274,143 @@ app.get('/api/notifications', async (req, res) => {
     } catch (error) {
         console.error('Error fetching notifications:', error);
         res.status(500).json({ error: error.message });
+    }
+});
+
+// POST /api/notifications - Receive status updates from driver portal
+app.post('/api/notifications', async (req, res) => {
+    try {
+        if (!db) {
+            return res.status(503).json({ error: 'Database not connected' });
+        }
+        
+        console.log('📨 Received notification from driver portal:', req.body);
+        
+        const today = getTodayDate();
+        
+        // Extract data from driver portal
+        const {
+            driver_name,
+            driver_id,
+            driverId,
+            driver,
+            vehicleId,
+            vehicle,
+            status,
+            message,
+            warehouse,
+            location,
+            timestamp,
+            hasReturns,
+            returnsCount,
+            returns,
+            type,
+            source,
+            name
+        } = req.body;
+        
+        // Create notification document
+        const notificationData = {
+            // Use a new ObjectId for this notification
+            _id: new ObjectId(),
+            
+            // Driver information - normalize the fields
+            driver_name: driver_name || driver || name,
+            driver_id: driver_id || driverId,
+            vehicleId: vehicleId || vehicle,
+            
+            // Status information
+            status: status, // 'en-route' or 'arrived'
+            type: type, // '30min' or 'arrived'
+            message: message,
+            
+            // Location
+            warehouse: warehouse || '6995 N US-41, Apollo Beach, FL 33572',
+            location: location || 'Driver Location',
+            
+            // Returns information
+            hasReturns: hasReturns || false,
+            returns: returnsCount || returns || 0,
+            returnsCount: returnsCount || returns || 0,
+            
+            // Timestamps
+            timestamp: new Date(timestamp || Date.now()),
+            date: today, // Important: Add today's date for daily operations filtering
+            
+            // Metadata
+            source: source || 'driver_portal',
+            read: false,
+            processed: false,
+            createdAt: new Date()
+        };
+        
+        // Insert into notifications collection
+        const notificationResult = await db.collection('notifications').insertOne(notificationData);
+        
+        // Also update/insert in daily_operations for dashboard tracking
+        // Check if driver already has an entry today
+        const existingEntry = await db.collection('daily_operations').findOne({
+            driver_id: notificationData.driver_id,
+            date: today
+        });
+        
+        if (existingEntry) {
+            // Update existing entry
+            await db.collection('daily_operations').updateOne(
+                { _id: existingEntry._id },
+                {
+                    $set: {
+                        status: notificationData.status,
+                        returns: notificationData.returns,
+                        hasReturns: notificationData.hasReturns,
+                        lastUpdate: notificationData.timestamp,
+                        message: notificationData.message
+                    }
+                }
+            );
+            console.log(`📝 Updated daily operations for ${notificationData.driver_name}`);
+        } else {
+            // Create new entry in daily_operations
+            const dailyOpsData = {
+                _id: new ObjectId(),
+                driver_name: notificationData.driver_name,
+                driver_id: notificationData.driver_id,
+                name: notificationData.driver_name, // Add for compatibility
+                vehicleId: notificationData.vehicleId,
+                status: notificationData.status,
+                returns: notificationData.returns,
+                hasReturns: notificationData.hasReturns,
+                warehouse: notificationData.warehouse,
+                timestamp: notificationData.timestamp,
+                date: today,
+                lastUpdate: notificationData.timestamp
+            };
+            
+            await db.collection('daily_operations').insertOne(dailyOpsData);
+            console.log(`✅ Created daily operations entry for ${notificationData.driver_name}`);
+        }
+        
+        console.log(`✅ Notification saved: ${notificationData.driver_name} - ${notificationData.status}`);
+        
+        // Send success response
+        res.status(201).json({
+            success: true,
+            message: 'Notification created successfully',
+            data: {
+                id: notificationResult.insertedId,
+                driver: notificationData.driver_name,
+                status: notificationData.status,
+                timestamp: notificationData.timestamp
+            }
+        });
+        
+    } catch (error) {
+        console.error('❌ Error creating notification:', error);
+        res.status(500).json({ 
+            success: false,
+            error: 'Failed to create notification',
+            message: error.message 
+        });
     }
 });
 
