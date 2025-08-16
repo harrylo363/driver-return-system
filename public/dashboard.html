@@ -1550,84 +1550,84 @@
         }
         
         // NEW: Perform daily reset with equipment issue reporting
-        async function performDailyReset() {
-            try {
-                log('🌙 Starting nightly archive with equipment issues...');
+async function performDailyReset() {
+    try {
+        log('🌙 Starting nightly archive with equipment issues...');
+        
+        // Collect ALL equipment issues from today
+        const equipmentIssues = collectAllEquipmentIssues();
+        
+        // Prepare complete daily report
+        const dailyReport = {
+            date: new Date().toISOString().split('T')[0],
+            time: new Date().toLocaleTimeString(),
+            
+            // Driver Statistics
+            driverStats: {
+                totalDrivers: allDrivers.length,
+                completed: allDrivers.filter(d => d.status === 'completed').length,
+                arrived: allDrivers.filter(d => d.status === 'arrived').length,
+                enRoute: allDrivers.filter(d => d.status === 'en-route').length,
+                stillWorking: allDrivers.filter(d => d.status === 'working').length
+            },
+            
+            // Returns Information
+            returns: {
+                totalReturns: allDrivers.reduce((sum, d) => sum + (d.returns || 0), 0),
+                driversWithReturns: allDrivers.filter(d => d.returns > 0).map(d => ({
+                    name: d.name,
+                    returnCount: d.returns
+                }))
+            },
+            
+            // EQUIPMENT ISSUES - Detailed breakdown
+            equipmentIssues: {
+                tractorIssues: equipmentIssues.tractor,
+                trailerIssues: equipmentIssues.trailer,
+                moffettIssues: equipmentIssues.moffett,
                 
-                // Collect ALL equipment issues from today
-                const equipmentIssues = collectAllEquipmentIssues();
-                
-                // Prepare complete daily report
-                const dailyReport = {
-                    date: new Date().toISOString().split('T')[0],
-                    time: new Date().toLocaleTimeString(),
-                    
-                    // Driver Statistics
-                    driverStats: {
-                        totalDrivers: allDrivers.length,
-                        completed: allDrivers.filter(d => d.status === 'completed').length,
-                        arrived: allDrivers.filter(d => d.status === 'arrived').length,
-                        enRoute: allDrivers.filter(d => d.status === 'en-route').length,
-                        stillWorking: allDrivers.filter(d => d.status === 'working').length
-                    },
-                    
-                    // Returns Information
-                    returns: {
-                        totalReturns: allDrivers.reduce((sum, d) => sum + (d.returns || 0), 0),
-                        driversWithReturns: allDrivers.filter(d => d.returns > 0).map(d => ({
-                            name: d.name,
-                            returnCount: d.returns
-                        }))
-                    },
-                    
-                    // EQUIPMENT ISSUES - Detailed breakdown
-                    equipmentIssues: {
-                        tractorIssues: equipmentIssues.tractor,
-                        trailerIssues: equipmentIssues.trailer,
-                        moffettIssues: equipmentIssues.moffett,
-                        
-                        // Summary counts
-                        summary: {
-                            totalTractorIssues: equipmentIssues.tractor.length,
-                            totalTrailerIssues: equipmentIssues.trailer.length,
-                            totalMoffettIssues: equipmentIssues.moffett.length,
-                            totalIssues: equipmentIssues.tractor.length + 
-                                        equipmentIssues.trailer.length + 
-                                        equipmentIssues.moffett.length
-                        }
-                    },
-                    
-                    // Individual driver check-ins with their issues
-                    driverCheckIns: allDrivers.filter(d => d.status === 'completed').map(d => ({
-                        name: d.name,
-                        completedAt: d.completedAt,
-                        returns: d.returns || 0,
-                        equipmentIssues: d.equipmentIssues || {}
-                    }))
-                };
-                
-                // Step 1: Archive to MongoDB
-                await archiveToMongoDB(dailyReport);
-                
-                // Step 2: Send to Google Sheets with all issue details
-                if (DAILY_RESET_CONFIG.GOOGLE_WEBHOOK_URL && 
-                    DAILY_RESET_CONFIG.GOOGLE_WEBHOOK_URL !== 'YOUR_GOOGLE_APPS_SCRIPT_URL') {
-                    await sendDetailedReportToGoogleSheets(dailyReport);
+                // Summary counts
+                summary: {
+                    totalTractorIssues: equipmentIssues.tractor.length,
+                    totalTrailerIssues: equipmentIssues.trailer.length,
+                    totalMoffettIssues: equipmentIssues.moffett.length,
+                    totalIssues: equipmentIssues.tractor.length + 
+                                equipmentIssues.trailer.length + 
+                                equipmentIssues.moffett.length
                 }
-                
-                // Step 3: Clear today's data
-                await clearDailyData();
-                
-                showToast('✅ Daily report sent! Equipment issues documented.', 'success');
-                
-                // Reload dashboard for fresh start
-                setTimeout(() => window.location.reload(), 3000);
-                
-            } catch (error) {
-                log('❌ Daily reset failed: ' + error.message, 'error');
-                showToast('Daily reset failed: ' + error.message, 'error');
-            }
+            },
+            
+            // Individual driver check-ins with their issues
+            driverCheckIns: allDrivers.filter(d => d.status === 'completed').map(d => ({
+                name: d.name,
+                completedAt: d.completedAt,
+                returns: d.returns || 0,
+                equipmentIssues: d.equipmentIssues || {}
+            }))
+        };
+        
+        // Step 1: Archive to MongoDB
+        await archiveToMongoDB(dailyReport);
+        
+        // Step 2: Send to Google Sheets with all issue details
+        if (DAILY_RESET_CONFIG.GOOGLE_WEBHOOK_URL && 
+            DAILY_RESET_CONFIG.GOOGLE_WEBHOOK_URL !== 'YOUR_GOOGLE_APPS_SCRIPT_URL') {
+            await sendDetailedReportToGoogleSheets(dailyReport);
         }
+        
+        // Step 3: Clear today's data
+        await clearDailyData();
+        
+        showToast('✅ Daily report sent! Equipment issues documented.', 'success');
+        
+        // Reload dashboard for fresh start
+        setTimeout(() => window.location.reload(), 3000);
+        
+    } catch (error) {
+        log('❌ Daily reset failed: ' + error.message, 'error');
+        showToast('Daily reset failed: ' + error.message, 'error');
+    }
+}
         
         // NEW: Collect all equipment issues
         function collectAllEquipmentIssues() {
