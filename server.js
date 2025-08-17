@@ -415,7 +415,7 @@ app.post('/api/notifications', async (req, res) => {
     }
 });
 
-// Driver check-in endpoint - FIXED
+// Driver check-in endpoint - FIXED to handle equipment issues
 app.post('/api/checkin', async (req, res) => {
     try {
         if (!db) {
@@ -423,9 +423,18 @@ app.post('/api/checkin', async (req, res) => {
         }
         
         const today = getTodayDate();
-        const { driver_id, driver_name, returns } = req.body;
+        const { 
+            driver_id, 
+            driver_name, 
+            returns,
+            tractorNumber,
+            trailerNumber,
+            moffettNumber,
+            equipmentIssues 
+        } = req.body;
         
         console.log(`📋 Check-in request for ${driver_name}`);
+        console.log('Equipment Issues:', equipmentIssues);
         
         // Update the driver's status to completed in daily_operations
         const updateResult = await db.collection('daily_operations').updateOne(
@@ -437,13 +446,34 @@ app.post('/api/checkin', async (req, res) => {
                 $set: {
                     status: 'completed',
                     completedAt: new Date(),
-                    lastUpdate: new Date()
+                    lastUpdate: new Date(),
+                    tractorNumber: tractorNumber || '',
+                    trailerNumber: trailerNumber || '',
+                    moffettNumber: moffettNumber || '',
+                    equipmentIssues: equipmentIssues || {},
+                    returns: returns || 0
                 }
             }
         );
         
         if (updateResult.modifiedCount > 0) {
-            console.log(`✅ ${driver_name} checked in successfully`);
+            console.log(`✅ ${driver_name} checked in successfully with equipment data`);
+            
+            // Also save to a check-ins collection for record keeping
+            await db.collection('checkins').insertOne({
+                _id: new ObjectId(),
+                driver_name: driver_name,
+                driver_id: driver_id,
+                tractorNumber: tractorNumber,
+                trailerNumber: trailerNumber,
+                moffettNumber: moffettNumber,
+                equipmentIssues: equipmentIssues || {},
+                returns: returns || 0,
+                date: today,
+                completedAt: new Date(),
+                timestamp: new Date()
+            });
+            
             res.json({ 
                 success: true,
                 message: 'Check-in completed successfully'
@@ -457,6 +487,10 @@ app.post('/api/checkin', async (req, res) => {
                 name: driver_name,
                 status: 'completed',
                 returns: returns || 0,
+                tractorNumber: tractorNumber || '',
+                trailerNumber: trailerNumber || '',
+                moffettNumber: moffettNumber || '',
+                equipmentIssues: equipmentIssues || {},
                 date: today,
                 timestamp: new Date(),
                 completedAt: new Date(),
@@ -465,7 +499,13 @@ app.post('/api/checkin', async (req, res) => {
             
             await db.collection('daily_operations').insertOne(checkInData);
             
-            console.log(`✅ ${driver_name} checked in (new record created)`);
+            // Also save to check-ins collection
+            await db.collection('checkins').insertOne({
+                ...checkInData,
+                _id: new ObjectId()
+            });
+            
+            console.log(`✅ ${driver_name} checked in (new record created with equipment data)`);
             res.json({ 
                 success: true,
                 message: 'Check-in completed successfully'
@@ -474,7 +514,10 @@ app.post('/api/checkin', async (req, res) => {
         
     } catch (error) {
         console.error('Error recording check-in:', error);
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ 
+            success: false,
+            error: error.message 
+        });
     }
 });
 
