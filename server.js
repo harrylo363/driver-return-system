@@ -42,6 +42,9 @@ async function connectToMongoDB() {
         console.log('✅ Connected to MongoDB Atlas');
         console.log(`📊 Database: ${DB_NAME}`);
         
+        // Create sample drivers if users collection is empty
+        await createSampleDrivers();
+        
         // Start the automatic daily archive schedule
         startDailyArchiveSchedule();
         
@@ -58,6 +61,35 @@ connectToMongoDB();
 // Helper function to get today's date in YYYY-MM-DD format
 function getTodayDate() {
     return new Date().toISOString().split('T')[0];
+}
+
+// Create sample drivers if none exist
+async function createSampleDrivers() {
+    if (!db) return;
+    
+    try {
+        const driverCount = await db.collection('users').countDocuments({ role: 'driver' });
+        
+        if (driverCount === 0) {
+            const sampleDrivers = [
+                { _id: new ObjectId(), name: 'John Smith', username: 'john.smith', password: 'driver123', role: 'driver', vehicleId: 'TRUCK-001', active: true },
+                { _id: new ObjectId(), name: 'Maria Garcia', username: 'maria.garcia', password: 'driver123', role: 'driver', vehicleId: 'TRUCK-002', active: true },
+                { _id: new ObjectId(), name: 'Robert Johnson', username: 'robert.johnson', password: 'driver123', role: 'driver', vehicleId: 'TRUCK-003', active: true },
+                { _id: new ObjectId(), name: 'Lisa Anderson', username: 'lisa.anderson', password: 'driver123', role: 'driver', vehicleId: 'TRUCK-004', active: true },
+                { _id: new ObjectId(), name: 'Michael Brown', username: 'michael.brown', password: 'driver123', role: 'driver', vehicleId: 'TRUCK-005', active: true },
+                { _id: new ObjectId(), name: 'Sarah Wilson', username: 'sarah.wilson', password: 'driver123', role: 'driver', vehicleId: 'TRUCK-006', active: true },
+                { _id: new ObjectId(), name: 'David Martinez', username: 'david.martinez', password: 'driver123', role: 'driver', vehicleId: 'TRUCK-007', active: true },
+                { _id: new ObjectId(), name: 'Jennifer Taylor', username: 'jennifer.taylor', password: 'driver123', role: 'driver', vehicleId: 'TRUCK-008', active: true },
+                { _id: new ObjectId(), name: 'James Davis', username: 'james.davis', password: 'driver123', role: 'driver', vehicleId: 'TRUCK-009', active: true },
+                { _id: new ObjectId(), name: 'Patricia Miller', username: 'patricia.miller', password: 'driver123', role: 'driver', vehicleId: 'TRUCK-010', active: true }
+            ];
+            
+            await db.collection('users').insertMany(sampleDrivers);
+            console.log(`✅ Created ${sampleDrivers.length} sample drivers`);
+        }
+    } catch (error) {
+        console.error('Error creating sample drivers:', error);
+    }
 }
 
 // ============= AUTOMATIC DAILY ARCHIVE =============
@@ -253,7 +285,7 @@ app.get('/api/health', async (req, res) => {
     }
 });
 
-// Get today's notifications/operations (dashboard data)
+// Get today's notifications/operations (dashboard data) - FIXED
 app.get('/api/notifications', async (req, res) => {
     try {
         if (!db) {
@@ -262,13 +294,13 @@ app.get('/api/notifications', async (req, res) => {
         
         const today = getTodayDate();
         
-        // Only fetch today's data from daily_operations
+        // Fetch from daily_operations which contains the latest status for each driver
         const notifications = await db.collection('daily_operations')
             .find({ date: today })
-            .sort({ timestamp: -1 })
+            .sort({ lastUpdate: -1 })
             .toArray();
         
-        console.log(`📊 Returning ${notifications.length} notifications for ${today}`);
+        console.log(`📊 Returning ${notifications.length} driver statuses for ${today}`);
         res.json(notifications);
         
     } catch (error) {
@@ -277,144 +309,113 @@ app.get('/api/notifications', async (req, res) => {
     }
 });
 
-// POST /api/notifications - Receive status updates from driver portal
+// POST /api/notifications - Receive status updates from driver portal - FIXED
 app.post('/api/notifications', async (req, res) => {
     try {
         if (!db) {
             return res.status(503).json({ error: 'Database not connected' });
         }
         
-        console.log('📨 Received notification from driver portal:', req.body);
+        console.log('📨 Received notification from driver portal:', {
+            driver: req.body.driver_name || req.body.driver,
+            status: req.body.status,
+            returns: req.body.returns
+        });
         
         const today = getTodayDate();
         
-        // Extract data from driver portal
-        const {
-            driver_name,
-            driver_id,
-            driverId,
-            driver,
-            vehicleId,
-            vehicle,
-            status,
-            message,
-            warehouse,
-            location,
-            timestamp,
-            hasReturns,
-            returnsCount,
-            returns,
-            type,
-            source,
-            name
-        } = req.body;
+        // Extract and normalize data from driver portal
+        const driverName = req.body.driver_name || req.body.driver || req.body.name;
+        const driverId = req.body.driver_id || req.body.driverId || req.body._id;
+        const vehicleId = req.body.vehicleId || req.body.vehicle || '';
+        const status = req.body.status; // 'en-route' or 'arrived'
+        const returns = parseInt(req.body.returnsCount || req.body.returns || 0);
+        const hasReturns = req.body.hasReturns || returns > 0;
         
-        // Create notification document
-        const notificationData = {
-            // Use a new ObjectId for this notification
-            _id: new ObjectId(),
+        // Create/Update in daily_operations for dashboard tracking
+        const dailyOpsData = {
+            // Core fields
+            driver_name: driverName,
+            driver_id: driverId,
+            name: driverName, // Compatibility field
+            driver: driverName, // Compatibility field
+            vehicleId: vehicleId,
+            vehicle: vehicleId, // Compatibility field
             
-            // Driver information - normalize the fields
-            driver_name: driver_name || driver || name,
-            driver_id: driver_id || driverId,
-            vehicleId: vehicleId || vehicle,
-            
-            // Status information
-            status: status, // 'en-route' or 'arrived'
-            type: type, // '30min' or 'arrived'
-            message: message,
+            // Status and returns
+            status: status,
+            returns: returns,
+            returnsCount: returns, // Compatibility field
+            hasReturns: hasReturns,
             
             // Location
-            warehouse: warehouse || '6995 N US-41, Apollo Beach, FL 33572',
-            location: location || 'Driver Location',
-            
-            // Returns information
-            hasReturns: hasReturns || false,
-            returns: returnsCount || returns || 0,
-            returnsCount: returnsCount || returns || 0,
+            warehouse: req.body.warehouse || '6995 N US-41, Apollo Beach, FL 33572',
             
             // Timestamps
-            timestamp: new Date(timestamp || Date.now()),
-            date: today, // Important: Add today's date for daily operations filtering
+            timestamp: new Date(),
+            lastUpdate: new Date(),
+            date: today,
             
-            // Metadata
-            source: source || 'driver_portal',
-            read: false,
-            processed: false,
-            createdAt: new Date()
+            // Message
+            message: req.body.message || `${driverName} - ${status}`
         };
         
-        // Insert into notifications collection
-        const notificationResult = await db.collection('notifications').insertOne(notificationData);
-        
-        // Also update/insert in daily_operations for dashboard tracking
         // Check if driver already has an entry today
         const existingEntry = await db.collection('daily_operations').findOne({
-            driver_id: notificationData.driver_id,
+            driver_id: driverId,
             date: today
         });
         
         if (existingEntry) {
-            // Update existing entry
+            // Update existing entry with new status
             await db.collection('daily_operations').updateOne(
                 { _id: existingEntry._id },
                 {
-                    $set: {
-                        status: notificationData.status,
-                        returns: notificationData.returns,
-                        hasReturns: notificationData.hasReturns,
-                        lastUpdate: notificationData.timestamp,
-                        message: notificationData.message
-                    }
+                    $set: dailyOpsData
                 }
             );
-            console.log(`📝 Updated daily operations for ${notificationData.driver_name}`);
+            console.log(`📝 Updated ${driverName}: ${status} with ${returns} returns`);
         } else {
-            // Create new entry in daily_operations
-            const dailyOpsData = {
-                _id: new ObjectId(),
-                driver_name: notificationData.driver_name,
-                driver_id: notificationData.driver_id,
-                name: notificationData.driver_name, // Add for compatibility
-                vehicleId: notificationData.vehicleId,
-                status: notificationData.status,
-                returns: notificationData.returns,
-                hasReturns: notificationData.hasReturns,
-                warehouse: notificationData.warehouse,
-                timestamp: notificationData.timestamp,
-                date: today,
-                lastUpdate: notificationData.timestamp
-            };
-            
+            // Create new entry with ObjectId
+            dailyOpsData._id = new ObjectId();
             await db.collection('daily_operations').insertOne(dailyOpsData);
-            console.log(`✅ Created daily operations entry for ${notificationData.driver_name}`);
+            console.log(`✅ Created entry for ${driverName}: ${status} with ${returns} returns`);
         }
         
-        console.log(`✅ Notification saved: ${notificationData.driver_name} - ${notificationData.status}`);
+        // Also save to notifications collection for history
+        const notificationData = {
+            _id: new ObjectId(),
+            ...dailyOpsData,
+            createdAt: new Date(),
+            source: req.body.source || 'driver_portal',
+            type: req.body.type // '30min' or 'arrived'
+        };
+        
+        await db.collection('notifications').insertOne(notificationData);
         
         // Send success response
         res.status(201).json({
             success: true,
-            message: 'Notification created successfully',
+            message: 'Status update received',
             data: {
-                id: notificationResult.insertedId,
-                driver: notificationData.driver_name,
-                status: notificationData.status,
-                timestamp: notificationData.timestamp
+                driver: driverName,
+                status: status,
+                returns: returns,
+                timestamp: dailyOpsData.timestamp
             }
         });
         
     } catch (error) {
-        console.error('❌ Error creating notification:', error);
+        console.error('❌ Error processing notification:', error);
         res.status(500).json({ 
             success: false,
-            error: 'Failed to create notification',
+            error: 'Failed to process notification',
             message: error.message 
         });
     }
 });
 
-// Driver check-in endpoint
+// Driver check-in endpoint - FIXED
 app.post('/api/checkin', async (req, res) => {
     try {
         if (!db) {
@@ -422,22 +423,54 @@ app.post('/api/checkin', async (req, res) => {
         }
         
         const today = getTodayDate();
-        const checkInData = {
-            ...req.body,
-            date: today,
-            timestamp: new Date(),
-            _id: new ObjectId()
-        };
+        const { driver_id, driver_name, returns } = req.body;
         
-        const result = await db.collection('daily_operations').insertOne(checkInData);
+        console.log(`📋 Check-in request for ${driver_name}`);
         
-        console.log(`✅ Driver check-in: ${checkInData.driver_name || checkInData.name || 'Unknown'}`);
+        // Update the driver's status to completed in daily_operations
+        const updateResult = await db.collection('daily_operations').updateOne(
+            { 
+                driver_id: driver_id,
+                date: today
+            },
+            {
+                $set: {
+                    status: 'completed',
+                    completedAt: new Date(),
+                    lastUpdate: new Date()
+                }
+            }
+        );
         
-        res.json({ 
-            success: true, 
-            id: result.insertedId,
-            message: 'Check-in recorded successfully' 
-        });
+        if (updateResult.modifiedCount > 0) {
+            console.log(`✅ ${driver_name} checked in successfully`);
+            res.json({ 
+                success: true,
+                message: 'Check-in completed successfully'
+            });
+        } else {
+            // If no existing record, create one
+            const checkInData = {
+                _id: new ObjectId(),
+                driver_name: driver_name,
+                driver_id: driver_id,
+                name: driver_name,
+                status: 'completed',
+                returns: returns || 0,
+                date: today,
+                timestamp: new Date(),
+                completedAt: new Date(),
+                lastUpdate: new Date()
+            };
+            
+            await db.collection('daily_operations').insertOne(checkInData);
+            
+            console.log(`✅ ${driver_name} checked in (new record created)`);
+            res.json({ 
+                success: true,
+                message: 'Check-in completed successfully'
+            });
+        }
         
     } catch (error) {
         console.error('Error recording check-in:', error);
@@ -598,7 +631,7 @@ app.get('/api/checkins', async (req, res) => {
     }
 });
 
-// Users endpoint
+// Users endpoint - FIXED to ensure drivers are returned
 app.get('/api/users', async (req, res) => {
     try {
         if (!db) {
@@ -606,6 +639,8 @@ app.get('/api/users', async (req, res) => {
         }
         
         const users = await db.collection('users').find({}).toArray();
+        
+        console.log(`📋 Returning ${users.length} users (${users.filter(u => u.role === 'driver').length} drivers)`);
         res.json(users);
         
     } catch (error) {
@@ -655,8 +690,10 @@ async function createDefaultAdmin() {
         const adminExists = await db.collection('users').findOne({ username: 'admin' });
         if (!adminExists) {
             await db.collection('users').insertOne({
+                _id: new ObjectId(),
                 username: 'admin',
                 password: 'admin123',
+                name: 'Administrator',
                 role: 'admin',
                 createdAt: new Date()
             });
