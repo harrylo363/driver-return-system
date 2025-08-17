@@ -1,38 +1,96 @@
 {
-  "name": "Fleet Management System",
+  "name": "FleetForce Management System",
   "short_name": "FleetForce",
-  "description": "Enterprise Fleet Management Platform",
+  "description": "Enterprise Fleet Management Platform with Driver Portal",
   "start_url": "/dashboard.html",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0F172A",
-  "theme_color": "#3B82F6",
+  "background_color": "#0B0F1A",
+  "theme_color": "#0EA5E9",
+  "scope": "/",
   "icons": [
     {
       "src": "https://img.icons8.com/color/72/truck.png",
       "sizes": "72x72",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "https://img.icons8.com/color/96/truck.png",
       "sizes": "96x96",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "https://img.icons8.com/color/144/truck.png",
       "sizes": "144x144",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "https://img.icons8.com/color/192/truck.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "https://img.icons8.com/color/512/truck.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ],
-  "categories": ["business", "productivity"]
+  "shortcuts": [
+    {
+      "name": "Driver Portal",
+      "short_name": "Driver",
+      "description": "Access driver status management",
+      "url": "/driver.html",
+      "icons": [
+        {
+          "src": "https://img.icons8.com/color/96/driver.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Admin Panel",
+      "short_name": "Admin",
+      "description": "Manage users and settings",
+      "url": "/admin.html",
+      "icons": [
+        {
+          "src": "https://img.icons8.com/color/96/admin-settings-male.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "View fleet dashboard",
+      "url": "/dashboard.html",
+      "icons": [
+        {
+          "src": "https://img.icons8.com/color/96/dashboard.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "categories": ["business", "productivity", "utilities"],
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "share_target": {
+    "action": "/share",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
 }
