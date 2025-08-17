@@ -1552,15 +1552,18 @@
             // If force close (after successful submission), just close without confirmation
             if (forceClose) {
                 document.getElementById('checkInModal').classList.remove('show');
-                currentCheckInDriver = null;
+                // Don't clear currentCheckInDriver here in case we need to retry
                 equipmentIssues = {};
                 return;
             }
             
             // Check if form has any data entered
-            const tractorNumber = document.getElementById('tractorNumber').value.trim();
-            const trailerNumber = document.getElementById('trailerNumber').value.trim();
-            const moffettNumber = document.getElementById('moffettNumber').value.trim();
+            const modal = document.getElementById('checkInModal');
+            if (!modal) return;
+            
+            const tractorNumber = document.getElementById('tractorNumber')?.value?.trim() || '';
+            const trailerNumber = document.getElementById('trailerNumber')?.value?.trim() || '';
+            const moffettNumber = document.getElementById('moffettNumber')?.value?.trim() || '';
             const hasInspectionData = document.querySelectorAll('.check-btn.selected').length > 0;
             
             if ((tractorNumber || trailerNumber || moffettNumber || hasInspectionData) && currentCheckInDriver) {
@@ -1569,18 +1572,21 @@
                 }
             }
             
-            document.getElementById('checkInModal').classList.remove('show');
-            currentCheckInDriver = null;
+            modal.classList.remove('show');
             equipmentIssues = {};
+            // Don't null out currentCheckInDriver to allow reopening
         }
         
         // Submit check-in from modal
         async function submitCheckIn() {
-            if (!currentCheckInDriver) return;
+            if (!currentCheckInDriver) {
+                showToast('❌ Error: No driver selected', 'error');
+                return;
+            }
             
             // Validation - Check if all required fields are filled
-            const tractorNumber = document.getElementById('tractorNumber').value.trim();
-            const trailerNumber = document.getElementById('trailerNumber').value.trim();
+            const tractorNumber = document.getElementById('tractorNumber')?.value?.trim() || '';
+            const trailerNumber = document.getElementById('trailerNumber')?.value?.trim() || '';
             
             if (!tractorNumber) {
                 showToast('❌ Please enter Tractor Number', 'error');
@@ -1611,7 +1617,7 @@
             });
             
             // Check Moffett only if a number is provided
-            const moffettNumber = document.getElementById('moffettNumber').value.trim();
+            const moffettNumber = document.getElementById('moffettNumber')?.value?.trim() || '';
             if (moffettNumber) {
                 inspectionItems.moffett.forEach((item, index) => {
                     const passBtn = document.querySelector(`#moffettChecklist .checklist-item:nth-child(${index + 1}) .check-btn.pass`);
@@ -1641,6 +1647,13 @@
                 }
             }
             
+            // Disable submit button to prevent double submission
+            const submitBtn = document.querySelector('#checkInModal button[onclick="submitCheckIn()"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Submitting...';
+            }
+            
             const checkInData = {
                 driver_name: currentCheckInDriver.name,
                 driver_id: currentCheckInDriver.id,
@@ -1654,11 +1667,11 @@
                 moffettNumber: moffettNumber,
                 
                 // Returns
-                returns: currentCheckInDriver.returns || 0,
-                hasReturns: currentCheckInDriver.returns > 0,
+                returns: parseInt(currentCheckInDriver.returns) || 0,
+                hasReturns: (parseInt(currentCheckInDriver.returns) || 0) > 0,
                 
                 // Equipment issues
-                equipmentIssues: equipmentIssues,
+                equipmentIssues: equipmentIssues || {},
                 
                 // Timestamps
                 timestamp: new Date().toISOString(),
@@ -1672,6 +1685,7 @@
             try {
                 log('📤 Submitting check-in for: ' + currentCheckInDriver.name);
                 log('Check-in data: ' + JSON.stringify(checkInData));
+                log('API endpoint: ' + `${API_BASE}/api/checkin`);
                 
                 const response = await fetch(`${API_BASE}/api/checkin`, {
                     method: 'POST',
@@ -1682,17 +1696,35 @@
                     body: JSON.stringify(checkInData)
                 });
                 
-                if (response.ok) {
-                    const result = await response.json();
-                    log('✅ Check-in response: ' + JSON.stringify(result));
+                const responseText = await response.text();
+                log('Response status: ' + response.status);
+                log('Response text: ' + responseText);
+                
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                } catch (e) {
+                    log('Response is not JSON: ' + responseText);
+                    if (response.ok) {
+                        result = { success: true, message: 'Check-in completed' };
+                    } else {
+                        throw new Error(responseText || 'Server error');
+                    }
+                }
+                
+                if (response.ok && result.success !== false) {
+                    log('✅ Check-in successful: ' + JSON.stringify(result));
                     
                     showToast('✅ Check-in completed successfully!', 'success');
                     
                     // Force close modal without confirmation after successful submission
                     closeCheckInModal(true);
                     
+                    // Clear the current driver after successful submission
+                    currentCheckInDriver = null;
+                    
                     // Update local state
-                    const driver = driverMap.get(currentCheckInDriver.id);
+                    const driver = driverMap.get(currentCheckInDriver?.id);
                     if (driver) {
                         driver.status = 'completed';
                         driver.completedAt = new Date().toISOString();
@@ -1703,14 +1735,20 @@
                         loadDataFromMongoDB();
                     }, 1000);
                 } else {
-                    const errorText = await response.text();
-                    log('❌ Server error: ' + errorText);
-                    throw new Error(`Server returned ${response.status}: ${errorText}`);
+                    const errorMsg = result.error || result.message || 'Check-in failed';
+                    throw new Error(errorMsg);
                 }
                 
             } catch (error) {
                 log('❌ Check-in error: ' + error.message);
+                log('Error stack: ' + error.stack);
                 showToast('Failed to complete check-in: ' + error.message, 'error');
+            } finally {
+                // Re-enable submit button
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Complete Check-In';
+                }
             }
         }
         
