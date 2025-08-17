@@ -1270,7 +1270,7 @@
             log('✅ COMPLETE DAILY RESET FINISHED');
             log('================================================');
             
-            showToast('📊 Daily Reset Complete', 'All data has been reset for the new day', 'info');
+            showToast('📊 Daily Reset Complete', 'info');
         }
 
         // Reset ALL KPI displays to 0
@@ -1500,6 +1500,15 @@
             loadDataFromMongoDB();
             
             // Start auto-refresh
+            startAutoRefresh();
+            
+            // Start periodic reset checking
+            startPeriodicResetCheck();
+            
+            log('✅ Dashboard initialization complete');
+        }
+        
+        // Start auto-refresh
         function startAutoRefresh() {
             if (refreshInterval) {
                 clearInterval(refreshInterval);
@@ -1509,6 +1518,8 @@
             refreshInterval = setInterval(() => {
                 loadDataFromMongoDB();
             }, 10000);
+            
+            log('🔄 Auto-refresh started (10-second intervals)');
         }
         
         // Update connection status
@@ -2092,43 +2103,6 @@
             }
         }
         
-        // Logout
-        function logout() {
-            if (confirm('Are you sure you want to logout?')) {
-                window.location.href = '/index.html';
-            }
-        }
-        
-        // Show toast notification
-        function showToast(message, type = 'info') {
-            const existingToast = document.querySelector('.toast');
-            if (existingToast) {
-                existingToast.remove();
-            }
-            
-            const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-            toast.innerHTML = `
-                <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
-                <span>${message}</span>
-            `;
-            document.body.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.remove();
-            }, 5000);
-        }
-    </script>
-</body>
-</html>
-            startAutoRefresh();
-            
-            // Start periodic reset checking
-            startPeriodicResetCheck();
-            
-            log('✅ Dashboard initialization complete');
-        }
-        
         // Load data from MongoDB with better error handling
         async function loadDataFromMongoDB() {
             try {
@@ -2299,4 +2273,70 @@
             }
         }
         
-        // Start auto-refresh
+        // Logout
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = '/index.html';
+            }
+        }
+        
+        // Show toast notification
+        function showToast(message, type = 'info') {
+            const existingToast = document.querySelector('.toast');
+            if (existingToast) {
+                existingToast.remove();
+            }
+            
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 5000);
+        }
+        
+        // Handle page visibility changes
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                // Page is hidden, stop refresh
+                if (refreshInterval) {
+                    clearInterval(refreshInterval);
+                    log('⏸️ Auto-refresh paused (page hidden)');
+                }
+            } else {
+                // Page is visible again, restart refresh
+                startAutoRefresh();
+                loadDataFromMongoDB();
+                log('▶️ Auto-refresh resumed (page visible)');
+            }
+        });
+        
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+        });
+        
+        // Error boundary for uncaught errors
+        window.addEventListener('error', function(event) {
+            // Ignore errors from browser extensions
+            if (event.filename && (
+                event.filename.includes('extension://') ||
+                event.filename.includes('chrome-extension://') ||
+                event.filename.includes('moz-extension://')
+            )) {
+                event.preventDefault();
+                return;
+            }
+            
+            log(`❌ Uncaught error: ${event.message} at ${event.filename}:${event.lineno}:${event.colno}`);
+        });
+    </script>
+</body>
+</html>
