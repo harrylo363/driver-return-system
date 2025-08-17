@@ -1548,7 +1548,15 @@
         }
         
         // Close check-in modal
-        function closeCheckInModal() {
+        function closeCheckInModal(forceClose = false) {
+            // If force close (after successful submission), just close without confirmation
+            if (forceClose) {
+                document.getElementById('checkInModal').classList.remove('show');
+                currentCheckInDriver = null;
+                equipmentIssues = {};
+                return;
+            }
+            
             // Check if form has any data entered
             const tractorNumber = document.getElementById('tractorNumber').value.trim();
             const trailerNumber = document.getElementById('trailerNumber').value.trim();
@@ -1679,7 +1687,9 @@
                     log('✅ Check-in response: ' + JSON.stringify(result));
                     
                     showToast('✅ Check-in completed successfully!', 'success');
-                    closeCheckInModal();
+                    
+                    // Force close modal without confirmation after successful submission
+                    closeCheckInModal(true);
                     
                     // Update local state
                     const driver = driverMap.get(currentCheckInDriver.id);
