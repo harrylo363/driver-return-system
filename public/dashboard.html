@@ -1715,20 +1715,22 @@
                 if (response.ok && result.success !== false) {
                     log('✅ Check-in successful: ' + JSON.stringify(result));
                     
+                    // Update local state BEFORE clearing currentCheckInDriver
+                    if (currentCheckInDriver && currentCheckInDriver.id) {
+                        const driverId = currentCheckInDriver.id;
+                        const driver = driverMap.get(driverId);
+                        if (driver) {
+                            driver.status = 'completed';
+                            driver.completedAt = new Date().toISOString();
+                            log('✅ Updated local driver status to completed');
+                        }
+                    }
+                    
                     showToast('✅ Check-in completed successfully!', 'success');
                     
-                    // Force close modal without confirmation after successful submission
-                    closeCheckInModal(true);
-                    
-                    // Clear the current driver after successful submission
+                    // Now we can safely clear and close
                     currentCheckInDriver = null;
-                    
-                    // Update local state
-                    const driver = driverMap.get(currentCheckInDriver?.id);
-                    if (driver) {
-                        driver.status = 'completed';
-                        driver.completedAt = new Date().toISOString();
-                    }
+                    closeCheckInModal(true);
                     
                     // Refresh dashboard after 1 second
                     setTimeout(() => {
@@ -1742,7 +1744,14 @@
             } catch (error) {
                 log('❌ Check-in error: ' + error.message);
                 log('Error stack: ' + error.stack);
-                showToast('Failed to complete check-in: ' + error.message, 'error');
+                
+                // Better error message handling
+                let errorMessage = 'Failed to complete check-in';
+                if (error.message && error.message !== 'null') {
+                    errorMessage = error.message;
+                }
+                
+                showToast('❌ ' + errorMessage, 'error');
             } finally {
                 // Re-enable submit button
                 if (submitBtn) {
