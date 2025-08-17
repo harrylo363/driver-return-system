@@ -1030,6 +1030,87 @@
             to { transform: rotate(360deg); }
         }
         
+        /* Broadcast History Styles */
+        .broadcast-item {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-primary);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            transition: all var(--transition-fast);
+        }
+        
+        .broadcast-item:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--border-secondary);
+        }
+        
+        .broadcast-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+        
+        .broadcast-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+        
+        .broadcast-meta {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            display: flex;
+            gap: 16px;
+        }
+        
+        .broadcast-message {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin: 12px 0;
+            padding: 12px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+        }
+        
+        .broadcast-stats {
+            display: flex;
+            gap: 24px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-primary);
+        }
+        
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+        
+        .stat-label {
+            color: var(--text-tertiary);
+        }
+        
+        .stat-value {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        
+        /* Notification Bell Animation */
+        @keyframes bell-ring {
+            0%, 100% { transform: rotate(0deg); }
+            10%, 30% { transform: rotate(-10deg); }
+            20%, 40% { transform: rotate(10deg); }
+        }
+        
+        .notification-bell {
+            animation: bell-ring 0.5s ease;
+        }
+        
         /* Mobile */
         @media (max-width: 768px) {
             .sidebar {
@@ -1087,6 +1168,7 @@
                     <button class="nav-item" onclick="switchTab('notifications', this)">
                         <span class="nav-icon">🔔</span>
                         <span>Notifications</span>
+                        <span class="nav-badge" id="unreadCount" style="display: none;">0</span>
                     </button>
                 </div>
                 
@@ -1526,6 +1608,16 @@
                                         <option value="admins">Administrators Only</option>
                                     </select>
                                 </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Priority Level</label>
+                                    <select class="form-select" id="broadcastPriority">
+                                        <option value="low">Low Priority</option>
+                                        <option value="normal">Normal Priority</option>
+                                        <option value="high">High Priority</option>
+                                        <option value="urgent">🚨 Urgent</option>
+                                    </select>
+                                </div>
                             </div>
                             
                             <div class="form-group">
@@ -1545,19 +1637,36 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Broadcast History -->
+                    <div class="enterprise-card">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <span>📜</span>
+                                <span>Broadcast History</span>
+                            </h2>
+                            <p class="card-subtitle">View previously sent broadcast messages</p>
+                        </div>
+                        
+                        <div class="card-body" id="broadcastHistory">
+                            <div class="empty-state">
+                                <div class="empty-icon">📭</div>
+                                <div>No broadcast messages sent yet</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
     
     <script>
-        // Keep ALL your existing JavaScript exactly as is
-        // I've only changed the CSS and the Live Dashboard button onclick
-        
         // Global Variables
         let allUsers = JSON.parse(localStorage.getItem('fleetforce_users')) || [];
         let bulkUploadData = [];
         let editingUserId = null;
+        let broadcastMessages = JSON.parse(localStorage.getItem('fleetforce_broadcasts')) || [];
+        let userNotifications = JSON.parse(localStorage.getItem('fleetforce_user_notifications')) || {};
         
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
@@ -1582,6 +1691,8 @@
             
             loadUsers();
             updateUserCount();
+            loadBroadcastHistory();
+            updateUnreadCount();
         });
         
         // Password requirements checker
@@ -1724,6 +1835,255 @@
             return 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
         }
         
+        // ENHANCED BROADCAST MESSAGING SYSTEM
+        // ====================================
+        
+        // Send broadcast message
+        function sendBroadcast() {
+            const title = document.getElementById('broadcastTitle').value;
+            const message = document.getElementById('broadcastMessage').value;
+            const audience = document.getElementById('broadcastAudience').value;
+            const priority = document.getElementById('broadcastPriority').value;
+            
+            if (!title || !message) {
+                showToast('Error', 'Please enter title and message', 'error');
+                return;
+            }
+            
+            // Get target users based on audience
+            const targetUsers = allUsers.filter(user => {
+                if (!user.active) return false; // Skip inactive users
+                if (!user.pushNotifications) return false; // Skip users who opted out
+                
+                if (audience === 'all') return true;
+                if (audience === 'drivers') return user.role === 'driver';
+                if (audience === 'dispatchers') return user.role === 'dispatcher';
+                if (audience === 'admins') return user.role === 'admin';
+                return false;
+            });
+            
+            if (targetUsers.length === 0) {
+                showToast('Warning', 'No active users found for selected audience', 'warning');
+                return;
+            }
+            
+            // Create broadcast record
+            const broadcast = {
+                id: 'broadcast_' + Date.now(),
+                title: title,
+                message: message,
+                audience: audience,
+                priority: priority,
+                targetCount: targetUsers.length,
+                sentBy: 'System Admin',
+                sentAt: new Date().toISOString(),
+                readBy: [],
+                deliveredTo: targetUsers.map(u => u.id)
+            };
+            
+            // Save broadcast to history
+            broadcastMessages.unshift(broadcast);
+            localStorage.setItem('fleetforce_broadcasts', JSON.stringify(broadcastMessages));
+            
+            // Create notifications for each target user
+            targetUsers.forEach(user => {
+                if (!userNotifications[user.id]) {
+                    userNotifications[user.id] = [];
+                }
+                
+                const notification = {
+                    id: 'notif_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                    broadcastId: broadcast.id,
+                    userId: user.id,
+                    title: title,
+                    message: message,
+                    priority: priority,
+                    read: false,
+                    receivedAt: new Date().toISOString()
+                };
+                
+                userNotifications[user.id].unshift(notification);
+            });
+            
+            // Save user notifications
+            localStorage.setItem('fleetforce_user_notifications', JSON.stringify(userNotifications));
+            
+            // Update UI
+            loadBroadcastHistory();
+            updateUnreadCount();
+            
+            // Show success message with animation
+            showToast('Success', `Broadcast sent to ${targetUsers.length} users`, 'success');
+            
+            // Animate the notification bell
+            const navIcon = document.querySelector('.nav-item:nth-child(4) .nav-icon');
+            if (navIcon) {
+                navIcon.classList.add('notification-bell');
+                setTimeout(() => navIcon.classList.remove('notification-bell'), 500);
+            }
+            
+            // Clear form
+            document.getElementById('broadcastTitle').value = '';
+            document.getElementById('broadcastMessage').value = '';
+            document.getElementById('broadcastAudience').value = 'all';
+            document.getElementById('broadcastPriority').value = 'normal';
+            
+            // Simulate push notification (in real app, this would use Push API)
+            if (priority === 'urgent' && 'Notification' in window && Notification.permission === 'granted') {
+                new Notification('FleetForce Alert', {
+                    body: title,
+                    icon: '⚡',
+                    badge: '🔔'
+                });
+            }
+        }
+        
+        // Test broadcast
+        function testBroadcast() {
+            const title = document.getElementById('broadcastTitle').value;
+            const message = document.getElementById('broadcastMessage').value;
+            const priority = document.getElementById('broadcastPriority').value;
+            
+            if (!title || !message) {
+                showToast('Error', 'Please enter title and message', 'error');
+                return;
+            }
+            
+            // Show test notification
+            showToast('Test Notification: ' + title, message, priority === 'urgent' ? 'warning' : 'info');
+            
+            // Request notification permission if needed
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        new Notification('FleetForce Test: ' + title, {
+                            body: message,
+                            icon: '⚡'
+                        });
+                    }
+                });
+            } else if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification('FleetForce Test: ' + title, {
+                    body: message,
+                    icon: '⚡'
+                });
+            }
+        }
+        
+        // Load broadcast history
+        function loadBroadcastHistory() {
+            const historyContainer = document.getElementById('broadcastHistory');
+            
+            if (broadcastMessages.length === 0) {
+                historyContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📭</div>
+                        <div>No broadcast messages sent yet</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            historyContainer.innerHTML = broadcastMessages.slice(0, 10).map(broadcast => {
+                const sentDate = new Date(broadcast.sentAt);
+                const readCount = broadcast.readBy ? broadcast.readBy.length : 0;
+                const deliveryRate = Math.round((broadcast.deliveredTo.length / broadcast.targetCount) * 100);
+                const readRate = Math.round((readCount / broadcast.targetCount) * 100);
+                
+                const priorityColors = {
+                    low: 'var(--text-tertiary)',
+                    normal: 'var(--text-secondary)',
+                    high: 'var(--accent-orange)',
+                    urgent: 'var(--accent-red)'
+                };
+                
+                const audienceLabels = {
+                    all: 'All Users',
+                    drivers: 'Drivers',
+                    dispatchers: 'Dispatchers',
+                    admins: 'Administrators'
+                };
+                
+                return `
+                    <div class="broadcast-item">
+                        <div class="broadcast-header">
+                            <div>
+                                <div class="broadcast-title">${broadcast.title}</div>
+                                <div class="broadcast-meta">
+                                    <span>${sentDate.toLocaleDateString()} ${sentDate.toLocaleTimeString()}</span>
+                                    <span>•</span>
+                                    <span style="color: ${priorityColors[broadcast.priority]}">${broadcast.priority.toUpperCase()}</span>
+                                    <span>•</span>
+                                    <span>${audienceLabels[broadcast.audience]}</span>
+                                </div>
+                            </div>
+                            <button class="btn btn-sm btn-secondary" onclick="resendBroadcast('${broadcast.id}')">
+                                <span>🔄</span>
+                                <span>Resend</span>
+                            </button>
+                        </div>
+                        
+                        <div class="broadcast-message">${broadcast.message}</div>
+                        
+                        <div class="broadcast-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Sent to:</span>
+                                <span class="stat-value">${broadcast.targetCount} users</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Delivered:</span>
+                                <span class="stat-value">${broadcast.deliveredTo.length} (${deliveryRate}%)</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Read:</span>
+                                <span class="stat-value">${readCount} (${readRate}%)</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Sent by:</span>
+                                <span class="stat-value">${broadcast.sentBy}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Resend broadcast
+        function resendBroadcast(broadcastId) {
+            const broadcast = broadcastMessages.find(b => b.id === broadcastId);
+            if (broadcast) {
+                document.getElementById('broadcastTitle').value = broadcast.title;
+                document.getElementById('broadcastMessage').value = broadcast.message;
+                document.getElementById('broadcastAudience').value = broadcast.audience;
+                document.getElementById('broadcastPriority').value = broadcast.priority;
+                
+                // Scroll to broadcast form
+                document.querySelector('#notifications .enterprise-card:nth-child(2)').scrollIntoView({ behavior: 'smooth' });
+                
+                showToast('Info', 'Broadcast message loaded. Click Send to resend.', 'info');
+            }
+        }
+        
+        // Update unread notification count
+        function updateUnreadCount() {
+            let totalUnread = 0;
+            
+            Object.values(userNotifications).forEach(notifications => {
+                totalUnread += notifications.filter(n => !n.read).length;
+            });
+            
+            const unreadBadge = document.getElementById('unreadCount');
+            if (unreadBadge) {
+                if (totalUnread > 0) {
+                    unreadBadge.textContent = totalUnread > 99 ? '99+' : totalUnread;
+                    unreadBadge.style.display = 'inline-block';
+                    unreadBadge.style.background = 'var(--accent-red)';
+                } else {
+                    unreadBadge.style.display = 'none';
+                }
+            }
+        }
+        
         // Clear Dashboard Data Functions
         function showClearDashboardDialog() {
             // Create modal overlay
@@ -1821,7 +2181,7 @@
             // Get ALL localStorage keys
             const allKeys = Object.keys(localStorage);
             let clearedCount = 0;
-            let preservedKeys = ['fleetforce_users', 'fleetforce_audit_log', 'notificationSettings', 'globalNotifications'];
+            let preservedKeys = ['fleetforce_users', 'fleetforce_audit_log', 'fleetforce_broadcasts', 'fleetforce_user_notifications', 'notificationSettings', 'globalNotifications'];
             
             // Clear ALL localStorage items except user-related ones
             allKeys.forEach(key => {
@@ -1943,12 +2303,17 @@
             tbody.innerHTML = users.map(user => {
                 const notificationsEnabled = user.pushNotifications !== false;
                 
+                // Check if user has unread notifications
+                const userNotifs = userNotifications[user.id] || [];
+                const unreadCount = userNotifs.filter(n => !n.read).length;
+                
                 return `
                     <tr>
                         <td>
                             <div style="display: flex; align-items: center; gap: 12px;">
-                                <div style="width: 40px; height: 40px; background: var(--gradient-primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 16px;">
+                                <div style="width: 40px; height: 40px; background: var(--gradient-primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 16px; position: relative;">
                                     ${user.name.charAt(0).toUpperCase()}
+                                    ${unreadCount > 0 ? `<span style="position: absolute; top: -4px; right: -4px; background: var(--accent-red); color: white; font-size: 10px; padding: 2px 4px; border-radius: 8px;">${unreadCount}</span>` : ''}
                                 </div>
                                 <div>
                                     <div style="font-weight: 600; color: var(--text-primary);">${user.name}</div>
@@ -1994,8 +2359,14 @@
             if (!confirm('Are you sure you want to delete this user?')) return;
             
             allUsers = allUsers.filter(u => u.id !== userId);
+            
+            // Also remove user's notifications
+            delete userNotifications[userId];
+            localStorage.setItem('fleetforce_user_notifications', JSON.stringify(userNotifications));
+            
             saveUsers();
             loadUsers();
+            updateUnreadCount();
             showToast('Success', 'User deleted successfully', 'success');
         }
         
@@ -2311,6 +2682,10 @@
             if (tabId === 'manage-users') {
                 loadUsers();
             }
+            
+            if (tabId === 'notifications') {
+                loadBroadcastHistory();
+            }
         }
         
         // Clear form
@@ -2415,44 +2790,6 @@
             showToast('Success', 'Notification settings saved', 'success');
         }
         
-        // Broadcast Messages
-        function testBroadcast() {
-            const title = document.getElementById('broadcastTitle').value;
-            const message = document.getElementById('broadcastMessage').value;
-            
-            if (!title || !message) {
-                showToast('Error', 'Please enter title and message', 'error');
-                return;
-            }
-            
-            showToast('Test Notification', message, 'info');
-        }
-        
-        function sendBroadcast() {
-            const title = document.getElementById('broadcastTitle').value;
-            const message = document.getElementById('broadcastMessage').value;
-            const audience = document.getElementById('broadcastAudience').value;
-            
-            if (!title || !message) {
-                showToast('Error', 'Please enter title and message', 'error');
-                return;
-            }
-            
-            const targetUsers = allUsers.filter(user => {
-                if (audience === 'all') return true;
-                if (audience === 'drivers') return user.role === 'driver';
-                if (audience === 'dispatchers') return user.role === 'dispatcher';
-                if (audience === 'admins') return user.role === 'admin';
-                return false;
-            });
-            
-            showToast('Success', `Broadcast sent to ${targetUsers.length} users`, 'success');
-            
-            // Clear form
-            document.getElementById('broadcastTitle').value = '';
-            document.getElementById('broadcastMessage').value = '';
-        }
-        
         // Logout function
         function logout() {
             if (confirm('Are you sure you want to logout?')) {
@@ -2500,6 +2837,11 @@
             document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('globalNotifications').checked = settings.global;
             });
+        }
+        
+        // Request notification permission on load
+        if ('Notification' in window && Notification.permission === 'default') {
+            console.log('Notification permission can be requested when sending broadcasts');
         }
     </script>
 </body>
