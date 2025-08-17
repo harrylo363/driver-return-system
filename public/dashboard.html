@@ -3,566 +3,415 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fleet Command Center - MongoDB Connected</title>
-    
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
+    <title>Fleet Command Center</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
-        :root {
-            --primary: #0F172A;
-            --primary-light: #1E293B;
-            --accent: #3B82F6;
-            --accent-hover: #2563EB;
-            --success: #10B981;
-            --warning: #F59E0B;
-            --danger: #EF4444;
-            --text-primary: #F1F5F9;
-            --text-secondary: #94A3B8;
-            --text-muted: #64748B;
-            --bg-dark: #0F172A;
-            --bg-card: #1E293B;
-            --bg-hover: #334155;
-            --border: #334155;
-            --gradient-primary: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
-        }
-        
+
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-dark);
-            color: var(--text-primary);
-            line-height: 1.6;
-            overflow-x: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 20px;
         }
-        
-        /* Background gradient */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
-            z-index: -1;
-        }
-        
-        .header {
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            padding: 1rem 2rem;
-        }
-        
-        .header-content {
-            max-width: 1920px;
+
+        .container {
+            max-width: 1400px;
             margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 24px 32px;
+            margin-bottom: 32px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
         }
-        
-        .brand {
+
+        .logo {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 16px;
         }
-        
-        .logo {
+
+        .logo-icon {
             width: 48px;
             height: 48px;
-            background: var(--gradient-primary);
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 24px;
-            font-weight: 700;
-            color: white;
             box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
-        
-        .brand-text h1 {
-            font-size: 1.5rem;
+
+        .logo-text h1 {
+            font-size: 28px;
             font-weight: 700;
-            background: var(--gradient-primary);
-            background-clip: text;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin: 0;
         }
-        
-        .brand-text p {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            margin: 0;
+
+        .logo-text p {
+            font-size: 14px;
+            color: #94a3b8;
+            margin-top: 2px;
         }
-        
-        .header-actions {
+
+        .header-info {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .status-badge {
             display: flex;
             align-items: center;
-            gap: 1.5rem;
-        }
-        
-        .status-indicator {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            border-radius: 100px;
-            font-size: 0.875rem;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-        
-        .status-indicator.connected {
+            gap: 8px;
+            padding: 8px 16px;
             background: rgba(16, 185, 129, 0.1);
             border: 1px solid rgba(16, 185, 129, 0.3);
-            color: var(--success);
+            border-radius: 24px;
+            color: #10b981;
+            font-weight: 500;
+            animation: pulse 2s infinite;
         }
-        
-        .status-indicator.connecting {
-            background: rgba(245, 158, 11, 0.1);
-            border: 1px solid rgba(245, 158, 11, 0.3);
-            color: var(--warning);
-        }
-        
-        .status-indicator.error {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: var(--danger);
-        }
-        
-        .pulse {
+
+        .status-indicator {
             width: 8px;
             height: 8px;
+            background: #10b981;
             border-radius: 50%;
             animation: pulse 2s infinite;
         }
-        
-        .pulse.success {
-            background: var(--success);
+
+        .timestamp {
+            color: #64748b;
+            font-size: 14px;
         }
-        
-        .pulse.warning {
-            background: var(--warning);
-        }
-        
-        .pulse.error {
-            background: var(--danger);
-        }
-        
-        @keyframes pulse {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.5); }
-            100% { opacity: 1; transform: scale(1); }
-        }
-        
-        .container {
-            max-width: 1920px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-        
-        .debug-panel {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            display: none;
-        }
-        
-        .debug-panel.show {
-            display: block;
-        }
-        
-        .debug-title {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .debug-info {
-            background: var(--bg-dark);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1rem;
-            font-family: 'Courier New', monospace;
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            white-space: pre-wrap;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        
-        .kpi-grid {
+
+        .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
         }
-        
-        .kpi-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
+
+        .stat-card {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(10px);
             border-radius: 16px;
-            padding: 1.5rem;
+            padding: 24px;
+            border: 1px solid rgba(148, 163, 184, 0.1);
             position: relative;
             overflow: hidden;
             transition: all 0.3s ease;
+            animation: fadeIn 0.5s ease-out;
         }
-        
-        .kpi-card:hover {
+
+        .stat-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
-            border-color: var(--accent);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border-color: rgba(148, 163, 184, 0.2);
         }
-        
-        .kpi-icon {
-            width: 48px;
-            height: 48px;
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .stat-card:hover::before {
+            opacity: 1;
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .stat-title {
+            font-size: 14px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
             background: rgba(59, 130, 246, 0.1);
-            border-radius: 12px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
-            margin-bottom: 1rem;
+            font-size: 20px;
         }
-        
-        .kpi-value {
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: var(--text-primary);
-            line-height: 1;
-            margin-bottom: 0.5rem;
+
+        .stat-value {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        
-        .kpi-label {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
+
+        .stat-description {
+            font-size: 13px;
+            color: #64748b;
         }
-        
-        .kpi-sublabel {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-top: 0.25rem;
-        }
-        
-        .control-panel {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-        
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 10px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
+
+        .stat-change {
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 12px;
         }
-        
+
+        .stat-change.positive {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+
+        .stat-change.negative {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 24px;
+        }
+
+        .activity-feed {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .activity-item {
+            display: flex;
+            gap: 16px;
+            padding: 16px;
+            background: rgba(15, 23, 42, 0.4);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .activity-item:hover {
+            background: rgba(15, 23, 42, 0.6);
+            border-color: rgba(148, 163, 184, 0.1);
+            transform: translateX(4px);
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .activity-icon.arrived {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .activity-icon.en-route {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+        }
+
+        .activity-icon.maintenance {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #e2e8f0;
+        }
+
+        .activity-meta {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .activity-time {
+            font-size: 12px;
+            color: #475569;
+        }
+
+        .performance-metrics {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .metric-item {
+            margin-bottom: 24px;
+        }
+
+        .metric-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .metric-label {
+            font-size: 14px;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #60a5fa;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: rgba(148, 163, 184, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            border-radius: 4px;
+            transition: width 1s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
         .btn-primary {
-            background: var(--gradient-primary);
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
             color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
-        
+
         .btn-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
         }
-        
+
         .btn-secondary {
-            background: var(--bg-hover);
-            color: var(--text-primary);
-            border: 1px solid var(--border);
-        }
-        
-        .btn-secondary:hover {
-            background: var(--border);
-        }
-        
-        .btn-danger {
-            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
-            color: white;
-        }
-        
-        .btn-danger:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
-        }
-        
-        .btn-warning {
-            background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
-            color: white;
-        }
-        
-        .btn-warning:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
-        }
-        
-        .btn-success {
-            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-            color: white;
-            padding: 0.5rem 1rem;
-            font-size: 0.75rem;
-        }
-        
-        .btn-success:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
-        }
-        
-        .filter-group {
-            display: flex;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        
-        .filter-btn {
-            padding: 0.75rem 1.25rem;
-            border: none;
-            background: transparent;
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .filter-btn:not(:last-child) {
-            border-right: 1px solid var(--border);
-        }
-        
-        .filter-btn:hover {
-            color: var(--text-primary);
-            background: var(--bg-hover);
-        }
-        
-        .filter-btn.active {
-            color: white;
-            background: var(--accent);
-        }
-        
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 2rem;
-        }
-        
-        .activity-section {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            overflow: hidden;
-        }
-        
-        .section-header {
-            padding: 1.5rem;
-            background: rgba(15, 23, 42, 0.5);
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .section-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        
-        .activity-list {
-            max-height: 600px;
-            overflow-y: auto;
-            padding: 0;
-        }
-        
-        .activity-item {
-            padding: 1.5rem;
-            border-bottom: 1px solid var(--border);
-            transition: all 0.2s ease;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .activity-item::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 3px;
-            background: transparent;
-            transition: all 0.2s ease;
-        }
-        
-        .activity-item:hover {
-            background: var(--bg-hover);
-            padding-left: 2rem;
-        }
-        
-        .activity-item.enroute::before { background: var(--warning); }
-        .activity-item.arrived::before { background: var(--success); }
-        .activity-item.completed::before { background: var(--success); }
-        .activity-item.working::before { background: var(--text-muted); }
-        
-        .activity-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 1rem;
-        }
-        
-        .activity-driver {
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 0.25rem;
-            font-size: 1rem;
-        }
-        
-        .activity-details {
-            display: flex;
-            gap: 1rem;
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            flex-wrap: wrap;
-        }
-        
-        .activity-actions {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        
-        .status-badge {
-            padding: 0.375rem 0.875rem;
-            border-radius: 100px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        
-        .status-enroute {
-            background: rgba(245, 158, 11, 0.1);
-            color: var(--warning);
-            border: 1px solid rgba(245, 158, 11, 0.3);
-        }
-        
-        .status-arrived {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--success);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-        
-        .status-completed {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--success);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-        
-        .status-working {
-            background: rgba(100, 116, 139, 0.1);
-            color: var(--text-muted);
-            border: 1px solid rgba(100, 116, 139, 0.3);
-        }
-        
-        .analytics-panel {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .analytics-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 1.5rem;
-        }
-        
-        .metric-card {
-            background: var(--bg-dark);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.25rem;
-            margin-bottom: 1rem;
-            transition: all 0.2s ease;
-        }
-        
-        .metric-card:hover {
-            border-color: var(--accent);
-            transform: translateX(4px);
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: 4rem 2rem;
-            color: var(--text-muted);
-        }
-        
-        .empty-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            opacity: 0.3;
+            background: rgba(148, 163, 184, 0.1);
+            color: #94a3b8;
+            border: 1px solid rgba(148, 163, 184, 0.2);
         }
 
-        /* Toast notification styles */
-        .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 1rem 1.5rem;
-            border-radius: 10px;
-            color: white;
-            font-weight: 600;
-            z-index: 10000;
-            animation: slideIn 0.3s ease;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            max-width: 400px;
+        .btn-secondary:hover {
+            background: rgba(148, 163, 184, 0.15);
+            border-color: rgba(148, 163, 184, 0.3);
         }
-        
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         @keyframes slideIn {
             from {
                 transform: translateX(100%);
@@ -574,900 +423,489 @@
             }
         }
         
-        .toast-success {
-            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        .notification {
+            transition: all 0.3s ease;
         }
         
-        .toast-error {
-            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+        .notification:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.4);
         }
-        
-        .toast-info {
-            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
-        }
-        
-        .loading-spinner {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 0.8s linear infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        @media (max-width: 1400px) {
-            .dashboard-grid {
+
+        @media (max-width: 1024px) {
+            .main-content {
                 grid-template-columns: 1fr;
             }
         }
-        
-        @media (max-width: 768px) {
-            .kpi-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .header-actions {
+
+        @media (max-width: 640px) {
+            .header {
                 flex-direction: column;
-                gap: 0.75rem;
-                align-items: flex-end;
+                gap: 16px;
+                text-align: center;
+            }
+
+            .header-info {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
-    <header class="header">
-        <div class="header-content">
-            <div class="brand">
-                <div class="logo">⚡</div>
-                <div class="brand-text">
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">🚛</div>
+                <div class="logo-text">
                     <h1>Fleet Command Center</h1>
-                    <p>MongoDB Atlas + Railway Integration</p>
+                    <p>Enterprise Logistics Platform</p>
                 </div>
             </div>
-            <div class="header-actions">
-                <div class="status-indicator connecting" id="connectionIndicator">
-                    <div class="pulse warning"></div>
-                    <span id="connectionStatus">Connecting to MongoDB...</span>
+            <div class="header-info">
+                <div class="status-badge">
+                    <span class="status-indicator"></span>
+                    <span>System Operational</span>
                 </div>
-                <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); color: var(--accent); padding: 0.5rem 1rem; border-radius: 100px; font-size: 0.875rem; font-weight: 500;">
-                    6995 N US-41, Apollo Beach, FL 33572
-                </div>
-                <button class="btn btn-danger" onclick="logout()">
-                    🚪 Logout
+                <div class="timestamp" id="timestamp"></div>
+                <button class="btn btn-primary" onclick="dashboard.toggleFullscreen()">
+                    <span>⛶</span> Fullscreen
                 </button>
             </div>
-        </div>
-    </header>
+        </header>
 
-    <div class="container">
-        <!-- Debug Panel -->
-        <div class="debug-panel" id="debugPanel">
-            <div class="debug-title">
-                <span>🔧</span>
-                <span>Debug Information</span>
-                <button class="btn btn-secondary" onclick="toggleDebug()" style="margin-left: auto; padding: 0.5rem 1rem; font-size: 0.75rem;">Hide</button>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div>
+                        <div class="stat-title">Active Drivers</div>
+                        <div class="stat-value" id="active-drivers">0</div>
+                        <div class="stat-description">Currently on duty</div>
+                    </div>
+                    <div class="stat-icon">🚗</div>
+                </div>
+                <div class="stat-change positive">↑ 12%</div>
             </div>
-            <div class="debug-info" id="debugInfo">
-                Initializing debug panel...
-            </div>
-        </div>
 
-        <!-- KPI Cards -->
-        <div class="kpi-grid">
-            <div class="kpi-card">
-                <div class="kpi-icon">🚚</div>
-                <div class="kpi-value" id="activeCount">0</div>
-                <div class="kpi-label">Active Updates</div>
-                <div class="kpi-sublabel">En route + arrived</div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div>
+                        <div class="stat-title">En Route</div>
+                        <div class="stat-value" id="en-route">0</div>
+                        <div class="stat-description">Approaching warehouses</div>
+                    </div>
+                    <div class="stat-icon">📍</div>
+                </div>
+                <div class="stat-change positive">↑ 5%</div>
             </div>
-            
-            <div class="kpi-card">
-                <div class="kpi-icon" style="background: rgba(245, 158, 11, 0.1);">📍</div>
-                <div class="kpi-value" id="enrouteCount">0</div>
-                <div class="kpi-label">En Route</div>
-                <div class="kpi-sublabel">30 min away</div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div>
+                        <div class="stat-title">Arrived Today</div>
+                        <div class="stat-value" id="arrived-today">0</div>
+                        <div class="stat-description">Successfully checked in</div>
+                    </div>
+                    <div class="stat-icon">✓</div>
+                </div>
+                <div class="stat-change positive">↑ 8%</div>
             </div>
-            
-            <div class="kpi-card">
-                <div class="kpi-icon" style="background: rgba(16, 185, 129, 0.1);">🏁</div>
-                <div class="kpi-value" id="arrivedCount">0</div>
-                <div class="kpi-label">Arrived</div>
-                <div class="kpi-sublabel">At warehouse</div>
-            </div>
-            
-            <div class="kpi-card">
-                <div class="kpi-icon" style="background: rgba(16, 185, 129, 0.1);">✅</div>
-                <div class="kpi-value" id="completedCount">0</div>
-                <div class="kpi-label">Completed</div>
-                <div class="kpi-sublabel">Checked in today</div>
-            </div>
-            
-            <div class="kpi-card">
-                <div class="kpi-icon" style="background: rgba(100, 116, 139, 0.1);">📦</div>
-                <div class="kpi-value" id="workingCount">0</div>
-                <div class="kpi-label">Still Working</div>
-                <div class="kpi-sublabel">Out on routes</div>
-            </div>
-            
-            <div class="kpi-card">
-                <div class="kpi-icon" style="background: rgba(239, 68, 68, 0.1);">📦</div>
-                <div class="kpi-value" id="returnsKpiCount">0</div>
-                <div class="kpi-label">Returns Today</div>
-                <div class="kpi-sublabel" id="returnsSublabel">From 0 drivers</div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div>
+                        <div class="stat-title">Pending Check-in</div>
+                        <div class="stat-value" id="pending-checkin">0</div>
+                        <div class="stat-description">Drivers awaiting check-in</div>
+                    </div>
+                    <div class="stat-icon">⏳</div>
+                </div>
+                <div class="stat-change negative">↓ 15%</div>
             </div>
         </div>
 
-        <!-- Filter Controls -->
-        <div class="control-panel">
-            <div class="filter-group" style="flex: 1;">
-                <button class="filter-btn active" onclick="filterDrivers('overview', this)">Overview</button>
-                <button class="filter-btn" onclick="filterDrivers('en-route', this)">En Route</button>
-                <button class="filter-btn" onclick="filterDrivers('arrived', this)">Arrived</button>
-                <button class="filter-btn" onclick="filterDrivers('completed', this)">✓ Completed</button>
-                <button class="filter-btn" onclick="filterDrivers('working', this)">Still Working</button>
-            </div>
-            <button class="btn btn-secondary" onclick="toggleDebug()">
-                🔧 Debug
-            </button>
-            <button class="btn btn-secondary" id="refreshButton" onclick="refreshDashboard()">
-                <span id="refreshIcon">🔄</span>
-                <span id="refreshText">Refresh</span>
-            </button>
-            <button class="btn btn-warning" onclick="manualDailyReset()">
-                📊 End Day & Archive
-            </button>
-            <button class="btn btn-danger" onclick="clearDailyCheckIns()">
-                🗑️ Clear Check-ins
-            </button>
-        </div>
-
-        <!-- Dashboard Grid -->
-        <div class="dashboard-grid">
-            <div class="activity-section">
+        <div class="main-content">
+            <div class="activity-feed">
                 <div class="section-header">
                     <h2 class="section-title">
-                        📡 MongoDB Real-Time Activity Feed
+                        <span>📊</span> Real-Time Activity Feed
                     </h2>
-                    <div style="display: flex; align-items: center; gap: 1rem;">
-                        <span id="activityCount" style="font-size: 0.875rem; color: var(--text-secondary);"></span>
-                        <span id="lastUpdate" style="font-size: 0.875rem; color: var(--text-secondary);">
-                            Loading from MongoDB...
-                        </span>
-                    </div>
+                    <span class="activity-time" id="activity-count">1 active</span>
                 </div>
-                <div class="activity-list" id="activityList">
-                    <div class="empty-state">
-                        <div class="empty-icon">📭</div>
-                        <p>Loading driver activity from MongoDB Atlas...</p>
-                        <p style="font-size: 0.875rem; margin-top: 1rem;">Drivers can update status at /driver</p>
-                    </div>
+                <div id="activity-list">
+                    <!-- Activity items will be dynamically inserted here -->
                 </div>
             </div>
 
-            <div>
-                <div class="analytics-panel">
-                    <h3 class="analytics-title">🔧 Equipment Status</h3>
-                    <div class="metric-card">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-size: 0.875rem; color: var(--text-secondary);">🚛 Tractor Issues</span>
-                            <span style="font-size: 1.5rem; font-weight: 700;" id="tractorIssues">0</span>
-                        </div>
-                    </div>
-                    <div class="metric-card">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-size: 0.875rem; color: var(--text-secondary);">🚚 Trailer Issues</span>
-                            <span style="font-size: 1.5rem; font-weight: 700;" id="trailerIssues">0</span>
-                        </div>
-                    </div>
-                    <div class="metric-card">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-size: 0.875rem; color: var(--text-secondary);">🏗️ Moffett Issues</span>
-                            <span style="font-size: 1.5rem; font-weight: 700;" id="moffettIssues">0</span>
-                        </div>
-                    </div>
+            <div class="performance-metrics">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <span>📈</span> Performance Metrics
+                    </h2>
                 </div>
                 
-                <div class="analytics-panel">
-                    <h3 class="analytics-title">📦 Returns Summary</h3>
-                    <div class="metric-card">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-size: 0.875rem; color: var(--text-secondary);">📥 Total Returns</span>
-                            <span style="font-size: 1.5rem; font-weight: 700;" id="totalReturnsToday">0</span>
-                        </div>
+                <div class="metric-item">
+                    <div class="metric-header">
+                        <span class="metric-label">Fleet Utilization</span>
+                        <span class="metric-value" id="utilization-value">0%</span>
                     </div>
-                    <div class="metric-card">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-size: 0.875rem; color: var(--text-secondary);">🚚 Drivers w/ Returns</span>
-                            <span style="font-size: 1.5rem; font-weight: 700;" id="driversWithReturns">0</span>
-                        </div>
-                    </div>
-                    <div class="metric-card">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-size: 0.875rem; color: var(--text-secondary);">📊 Avg Returns/Driver</span>
-                            <span style="font-size: 1.5rem; font-weight: 700;" id="avgReturns">0</span>
-                        </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="utilization-bar" style="width: 0%"></div>
                     </div>
                 </div>
-                
-                <div class="analytics-panel">
-                    <h3 class="analytics-title">⚡ Quick Actions</h3>
-                    <div style="display: grid; gap: 1rem;">
-                        <button class="btn btn-primary" style="width: 100%;" onclick="testMongoConnection()">
-                            📡 Test MongoDB Connection
-                        </button>
-                        <button class="btn btn-secondary" style="width: 100%;" onclick="window.open('driver.html', '_blank')">
-                            🚚 Driver Portal
-                        </button>
-                        <button class="btn btn-danger" style="width: 100%;" onclick="logout()">
-                            🚪 Logout
-                        </button>
+
+                <div class="metric-item">
+                    <div class="metric-header">
+                        <span class="metric-label">On-Time Delivery</span>
+                        <span class="metric-value" id="delivery-value">0%</span>
                     </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="delivery-bar" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="metric-item">
+                    <div class="metric-header">
+                        <span class="metric-label">Driver Satisfaction</span>
+                        <span class="metric-value" id="satisfaction-value">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="satisfaction-bar" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="dashboard.exportReport()">
+                        <span>📊</span> Export Report
+                    </button>
+                    <button class="btn btn-secondary" onclick="dashboard.refreshData()">
+                        <span>🔄</span> Refresh
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // FIXED: Auto-detect API base with better logic
-        const API_BASE = (() => {
-            const hostname = window.location.hostname;
-            const port = window.location.port;
-            const protocol = window.location.protocol;
-            
-            // For localhost development
-            if (hostname === 'localhost' || hostname === '127.0.0.1') {
-                return 'http://localhost:3000';
+        class FleetDashboard {
+            constructor() {
+                this.activeDrivers = 0;
+                this.enRoute = 0;
+                this.arrivedToday = 0;
+                this.pendingCheckin = 0;
+                this.activities = [];
+                this.init();
             }
-            
-            // For production - use current origin
-            return window.location.origin;
-        })();
-        
-        const WAREHOUSE_ADDRESS = "6995 N US-41, Apollo Beach, FL 33572";
-        
-        // Global variables
-        let allDrivers = [];
-        let currentFilter = 'overview';
-        let driverMap = new Map();
-        let refreshInterval = null;
-        let debugMode = false;
-        let debugInfo = [];
-        let isLoading = false;
-        
-        // Debug logging function
-        function log(message, type = 'info') {
-            const timestamp = new Date().toLocaleTimeString();
-            const logEntry = `[${timestamp}] ${message}`;
-            
-            console.log(logEntry);
-            debugInfo.push(logEntry);
-            
-            // Keep only last 50 entries
-            if (debugInfo.length > 50) {
-                debugInfo = debugInfo.slice(-50);
-            }
-            
-            updateDebugPanel();
-        }
-        
-        function updateDebugPanel() {
-            const debugElement = document.getElementById('debugInfo');
-            if (debugElement) {
-                debugElement.textContent = debugInfo.join('\n');
-                debugElement.scrollTop = debugElement.scrollHeight;
-            }
-        }
-        
-        function toggleDebug() {
-            debugMode = !debugMode;
-            const panel = document.getElementById('debugPanel');
-            if (debugMode) {
-                panel.classList.add('show');
-            } else {
-                panel.classList.remove('show');
-            }
-        }
-        
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            log('🚀 Fleet Command Center - FIXED VERSION');
-            log('🔗 API Base: ' + API_BASE);
-            log('📍 Warehouse: ' + WAREHOUSE_ADDRESS);
-            log('📅 Current Date: ' + new Date().toDateString());
-            log('🕐 Current Time: ' + new Date().toLocaleTimeString());
-            log('================================================');
-            
-            initializeDashboard();
-        });
-        
-        // FIXED: Simplified initialization
-        function initializeDashboard() {
-            log('🚀 Initializing Dashboard...');
-            
-            // Start with fresh data load
-            loadDataFromMongoDB();
-            
-            // Start auto-refresh
-            startAutoRefresh();
-            
-            log('✅ Dashboard initialization complete');
-        }
-        
-        // Start auto-refresh
-        function startAutoRefresh() {
-            if (refreshInterval) {
-                clearInterval(refreshInterval);
-            }
-            
-            // Refresh every 15 seconds
-            refreshInterval = setInterval(() => {
-                if (!isLoading) {
-                    loadDataFromMongoDB();
-                }
-            }, 15000);
-            
-            log('🔄 Auto-refresh started (15-second intervals)');
-        }
-        
-        // Update connection status
-        function updateConnectionStatus(status, message = null) {
-            const indicator = document.getElementById('connectionIndicator');
-            const statusText = document.getElementById('connectionStatus');
-            const pulse = indicator?.querySelector('.pulse');
-            
-            if (!indicator || !statusText || !pulse) return;
-            
-            indicator.classList.remove('connected', 'connecting', 'error');
-            pulse.classList.remove('success', 'warning', 'error');
-            
-            switch (status) {
-                case 'connected':
-                    indicator.classList.add('connected');
-                    pulse.classList.add('success');
-                    statusText.textContent = message || 'MongoDB Connected';
-                    break;
-                case 'connecting':
-                case 'loading':
-                    indicator.classList.add('connecting');
-                    pulse.classList.add('warning');
-                    statusText.textContent = message || 'Connecting to MongoDB...';
-                    break;
-                case 'error':
-                    indicator.classList.add('error');
-                    pulse.classList.add('error');
-                    statusText.textContent = message || 'MongoDB Connection Error';
-                    break;
-            }
-        }
-        
-        // FIXED: Robust data loading with better error handling
-        async function loadDataFromMongoDB() {
-            if (isLoading) {
-                log('⏭️ Skipping load - already in progress');
-                return;
-            }
-            
-            isLoading = true;
-            
-            try {
-                log('📡 Loading data from MongoDB Atlas...');
-                updateConnectionStatus('loading', 'Loading data...');
+
+            init() {
+                this.updateTimestamp();
+                setInterval(() => this.updateTimestamp(), 1000);
                 
-                // Set timeout for the request
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 15000);
+                // Initialize notification container first
+                this.initializeNotifications();
                 
-                const response = await fetch(`${API_BASE}/api/notifications`, {
-                    method: 'GET',
-                    headers: { 
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    signal: controller.signal
-                });
+                // Animate stats on load
+                setTimeout(() => this.animateStats(), 100);
                 
-                clearTimeout(timeoutId);
+                // Simulate real-time updates
+                setInterval(() => this.simulateUpdate(), 5000);
                 
-                log(`📊 API Response: ${response.status} ${response.statusText}`);
+                // Show notifications
+                this.showNotification('System Operational', 'success');
                 
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                
-                const responseText = await response.text();
-                log(`📏 Response length: ${responseText.length} characters`);
-                
-                if (!responseText.trim()) {
-                    log('⚠️ Empty response from server');
-                    handleEmptyResponse();
-                    return;
-                }
-                
-                let result;
-                try {
-                    result = JSON.parse(responseText);
-                } catch (parseError) {
-                    log('❌ JSON parse error: ' + parseError.message);
-                    log('📄 Raw response: ' + responseText.substring(0, 200));
-                    throw new Error('Invalid JSON response from server');
-                }
-                
-                // Handle different response formats
-                let notifications = [];
-                if (Array.isArray(result)) {
-                    notifications = result;
-                } else if (result.data && Array.isArray(result.data)) {
-                    notifications = result.data;
-                } else if (result.notifications && Array.isArray(result.notifications)) {
-                    notifications = result.notifications;
-                } else {
-                    log('⚠️ Unexpected response format: ' + typeof result);
-                    notifications = [];
-                }
-                
-                log(`🔍 Found ${notifications.length} total notifications`);
-                
-                // Process the data
-                if (notifications.length > 0) {
-                    processNotifications(notifications);
-                    updateConnectionStatus('connected', `${notifications.length} records loaded`);
-                } else {
-                    handleEmptyResponse();
-                }
-                
-                // Update timestamp
-                const lastUpdate = document.getElementById('lastUpdate');
-                if (lastUpdate) {
-                    lastUpdate.textContent = 'Last updated: ' + new Date().toLocaleTimeString();
-                }
-                
-            } catch (error) {
-                log('❌ MongoDB connection failed: ' + error.message);
-                
-                if (error.name === 'AbortError') {
-                    updateConnectionStatus('error', 'Request timeout');
-                } else {
-                    updateConnectionStatus('error', error.message);
-                }
-                
-                showEmptyState('Connection error - will retry automatically');
-            } finally {
-                isLoading = false;
-            }
-        }
-        
-        // Handle empty response
-        function handleEmptyResponse() {
-            allDrivers = [];
-            driverMap.clear();
-            updateKPIs();
-            updateActivityFeed();
-            updateConnectionStatus('connected', 'Connected - No data today');
-        }
-        
-        // FIXED: Better notification processing
-        function processNotifications(notifications) {
-            try {
-                log(`🔍 Processing ${notifications.length} notifications...`);
-                
-                // Clear existing data
-                allDrivers = [];
-                driverMap.clear();
-                
-                // Filter for today's data
-                const today = new Date().toISOString().split('T')[0];
-                const todaysNotifications = notifications.filter(notification => {
-                    if (!notification) return false;
-                    
-                    // Check various date fields
-                    if (notification.date) {
-                        return notification.date === today;
-                    }
-                    if (notification.timestamp) {
-                        const notificationDate = new Date(notification.timestamp).toISOString().split('T')[0];
-                        return notificationDate === today;
-                    }
-                    if (notification.lastUpdate) {
-                        const notificationDate = new Date(notification.lastUpdate).toISOString().split('T')[0];
-                        return notificationDate === today;
-                    }
-                    
-                    // If no date info, assume it's recent
-                    return true;
-                });
-                
-                log(`📅 Today's notifications: ${todaysNotifications.length}`);
-                
-                // Process each notification
-                todaysNotifications.forEach((notification, index) => {
-                    try {
-                        const driver = createDriverFromNotification(notification, index);
-                        if (driver) {
-                            const existingDriver = driverMap.get(driver.id);
-                            if (existingDriver) {
-                                // Update existing driver with latest info
-                                updateExistingDriver(existingDriver, driver);
-                            } else {
-                                // Add new driver
-                                allDrivers.push(driver);
-                                driverMap.set(driver.id, driver);
-                            }
-                        }
-                    } catch (error) {
-                        log(`⚠️ Error processing notification ${index}: ${error.message}`);
-                    }
-                });
-                
-                log(`✅ Processed ${allDrivers.length} unique drivers`);
-                
-                // Update UI
-                updateKPIs();
-                updateActivityFeed();
-                
-            } catch (error) {
-                log('❌ Error processing notifications: ' + error.message);
-                showEmptyState('Data processing error');
-            }
-        }
-        
-        // Create driver object from notification
-        function createDriverFromNotification(notification, index) {
-            if (!notification) return null;
-            
-            const driver = {
-                id: notification.driver_id || 
-                    notification.driverId || 
-                    notification._id || 
-                    notification.id || 
-                    `driver-${index}`,
-                    
-                name: notification.driver_name || 
-                      notification.driver || 
-                      notification.name || 
-                      `Driver ${index + 1}`,
-                      
-                status: notification.status || 'working',
-                
-                returns: parseInt(notification.returns || 
-                               notification.returnsCount || 
-                               notification.returnCount || 
-                               0),
-                               
-                timestamp: notification.timestamp || 
-                          notification.lastUpdate || 
-                          notification.createdAt ||
-                          new Date().toISOString(),
-                          
-                vehicleId: notification.vehicleId || 
-                          notification.vehicle || 
-                          notification.truck || '',
-                          
-                message: notification.message || '',
-                hasReturns: notification.hasReturns || false,
-                equipmentIssues: notification.equipmentIssues || {}
-            };
-            
-            // Validate required fields
-            if (!driver.name || driver.name === 'undefined') {
-                log(`⚠️ Skipping notification with invalid name: ${JSON.stringify(notification)}`);
-                return null;
-            }
-            
-            return driver;
-        }
-        
-        // Update existing driver with newer information
-        function updateExistingDriver(existing, incoming) {
-            const existingTime = new Date(existing.timestamp);
-            const incomingTime = new Date(incoming.timestamp);
-            
-            // Only update if incoming data is newer or equal
-            if (incomingTime >= existingTime) {
-                existing.status = incoming.status;
-                existing.timestamp = incoming.timestamp;
-                existing.returns = incoming.returns;
-                existing.hasReturns = incoming.hasReturns;
-                existing.message = incoming.message;
-                existing.equipmentIssues = incoming.equipmentIssues;
-                existing.vehicleId = incoming.vehicleId;
-            }
-        }
-        
-        // FIXED: Simplified KPI updates
-        function updateKPIs() {
-            const stats = {
-                enRoute: 0,
-                arrived: 0,
-                completed: 0,
-                working: 0,
-                totalReturns: 0,
-                driversWithReturns: 0,
-                tractorIssues: 0,
-                trailerIssues: 0,
-                moffettIssues: 0
-            };
-            
-            // Calculate stats from drivers
-            allDrivers.forEach(driver => {
-                if (!driver) return;
-                
-                switch (driver.status) {
-                    case 'en-route':
-                        stats.enRoute++;
-                        break;
-                    case 'arrived':
-                        stats.arrived++;
-                        break;
-                    case 'completed':
-                        stats.completed++;
-                        break;
-                    case 'working':
-                    default:
-                        stats.working++;
-                        break;
-                }
-                
-                const returns = parseInt(driver.returns) || 0;
-                stats.totalReturns += returns;
-                if (returns > 0) {
-                    stats.driversWithReturns++;
-                }
-                
-                // Count equipment issues
-                if (driver.equipmentIssues) {
-                    Object.keys(driver.equipmentIssues).forEach(key => {
-                        if (key.startsWith('tractor_')) stats.tractorIssues++;
-                        else if (key.startsWith('trailer_')) stats.trailerIssues++;
-                        else if (key.startsWith('moffett_')) stats.moffettIssues++;
-                    });
-                }
-            });
-            
-            // Update DOM elements safely
-            const elements = {
-                'activeCount': stats.enRoute + stats.arrived,
-                'enrouteCount': stats.enRoute,
-                'arrivedCount': stats.arrived,
-                'completedCount': stats.completed,
-                'workingCount': stats.working,
-                'returnsKpiCount': stats.totalReturns,
-                'totalReturnsToday': stats.totalReturns,
-                'driversWithReturns': stats.driversWithReturns,
-                'avgReturns': stats.driversWithReturns > 0 ? 
-                    Math.round((stats.totalReturns / stats.driversWithReturns) * 10) / 10 : 0,
-                'tractorIssues': stats.tractorIssues,
-                'trailerIssues': stats.trailerIssues,
-                'moffettIssues': stats.moffettIssues
-            };
-            
-            Object.entries(elements).forEach(([id, value]) => {
-                const element = document.getElementById(id);
-                if (element) {
-                    element.textContent = value;
-                }
-            });
-            
-            // Update sublabel
-            const returnsSublabel = document.getElementById('returnsSublabel');
-            if (returnsSublabel) {
-                returnsSublabel.textContent = `From ${stats.driversWithReturns} drivers`;
-            }
-            
-            log(`📊 KPIs Updated: Active=${stats.enRoute + stats.arrived}, Total=${allDrivers.length}`);
-        }
-        
-        // FIXED: Activity feed with proper filtering
-        function updateActivityFeed() {
-            const activityList = document.getElementById('activityList');
-            const activityCount = document.getElementById('activityCount');
-            
-            if (!activityList || !activityCount) return;
-            
-            if (allDrivers.length === 0) {
-                showEmptyState();
-                return;
-            }
-            
-            // Apply filters
-            let filteredDrivers = [];
-            let filterLabel = 'drivers';
-            
-            switch (currentFilter) {
-                case 'overview':
-                    filteredDrivers = allDrivers.filter(d => d.status !== 'completed');
-                    filterLabel = 'active drivers';
-                    break;
-                case 'completed':
-                    filteredDrivers = allDrivers.filter(d => d.status === 'completed');
-                    filterLabel = 'completed today';
-                    break;
-                case 'en-route':
-                    filteredDrivers = allDrivers.filter(d => d.status === 'en-route');
-                    filterLabel = 'en route';
-                    break;
-                case 'arrived':
-                    filteredDrivers = allDrivers.filter(d => d.status === 'arrived');
-                    filterLabel = 'arrived';
-                    break;
-                case 'working':
-                    filteredDrivers = allDrivers.filter(d => d.status === 'working');
-                    filterLabel = 'still working';
-                    break;
-                default:
-                    filteredDrivers = allDrivers;
-            }
-            
-            activityCount.textContent = `${filteredDrivers.length} ${filterLabel}`;
-            
-            if (filteredDrivers.length === 0) {
-                const emptyMessage = currentFilter === 'overview' ? 
-                    'No active drivers - all completed or no updates today' :
-                    `No drivers ${filterLabel}`;
-                    
-                activityList.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">📭</div>
-                        <p>${emptyMessage}</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            // Generate activity items
-            activityList.innerHTML = filteredDrivers.map(driver => {
-                const timestamp = new Date(driver.timestamp);
-                const timeString = timestamp.toLocaleTimeString();
-                
-                let statusClass = driver.status?.replace('-', '') || 'working';
-                let statusText = driver.status || 'working';
-                
-                if (driver.status === 'completed') {
-                    statusText = 'COMPLETED ✓';
-                }
-                
-                return `
-                    <div class="activity-item ${statusClass}">
-                        <div class="activity-content">
-                            <div>
-                                <div class="activity-driver">${driver.name}</div>
-                                <div class="activity-details">
-                                    <span>🕐 ${timeString}</span>
-                                    <span>📦 ${driver.returns} returns</span>
-                                    ${driver.vehicleId ? `<span>🚚 ${driver.vehicleId}</span>` : ''}
-                                </div>
-                            </div>
-                            <div class="activity-actions">
-                                <span class="status-badge status-${statusClass}">
-                                    ${statusText}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            
-            log(`✅ Activity feed updated: ${filteredDrivers.length} drivers shown`);
-        }
-        
-        // Show empty state
-        function showEmptyState(message = null) {
-            const activityList = document.getElementById('activityList');
-            const activityCount = document.getElementById('activityCount');
-            
-            if (activityCount) activityCount.textContent = '0 drivers';
-            
-            if (activityList) {
-                const defaultMessage = message || 'No driver activity today';
-                activityList.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">📭</div>
-                        <p>${defaultMessage}</p>
-                        <p style="font-size: 0.875rem; margin-top: 1rem;">Waiting for driver updates...</p>
-                    </div>
-                `;
-            }
-        }
-        
-        // Filter drivers
-        function filterDrivers(filter, buttonElement) {
-            currentFilter = filter;
-            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-            if (buttonElement) buttonElement.classList.add('active');
-            updateActivityFeed();
-            log(`🔍 Filter changed to: ${filter}`);
-        }
-        
-        // Refresh dashboard
-        function refreshDashboard() {
-            const refreshIcon = document.getElementById('refreshIcon');
-            const refreshText = document.getElementById('refreshText');
-            
-            if (refreshIcon) refreshIcon.style.animation = 'spin 1s linear infinite';
-            if (refreshText) refreshText.textContent = 'Refreshing...';
-            
-            loadDataFromMongoDB().finally(() => {
+                // Simulate some notifications
                 setTimeout(() => {
-                    if (refreshIcon) refreshIcon.style.animation = '';
-                    if (refreshText) refreshText.textContent = 'Refresh';
-                }, 1000);
-            });
-        }
-        
-        // Test MongoDB connection
-        async function testMongoConnection() {
-            try {
-                log('🧪 Testing MongoDB connection...');
-                showToast('Testing connection...', 'info');
-                updateConnectionStatus('loading', 'Testing...');
+                    this.showNotification('Driver #3 has checked in', 'info');
+                }, 3000);
                 
-                const response = await fetch(`${API_BASE}/api/health`, {
-                    signal: AbortSignal.timeout(10000)
+                setTimeout(() => {
+                    this.showNotification('Route optimization complete', 'success');
+                }, 6000);
+                
+                setTimeout(() => {
+                    this.showNotification('Vehicle maintenance due for Unit #7', 'warning');
+                }, 9000);
+                
+                // Initialize activity feed
+                this.addActivity('arrived', 'Driver #5856 - Tampa FDC', 'Checked in at warehouse');
+                
+                // Animate performance metrics
+                setTimeout(() => this.animateMetrics(), 500);
+            }
+
+            initializeNotifications() {
+                // Create notification container if it doesn't exist
+                if (!document.getElementById('notification-container')) {
+                    const container = document.createElement('div');
+                    container.id = 'notification-container';
+                    container.style.cssText = `
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        z-index: 10000;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 10px;
+                        pointer-events: none;
+                    `;
+                    document.body.appendChild(container);
+                }
+            }
+
+            showNotification(message, type = 'info') {
+                console.log(`Showing notification: ${message} (${type})`);
+                
+                // Ensure container exists
+                let container = document.getElementById('notification-container');
+                if (!container) {
+                    this.initializeNotifications();
+                    container = document.getElementById('notification-container');
+                }
+                
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                
+                const colors = {
+                    success: '#10b981',
+                    error: '#ef4444',
+                    warning: '#f59e0b',
+                    info: '#3b82f6'
+                };
+                
+                notification.style.cssText = `
+                    background: ${colors[type] || colors.info};
+                    color: white;
+                    padding: 12px 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                    animation: slideIn 0.3s ease-out;
+                    pointer-events: auto;
+                    cursor: pointer;
+                    min-width: 250px;
+                    max-width: 400px;
+                    font-size: 14px;
+                    font-weight: 500;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    position: relative;
+                    overflow: hidden;
+                `;
+                
+                // Add icon
+                const icon = document.createElement('span');
+                icon.style.cssText = 'font-size: 18px;';
+                icon.innerHTML = type === 'success' ? '✓' : 
+                                type === 'error' ? '✕' : 
+                                type === 'warning' ? '⚠' : 'ℹ';
+                
+                // Add message
+                const text = document.createElement('span');
+                text.style.cssText = 'flex: 1;';
+                text.textContent = message;
+                
+                // Add close button
+                const closeBtn = document.createElement('span');
+                closeBtn.style.cssText = `
+                    cursor: pointer;
+                    opacity: 0.8;
+                    font-size: 18px;
+                    padding: 0 4px;
+                `;
+                closeBtn.innerHTML = '×';
+                closeBtn.onclick = () => notification.remove();
+                
+                notification.appendChild(icon);
+                notification.appendChild(text);
+                notification.appendChild(closeBtn);
+                
+                container.appendChild(notification);
+                
+                // Auto remove after 5 seconds
+                setTimeout(() => {
+                    notification.style.animation = 'slideOut 0.3s ease-in';
+                    setTimeout(() => notification.remove(), 300);
+                }, 5000);
+            }
+
+            updateTimestamp() {
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString('en-US', { 
+                    hour: '2-digit', 
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+                document.getElementById('timestamp').textContent = timeStr;
+            }
+
+            animateValue(id, start, end, duration) {
+                const element = document.getElementById(id);
+                const range = end - start;
+                const increment = end > start ? 1 : -1;
+                const stepTime = Math.abs(Math.floor(duration / range));
+                let current = start;
+                
+                const timer = setInterval(() => {
+                    current += increment;
+                    element.textContent = current;
+                    if (current === end) {
+                        clearInterval(timer);
+                    }
+                }, stepTime);
+            }
+
+            animateStats() {
+                this.animateValue('active-drivers', 0, 2, 1000);
+                this.animateValue('en-route', 0, 0, 1000);
+                this.animateValue('arrived-today', 0, 1, 1000);
+                this.animateValue('pending-checkin', 0, 1, 1000);
+                
+                this.activeDrivers = 2;
+                this.enRoute = 0;
+                this.arrivedToday = 1;
+                this.pendingCheckin = 1;
+            }
+
+            animateMetrics() {
+                this.animateProgress('utilization-bar', 'utilization-value', 50);
+                this.animateProgress('delivery-bar', 'delivery-value', 91);
+                this.animateProgress('satisfaction-bar', 'satisfaction-value', 88);
+            }
+
+            animateProgress(barId, valueId, targetPercent) {
+                const bar = document.getElementById(barId);
+                const value = document.getElementById(valueId);
+                let current = 0;
+                
+                const interval = setInterval(() => {
+                    if (current <= targetPercent) {
+                        bar.style.width = current + '%';
+                        value.textContent = current + '%';
+                        current += 2;
+                    } else {
+                        clearInterval(interval);
+                    }
+                }, 20);
+            }
+
+            simulateUpdate() {
+                const updates = [
+                    () => {
+                        this.activeDrivers++;
+                        document.getElementById('active-drivers').textContent = this.activeDrivers;
+                        this.addActivity('en-route', `Driver #${Math.floor(Math.random() * 9000) + 1000}`, 'Started route to warehouse');
+                        this.showNotification('New driver started shift', 'info');
+                    },
+                    () => {
+                        if (this.enRoute > 0) {
+                            this.enRoute--;
+                            this.arrivedToday++;
+                            document.getElementById('en-route').textContent = this.enRoute;
+                            document.getElementById('arrived-today').textContent = this.arrivedToday;
+                            this.addActivity('arrived', `Driver #${Math.floor(Math.random() * 9000) + 1000}`, 'Arrived at destination');
+                            this.showNotification('Driver arrived at warehouse', 'success');
+                        }
+                    },
+                    () => {
+                        this.pendingCheckin++;
+                        document.getElementById('pending-checkin').textContent = this.pendingCheckin;
+                        this.addActivity('maintenance', `Vehicle #${Math.floor(Math.random() * 900) + 100}`, 'Scheduled for maintenance');
+                    },
+                    () => {
+                        if (this.pendingCheckin > 0) {
+                            this.pendingCheckin--;
+                            this.arrivedToday++;
+                            document.getElementById('pending-checkin').textContent = this.pendingCheckin;
+                            document.getElementById('arrived-today').textContent = this.arrivedToday;
+                            this.addActivity('arrived', `Driver #${Math.floor(Math.random() * 9000) + 1000}`, 'Check-in completed');
+                        }
+                    }
+                ];
+                
+                const randomUpdate = updates[Math.floor(Math.random() * updates.length)];
+                randomUpdate();
+            }
+
+            addActivity(type, title, description) {
+                const activityList = document.getElementById('activity-list');
+                const activityItem = document.createElement('div');
+                activityItem.className = 'activity-item';
+                activityItem.style.opacity = '0';
+                
+                const icons = {
+                    arrived: '✓',
+                    'en-route': '🚛',
+                    maintenance: '🔧'
+                };
+                
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString('en-US', { 
+                    hour: '2-digit', 
+                    minute: '2-digit'
                 });
                 
-                if (response.ok) {
-                    const data = await response.text();
-                    updateConnectionStatus('connected', 'Test passed');
-                    showToast('✅ MongoDB connection successful!', 'success');
-                    log('✅ Health check passed: ' + data);
-                } else {
-                    throw new Error(`HTTP ${response.status}`);
+                activityItem.innerHTML = `
+                    <div class="activity-icon ${type}">${icons[type] || '📍'}</div>
+                    <div class="activity-content">
+                        <div class="activity-title">${title}</div>
+                        <div class="activity-meta">${description}</div>
+                    </div>
+                    <div class="activity-time">${timeStr}</div>
+                `;
+                
+                activityList.insertBefore(activityItem, activityList.firstChild);
+                
+                // Animate in
+                setTimeout(() => {
+                    activityItem.style.opacity = '1';
+                    activityItem.style.transform = 'translateX(0)';
+                }, 10);
+                
+                // Keep only last 5 activities
+                while (activityList.children.length > 5) {
+                    activityList.removeChild(activityList.lastChild);
                 }
-            } catch (error) {
-                updateConnectionStatus('error', 'Test failed');
-                showToast('❌ Connection test failed: ' + error.message, 'error');
-                log('❌ Health check failed: ' + error.message);
+                
+                // Update activity count
+                document.getElementById('activity-count').textContent = `${activityList.children.length} active`;
+            }
+
+            exportReport() {
+                this.showNotification('Report exported successfully', 'success');
+                console.log('Exporting report...');
+            }
+
+            refreshData() {
+                this.showNotification('Dashboard refreshed', 'info');
+                this.simulateUpdate();
+            }
+
+            toggleFullscreen() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                } else {
+                    document.exitFullscreen();
+                }
             }
         }
-        
-        // Manual resets (simplified)
-        function manualDailyReset() {
-            if (confirm('Archive all data for today?')) {
-                allDrivers = [];
-                driverMap.clear();
-                updateKPIs();
-                updateActivityFeed();
-                showToast('📊 Data archived', 'info');
-                log('📊 Manual reset completed');
-            }
-        }
-        
-        function clearDailyCheckIns() {
-            if (confirm('Clear all data?')) {
-                manualDailyReset();
-            }
-        }
-        
-        // Logout
-        function logout() {
-            if (confirm('Are you sure you want to logout?')) {
-                window.location.href = '/index.html';
-            }
-        }
-        
-        // Show toast notification
-        function showToast(message, type = 'info') {
-            const existingToast = document.querySelector('.toast');
-            if (existingToast) {
-                existingToast.remove();
-            }
-            
-            const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-            toast.innerHTML = `
-                <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
-                <span>${message}</span>
-            `;
-            document.body.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.remove();
-            }, 5000);
-        }
+
+        // Initialize dashboard
+        const dashboard = new FleetDashboard();
     </script>
 </body>
 </html>
