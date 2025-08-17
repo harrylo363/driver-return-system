@@ -1270,7 +1270,7 @@
             log('✅ COMPLETE DAILY RESET FINISHED');
             log('================================================');
             
-            showToast('📊 Daily Reset Complete', 'All data has been reset for the new day', 'info');
+            showToast('📊 Daily Reset Complete', 'info');
         }
 
         // Reset ALL KPI displays to 0
@@ -1500,6 +1500,15 @@
             loadDataFromMongoDB();
             
             // Start auto-refresh
+            startAutoRefresh();
+            
+            // Start periodic reset checking
+            startPeriodicResetCheck();
+            
+            log('✅ Dashboard initialization complete');
+        }
+        
+        // Start auto-refresh
         function startAutoRefresh() {
             if (refreshInterval) {
                 clearInterval(refreshInterval);
@@ -1509,6 +1518,8 @@
             refreshInterval = setInterval(() => {
                 loadDataFromMongoDB();
             }, 10000);
+            
+            log('🔄 Auto-refresh started (10-second intervals)');
         }
         
         // Update connection status
@@ -1614,7 +1625,7 @@
             log(`📊 KPIs Updated: Active=${stats.enRoute + stats.arrived}, Completed=${stats.completed}, Returns=${stats.totalReturns}`);
         }
         
-        // Update activity feed WITH proper filtering - FIXED VERSION
+        // Update activity feed WITH proper filtering
         function updateActivityFeed() {
             const activityList = document.getElementById('activityList');
             const activityCount = document.getElementById('activityCount');
@@ -1629,7 +1640,7 @@
             let filteredDrivers = allDrivers;
             let filterLabel = 'drivers';
             
-            // FIXED: Apply proper filtering to hide completed drivers from overview
+            // Apply proper filtering
             if (currentFilter === 'overview') {
                 // Overview should show all ACTIVE drivers (exclude completed)
                 filteredDrivers = allDrivers.filter(d => d?.status !== 'completed');
@@ -2118,18 +2129,8 @@
                 toast.remove();
             }, 5000);
         }
-    </script>
-</body>
-</html>
-            startAutoRefresh();
-            
-            // Start periodic reset checking
-            startPeriodicResetCheck();
-            
-            log('✅ Dashboard initialization complete');
-        }
         
-        // Load data from MongoDB with better error handling
+        // Load data from MongoDB
         async function loadDataFromMongoDB() {
             try {
                 log('📡 Loading data from MongoDB Atlas...');
@@ -2202,7 +2203,7 @@
             }
         }
         
-        // Process notifications from MongoDB - FIXED to use most recent status
+        // Process notifications from MongoDB
         function processNotifications(notifications) {
             try {
                 // Clear existing drivers and rebuild from notifications
@@ -2298,5 +2299,6 @@
                 showEmptyState();
             }
         }
-        
-        // Start auto-refresh
+    </script>
+</body>
+</html>
