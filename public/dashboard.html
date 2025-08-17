@@ -1723,6 +1723,10 @@
                             driver.status = 'completed';
                             driver.completedAt = new Date().toISOString();
                             log('✅ Updated local driver status to completed');
+                            
+                            // Immediately update the UI
+                            updateKPIs();
+                            updateActivityFeed();
                         }
                     }
                     
@@ -1732,7 +1736,7 @@
                     currentCheckInDriver = null;
                     closeCheckInModal(true);
                     
-                    // Refresh dashboard after 1 second
+                    // Refresh dashboard after 1 second to get latest from server
                     setTimeout(() => {
                         loadDataFromMongoDB();
                     }, 1000);
