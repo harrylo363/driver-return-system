@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0B0F1A">
     <title>FleetForce Driver Portal | Professional Status Management</title>
     
     <!-- Fonts -->
@@ -15,6 +18,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
         
         :root {
@@ -41,6 +45,10 @@
             --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
             --transition-fast: 0.15s ease;
             --transition-normal: 0.3s ease;
+            
+            /* Mobile-optimized spacing */
+            --safe-area-inset-top: env(safe-area-inset-top, 0px);
+            --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
         }
         
         body {
@@ -49,11 +57,15 @@
             color: var(--text-primary);
             line-height: 1.6;
             min-height: 100vh;
+            min-height: -webkit-fill-available;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
+            padding-top: calc(20px + var(--safe-area-inset-top));
+            padding-bottom: calc(20px + var(--safe-area-inset-bottom));
             overflow-x: hidden;
+            touch-action: pan-y;
         }
         
         body::before {
@@ -104,6 +116,182 @@
                 opacity: 1;
                 transform: translateY(0) scale(1);
             }
+        }
+        
+        /* Notification Badge */
+        .notification-badge {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--accent-red);
+            color: white;
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 12px;
+            font-weight: 600;
+            display: none;
+            align-items: center;
+            gap: 6px;
+            z-index: 1000;
+            cursor: pointer;
+            animation: badgePulse 2s infinite;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .notification-badge.show {
+            display: flex;
+        }
+        
+        @keyframes badgePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        /* Broadcast Message Modal */
+        .broadcast-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 20px;
+        }
+        
+        .broadcast-modal.show {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .broadcast-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border-primary);
+            border-radius: 20px;
+            padding: 24px;
+            max-width: 400px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-xl);
+            animation: slideUp 0.4s ease;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .broadcast-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .broadcast-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .broadcast-close {
+            background: transparent;
+            border: none;
+            color: var(--text-tertiary);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 4px;
+            transition: all var(--transition-fast);
+        }
+        
+        .broadcast-close:active {
+            transform: scale(0.9);
+        }
+        
+        .broadcast-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .broadcast-item {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-primary);
+            border-radius: 12px;
+            padding: 16px;
+            transition: all var(--transition-fast);
+        }
+        
+        .broadcast-item.unread {
+            border-left: 3px solid var(--accent-blue);
+            background: rgba(14, 165, 233, 0.05);
+        }
+        
+        .broadcast-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 8px;
+        }
+        
+        .broadcast-item-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .broadcast-priority {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 10px;
+            text-transform: uppercase;
+        }
+        
+        .priority-urgent {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--accent-red);
+        }
+        
+        .priority-high {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--accent-orange);
+        }
+        
+        .priority-normal {
+            background: rgba(14, 165, 233, 0.2);
+            color: var(--accent-blue);
+        }
+        
+        .priority-low {
+            background: rgba(100, 116, 139, 0.2);
+            color: var(--text-tertiary);
+        }
+        
+        .broadcast-message {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+        
+        .broadcast-time {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        
+        .broadcast-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-tertiary);
         }
         
         /* Login Screen */
@@ -211,18 +399,18 @@
             background-position: right 20px center;
             background-size: 20px;
             font-family: inherit;
+            -webkit-appearance: none;
         }
         
         .driver-select:focus {
             outline: none;
             border-color: var(--accent-blue);
-            background: var(--bg-tertiary);
+            background-color: var(--bg-tertiary);
             box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
         }
         
-        .driver-select:hover {
-            border-color: var(--border-secondary);
-            background: var(--bg-tertiary);
+        .driver-select:active {
+            transform: scale(0.99);
         }
         
         .login-btn {
@@ -240,15 +428,11 @@
             font-family: inherit;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-        }
-        
-        .login-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 30px rgba(14, 165, 233, 0.4);
+            -webkit-appearance: none;
         }
         
         .login-btn:active:not(:disabled) {
-            transform: translateY(0);
+            transform: scale(0.98);
         }
         
         .login-btn:disabled {
@@ -391,11 +575,11 @@
             justify-content: center;
             gap: 8px;
             font-family: inherit;
+            -webkit-appearance: none;
         }
         
-        .returns-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
+        .returns-btn:active {
+            transform: scale(0.98);
         }
         
         .returns-btn.selected {
@@ -463,6 +647,7 @@
             text-align: center;
             transition: all var(--transition-normal);
             font-family: inherit;
+            -webkit-appearance: none;
         }
         
         .returns-count-input:focus {
@@ -510,6 +695,7 @@
             font-family: inherit;
             text-transform: uppercase;
             letter-spacing: 0.02em;
+            -webkit-appearance: none;
         }
         
         .status-btn::before {
@@ -523,16 +709,8 @@
             transition: left 0.5s;
         }
         
-        .status-btn:hover:not(:disabled)::before {
-            left: 100%;
-        }
-        
-        .status-btn:hover:not(:disabled) {
-            transform: translateY(-3px);
-        }
-        
         .status-btn:active:not(:disabled) {
-            transform: translateY(-1px);
+            transform: scale(0.98);
         }
         
         .status-btn:disabled {
@@ -546,17 +724,9 @@
             box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
         }
         
-        .btn-30min:hover:not(:disabled) {
-            box-shadow: 0 12px 30px rgba(245, 158, 11, 0.4);
-        }
-        
         .btn-arrived {
             background: linear-gradient(135deg, var(--accent-green) 0%, #059669 100%);
             box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
-        }
-        
-        .btn-arrived:hover:not(:disabled) {
-            box-shadow: 0 12px 30px rgba(16, 185, 129, 0.4);
         }
         
         /* Loading Spinner */
@@ -608,6 +778,10 @@
         
         .notification.warning {
             border-left: 4px solid var(--accent-orange);
+        }
+        
+        .notification.info {
+            border-left: 4px solid var(--accent-blue);
         }
         
         .notification-title {
@@ -666,12 +840,11 @@
             font-family: inherit;
             text-transform: uppercase;
             letter-spacing: 0.05em;
+            -webkit-appearance: none;
         }
         
-        .signout-btn:hover {
-            background: var(--bg-elevated);
-            color: var(--text-primary);
-            border-color: var(--border-secondary);
+        .signout-btn:active {
+            transform: scale(0.98);
         }
         
         /* Debug Panel */
@@ -694,11 +867,21 @@
             display: block;
         }
         
-        /* Mobile Responsiveness */
+        /* Enhanced Mobile Responsiveness */
         @media (max-width: 640px) {
+            body {
+                padding: 0;
+                align-items: stretch;
+            }
+            
             .container {
-                padding: 32px 24px;
-                margin: 10px;
+                max-width: 100%;
+                min-height: 100vh;
+                min-height: -webkit-fill-available;
+                border-radius: 0;
+                padding: 24px 20px;
+                padding-top: calc(24px + var(--safe-area-inset-top));
+                padding-bottom: calc(24px + var(--safe-area-inset-bottom));
             }
             
             .brand-text h1 {
@@ -706,9 +889,9 @@
             }
             
             .logo-icon {
-                width: 64px;
-                height: 64px;
-                font-size: 32px;
+                width: 60px;
+                height: 60px;
+                font-size: 28px;
             }
             
             .driver-select,
@@ -723,10 +906,74 @@
             }
             
             .notification {
-                top: 20px;
+                top: auto;
+                bottom: 20px;
                 right: 20px;
                 left: 20px;
                 min-width: auto;
+            }
+            
+            .notification-badge {
+                top: calc(10px + var(--safe-area-inset-top));
+                right: 10px;
+            }
+            
+            .broadcast-modal {
+                padding: 0;
+            }
+            
+            .broadcast-content {
+                border-radius: 20px 20px 0 0;
+                max-height: 90vh;
+                margin-top: auto;
+            }
+            
+            .returns-buttons {
+                grid-template-columns: 1fr;
+            }
+            
+            .returns-btn {
+                padding: 18px;
+            }
+            
+            .header {
+                margin-bottom: 32px;
+            }
+            
+            .form-group {
+                margin-bottom: 24px;
+            }
+        }
+        
+        /* Touch-friendly adjustments */
+        @media (pointer: coarse) {
+            button, select, input {
+                min-height: 44px;
+            }
+            
+            .broadcast-close {
+                padding: 8px;
+            }
+        }
+        
+        /* Landscape mode adjustments */
+        @media (max-height: 600px) and (orientation: landscape) {
+            .container {
+                padding: 20px;
+            }
+            
+            .header {
+                margin-bottom: 24px;
+            }
+            
+            .logo-icon {
+                width: 48px;
+                height: 48px;
+                font-size: 24px;
+            }
+            
+            .brand-text h1 {
+                font-size: 20px;
             }
         }
         
@@ -741,6 +988,31 @@
     </style>
 </head>
 <body>
+    <!-- Notification Badge -->
+    <div class="notification-badge" id="notificationBadge" onclick="showBroadcasts()">
+        <span>🔔</span>
+        <span id="unreadCount">0</span>
+    </div>
+    
+    <!-- Broadcast Modal -->
+    <div class="broadcast-modal" id="broadcastModal">
+        <div class="broadcast-content">
+            <div class="broadcast-header">
+                <div class="broadcast-title">
+                    <span>📢</span>
+                    <span>Company Broadcasts</span>
+                </div>
+                <button class="broadcast-close" onclick="closeBroadcasts()">✕</button>
+            </div>
+            <div class="broadcast-list" id="broadcastList">
+                <div class="broadcast-empty">
+                    <div style="font-size: 48px; margin-bottom: 16px;">📭</div>
+                    <div>No messages yet</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <div class="container">
         <!-- Login Screen -->
         <div class="login-screen" id="loginScreen">
@@ -816,7 +1088,7 @@
                 </div>
                 <div class="returns-count" id="returnsCount">
                     <label class="returns-count-label" for="returnsCountInput">Number of Returns</label>
-                    <input type="number" class="returns-count-input" id="returnsCountInput" min="1" max="999" placeholder="Enter quantity">
+                    <input type="number" class="returns-count-input" id="returnsCountInput" min="1" max="999" placeholder="Enter quantity" inputmode="numeric">
                 </div>
             </div>
             
@@ -871,8 +1143,10 @@
         let hasReturns = null;
         let returnsCount = 0;
         let autoRefreshInterval = null;
+        let broadcastCheckInterval = null;
         let debugMode = false;
         let debugInfo = [];
+        let userBroadcasts = [];
         
         // Debug logging function
         function log(message, type = 'info') {
@@ -908,11 +1182,185 @@
             }
         }
         
+        // BROADCAST MESSAGE SYSTEM
+        // ========================
+        
+        // Check for new broadcasts
+        function checkForBroadcasts() {
+            if (!currentDriverId) return;
+            
+            log('🔔 Checking for broadcasts...');
+            
+            // Get all broadcasts from localStorage
+            const allBroadcasts = JSON.parse(localStorage.getItem('fleetforce_broadcasts')) || [];
+            const userNotifications = JSON.parse(localStorage.getItem('fleetforce_user_notifications')) || {};
+            
+            // Get notifications for current driver
+            const myNotifications = userNotifications[currentDriverId] || [];
+            
+            // Map notifications to broadcasts
+            userBroadcasts = myNotifications.map(notif => {
+                const broadcast = allBroadcasts.find(b => b.id === notif.broadcastId);
+                return {
+                    ...notif,
+                    ...broadcast,
+                    read: notif.read || false
+                };
+            }).filter(b => b.title); // Filter out invalid broadcasts
+            
+            // Sort by date (newest first)
+            userBroadcasts.sort((a, b) => new Date(b.sentAt || b.receivedAt) - new Date(a.sentAt || a.receivedAt));
+            
+            // Update unread count
+            const unreadCount = userBroadcasts.filter(b => !b.read).length;
+            updateNotificationBadge(unreadCount);
+            
+            // Show notification for new unread messages
+            if (unreadCount > 0) {
+                const latestUnread = userBroadcasts.find(b => !b.read);
+                if (latestUnread && !latestUnread.notified) {
+                    showNotification('New Broadcast', latestUnread.title, 'info');
+                    latestUnread.notified = true;
+                    
+                    // Play notification sound if available
+                    try {
+                        const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhB');
+                        audio.volume = 0.3;
+                        audio.play();
+                    } catch (e) {
+                        log('Could not play notification sound');
+                    }
+                }
+            }
+            
+            log(`✅ Found ${userBroadcasts.length} broadcasts (${unreadCount} unread)`);
+        }
+        
+        // Update notification badge
+        function updateNotificationBadge(count) {
+            const badge = document.getElementById('notificationBadge');
+            const countEl = document.getElementById('unreadCount');
+            
+            if (count > 0) {
+                badge.classList.add('show');
+                countEl.textContent = count > 99 ? '99+' : count;
+            } else {
+                badge.classList.remove('show');
+            }
+        }
+        
+        // Show broadcasts modal
+        function showBroadcasts() {
+            const modal = document.getElementById('broadcastModal');
+            const list = document.getElementById('broadcastList');
+            
+            if (userBroadcasts.length === 0) {
+                list.innerHTML = `
+                    <div class="broadcast-empty">
+                        <div style="font-size: 48px; margin-bottom: 16px;">📭</div>
+                        <div>No messages yet</div>
+                    </div>
+                `;
+            } else {
+                list.innerHTML = userBroadcasts.map(broadcast => {
+                    const sentDate = new Date(broadcast.sentAt || broadcast.receivedAt);
+                    const isUnread = !broadcast.read;
+                    
+                    return `
+                        <div class="broadcast-item ${isUnread ? 'unread' : ''}" onclick="markAsRead('${broadcast.id}')">
+                            <div class="broadcast-item-header">
+                                <div class="broadcast-item-title">${broadcast.title}</div>
+                                <span class="broadcast-priority priority-${broadcast.priority || 'normal'}">${broadcast.priority || 'normal'}</span>
+                            </div>
+                            <div class="broadcast-message">${broadcast.message}</div>
+                            <div class="broadcast-time">${sentDate.toLocaleDateString()} ${sentDate.toLocaleTimeString()}</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+            
+            modal.classList.add('show');
+            
+            // Mark all as read after 2 seconds
+            setTimeout(() => {
+                markAllAsRead();
+            }, 2000);
+        }
+        
+        // Close broadcasts modal
+        function closeBroadcasts() {
+            const modal = document.getElementById('broadcastModal');
+            modal.classList.remove('show');
+        }
+        
+        // Mark broadcast as read
+        function markAsRead(broadcastId) {
+            const userNotifications = JSON.parse(localStorage.getItem('fleetforce_user_notifications')) || {};
+            const myNotifications = userNotifications[currentDriverId] || [];
+            
+            const notif = myNotifications.find(n => n.id === broadcastId || n.broadcastId === broadcastId);
+            if (notif) {
+                notif.read = true;
+                userNotifications[currentDriverId] = myNotifications;
+                localStorage.setItem('fleetforce_user_notifications', JSON.stringify(userNotifications));
+                
+                // Update local state
+                const broadcast = userBroadcasts.find(b => b.id === broadcastId || b.broadcastId === broadcastId);
+                if (broadcast) {
+                    broadcast.read = true;
+                }
+                
+                // Update badge
+                const unreadCount = userBroadcasts.filter(b => !b.read).length;
+                updateNotificationBadge(unreadCount);
+            }
+        }
+        
+        // Mark all broadcasts as read
+        function markAllAsRead() {
+            const userNotifications = JSON.parse(localStorage.getItem('fleetforce_user_notifications')) || {};
+            const myNotifications = userNotifications[currentDriverId] || [];
+            
+            myNotifications.forEach(notif => {
+                notif.read = true;
+            });
+            
+            userNotifications[currentDriverId] = myNotifications;
+            localStorage.setItem('fleetforce_user_notifications', JSON.stringify(userNotifications));
+            
+            // Update local state
+            userBroadcasts.forEach(b => {
+                b.read = true;
+            });
+            
+            // Update badge
+            updateNotificationBadge(0);
+            
+            // Update UI
+            document.querySelectorAll('.broadcast-item.unread').forEach(item => {
+                item.classList.remove('unread');
+            });
+        }
+        
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            log('🚀 FleetForce Driver Portal - MongoDB Atlas + Railway');
+            log('🚀 FleetForce Driver Portal - Enhanced Mobile Version');
             log('🔗 API Base: ' + API_BASE);
             
+            // Prevent zoom on double tap (iOS)
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', function(event) {
+                const now = Date.now();
+                if (now - lastTouchEnd <= 300) {
+                    event.preventDefault();
+                }
+                lastTouchEnd = now;
+            }, false);
+            
+            // Load drivers from localStorage first (for testing)
+            loadDriversFromLocalStorage();
+            
+            // Then try MongoDB
             loadDriversFromMongoDB();
             checkConnectionStatus();
             
@@ -934,7 +1382,27 @@
                 returnsCount = parseInt(this.value) || 0;
                 log('Returns count updated: ' + returnsCount);
             });
+            
+            // Close modal when clicking outside
+            document.getElementById('broadcastModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeBroadcasts();
+                }
+            });
         });
+        
+        // Load drivers from localStorage (fallback/testing)
+        function loadDriversFromLocalStorage() {
+            log('📦 Checking localStorage for drivers...');
+            
+            const users = JSON.parse(localStorage.getItem('fleetforce_users')) || [];
+            const drivers = users.filter(u => u.role === 'driver' && u.active !== false);
+            
+            if (drivers.length > 0) {
+                log(`✅ Found ${drivers.length} drivers in localStorage`);
+                populateDriverDropdown(drivers);
+            }
+        }
         
         // Load drivers from MongoDB Atlas via Railway API
         async function loadDriversFromMongoDB() {
@@ -982,52 +1450,50 @@
                 
                 log('✅ Active drivers found: ' + drivers.length);
                 
-                const select = document.getElementById('driverSelect');
-                const currentValue = select.value; // Preserve selection
-                
-                if (drivers.length === 0) {
-                    select.innerHTML = '<option value="">No active drivers available</option>';
-                    log('⚠️ No active drivers found');
-                    return;
+                if (drivers.length > 0) {
+                    populateDriverDropdown(drivers);
                 }
-                
-                // Populate dropdown
-                select.innerHTML = '<option value="">-- Select your name --</option>';
-                
-                drivers.forEach((driver, index) => {
-                    const option = document.createElement('option');
-                    option.value = driver._id || driver.id;
-                    option.textContent = driver.name;
-                    option.dataset.vehicle = driver.vehicleId || `FLEET-${String(index + 1).padStart(3, '0')}`;
-                    option.dataset.name = driver.name;
-                    
-                    // Restore previous selection
-                    if ((driver._id || driver.id) === currentValue) {
-                        option.selected = true;
-                    }
-                    
-                    select.appendChild(option);
-                    log('Added driver: ' + driver.name + ' (' + option.value + ')');
-                });
-                
-                // Re-enable login button if driver was previously selected
-                document.getElementById('loginBtn').disabled = !select.value;
-                
-                log('✅ Driver dropdown populated successfully');
                 
             } catch (error) {
-                log('❌ Error loading drivers: ' + error.message);
+                log('❌ Error loading drivers from MongoDB: ' + error.message);
+                // Fallback already loaded from localStorage
+            }
+        }
+        
+        // Populate driver dropdown
+        function populateDriverDropdown(drivers) {
+            const select = document.getElementById('driverSelect');
+            const currentValue = select.value; // Preserve selection
+            
+            if (drivers.length === 0) {
+                select.innerHTML = '<option value="">No active drivers available</option>';
+                log('⚠️ No active drivers found');
+                return;
+            }
+            
+            // Populate dropdown
+            select.innerHTML = '<option value="">-- Select your name --</option>';
+            
+            drivers.forEach((driver, index) => {
+                const option = document.createElement('option');
+                option.value = driver._id || driver.id;
+                option.textContent = driver.name;
+                option.dataset.vehicle = driver.vehicleId || `FLEET-${String(index + 1).padStart(3, '0')}`;
+                option.dataset.name = driver.name;
                 
-                const select = document.getElementById('driverSelect');
-                if (select.children.length <= 1) {
-                    select.innerHTML = `
-                        <option value="">-- Connection error --</option>
-                        <option value="demo1" data-vehicle="DEMO-001" data-name="Demo Driver">Demo Driver (Offline Mode)</option>
-                    `;
+                // Restore previous selection
+                if ((driver._id || driver.id) === currentValue) {
+                    option.selected = true;
                 }
                 
-                showNotification('Connection Error', `Failed to load drivers: ${error.message}`, 'error');
-            }
+                select.appendChild(option);
+                log('Added driver: ' + driver.name + ' (' + option.value + ')');
+            });
+            
+            // Re-enable login button if driver was previously selected
+            document.getElementById('loginBtn').disabled = !select.value;
+            
+            log('✅ Driver dropdown populated successfully');
         }
         
         // Check MongoDB connection via Railway health endpoint
@@ -1095,6 +1561,10 @@
                 autoRefreshInterval = null;
             }
             
+            // Start checking for broadcasts
+            checkForBroadcasts();
+            broadcastCheckInterval = setInterval(checkForBroadcasts, 10000); // Check every 10 seconds
+            
             showMainScreen();
         }
         
@@ -1124,9 +1594,17 @@
             currentDriverId = null;
             hasReturns = null;
             returnsCount = 0;
+            userBroadcasts = [];
+            
+            // Clear broadcast check interval
+            if (broadcastCheckInterval) {
+                clearInterval(broadcastCheckInterval);
+                broadcastCheckInterval = null;
+            }
             
             // Reset UI
             resetReturnsSelection();
+            updateNotificationBadge(0);
             
             // Return to login screen
             document.getElementById('loginScreen').classList.remove('hidden');
@@ -1353,7 +1831,17 @@
             if (autoRefreshInterval) {
                 clearInterval(autoRefreshInterval);
             }
+            if (broadcastCheckInterval) {
+                clearInterval(broadcastCheckInterval);
+            }
         });
+        
+        // Request notification permission
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission().then(permission => {
+                log('Browser notification permission: ' + permission);
+            });
+        }
         
         // Debug information
         log('🔧 Debug Information:');
@@ -1363,6 +1851,8 @@
         log('  - Users: /api/users');
         log('  - Notifications: /api/notifications');
         log('  - Health: /api/health');
+        log('- Broadcast system: Active');
+        log('- Mobile optimizations: Enabled');
     </script>
 </body>
 </html>
