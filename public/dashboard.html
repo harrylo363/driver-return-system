@@ -3,415 +3,566 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fleet Command Center</title>
+    <title>Fleet Command Center - MongoDB Connected</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
+        
+        :root {
+            --primary: #0F172A;
+            --primary-light: #1E293B;
+            --accent: #3B82F6;
+            --accent-hover: #2563EB;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --text-primary: #F1F5F9;
+            --text-secondary: #94A3B8;
+            --text-muted: #64748B;
+            --bg-dark: #0F172A;
+            --bg-card: #1E293B;
+            --bg-hover: #334155;
+            --border: #334155;
+            --gradient-primary: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
+        }
+        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            color: #e2e8f0;
-            min-height: 100vh;
-            padding: 20px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
         }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
+        
+        /* Background gradient */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
+            z-index: -1;
         }
-
+        
         .header {
-            background: rgba(30, 41, 59, 0.8);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 24px 32px;
-            margin-bottom: 32px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 1rem 2rem;
+        }
+        
+        .header-content {
+            max-width: 1920px;
+            margin: 0 auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border: 1px solid rgba(148, 163, 184, 0.1);
-            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
         }
-
-        .logo {
+        
+        .brand {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 1rem;
         }
-
-        .logo-icon {
+        
+        .logo {
             width: 48px;
             height: 48px;
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            background: var(--gradient-primary);
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 24px;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-        }
-
-        .logo-text h1 {
-            font-size: 28px;
             font-weight: 700;
-            background: linear-gradient(135deg, #60a5fa, #a78bfa);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .logo-text p {
-            font-size: 14px;
-            color: #94a3b8;
-            margin-top: 2px;
-        }
-
-        .header-info {
-            display: flex;
-            gap: 32px;
-            align-items: center;
-        }
-
-        .status-badge {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            border-radius: 24px;
-            color: #10b981;
-            font-weight: 500;
-            animation: pulse 2s infinite;
-        }
-
-        .status-indicator {
-            width: 8px;
-            height: 8px;
-            background: #10b981;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        .timestamp {
-            color: #64748b;
-            font-size: 14px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px;
-            margin-bottom: 32px;
-        }
-
-        .stat-card {
-            background: rgba(30, 41, 59, 0.6);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 24px;
-            border: 1px solid rgba(148, 163, 184, 0.1);
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            animation: fadeIn 0.5s ease-out;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            border-color: rgba(148, 163, 184, 0.2);
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .stat-card:hover::before {
-            opacity: 1;
-        }
-
-        .stat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 16px;
-        }
-
-        .stat-title {
-            font-size: 14px;
-            color: #94a3b8;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 600;
-        }
-
-        .stat-icon {
-            width: 40px;
-            height: 40px;
-            background: rgba(59, 130, 246, 0.1);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-        }
-
-        .stat-value {
-            font-size: 48px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            background: linear-gradient(135deg, #60a5fa, #a78bfa);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .stat-description {
-            font-size: 13px;
-            color: #64748b;
-        }
-
-        .stat-change {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-top: 12px;
-        }
-
-        .stat-change.positive {
-            background: rgba(16, 185, 129, 0.1);
-            color: #10b981;
-        }
-
-        .stat-change.negative {
-            background: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
-        }
-
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 400px;
-            gap: 24px;
-        }
-
-        .activity-feed {
-            background: rgba(30, 41, 59, 0.6);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 24px;
-            border: 1px solid rgba(148, 163, 184, 0.1);
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
-        }
-
-        .section-title {
-            font-size: 18px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .activity-item {
-            display: flex;
-            gap: 16px;
-            padding: 16px;
-            background: rgba(15, 23, 42, 0.4);
-            border-radius: 12px;
-            margin-bottom: 12px;
-            transition: all 0.2s ease;
-            border: 1px solid transparent;
-        }
-
-        .activity-item:hover {
-            background: rgba(15, 23, 42, 0.6);
-            border-color: rgba(148, 163, 184, 0.1);
-            transform: translateX(4px);
-        }
-
-        .activity-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            flex-shrink: 0;
-        }
-
-        .activity-icon.arrived {
-            background: rgba(16, 185, 129, 0.2);
-            color: #10b981;
-        }
-
-        .activity-icon.en-route {
-            background: rgba(59, 130, 246, 0.2);
-            color: #3b82f6;
-        }
-
-        .activity-icon.maintenance {
-            background: rgba(245, 158, 11, 0.2);
-            color: #f59e0b;
-        }
-
-        .activity-content {
-            flex: 1;
-        }
-
-        .activity-title {
-            font-weight: 600;
-            margin-bottom: 4px;
-            color: #e2e8f0;
-        }
-
-        .activity-meta {
-            font-size: 12px;
-            color: #64748b;
-        }
-
-        .activity-time {
-            font-size: 12px;
-            color: #475569;
-        }
-
-        .performance-metrics {
-            background: rgba(30, 41, 59, 0.6);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 24px;
-            border: 1px solid rgba(148, 163, 184, 0.1);
-        }
-
-        .metric-item {
-            margin-bottom: 24px;
-        }
-
-        .metric-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .metric-label {
-            font-size: 14px;
-            color: #94a3b8;
-            font-weight: 500;
-        }
-
-        .metric-value {
-            font-size: 24px;
-            font-weight: 700;
-            color: #60a5fa;
-        }
-
-        .progress-bar {
-            height: 8px;
-            background: rgba(148, 163, 184, 0.1);
-            border-radius: 4px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
-            border-radius: 4px;
-            transition: width 1s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .progress-fill::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            animation: shimmer 2s infinite;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 12px;
-            margin-top: 24px;
-        }
-
-        .btn {
-            padding: 12px 24px;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
             color: white;
             box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
-
+        
+        .brand-text h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--gradient-primary);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0;
+        }
+        
+        .brand-text p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 100px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .status-indicator.connected {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: var(--success);
+        }
+        
+        .status-indicator.connecting {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: var(--warning);
+        }
+        
+        .status-indicator.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--danger);
+        }
+        
+        .pulse {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        .pulse.success {
+            background: var(--success);
+        }
+        
+        .pulse.warning {
+            background: var(--warning);
+        }
+        
+        .pulse.error {
+            background: var(--danger);
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.5); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        
+        .container {
+            max-width: 1920px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .debug-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: none;
+        }
+        
+        .debug-panel.show {
+            display: block;
+        }
+        
+        .debug-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .debug-info {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .kpi-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .kpi-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            border-color: var(--accent);
+        }
+        
+        .kpi-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 1rem;
+        }
+        
+        .kpi-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+        
+        .kpi-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .kpi-sublabel {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+        
+        .control-panel {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+        }
+        
         .btn-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
         }
-
+        
         .btn-secondary {
-            background: rgba(148, 163, 184, 0.1);
-            color: #94a3b8;
-            border: 1px solid rgba(148, 163, 184, 0.2);
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
         }
-
+        
         .btn-secondary:hover {
-            background: rgba(148, 163, 184, 0.15);
-            border-color: rgba(148, 163, 184, 0.3);
+            background: var(--border);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            font-size: 0.75rem;
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+        
+        .filter-group {
+            display: flex;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .filter-btn {
+            padding: 0.75rem 1.25rem;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .filter-btn:not(:last-child) {
+            border-right: 1px solid var(--border);
+        }
+        
+        .filter-btn:hover {
+            color: var(--text-primary);
+            background: var(--bg-hover);
+        }
+        
+        .filter-btn.active {
+            color: white;
+            background: var(--accent);
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+        
+        .activity-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        
+        .section-header {
+            padding: 1.5rem;
+            background: rgba(15, 23, 42, 0.5);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .activity-list {
+            max-height: 600px;
+            overflow-y: auto;
+            padding: 0;
+        }
+        
+        .activity-item {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            transition: all 0.2s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .activity-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: transparent;
+            transition: all 0.2s ease;
+        }
+        
+        .activity-item:hover {
+            background: var(--bg-hover);
+            padding-left: 2rem;
+        }
+        
+        .activity-item.enroute::before { background: var(--warning); }
+        .activity-item.arrived::before { background: var(--success); }
+        .activity-item.completed::before { background: var(--success); }
+        .activity-item.working::before { background: var(--text-muted); }
+        
+        .activity-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .activity-driver {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+            font-size: 1rem;
+        }
+        
+        .activity-details {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            flex-wrap: wrap;
+        }
+        
+        .activity-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .status-badge {
+            padding: 0.375rem 0.875rem;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .status-enroute {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+        
+        .status-arrived {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .status-completed {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .status-working {
+            background: rgba(100, 116, 139, 0.1);
+            color: var(--text-muted);
+            border: 1px solid rgba(100, 116, 139, 0.3);
+        }
+        
+        .analytics-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .analytics-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+        }
+        
+        .metric-card {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            transition: all 0.2s ease;
+        }
+        
+        .metric-card:hover {
+            border-color: var(--accent);
+            transform: translateX(4px);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-muted);
+        }
+        
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
         }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.8; }
+        /* Toast notification styles */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            z-index: 10000;
+            animation: slideIn 0.3s ease;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            max-width: 400px;
         }
-
-        @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
+        
         @keyframes slideIn {
             from {
                 transform: translateX(100%);
@@ -423,489 +574,1729 @@
             }
         }
         
-        @keyframes slideOut {
-            from {
-                transform: translateX(0);
-                opacity: 1;
-            }
-            to {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-        }
-
-        .notification {
-            transition: all 0.3s ease;
+        .toast-success {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
         }
         
-        .notification:hover {
-            transform: scale(1.02);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+        .toast-error {
+            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
         }
-
-        @media (max-width: 1024px) {
-            .main-content {
+        
+        .toast-info {
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Modal styles for check-in form */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+        }
+        
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 2rem;
+            animation: modalSlideIn 0.3s ease;
+        }
+        
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            transition: color 0.2s;
+        }
+        
+        .close-modal:hover {
+            color: var(--text-primary);
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            display: block;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        .equipment-section {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .equipment-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .checklist-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .checklist-label {
+            font-size: 0.875rem;
+            color: var(--text-primary);
+        }
+        
+        .checklist-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .check-btn {
+            padding: 0.375rem 0.75rem;
+            border: 1px solid var(--border);
+            background: var(--bg-dark);
+            color: var(--text-secondary);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .check-btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .check-btn.pass.selected {
+            background: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+        
+        .check-btn.fail.selected {
+            background: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+        
+        .issue-input {
+            width: 100%;
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            font-size: 0.75rem;
+            display: none;
+        }
+        
+        .issue-input.show {
+            display: block;
+        }
+        
+        @media (max-width: 1400px) {
+            .dashboard-grid {
                 grid-template-columns: 1fr;
             }
         }
-
-        @media (max-width: 640px) {
-            .header {
-                flex-direction: column;
-                gap: 16px;
-                text-align: center;
-            }
-
-            .header-info {
-                flex-direction: column;
-                gap: 12px;
-            }
-
-            .stats-grid {
+        
+        @media (max-width: 768px) {
+            .kpi-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            .header-actions {
+                flex-direction: column;
+                gap: 0.75rem;
+                align-items: flex-end;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header class="header">
-            <div class="logo">
-                <div class="logo-icon">🚛</div>
-                <div class="logo-text">
+    <header class="header">
+        <div class="header-content">
+            <div class="brand">
+                <div class="logo">⚡</div>
+                <div class="brand-text">
                     <h1>Fleet Command Center</h1>
-                    <p>Enterprise Logistics Platform</p>
+                    <p>MongoDB Atlas + Railway Integration</p>
                 </div>
             </div>
-            <div class="header-info">
-                <div class="status-badge">
-                    <span class="status-indicator"></span>
-                    <span>System Operational</span>
+            <div class="header-actions">
+                <div class="status-indicator connecting" id="connectionIndicator">
+                    <div class="pulse warning"></div>
+                    <span id="connectionStatus">Connecting to MongoDB...</span>
                 </div>
-                <div class="timestamp" id="timestamp"></div>
-                <button class="btn btn-primary" onclick="dashboard.toggleFullscreen()">
-                    <span>⛶</span> Fullscreen
+                <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); color: var(--accent); padding: 0.5rem 1rem; border-radius: 100px; font-size: 0.875rem; font-weight: 500;">
+                    6995 N US-41, Apollo Beach, FL 33572
+                </div>
+                <button class="btn btn-danger" onclick="logout()">
+                    🚪 Logout
                 </button>
             </div>
-        </header>
+        </div>
+    </header>
 
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div>
-                        <div class="stat-title">Active Drivers</div>
-                        <div class="stat-value" id="active-drivers">0</div>
-                        <div class="stat-description">Currently on duty</div>
-                    </div>
-                    <div class="stat-icon">🚗</div>
-                </div>
-                <div class="stat-change positive">↑ 12%</div>
+    <div class="container">
+        <!-- Debug Panel -->
+        <div class="debug-panel" id="debugPanel">
+            <div class="debug-title">
+                <span>🔧</span>
+                <span>Debug Information</span>
+                <button class="btn btn-secondary" onclick="toggleDebug()" style="margin-left: auto; padding: 0.5rem 1rem; font-size: 0.75rem;">Hide</button>
             </div>
-
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div>
-                        <div class="stat-title">En Route</div>
-                        <div class="stat-value" id="en-route">0</div>
-                        <div class="stat-description">Approaching warehouses</div>
-                    </div>
-                    <div class="stat-icon">📍</div>
-                </div>
-                <div class="stat-change positive">↑ 5%</div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div>
-                        <div class="stat-title">Arrived Today</div>
-                        <div class="stat-value" id="arrived-today">0</div>
-                        <div class="stat-description">Successfully checked in</div>
-                    </div>
-                    <div class="stat-icon">✓</div>
-                </div>
-                <div class="stat-change positive">↑ 8%</div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div>
-                        <div class="stat-title">Pending Check-in</div>
-                        <div class="stat-value" id="pending-checkin">0</div>
-                        <div class="stat-description">Drivers awaiting check-in</div>
-                    </div>
-                    <div class="stat-icon">⏳</div>
-                </div>
-                <div class="stat-change negative">↓ 15%</div>
+            <div class="debug-info" id="debugInfo">
+                Initializing debug panel...
             </div>
         </div>
 
-        <div class="main-content">
-            <div class="activity-feed">
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-icon">🚚</div>
+                <div class="kpi-value" id="activeCount">0</div>
+                <div class="kpi-label">Active Updates</div>
+                <div class="kpi-sublabel">En route + arrived</div>
+            </div>
+            
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: rgba(245, 158, 11, 0.1);">📍</div>
+                <div class="kpi-value" id="enrouteCount">0</div>
+                <div class="kpi-label">En Route</div>
+                <div class="kpi-sublabel">30 min away</div>
+            </div>
+            
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: rgba(16, 185, 129, 0.1);">🏁</div>
+                <div class="kpi-value" id="arrivedCount">0</div>
+                <div class="kpi-label">Arrived</div>
+                <div class="kpi-sublabel">At warehouse</div>
+            </div>
+            
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: rgba(16, 185, 129, 0.1);">✅</div>
+                <div class="kpi-value" id="completedCount">0</div>
+                <div class="kpi-label">Completed</div>
+                <div class="kpi-sublabel">Checked in today</div>
+            </div>
+            
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: rgba(100, 116, 139, 0.1);">📦</div>
+                <div class="kpi-value" id="workingCount">0</div>
+                <div class="kpi-label">Still Working</div>
+                <div class="kpi-sublabel">Out on routes</div>
+            </div>
+            
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: rgba(239, 68, 68, 0.1);">📦</div>
+                <div class="kpi-value" id="returnsKpiCount">0</div>
+                <div class="kpi-label">Returns Today</div>
+                <div class="kpi-sublabel" id="returnsSublabel">From 0 drivers</div>
+            </div>
+        </div>
+
+        <!-- Filter Controls -->
+        <div class="control-panel">
+            <div class="filter-group" style="flex: 1;">
+                <button class="filter-btn active" onclick="filterDrivers('overview', this)">Overview</button>
+                <button class="filter-btn" onclick="filterDrivers('en-route', this)">En Route</button>
+                <button class="filter-btn" onclick="filterDrivers('arrived', this)">Arrived</button>
+                <button class="filter-btn" onclick="filterDrivers('completed', this)">✓ Completed</button>
+                <button class="filter-btn" onclick="filterDrivers('working', this)">Still Working</button>
+            </div>
+            <button class="btn btn-secondary" onclick="toggleDebug()">
+                🔧 Debug
+            </button>
+            <button class="btn btn-secondary" id="refreshButton" onclick="refreshDashboard()">
+                <span id="refreshIcon">🔄</span>
+                <span id="refreshText">Refresh</span>
+            </button>
+            <button class="btn btn-warning" onclick="manualDailyReset()">
+                📊 End Day & Archive
+            </button>
+            <button class="btn btn-danger" onclick="clearDailyCheckIns()">
+                🗑️ Clear Check-ins
+            </button>
+        </div>
+
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+            <div class="activity-section">
                 <div class="section-header">
                     <h2 class="section-title">
-                        <span>📊</span> Real-Time Activity Feed
+                        📡 MongoDB Real-Time Activity Feed
                     </h2>
-                    <span class="activity-time" id="activity-count">1 active</span>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <span id="activityCount" style="font-size: 0.875rem; color: var(--text-secondary);"></span>
+                        <span id="lastUpdate" style="font-size: 0.875rem; color: var(--text-secondary);">
+                            Loading from MongoDB...
+                        </span>
+                    </div>
                 </div>
-                <div id="activity-list">
-                    <!-- Activity items will be dynamically inserted here -->
+                <div class="activity-list" id="activityList">
+                    <div class="empty-state">
+                        <div class="empty-icon">📭</div>
+                        <p>Loading driver activity from MongoDB Atlas...</p>
+                        <p style="font-size: 0.875rem; margin-top: 1rem;">Drivers can update status at /driver</p>
+                    </div>
                 </div>
             </div>
 
-            <div class="performance-metrics">
-                <div class="section-header">
-                    <h2 class="section-title">
-                        <span>📈</span> Performance Metrics
-                    </h2>
+            <div>
+                <div class="analytics-panel">
+                    <h3 class="analytics-title">🔧 Equipment Status</h3>
+                    <div class="metric-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 0.875rem; color: var(--text-secondary);">🚛 Tractor Issues</span>
+                            <span style="font-size: 1.5rem; font-weight: 700;" id="tractorIssues">0</span>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 0.875rem; color: var(--text-secondary);">🚚 Trailer Issues</span>
+                            <span style="font-size: 1.5rem; font-weight: 700;" id="trailerIssues">0</span>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 0.875rem; color: var(--text-secondary);">🏗️ Moffett Issues</span>
+                            <span style="font-size: 1.5rem; font-weight: 700;" id="moffettIssues">0</span>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="metric-item">
-                    <div class="metric-header">
-                        <span class="metric-label">Fleet Utilization</span>
-                        <span class="metric-value" id="utilization-value">0%</span>
+                <div class="analytics-panel">
+                    <h3 class="analytics-title">📦 Returns Summary</h3>
+                    <div class="metric-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 0.875rem; color: var(--text-secondary);">📥 Total Returns</span>
+                            <span style="font-size: 1.5rem; font-weight: 700;" id="totalReturnsToday">0</span>
+                        </div>
                     </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="utilization-bar" style="width: 0%"></div>
+                    <div class="metric-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 0.875rem; color: var(--text-secondary);">🚚 Drivers w/ Returns</span>
+                            <span style="font-size: 1.5rem; font-weight: 700;" id="driversWithReturns">0</span>
+                        </div>
                     </div>
-                </div>
-
-                <div class="metric-item">
-                    <div class="metric-header">
-                        <span class="metric-label">On-Time Delivery</span>
-                        <span class="metric-value" id="delivery-value">0%</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="delivery-bar" style="width: 0%"></div>
-                    </div>
-                </div>
-
-                <div class="metric-item">
-                    <div class="metric-header">
-                        <span class="metric-label">Driver Satisfaction</span>
-                        <span class="metric-value" id="satisfaction-value">0%</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="satisfaction-bar" style="width: 0%"></div>
+                    <div class="metric-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 0.875rem; color: var(--text-secondary);">📊 Avg Returns/Driver</span>
+                            <span style="font-size: 1.5rem; font-weight: 700;" id="avgReturns">0</span>
+                        </div>
                     </div>
                 </div>
-
-                <div class="action-buttons">
-                    <button class="btn btn-primary" onclick="dashboard.exportReport()">
-                        <span>📊</span> Export Report
-                    </button>
-                    <button class="btn btn-secondary" onclick="dashboard.refreshData()">
-                        <span>🔄</span> Refresh
-                    </button>
+                
+                <div class="analytics-panel">
+                    <h3 class="analytics-title">⚡ Quick Actions</h3>
+                    <div style="display: grid; gap: 1rem;">
+                        <button class="btn btn-primary" style="width: 100%;" onclick="testMongoConnection()">
+                            📡 Test MongoDB Connection
+                        </button>
+                        <button class="btn btn-secondary" style="width: 100%;" onclick="window.open('driver.html', '_blank')">
+                            🚚 Driver Portal
+                        </button>
+                        <button class="btn btn-danger" style="width: 100%;" onclick="logout()">
+                            🚪 Logout
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Check-In Modal -->
+    <div id="checkInModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">📋 Equipment Check-In: <span id="modalDriverName"></span></h2>
+                <button class="close-modal" onclick="closeCheckInModal()" title="Close form">&times;</button>
+            </div>
+            
+            <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem;">
+                <p style="color: var(--warning); font-size: 0.875rem; margin: 0;">
+                    ⚠️ All fields and inspection items must be completed before submission
+                </p>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Driver Name</label>
+                <input type="text" class="form-input" id="driverNameField" readonly style="background: var(--bg-card); cursor: not-allowed;">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Equipment Numbers <span style="color: var(--danger);">*</span></label>
+                <input type="text" class="form-input" id="tractorNumber" placeholder="Tractor # (Required)" required>
+                <input type="text" class="form-input" id="trailerNumber" placeholder="Trailer # (Required)" style="margin-top: 0.5rem;" required>
+                <input type="text" class="form-input" id="moffettNumber" placeholder="Moffett # (Optional - only fill if applicable)" style="margin-top: 0.5rem;">
+            </div>
+            
+            <div class="equipment-section">
+                <div class="equipment-title">
+                    <span>🚛</span>
+                    <span>Tractor Inspection</span>
+                </div>
+                <div id="tractorChecklist"></div>
+            </div>
+            
+            <div class="equipment-section">
+                <div class="equipment-title">
+                    <span>🚚</span>
+                    <span>Trailer Inspection</span>
+                </div>
+                <div id="trailerChecklist"></div>
+            </div>
+            
+            <div class="equipment-section">
+                <div class="equipment-title">
+                    <span>🏗️</span>
+                    <span>Moffett Inspection (if applicable)</span>
+                </div>
+                <div id="moffettChecklist"></div>
+            </div>
+            
+            <button class="btn btn-primary" style="width: 100%; margin-top: 1.5rem;" onclick="submitCheckIn()">
+                Complete Check-In
+            </button>
+        </div>
+    </div>
+
     <script>
-        class FleetDashboard {
-            constructor() {
-                this.activeDrivers = 0;
-                this.enRoute = 0;
-                this.arrivedToday = 0;
-                this.pendingCheckin = 0;
-                this.activities = [];
-                this.init();
-            }
-
-            init() {
-                this.updateTimestamp();
-                setInterval(() => this.updateTimestamp(), 1000);
-                
-                // Initialize notification container first
-                this.initializeNotifications();
-                
-                // Animate stats on load
-                setTimeout(() => this.animateStats(), 100);
-                
-                // Simulate real-time updates
-                setInterval(() => this.simulateUpdate(), 5000);
-                
-                // Show notifications
-                this.showNotification('System Operational', 'success');
-                
-                // Simulate some notifications
-                setTimeout(() => {
-                    this.showNotification('Driver #3 has checked in', 'info');
-                }, 3000);
-                
-                setTimeout(() => {
-                    this.showNotification('Route optimization complete', 'success');
-                }, 6000);
-                
-                setTimeout(() => {
-                    this.showNotification('Vehicle maintenance due for Unit #7', 'warning');
-                }, 9000);
-                
-                // Initialize activity feed
-                this.addActivity('arrived', 'Driver #5856 - Tampa FDC', 'Checked in at warehouse');
-                
-                // Animate performance metrics
-                setTimeout(() => this.animateMetrics(), 500);
-            }
-
-            initializeNotifications() {
-                // Create notification container if it doesn't exist
-                if (!document.getElementById('notification-container')) {
-                    const container = document.createElement('div');
-                    container.id = 'notification-container';
-                    container.style.cssText = `
-                        position: fixed;
-                        top: 20px;
-                        right: 20px;
-                        z-index: 10000;
-                        display: flex;
-                        flex-direction: column;
-                        gap: 10px;
-                        pointer-events: none;
-                    `;
-                    document.body.appendChild(container);
+        // IMPORTANT: Update this with your Railway backend URL if needed
+        const API_BASE = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000' 
+            : window.location.origin;
+        
+        const WAREHOUSE_ADDRESS = "6995 N US-41, Apollo Beach, FL 33572";
+        
+        // Global variables
+        let allDrivers = [];
+        let currentFilter = 'overview';
+        let driverMap = new Map();
+        let completedDrivers = new Set();
+        let lastResetDate = null;
+        let refreshInterval = null;
+        let debugMode = false;
+        let debugInfo = [];
+        let currentCheckInDriver = null;
+        let equipmentIssues = {};
+        
+        // Inspection items
+        const inspectionItems = {
+            tractor: [
+                'QR Code Scanned',
+                'Samsara Device Working',
+                'No External Damages',
+                'Windshield Clean & Intact',
+                'All Lights Working',
+                'Tires in Good Condition',
+                'Air/Electrical Lines Good',
+                'Cab Clean',
+                'Fire Extinguisher Present',
+                'Safety Equipment Complete',
+                'Documentation Present',
+                'Fluid Levels Checked'
+            ],
+            trailer: [
+                'Gladhands Connected',
+                'Deck in Good Condition',
+                'No Physical Damages',
+                'All Lights Working',
+                'Tires in Good Condition',
+                'Straps & Securement Good'
+            ],
+            moffett: [
+                'No Physical Damages',
+                'Safety Equipment Present',
+                'All Lights Working',
+                'Electrical Systems Good',
+                'Tires in Good Condition'
+            ]
+        };
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🚀 Fleet Command Center - MongoDB Atlas Integration');
+            log('🔗 API Base: ' + API_BASE);
+            log('📍 Warehouse: ' + WAREHOUSE_ADDRESS);
+            log('📅 Current Date: ' + new Date().toDateString());
+            log('🕐 Current Time: ' + new Date().toLocaleTimeString());
+            log('================================================');
+            
+            setupChecklistItems();
+            initializeDashboard();
+        });
+        
+        // Setup checklist items in modal
+        function setupChecklistItems() {
+            ['tractor', 'trailer', 'moffett'].forEach(type => {
+                const container = document.getElementById(`${type}Checklist`);
+                if (container) {
+                    container.innerHTML = inspectionItems[type].map((item, index) => `
+                        <div class="checklist-item">
+                            <span class="checklist-label">${item}</span>
+                            <div class="checklist-buttons">
+                                <button class="check-btn pass" onclick="setCheckStatus('${type}', ${index}, 'pass', this)">✓ Pass</button>
+                                <button class="check-btn fail" onclick="setCheckStatus('${type}', ${index}, 'fail', this)">✗ Fail</button>
+                            </div>
+                            <input type="text" class="issue-input" id="${type}_${index}_issue" 
+                                   placeholder="Describe the issue..." onblur="saveIssueDescription('${type}', ${index})">
+                        </div>
+                    `).join('');
                 }
+            });
+        }
+        
+        // Set check status
+        function setCheckStatus(type, index, status, button) {
+            const itemId = `${type}_${index}`;
+            const issueInput = document.getElementById(`${itemId}_issue`);
+            const buttons = button.parentElement.querySelectorAll('.check-btn');
+            
+            // Clear selected state from both buttons
+            buttons.forEach(btn => btn.classList.remove('selected'));
+            
+            // Set selected state
+            button.classList.add('selected');
+            
+            if (status === 'fail') {
+                issueInput.classList.add('show');
+                issueInput.focus();
+                equipmentIssues[itemId] = ''; // Initialize with empty string
+            } else {
+                issueInput.classList.remove('show');
+                delete equipmentIssues[itemId];
             }
-
-            showNotification(message, type = 'info') {
-                console.log(`Showing notification: ${message} (${type})`);
-                
-                // Ensure container exists
-                let container = document.getElementById('notification-container');
-                if (!container) {
-                    this.initializeNotifications();
-                    container = document.getElementById('notification-container');
-                }
-                
-                const notification = document.createElement('div');
-                notification.className = `notification ${type}`;
-                
-                const colors = {
-                    success: '#10b981',
-                    error: '#ef4444',
-                    warning: '#f59e0b',
-                    info: '#3b82f6'
-                };
-                
-                notification.style.cssText = `
-                    background: ${colors[type] || colors.info};
-                    color: white;
-                    padding: 12px 20px;
-                    border-radius: 8px;
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-                    animation: slideIn 0.3s ease-out;
-                    pointer-events: auto;
-                    cursor: pointer;
-                    min-width: 250px;
-                    max-width: 400px;
-                    font-size: 14px;
-                    font-weight: 500;
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
-                    position: relative;
-                    overflow: hidden;
-                `;
-                
-                // Add icon
-                const icon = document.createElement('span');
-                icon.style.cssText = 'font-size: 18px;';
-                icon.innerHTML = type === 'success' ? '✓' : 
-                                type === 'error' ? '✕' : 
-                                type === 'warning' ? '⚠' : 'ℹ';
-                
-                // Add message
-                const text = document.createElement('span');
-                text.style.cssText = 'flex: 1;';
-                text.textContent = message;
-                
-                // Add close button
-                const closeBtn = document.createElement('span');
-                closeBtn.style.cssText = `
-                    cursor: pointer;
-                    opacity: 0.8;
-                    font-size: 18px;
-                    padding: 0 4px;
-                `;
-                closeBtn.innerHTML = '×';
-                closeBtn.onclick = () => notification.remove();
-                
-                notification.appendChild(icon);
-                notification.appendChild(text);
-                notification.appendChild(closeBtn);
-                
-                container.appendChild(notification);
-                
-                // Auto remove after 5 seconds
-                setTimeout(() => {
-                    notification.style.animation = 'slideOut 0.3s ease-in';
-                    setTimeout(() => notification.remove(), 300);
-                }, 5000);
+        }
+        
+        // Save issue description
+        function saveIssueDescription(type, index) {
+            const itemId = `${type}_${index}`;
+            const issueInput = document.getElementById(`${itemId}_issue`);
+            
+            if (issueInput.value.trim()) {
+                equipmentIssues[itemId] = issueInput.value.trim();
+            } else {
+                delete equipmentIssues[itemId];
             }
-
-            updateTimestamp() {
-                const now = new Date();
-                const timeStr = now.toLocaleTimeString('en-US', { 
-                    hour: '2-digit', 
-                    minute: '2-digit',
-                    second: '2-digit'
-                });
-                document.getElementById('timestamp').textContent = timeStr;
+        }
+        
+        // Debug logging function
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            
+            console.log(logEntry);
+            debugInfo.push(logEntry);
+            
+            // Keep only last 50 entries
+            if (debugInfo.length > 50) {
+                debugInfo = debugInfo.slice(-50);
             }
-
-            animateValue(id, start, end, duration) {
-                const element = document.getElementById(id);
-                const range = end - start;
-                const increment = end > start ? 1 : -1;
-                const stepTime = Math.abs(Math.floor(duration / range));
-                let current = start;
-                
-                const timer = setInterval(() => {
-                    current += increment;
-                    element.textContent = current;
-                    if (current === end) {
-                        clearInterval(timer);
-                    }
-                }, stepTime);
+            
+            updateDebugPanel();
+        }
+        
+        function updateDebugPanel() {
+            const debugElement = document.getElementById('debugInfo');
+            if (debugElement) {
+                debugElement.textContent = debugInfo.join('\n');
+                debugElement.scrollTop = debugElement.scrollHeight;
             }
-
-            animateStats() {
-                this.animateValue('active-drivers', 0, 2, 1000);
-                this.animateValue('en-route', 0, 0, 1000);
-                this.animateValue('arrived-today', 0, 1, 1000);
-                this.animateValue('pending-checkin', 0, 1, 1000);
-                
-                this.activeDrivers = 2;
-                this.enRoute = 0;
-                this.arrivedToday = 1;
-                this.pendingCheckin = 1;
-            }
-
-            animateMetrics() {
-                this.animateProgress('utilization-bar', 'utilization-value', 50);
-                this.animateProgress('delivery-bar', 'delivery-value', 91);
-                this.animateProgress('satisfaction-bar', 'satisfaction-value', 88);
-            }
-
-            animateProgress(barId, valueId, targetPercent) {
-                const bar = document.getElementById(barId);
-                const value = document.getElementById(valueId);
-                let current = 0;
-                
-                const interval = setInterval(() => {
-                    if (current <= targetPercent) {
-                        bar.style.width = current + '%';
-                        value.textContent = current + '%';
-                        current += 2;
-                    } else {
-                        clearInterval(interval);
-                    }
-                }, 20);
-            }
-
-            simulateUpdate() {
-                const updates = [
-                    () => {
-                        this.activeDrivers++;
-                        document.getElementById('active-drivers').textContent = this.activeDrivers;
-                        this.addActivity('en-route', `Driver #${Math.floor(Math.random() * 9000) + 1000}`, 'Started route to warehouse');
-                        this.showNotification('New driver started shift', 'info');
-                    },
-                    () => {
-                        if (this.enRoute > 0) {
-                            this.enRoute--;
-                            this.arrivedToday++;
-                            document.getElementById('en-route').textContent = this.enRoute;
-                            document.getElementById('arrived-today').textContent = this.arrivedToday;
-                            this.addActivity('arrived', `Driver #${Math.floor(Math.random() * 9000) + 1000}`, 'Arrived at destination');
-                            this.showNotification('Driver arrived at warehouse', 'success');
-                        }
-                    },
-                    () => {
-                        this.pendingCheckin++;
-                        document.getElementById('pending-checkin').textContent = this.pendingCheckin;
-                        this.addActivity('maintenance', `Vehicle #${Math.floor(Math.random() * 900) + 100}`, 'Scheduled for maintenance');
-                    },
-                    () => {
-                        if (this.pendingCheckin > 0) {
-                            this.pendingCheckin--;
-                            this.arrivedToday++;
-                            document.getElementById('pending-checkin').textContent = this.pendingCheckin;
-                            document.getElementById('arrived-today').textContent = this.arrivedToday;
-                            this.addActivity('arrived', `Driver #${Math.floor(Math.random() * 9000) + 1000}`, 'Check-in completed');
-                        }
-                    }
-                ];
-                
-                const randomUpdate = updates[Math.floor(Math.random() * updates.length)];
-                randomUpdate();
-            }
-
-            addActivity(type, title, description) {
-                const activityList = document.getElementById('activity-list');
-                const activityItem = document.createElement('div');
-                activityItem.className = 'activity-item';
-                activityItem.style.opacity = '0';
-                
-                const icons = {
-                    arrived: '✓',
-                    'en-route': '🚛',
-                    maintenance: '🔧'
-                };
-                
-                const now = new Date();
-                const timeStr = now.toLocaleTimeString('en-US', { 
-                    hour: '2-digit', 
-                    minute: '2-digit'
-                });
-                
-                activityItem.innerHTML = `
-                    <div class="activity-icon ${type}">${icons[type] || '📍'}</div>
-                    <div class="activity-content">
-                        <div class="activity-title">${title}</div>
-                        <div class="activity-meta">${description}</div>
-                    </div>
-                    <div class="activity-time">${timeStr}</div>
-                `;
-                
-                activityList.insertBefore(activityItem, activityList.firstChild);
-                
-                // Animate in
-                setTimeout(() => {
-                    activityItem.style.opacity = '1';
-                    activityItem.style.transform = 'translateX(0)';
-                }, 10);
-                
-                // Keep only last 5 activities
-                while (activityList.children.length > 5) {
-                    activityList.removeChild(activityList.lastChild);
-                }
-                
-                // Update activity count
-                document.getElementById('activity-count').textContent = `${activityList.children.length} active`;
-            }
-
-            exportReport() {
-                this.showNotification('Report exported successfully', 'success');
-                console.log('Exporting report...');
-            }
-
-            refreshData() {
-                this.showNotification('Dashboard refreshed', 'info');
-                this.simulateUpdate();
-            }
-
-            toggleFullscreen() {
-                if (!document.fullscreenElement) {
-                    document.documentElement.requestFullscreen();
-                } else {
-                    document.exitFullscreen();
-                }
+        }
+        
+        function toggleDebug() {
+            debugMode = !debugMode;
+            const panel = document.getElementById('debugPanel');
+            if (debugMode) {
+                panel.classList.add('show');
+            } else {
+                panel.classList.remove('show');
             }
         }
 
-        // Initialize dashboard
-        const dashboard = new FleetDashboard();
+        // ============= COMPREHENSIVE DAILY RESET SYSTEM =============
+
+        // Perform complete daily reset - ALL KPIs and data
+        function performCompleteDailyReset() {
+            const now = new Date();
+            const today = now.toDateString();
+            
+            log('🔄 PERFORMING COMPLETE DAILY RESET at ' + now.toLocaleTimeString());
+            log('================================================');
+            
+            // Step 1: Clear ALL in-memory data structures
+            allDrivers = [];
+            driverMap.clear();
+            completedDrivers.clear();
+            equipmentIssues = {};
+            currentCheckInDriver = null;
+            
+            // Step 2: Clear ALL localStorage items related to operations
+            const keysToRemove = [
+                'completedDrivers',
+                'checkoutUrls',
+                'checkedOutDrivers', 
+                'driverCheckouts',
+                'notifications',
+                'drivers',
+                'checkins',
+                'equipment',
+                'dailyOperations',
+                'returnsData',
+                'equipmentData',
+                'tractorIssues',
+                'trailerIssues',
+                'moffettIssues'
+            ];
+            
+            keysToRemove.forEach(key => {
+                localStorage.removeItem(key);
+                log(`🗑️ Cleared localStorage: ${key}`);
+            });
+            
+            // Step 3: Update the reset date
+            localStorage.setItem('lastResetDate', today);
+            lastResetDate = today;
+            
+            // Step 4: Reset ALL KPI displays to 0
+            resetAllKPIDisplays();
+            
+            // Step 5: Clear activity feed
+            showEmptyState();
+            
+            // Step 6: Reset all filters to default
+            currentFilter = 'overview';
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent.includes('Overview')) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Step 7: Reload fresh data from MongoDB (should be empty after archive)
+            setTimeout(() => {
+                loadDataFromMongoDB();
+            }, 1000);
+            
+            log('✅ COMPLETE DAILY RESET FINISHED');
+            log('================================================');
+            
+            showToast('📊 Daily Reset Complete', 'All data has been reset for the new day', 'info');
+        }
+
+        // Reset ALL KPI displays to 0
+        function resetAllKPIDisplays() {
+            log('🔢 Resetting all KPI displays to 0...');
+            
+            // Main KPI Cards
+            const kpiElements = {
+                // Top row KPIs
+                'activeCount': 0,
+                'enrouteCount': 0,
+                'arrivedCount': 0,
+                'completedCount': 0,
+                'workingCount': 0,
+                'returnsKpiCount': 0,
+                
+                // Equipment Status Panel
+                'tractorIssues': 0,
+                'trailerIssues': 0,
+                'moffettIssues': 0,
+                
+                // Returns Summary Panel
+                'totalReturnsToday': 0,
+                'driversWithReturns': 0,
+                'avgReturns': 0
+            };
+            
+            // Update all KPI elements
+            Object.entries(kpiElements).forEach(([id, value]) => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = value;
+                    log(`  Reset ${id} to ${value}`);
+                }
+            });
+            
+            // Update sublabels
+            const returnsSublabel = document.getElementById('returnsSublabel');
+            if (returnsSublabel) {
+                returnsSublabel.textContent = 'From 0 drivers';
+            }
+            
+            // Update activity count
+            const activityCount = document.getElementById('activityCount');
+            if (activityCount) {
+                activityCount.textContent = '0 drivers';
+            }
+            
+            // Update last update timestamp
+            const lastUpdate = document.getElementById('lastUpdate');
+            if (lastUpdate) {
+                lastUpdate.textContent = 'Dashboard reset at ' + new Date().toLocaleTimeString();
+            }
+            
+            log('✅ All KPI displays reset to 0');
+        }
+
+        // Enhanced daily reset check
+        function checkDailyReset() {
+            const now = new Date();
+            const today = now.toDateString();
+            const lastResetDate = localStorage.getItem('lastResetDate');
+            
+            // Get current time
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+            
+            // Check multiple reset conditions
+            const isNewDay = lastResetDate !== today;
+            const isPastArchiveTime = (currentHour === 23 && currentMinute >= 55);
+            const isJustAfterMidnight = (currentHour === 0 && currentMinute < 5);
+            
+            log(`🕐 Reset Check: Day=${today}, LastReset=${lastResetDate}, Time=${currentHour}:${currentMinute}`);
+            
+            if (isNewDay) {
+                log('📅 New day detected - triggering reset');
+                performCompleteDailyReset();
+            } else if (isPastArchiveTime) {
+                log('🕐 Past archive time (11:55 PM) - triggering reset');
+                performCompleteDailyReset();
+            } else if (isJustAfterMidnight && lastResetDate !== today) {
+                log('🌙 Just after midnight - ensuring reset');
+                performCompleteDailyReset();
+            }
+            
+            // Schedule checks
+            scheduleArchiveTimeCheck();
+            scheduleMidnightCheck();
+        }
+
+        // Schedule exact archive time check
+        function scheduleArchiveTimeCheck() {
+            const now = new Date();
+            const archiveTime = new Date();
+            archiveTime.setHours(23, 55, 0, 0); // 11:55 PM
+            
+            // If we've already passed 11:55 PM today, schedule for tomorrow
+            if (now >= archiveTime) {
+                archiveTime.setDate(archiveTime.getDate() + 1);
+            }
+            
+            const timeUntilArchive = archiveTime - now;
+            const hoursUntil = Math.floor(timeUntilArchive / (1000 * 60 * 60));
+            const minutesUntil = Math.floor((timeUntilArchive % (1000 * 60 * 60)) / (1000 * 60));
+            
+            log(`⏰ Archive reset scheduled for ${archiveTime.toLocaleString()} (in ${hoursUntil}h ${minutesUntil}m)`);
+            
+            setTimeout(() => {
+                log('🕐 Archive time reached (11:55 PM) - executing reset');
+                performCompleteDailyReset();
+                
+                // Schedule next day's check
+                scheduleArchiveTimeCheck();
+            }, timeUntilArchive);
+        }
+
+        // Schedule midnight check as backup
+        function scheduleMidnightCheck() {
+            const now = new Date();
+            const midnight = new Date();
+            midnight.setDate(midnight.getDate() + 1);
+            midnight.setHours(0, 0, 5, 0); // 12:00:05 AM (5 seconds after midnight)
+            
+            const timeUntilMidnight = midnight - now;
+            
+            setTimeout(() => {
+                log('🌙 Midnight backup check');
+                const today = new Date().toDateString();
+                const lastReset = localStorage.getItem('lastResetDate');
+                
+                if (lastReset !== today) {
+                    log('🌙 Midnight reset needed - executing');
+                    performCompleteDailyReset();
+                }
+                
+                // Schedule next midnight check
+                scheduleMidnightCheck();
+            }, timeUntilMidnight);
+        }
+
+        // Periodic reset check (every minute as safety net)
+        function startPeriodicResetCheck() {
+            setInterval(() => {
+                const now = new Date();
+                const hour = now.getHours();
+                const minute = now.getMinutes();
+                
+                // Check at specific times
+                if ((hour === 23 && minute === 55) || // 11:55 PM
+                    (hour === 23 && minute === 56) || // 11:56 PM (backup)
+                    (hour === 0 && minute === 0) ||   // Midnight
+                    (hour === 0 && minute === 1)) {   // 12:01 AM (backup)
+                    
+                    const today = new Date().toDateString();
+                    const lastReset = localStorage.getItem('lastResetDate');
+                    
+                    if (lastReset !== today) {
+                        log(`⏱️ Periodic check triggered reset at ${hour}:${minute}`);
+                        performCompleteDailyReset();
+                    }
+                }
+            }, 60000); // Check every minute
+        }
+
+        // Validate and clean stored state on load
+        function loadStoredState() {
+            const today = new Date().toDateString();
+            const storedDate = localStorage.getItem('lastResetDate');
+            
+            log(`📂 Loading stored state: Today=${today}, StoredDate=${storedDate}`);
+            
+            // If dates don't match, clear everything
+            if (storedDate !== today) {
+                log('📅 Stored data is from previous day - clearing all data');
+                performCompleteDailyReset();
+                return;
+            }
+            
+            // Even if same day, validate the data
+            const storedCompleted = localStorage.getItem('completedDrivers');
+            if (storedCompleted) {
+                try {
+                    const parsed = JSON.parse(storedCompleted);
+                    // Check if data has timestamps and validate they're from today
+                    const isValid = validateStoredData(parsed);
+                    
+                    if (isValid) {
+                        completedDrivers = new Set(parsed);
+                        log('✅ Loaded valid completed drivers: ' + [...completedDrivers].length);
+                    } else {
+                        log('⚠️ Stored data validation failed - clearing');
+                        localStorage.removeItem('completedDrivers');
+                        completedDrivers = new Set();
+                    }
+                } catch (e) {
+                    log('❌ Error loading completed drivers: ' + e.message);
+                    completedDrivers = new Set();
+                    localStorage.removeItem('completedDrivers');
+                }
+            }
+            
+            lastResetDate = storedDate;
+        }
+
+        // Validate stored data is from today
+        function validateStoredData(data) {
+            if (!data || !Array.isArray(data)) return false;
+            
+            const today = new Date().toISOString().split('T')[0];
+            
+            // Add your validation logic here based on data structure
+            // For now, return true if data exists
+            return true;
+        }
+
+        // Initialize dashboard with comprehensive reset handling
+        function initializeDashboard() {
+            log('🚀 Initializing Dashboard with Complete Reset System');
+            
+            // First, check if we need to reset
+            checkDailyReset();
+            
+            // Load any valid stored state
+            loadStoredState();
+            
+            // Load fresh data from MongoDB
+            loadDataFromMongoDB();
+            
+            // Start auto-refresh
+        function startAutoRefresh() {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+            
+            // Refresh every 10 seconds for more real-time updates
+            refreshInterval = setInterval(() => {
+                loadDataFromMongoDB();
+            }, 10000);
+        }
+        
+        // Update connection status
+        function updateConnectionStatus(status, message = null) {
+            const indicator = document.getElementById('connectionIndicator');
+            const statusText = document.getElementById('connectionStatus');
+            const pulse = indicator.querySelector('.pulse');
+            
+            indicator.classList.remove('connected', 'connecting', 'error');
+            pulse.classList.remove('success', 'warning', 'error');
+            
+            switch (status) {
+                case 'connected':
+                    indicator.classList.add('connected');
+                    pulse.classList.add('success');
+                    statusText.textContent = message || 'MongoDB Connected';
+                    break;
+                case 'connecting':
+                case 'loading':
+                    indicator.classList.add('connecting');
+                    pulse.classList.add('warning');
+                    statusText.textContent = message || 'Connecting to MongoDB...';
+                    break;
+                case 'error':
+                    indicator.classList.add('error');
+                    pulse.classList.add('error');
+                    statusText.textContent = message || 'MongoDB Connection Error';
+                    break;
+            }
+        }
+        
+        // Enhanced updateKPIs to ensure zeros on empty data
+        function updateKPIs() {
+            // Calculate stats with defaults to 0
+            const stats = {
+                enRoute: 0,
+                arrived: 0,
+                completed: 0,
+                working: 0,
+                totalReturns: 0,
+                driversWithReturns: 0,
+                tractorIssues: 0,
+                trailerIssues: 0,
+                moffettIssues: 0
+            };
+            
+            // Only calculate if we have drivers
+            if (allDrivers && allDrivers.length > 0) {
+                stats.enRoute = allDrivers.filter(d => d?.status === 'en-route').length;
+                stats.arrived = allDrivers.filter(d => d?.status === 'arrived').length;
+                stats.completed = allDrivers.filter(d => d?.status === 'completed').length;
+                stats.working = allDrivers.filter(d => d?.status === 'working').length;
+                stats.totalReturns = allDrivers.reduce((sum, d) => sum + (parseInt(d?.returns) || 0), 0);
+                stats.driversWithReturns = allDrivers.filter(d => (parseInt(d?.returns) || 0) > 0).length;
+                
+                // Calculate equipment issues if data exists
+                allDrivers.forEach(d => {
+                    if (d?.equipmentIssues) {
+                        Object.keys(d.equipmentIssues).forEach(key => {
+                            if (key.startsWith('tractor_')) stats.tractorIssues++;
+                            else if (key.startsWith('trailer_')) stats.trailerIssues++;
+                            else if (key.startsWith('moffett_')) stats.moffettIssues++;
+                        });
+                    }
+                });
+            }
+            
+            // Update ALL KPI elements
+            const updateElement = (id, value) => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = value || 0; // Ensure 0 if undefined
+                }
+            };
+            
+            // Main KPIs
+            updateElement('activeCount', stats.enRoute + stats.arrived);
+            updateElement('enrouteCount', stats.enRoute);
+            updateElement('arrivedCount', stats.arrived);
+            updateElement('completedCount', stats.completed);
+            updateElement('workingCount', stats.working);
+            updateElement('returnsKpiCount', stats.totalReturns);
+            
+            // Returns Summary
+            updateElement('totalReturnsToday', stats.totalReturns);
+            updateElement('driversWithReturns', stats.driversWithReturns);
+            updateElement('avgReturns', 
+                stats.driversWithReturns > 0 ? 
+                Math.round((stats.totalReturns / stats.driversWithReturns) * 10) / 10 : 0
+            );
+            
+            // Equipment Issues
+            updateElement('tractorIssues', stats.tractorIssues);
+            updateElement('trailerIssues', stats.trailerIssues);
+            updateElement('moffettIssues', stats.moffettIssues);
+            
+            // Update sublabel
+            const returnsSublabel = document.getElementById('returnsSublabel');
+            if (returnsSublabel) {
+                returnsSublabel.textContent = `From ${stats.driversWithReturns} drivers`;
+            }
+            
+            log(`📊 KPIs Updated: Active=${stats.enRoute + stats.arrived}, Completed=${stats.completed}, Returns=${stats.totalReturns}`);
+        }
+        
+        // Update activity feed WITH proper filtering - FIXED VERSION
+        function updateActivityFeed() {
+            const activityList = document.getElementById('activityList');
+            const activityCount = document.getElementById('activityCount');
+            
+            if (!activityList || !activityCount) return;
+            
+            if (allDrivers.length === 0) {
+                showEmptyState();
+                return;
+            }
+            
+            let filteredDrivers = allDrivers;
+            let filterLabel = 'drivers';
+            
+            // FIXED: Apply proper filtering to hide completed drivers from overview
+            if (currentFilter === 'overview') {
+                // Overview should show all ACTIVE drivers (exclude completed)
+                filteredDrivers = allDrivers.filter(d => d?.status !== 'completed');
+                filterLabel = 'active drivers';
+            } else if (currentFilter === 'completed') {
+                // Only show completed drivers
+                filteredDrivers = allDrivers.filter(d => d?.status === 'completed');
+                filterLabel = 'completed today';
+            } else if (currentFilter === 'en-route') {
+                filteredDrivers = allDrivers.filter(d => d?.status === 'en-route');
+                filterLabel = 'en route';
+            } else if (currentFilter === 'arrived') {
+                filteredDrivers = allDrivers.filter(d => d?.status === 'arrived');
+                filterLabel = 'arrived';
+            } else if (currentFilter === 'working') {
+                filteredDrivers = allDrivers.filter(d => d?.status === 'working');
+                filterLabel = 'still working';
+            } else {
+                filteredDrivers = allDrivers.filter(d => d?.status === currentFilter);
+                filterLabel = currentFilter;
+            }
+            
+            activityCount.textContent = `${filteredDrivers.length} ${filterLabel}`;
+            
+            if (filteredDrivers.length === 0) {
+                let emptyMessage;
+                if (currentFilter === 'overview') {
+                    emptyMessage = 'No active drivers - all drivers have completed check-in';
+                } else if (currentFilter === 'completed') {
+                    emptyMessage = 'No completed check-ins today';
+                } else {
+                    emptyMessage = `No drivers ${filterLabel}`;
+                }
+                
+                activityList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📭</div>
+                        <p>${emptyMessage}</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Generate activity items WITH CHECK-IN BUTTON for arrived drivers
+            activityList.innerHTML = filteredDrivers.map(driver => {
+                const timestamp = driver?.timestamp ? new Date(driver.timestamp) : new Date();
+                const timeString = timestamp instanceof Date && !isNaN(timestamp) 
+                    ? timestamp.toLocaleTimeString() 
+                    : 'Unknown time';
+                
+                // Create check-in button ONLY for arrived status
+                let checkInButton = '';
+                if (driver?.status === 'arrived') {
+                    // Pass the driver object properly to the modal function
+                    const driverData = JSON.stringify({
+                        id: driver.id,
+                        name: driver.name,
+                        returns: driver.returns || 0,
+                        vehicleId: driver.vehicleId || ''
+                    }).replace(/"/g, '&quot;');
+                    
+                    checkInButton = `
+                        <button class="btn btn-success" onclick='openCheckInModal(${driverData})'>
+                            📋 Check-In
+                        </button>
+                    `;
+                }
+                
+                // Status badge styling
+                let statusClass = (driver?.status || 'working').replace('-', '');
+                let statusText = driver?.status || 'working';
+                
+                if (driver?.status === 'completed') {
+                    statusClass = 'completed';
+                    statusText = 'COMPLETED ✓';
+                    // No check-in button for completed drivers
+                    checkInButton = '';
+                }
+                
+                return `
+                    <div class="activity-item ${statusClass}">
+                        <div class="activity-content">
+                            <div>
+                                <div class="activity-driver">${driver?.name || 'Unknown Driver'}</div>
+                                <div class="activity-details">
+                                    <span>🕐 ${timeString}</span>
+                                    <span>📦 ${parseInt(driver?.returns) || 0} returns</span>
+                                    ${driver?.vehicleId ? `<span>🚚 ${driver.vehicleId}</span>` : ''}
+                                </div>
+                            </div>
+                            <div class="activity-actions">
+                                <span class="status-badge status-${statusClass}">
+                                    ${statusText}
+                                </span>
+                                ${checkInButton}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            log(`✅ Activity feed updated with ${filteredDrivers.length} drivers`);
+        }
+        
+        // Open check-in modal for a driver
+        function openCheckInModal(driverData) {
+            currentCheckInDriver = driverData;
+            
+            // Populate driver name only
+            document.getElementById('modalDriverName').textContent = driverData.name;
+            document.getElementById('driverNameField').value = driverData.name;
+            
+            // Show the modal
+            document.getElementById('checkInModal').classList.add('show');
+            
+            // Reset form fields
+            document.getElementById('tractorNumber').value = '';
+            document.getElementById('trailerNumber').value = '';
+            document.getElementById('moffettNumber').value = '';
+            equipmentIssues = {};
+            
+            // Reset all checkboxes
+            document.querySelectorAll('.check-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            document.querySelectorAll('.issue-input').forEach(input => {
+                input.value = '';
+                input.classList.remove('show');
+            });
+            
+            log('📋 Opened check-in form for: ' + driverData.name);
+            
+            // Focus on first input field
+            setTimeout(() => {
+                document.getElementById('tractorNumber').focus();
+            }, 100);
+        }
+        
+        // Close check-in modal
+        function closeCheckInModal(forceClose = false) {
+            // If force close (after successful submission), just close without confirmation
+            if (forceClose) {
+                document.getElementById('checkInModal').classList.remove('show');
+                // Don't clear currentCheckInDriver here in case we need to retry
+                equipmentIssues = {};
+                return;
+            }
+            
+            // Check if form has any data entered
+            const modal = document.getElementById('checkInModal');
+            if (!modal) return;
+            
+            const tractorNumber = document.getElementById('tractorNumber')?.value?.trim() || '';
+            const trailerNumber = document.getElementById('trailerNumber')?.value?.trim() || '';
+            const moffettNumber = document.getElementById('moffettNumber')?.value?.trim() || '';
+            const hasInspectionData = document.querySelectorAll('.check-btn.selected').length > 0;
+            
+            if ((tractorNumber || trailerNumber || moffettNumber || hasInspectionData) && currentCheckInDriver) {
+                if (!confirm('Are you sure you want to close? All entered data will be lost.')) {
+                    return;
+                }
+            }
+            
+            modal.classList.remove('show');
+            equipmentIssues = {};
+            // Don't null out currentCheckInDriver to allow reopening
+        }
+        
+        // Submit check-in from modal
+        async function submitCheckIn() {
+            if (!currentCheckInDriver) {
+                showToast('❌ Error: No driver selected', 'error');
+                return;
+            }
+            
+            // Validation - Check if all required fields are filled
+            const tractorNumber = document.getElementById('tractorNumber')?.value?.trim() || '';
+            const trailerNumber = document.getElementById('trailerNumber')?.value?.trim() || '';
+            
+            if (!tractorNumber) {
+                showToast('❌ Please enter Tractor Number', 'error');
+                document.getElementById('tractorNumber').focus();
+                return;
+            }
+            
+            if (!trailerNumber) {
+                showToast('❌ Please enter Trailer Number', 'error');
+                document.getElementById('trailerNumber').focus();
+                return;
+            }
+            
+            // Check if all inspection items have been marked
+            let allInspected = true;
+            let missingInspections = [];
+            
+            ['tractor', 'trailer'].forEach(type => {
+                inspectionItems[type].forEach((item, index) => {
+                    const passBtn = document.querySelector(`#${type}Checklist .checklist-item:nth-child(${index + 1}) .check-btn.pass`);
+                    const failBtn = document.querySelector(`#${type}Checklist .checklist-item:nth-child(${index + 1}) .check-btn.fail`);
+                    
+                    if (!passBtn?.classList.contains('selected') && !failBtn?.classList.contains('selected')) {
+                        allInspected = false;
+                        missingInspections.push(`${type} - ${item}`);
+                    }
+                });
+            });
+            
+            // Check Moffett only if a number is provided
+            const moffettNumber = document.getElementById('moffettNumber')?.value?.trim() || '';
+            if (moffettNumber) {
+                inspectionItems.moffett.forEach((item, index) => {
+                    const passBtn = document.querySelector(`#moffettChecklist .checklist-item:nth-child(${index + 1}) .check-btn.pass`);
+                    const failBtn = document.querySelector(`#moffettChecklist .checklist-item:nth-child(${index + 1}) .check-btn.fail`);
+                    
+                    if (!passBtn?.classList.contains('selected') && !failBtn?.classList.contains('selected')) {
+                        allInspected = false;
+                        missingInspections.push(`moffett - ${item}`);
+                    }
+                });
+            }
+            
+            if (!allInspected) {
+                showToast('❌ Please complete all inspection items', 'error');
+                console.log('Missing inspections:', missingInspections);
+                return;
+            }
+            
+            // Check if failed items have descriptions
+            for (const [itemId, description] of Object.entries(equipmentIssues)) {
+                if (!description || description.trim() === '') {
+                    const [type, index] = itemId.split('_');
+                    const itemName = inspectionItems[type]?.[index] || 'Unknown item';
+                    showToast(`❌ Please describe the issue for: ${itemName}`, 'error');
+                    document.getElementById(`${itemId}_issue`)?.focus();
+                    return;
+                }
+            }
+            
+            // Disable submit button to prevent double submission
+            const submitBtn = document.querySelector('#checkInModal button[onclick="submitCheckIn()"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Submitting...';
+            }
+            
+            const checkInData = {
+                driver_name: currentCheckInDriver.name,
+                driver_id: currentCheckInDriver.id,
+                name: currentCheckInDriver.name,
+                vehicleId: currentCheckInDriver.vehicleId || '',
+                status: 'completed',
+                
+                // Equipment numbers
+                tractorNumber: tractorNumber,
+                trailerNumber: trailerNumber,
+                moffettNumber: moffettNumber,
+                
+                // Returns
+                returns: parseInt(currentCheckInDriver.returns) || 0,
+                hasReturns: (parseInt(currentCheckInDriver.returns) || 0) > 0,
+                
+                // Equipment issues
+                equipmentIssues: equipmentIssues || {},
+                
+                // Timestamps
+                timestamp: new Date().toISOString(),
+                completedAt: new Date().toISOString(),
+                date: new Date().toISOString().split('T')[0],
+                
+                // Metadata
+                source: 'dashboard_checkin'
+            };
+            
+            try {
+                log('📤 Submitting check-in for: ' + currentCheckInDriver.name);
+                log('Check-in data: ' + JSON.stringify(checkInData));
+                log('API endpoint: ' + `${API_BASE}/api/checkin`);
+                
+                const response = await fetch(`${API_BASE}/api/checkin`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(checkInData)
+                });
+                
+                const responseText = await response.text();
+                log('Response status: ' + response.status);
+                log('Response text: ' + responseText);
+                
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                } catch (e) {
+                    log('Response is not JSON: ' + responseText);
+                    if (response.ok) {
+                        result = { success: true, message: 'Check-in completed' };
+                    } else {
+                        throw new Error(responseText || 'Server error');
+                    }
+                }
+                
+                if (response.ok && result.success !== false) {
+                    log('✅ Check-in successful: ' + JSON.stringify(result));
+                    
+                    // Update local state BEFORE clearing currentCheckInDriver
+                    if (currentCheckInDriver && currentCheckInDriver.id) {
+                        const driverId = currentCheckInDriver.id;
+                        const driver = driverMap.get(driverId);
+                        if (driver) {
+                            driver.status = 'completed';
+                            driver.completedAt = new Date().toISOString();
+                            driver.equipmentIssues = equipmentIssues;
+                            log('✅ Updated local driver status to completed');
+                            
+                            // Immediately update the UI
+                            updateKPIs();
+                            updateActivityFeed();
+                        }
+                    }
+                    
+                    showToast('✅ Check-in completed successfully!', 'success');
+                    
+                    // Now we can safely clear and close
+                    currentCheckInDriver = null;
+                    closeCheckInModal(true);
+                    
+                    // Refresh dashboard after 1 second to get latest from server
+                    setTimeout(() => {
+                        loadDataFromMongoDB();
+                    }, 1000);
+                } else {
+                    const errorMsg = result.error || result.message || 'Check-in failed';
+                    throw new Error(errorMsg);
+                }
+                
+            } catch (error) {
+                log('❌ Check-in error: ' + error.message);
+                log('Error stack: ' + error.stack);
+                
+                // Better error message handling
+                let errorMessage = 'Failed to complete check-in';
+                if (error.message && error.message !== 'null') {
+                    errorMessage = error.message;
+                }
+                
+                showToast('❌ ' + errorMessage, 'error');
+            } finally {
+                // Re-enable submit button
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Complete Check-In';
+                }
+            }
+        }
+        
+        // Show empty state
+        function showEmptyState() {
+            const activityList = document.getElementById('activityList');
+            const activityCount = document.getElementById('activityCount');
+            
+            if (activityCount) activityCount.textContent = '0 drivers';
+            
+            if (activityList) {
+                activityList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📭</div>
+                        <p>No driver activity today</p>
+                        <p style="font-size: 0.875rem; margin-top: 1rem;">Waiting for driver updates...</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Filter drivers
+        function filterDrivers(filter, buttonElement) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            if (buttonElement) buttonElement.classList.add('active');
+            updateActivityFeed();
+        }
+        
+        // Refresh dashboard
+        function refreshDashboard() {
+            const refreshIcon = document.getElementById('refreshIcon');
+            const refreshText = document.getElementById('refreshText');
+            
+            if (refreshIcon) refreshIcon.style.animation = 'spin 1s linear infinite';
+            if (refreshText) refreshText.textContent = 'Refreshing...';
+            
+            loadDataFromMongoDB().finally(() => {
+                setTimeout(() => {
+                    if (refreshIcon) refreshIcon.style.animation = '';
+                    if (refreshText) refreshText.textContent = 'Refresh';
+                }, 1000);
+            });
+        }
+        
+        // Test MongoDB connection
+        async function testMongoConnection() {
+            try {
+                log('🧪 Testing MongoDB connection...');
+                updateConnectionStatus('loading', 'Testing...');
+                
+                const response = await fetch(`${API_BASE}/api/health`, {
+                    signal: AbortSignal.timeout(5000)
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    updateConnectionStatus('connected', 'Test passed');
+                    showToast('✅ MongoDB connection successful!', 'success');
+                    log('✅ Health check response: ' + JSON.stringify(data));
+                } else {
+                    const errorText = await response.text();
+                    updateConnectionStatus('error', 'Test failed');
+                    showToast('Connection test failed: ' + errorText, 'error');
+                    log('❌ Health check failed: ' + errorText);
+                }
+            } catch (error) {
+                updateConnectionStatus('error', 'Test error');
+                showToast('Connection test error: ' + error.message, 'error');
+                log('❌ Health check error: ' + error.message);
+            }
+        }
+        
+        // Manual daily reset with complete clearing
+        function manualDailyReset() {
+            if (confirm('Are you sure you want to end the day and archive all data?')) {
+                showToast('📊 Archiving data...', 'info');
+                log('📊 Manual daily reset initiated by user');
+                
+                // Perform the complete reset
+                performCompleteDailyReset();
+                
+                // Optionally trigger backend archive
+                fetch(`${API_BASE}/api/archive`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        date: new Date().toISOString().split('T')[0],
+                        source: 'manual_dashboard_reset'
+                    })
+                }).then(response => {
+                    if (response.ok) {
+                        log('✅ Backend archive triggered successfully');
+                    }
+                }).catch(error => {
+                    log('⚠️ Backend archive failed: ' + error.message);
+                });
+            }
+        }
+        
+        // Clear daily check-ins with complete reset
+        function clearDailyCheckIns() {
+            if (confirm('Are you sure you want to clear all daily check-ins?')) {
+                log('🗑️ Manual clear check-ins initiated');
+                performCompleteDailyReset();
+            }
+        }
+        
+        // Logout
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = '/index.html';
+            }
+        }
+        
+        // Show toast notification
+        function showToast(message, type = 'info') {
+            const existingToast = document.querySelector('.toast');
+            if (existingToast) {
+                existingToast.remove();
+            }
+            
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 5000);
+        }
     </script>
 </body>
 </html>
+            startAutoRefresh();
+            
+            // Start periodic reset checking
+            startPeriodicResetCheck();
+            
+            log('✅ Dashboard initialization complete');
+        }
+        
+        // Load data from MongoDB with better error handling
+        async function loadDataFromMongoDB() {
+            try {
+                log('📡 Loading data from MongoDB Atlas...');
+                updateConnectionStatus('loading');
+                
+                // Fetch notifications from MongoDB
+                const response = await fetch(`${API_BASE}/api/notifications`, {
+                    method: 'GET',
+                    headers: { 
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    signal: AbortSignal.timeout(10000)
+                });
+                
+                log(`API Response status: ${response.status}`);
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    log(`Raw response: ${JSON.stringify(result).substring(0, 200)}`);
+                    
+                    // Handle different response formats
+                    let notifications = [];
+                    if (Array.isArray(result)) {
+                        notifications = result;
+                    } else if (result.data && Array.isArray(result.data)) {
+                        notifications = result.data;
+                    } else if (result.notifications && Array.isArray(result.notifications)) {
+                        notifications = result.notifications;
+                    }
+                    
+                    log(`📊 Found ${notifications.length} notifications`);
+                    
+                    // Validate that data is from today
+                    const today = new Date().toDateString();
+                    const todayISO = new Date().toISOString().split('T')[0];
+                    
+                    // Filter only today's data
+                    const todaysNotifications = notifications.filter(n => {
+                        if (n.date) {
+                            return n.date === todayISO;
+                        }
+                        // Check timestamp if no date field
+                        if (n.timestamp || n.lastUpdate) {
+                            const notificationDate = new Date(n.timestamp || n.lastUpdate).toISOString().split('T')[0];
+                            return notificationDate === todayISO;
+                        }
+                        return false;
+                    });
+                    
+                    if (todaysNotifications.length !== notifications.length) {
+                        log(`⚠️ Filtered to ${todaysNotifications.length} notifications from today`);
+                    }
+                    
+                    // Process notifications into driver data
+                    processNotifications(todaysNotifications);
+                    updateConnectionStatus('connected');
+                    
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                document.getElementById('lastUpdate').textContent = 
+                    'Last updated: ' + new Date().toLocaleTimeString();
+                
+            } catch (error) {
+                log('❌ MongoDB connection failed: ' + error.message);
+                updateConnectionStatus('error');
+                showEmptyState();
+            }
+        }
+        
+        // Process notifications from MongoDB - FIXED to use most recent status
+        function processNotifications(notifications) {
+            try {
+                // Clear existing drivers and rebuild from notifications
+                allDrivers = [];
+                driverMap.clear();
+                
+                log(`🔍 Processing ${notifications.length} notifications from MongoDB`);
+                
+                // Sort notifications by timestamp to ensure we process them in order
+                const sortedNotifications = notifications.sort((a, b) => {
+                    const timeA = new Date(a.timestamp || a.lastUpdate || 0);
+                    const timeB = new Date(b.timestamp || b.lastUpdate || 0);
+                    return timeA - timeB; // Oldest first, so newest overwrites
+                });
+                
+                sortedNotifications.forEach((notification, index) => {
+                    // Extract driver information from various possible field names
+                    const driverName = notification.driver_name || 
+                                      notification.driver || 
+                                      notification.name || 
+                                      `Driver ${index + 1}`;
+                    
+                    const driverId = notification.driver_id || 
+                                    notification.driverId || 
+                                    notification._id || 
+                                    notification.id || 
+                                    `driver-${index}`;
+                    
+                    const status = notification.status || 'working';
+                    const returns = parseInt(notification.returns || 
+                                           notification.returnsCount || 
+                                           notification.hasReturns ? notification.returnsCount : 0);
+                    
+                    const timestamp = notification.timestamp || notification.lastUpdate || new Date().toISOString();
+                    
+                    const driver = {
+                        id: driverId,
+                        name: driverName,
+                        status: status,
+                        returns: returns,
+                        timestamp: timestamp,
+                        vehicleId: notification.vehicleId || notification.vehicle || '',
+                        message: notification.message || '',
+                        hasReturns: notification.hasReturns || returns > 0,
+                        equipmentIssues: notification.equipmentIssues || {}
+                    };
+                    
+                    log(`📋 Processing: ${driverName} - Status: ${status} - Returns: ${returns} - Time: ${timestamp}`);
+                    
+                    // Check if driver already exists in map
+                    if (driverMap.has(driverId)) {
+                        // Compare timestamps to keep the most recent update
+                        const existingDriver = driverMap.get(driverId);
+                        const existingTime = new Date(existingDriver.timestamp);
+                        const newTime = new Date(timestamp);
+                        
+                        if (newTime >= existingTime) {
+                            // Update with newer status
+                            existingDriver.status = status;
+                            existingDriver.timestamp = timestamp;
+                            existingDriver.returns = returns;
+                            existingDriver.hasReturns = driver.hasReturns;
+                            existingDriver.message = driver.message;
+                            existingDriver.equipmentIssues = driver.equipmentIssues;
+                            log(`🔄 Updated ${driverName}: ${status} (newer timestamp)`);
+                        } else {
+                            log(`⏭️ Skipped older update for ${driverName}: ${status}`);
+                        }
+                    } else {
+                        // Add new driver
+                        allDrivers.push(driver);
+                        driverMap.set(driverId, driver);
+                        log(`➕ Added new driver: ${driverName} - Status: ${status} - Returns: ${returns}`);
+                    }
+                });
+                
+                // Get final driver list from map and log final status
+                allDrivers = Array.from(driverMap.values());
+                
+                log(`✅ Final processed drivers:`);
+                allDrivers.forEach(driver => {
+                    log(`   ${driver.name}: ${driver.status} (${driver.returns} returns)`);
+                });
+                
+                log(`📊 Total unique drivers: ${allDrivers.length}`);
+                
+                // Update UI
+                updateKPIs();
+                updateActivityFeed();
+                
+            } catch (error) {
+                log('❌ Error processing notifications: ' + error.message);
+                showEmptyState();
+            }
+        }
+        
+        // Start auto-refresh
