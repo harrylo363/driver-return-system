@@ -1287,14 +1287,23 @@
             }
         }
         
-        // Process notifications from MongoDB
+        // Process notifications from MongoDB - FIXED to use most recent status
         function processNotifications(notifications) {
             try {
                 // Clear existing drivers and rebuild from notifications
                 allDrivers = [];
                 driverMap.clear();
                 
-                notifications.forEach((notification, index) => {
+                log(`🔍 Processing ${notifications.length} notifications from MongoDB`);
+                
+                // Sort notifications by timestamp to ensure we process them in order
+                const sortedNotifications = notifications.sort((a, b) => {
+                    const timeA = new Date(a.timestamp || a.lastUpdate || 0);
+                    const timeB = new Date(b.timestamp || b.lastUpdate || 0);
+                    return timeA - timeB; // Oldest first, so newest overwrites
+                });
+                
+                sortedNotifications.forEach((notification, index) => {
                     // Extract driver information from various possible field names
                     const driverName = notification.driver_name || 
                                       notification.driver || 
@@ -1312,38 +1321,56 @@
                                            notification.returnsCount || 
                                            notification.hasReturns ? notification.returnsCount : 0);
                     
+                    const timestamp = notification.timestamp || notification.lastUpdate || new Date().toISOString();
+                    
                     const driver = {
                         id: driverId,
                         name: driverName,
                         status: status,
                         returns: returns,
-                        timestamp: notification.timestamp || new Date().toISOString(),
+                        timestamp: timestamp,
                         vehicleId: notification.vehicleId || notification.vehicle || '',
                         message: notification.message || '',
                         hasReturns: notification.hasReturns || returns > 0
                     };
                     
+                    log(`📋 Processing: ${driverName} - Status: ${status} - Returns: ${returns} - Time: ${timestamp}`);
+                    
                     // Check if driver already exists in map
                     if (driverMap.has(driverId)) {
-                        // Update existing driver with latest status
+                        // Compare timestamps to keep the most recent update
                         const existingDriver = driverMap.get(driverId);
-                        existingDriver.status = status;
-                        existingDriver.timestamp = driver.timestamp;
-                        existingDriver.returns = returns;
-                        existingDriver.hasReturns = driver.hasReturns;
-                        log(`Updated existing driver: ${driverName} - Status: ${status}`);
+                        const existingTime = new Date(existingDriver.timestamp);
+                        const newTime = new Date(timestamp);
+                        
+                        if (newTime >= existingTime) {
+                            // Update with newer status
+                            existingDriver.status = status;
+                            existingDriver.timestamp = timestamp;
+                            existingDriver.returns = returns;
+                            existingDriver.hasReturns = driver.hasReturns;
+                            existingDriver.message = driver.message;
+                            log(`🔄 Updated ${driverName}: ${status} (newer timestamp)`);
+                        } else {
+                            log(`⏭️ Skipped older update for ${driverName}: ${status}`);
+                        }
                     } else {
                         // Add new driver
                         allDrivers.push(driver);
                         driverMap.set(driverId, driver);
-                        log(`Added new driver: ${driverName} - Status: ${status} - Returns: ${returns}`);
+                        log(`➕ Added new driver: ${driverName} - Status: ${status} - Returns: ${returns}`);
                     }
                 });
                 
-                // Get final driver list from map
+                // Get final driver list from map and log final status
                 allDrivers = Array.from(driverMap.values());
                 
-                log(`✅ Processed ${allDrivers.length} unique drivers`);
+                log(`✅ Final processed drivers:`);
+                allDrivers.forEach(driver => {
+                    log(`   ${driver.name}: ${driver.status} (${driver.returns} returns)`);
+                });
+                
+                log(`📊 Total unique drivers: ${allDrivers.length}`);
                 
                 // Update UI
                 updateKPIs();
