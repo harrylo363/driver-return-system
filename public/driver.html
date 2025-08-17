@@ -674,23 +674,6 @@
             border-color: var(--border-secondary);
         }
         
-        /* Loading State */
-        .loading-state {
-            text-align: center;
-            padding: 24px;
-            color: var(--text-tertiary);
-        }
-        
-        .spinner {
-            width: 32px;
-            height: 32px;
-            border: 3px solid var(--border-primary);
-            border-radius: 50%;
-            border-top-color: var(--accent-blue);
-            animation: spin 1s linear infinite;
-            margin: 0 auto 16px;
-        }
-
         /* Debug Panel */
         .debug-panel {
             background: var(--bg-elevated);
@@ -1192,7 +1175,7 @@
             document.getElementById('returnsCountInput').value = '';
         }
         
-        // Send update to MongoDB Atlas via Railway API - ENHANCED VERSION
+        // Send update to MongoDB Atlas via Railway API
         async function sendUpdate(type) {
             log('📡 Sending update to MongoDB: ' + type);
             
@@ -1218,7 +1201,7 @@
             let status, message;
             
             if (type === '30min') {
-                status = 'en-route'; // Changed to match dashboard expectations
+                status = 'en-route';
                 message = `${currentDriver} is 30 minutes away from warehouse`;
             } else {
                 status = 'arrived';
@@ -1232,13 +1215,13 @@
                 message += ' with no returns';
             }
             
-            // Enhanced notification data with standardized fields for dashboard compatibility
+            // Notification data for status updates
             const notificationData = {
                 // Core fields
-                driver_name: currentDriver,    // Dashboard expects this field
-                driver_id: currentDriverId,    // Dashboard expects this field  
-                driverId: currentDriverId,     // Alternative field name
-                driver: currentDriver,         // Alternative field name
+                driver_name: currentDriver,
+                driver_id: currentDriverId,
+                driverId: currentDriverId,
+                driver: currentDriver,
                 vehicleId: currentVehicle,
                 vehicle: currentVehicle,
                 status: status,
@@ -1248,13 +1231,13 @@
                 warehouse: WAREHOUSE_ADDRESS,
                 location: 'Driver Location',
                 timestamp: now.toISOString(),
-                created_at: now.toISOString(),  // Alternative timestamp field
-                time: now.toISOString(),        // Alternative timestamp field
+                created_at: now.toISOString(),
+                time: now.toISOString(),
                 
                 // Returns data
                 hasReturns: hasReturns,
                 returnsCount: hasReturns ? returnsCount : 0,
-                returns: hasReturns ? returnsCount : 0,  // Alternative field name
+                returns: hasReturns ? returnsCount : 0,
                 
                 // Additional tracking fields
                 type: type,
@@ -1264,7 +1247,8 @@
                 // Dashboard compatibility fields
                 name: currentDriver,
                 id: currentDriverId,
-                _id: currentDriverId
+                _id: currentDriverId,
+                date: now.toISOString().split('T')[0]
             };
             
             log('Sending notification data: ' + JSON.stringify(notificationData, null, 2));
@@ -1305,6 +1289,17 @@
                         `${status === 'arrived' ? 'Arrival' : 'ETA'} notification sent to command center`,
                         'success'
                     );
+                    
+                    // If arrived, show additional message about check-in
+                    if (status === 'arrived') {
+                        setTimeout(() => {
+                            showNotification(
+                                'Ready for Check-In',
+                                'Dashboard operator will complete your equipment check-in',
+                                'success'
+                            );
+                        }, 2000);
+                    }
                     
                     // Reset returns selection after successful send
                     resetReturnsSelection();
