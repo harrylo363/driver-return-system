@@ -813,9 +813,7 @@
     </div>
 
     <script>
-        // IMPORTANT: Update this with your Railway backend URL
-        // If deployed on Railway, it should be something like: https://your-app-name.railway.app
-        // If running locally, use: http://localhost:3000
+        // IMPORTANT: Update this with your Railway backend URL if needed
         const API_BASE = window.location.hostname === 'localhost' 
             ? 'http://localhost:3000' 
             : window.location.origin;
@@ -916,58 +914,40 @@
                 log('📡 Loading data from MongoDB Atlas...');
                 updateConnectionStatus('loading');
                 
-                // Test endpoints separately with better error handling
-                const endpoints = [
-                    { url: '/api/health', required: false },
-                    { url: '/api/notifications', required: true },
-                    { url: '/api/users', required: false },
-                    { url: '/api/checkins', required: false }
-                ];
+                // Fetch notifications from MongoDB
+                const response = await fetch(`${API_BASE}/api/notifications`, {
+                    method: 'GET',
+                    headers: { 
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    signal: AbortSignal.timeout(10000)
+                });
                 
-                const results = {};
-                let hasConnection = false;
-                let hasRequiredData = false;
+                log(`API Response status: ${response.status}`);
                 
-                for (const endpoint of endpoints) {
-                    try {
-                        log(`🔍 Fetching ${endpoint.url}...`);
-                        
-                        const response = await fetch(`${API_BASE}${endpoint.url}`, {
-                            method: 'GET',
-                            headers: { 
-                                'Accept': 'application/json',
-                                'Content-Type': 'application/json'
-                            },
-                            // Add timeout
-                            signal: AbortSignal.timeout(10000)
-                        });
-                        
-                        if (response.ok) {
-                            const data = await response.json();
-                            results[endpoint.url] = data;
-                            hasConnection = true;
-                            if (endpoint.required) hasRequiredData = true;
-                            log(`✅ ${endpoint.url} responded with ${JSON.stringify(data).length} bytes`);
-                        } else {
-                            const errorText = await response.text();
-                            results[endpoint.url] = { error: `HTTP ${response.status}: ${errorText}` };
-                            log(`⚠️ ${endpoint.url} returned ${response.status}`);
-                        }
-                    } catch (error) {
-                        results[endpoint.url] = { error: error.message };
-                        log(`❌ ${endpoint.url} failed: ${error.message}`);
+                if (response.ok) {
+                    const result = await response.json();
+                    log(`Raw response: ${JSON.stringify(result).substring(0, 200)}`);
+                    
+                    // Handle different response formats
+                    let notifications = [];
+                    if (Array.isArray(result)) {
+                        notifications = result;
+                    } else if (result.data && Array.isArray(result.data)) {
+                        notifications = result.data;
+                    } else if (result.notifications && Array.isArray(result.notifications)) {
+                        notifications = result.notifications;
                     }
-                }
-                
-                if (hasConnection && hasRequiredData) {
+                    
+                    log(`📊 Found ${notifications.length} notifications`);
+                    
+                    // Process notifications into driver data
+                    processNotifications(notifications);
                     updateConnectionStatus('connected');
-                    processMongoData(results);
-                } else if (hasConnection) {
-                    updateConnectionStatus('connected', 'Partial connection');
-                    processMongoData(results);
+                    
                 } else {
-                    updateConnectionStatus('error', 'Connection failed');
-                    showEmptyState();
+                    throw new Error(`HTTP ${response.status}`);
                 }
                 
                 document.getElementById('lastUpdate').textContent = 
@@ -980,15 +960,84 @@
             }
         }
         
+        // Process notifications from MongoDB
+        function processNotifications(notifications) {
+            try {
+                // Clear existing drivers and rebuild from notifications
+                allDrivers = [];
+                driverMap.clear();
+                
+                notifications.forEach((notification, index) => {
+                    // Extract driver information from various possible field names
+                    const driverName = notification.driver_name || 
+                                      notification.driver || 
+                                      notification.name || 
+                                      `Driver ${index + 1}`;
+                    
+                    const driverId = notification.driver_id || 
+                                    notification.driverId || 
+                                    notification._id || 
+                                    notification.id || 
+                                    `driver-${index}`;
+                    
+                    const status = notification.status || 'working';
+                    const returns = parseInt(notification.returns || 
+                                           notification.returnsCount || 
+                                           notification.hasReturns ? notification.returnsCount : 0);
+                    
+                    const driver = {
+                        id: driverId,
+                        name: driverName,
+                        status: status,
+                        returns: returns,
+                        timestamp: notification.timestamp || new Date().toISOString(),
+                        vehicleId: notification.vehicleId || notification.vehicle || '',
+                        message: notification.message || '',
+                        hasReturns: notification.hasReturns || returns > 0
+                    };
+                    
+                    // Check if driver already exists in map
+                    if (driverMap.has(driverId)) {
+                        // Update existing driver with latest status
+                        const existingDriver = driverMap.get(driverId);
+                        existingDriver.status = status;
+                        existingDriver.timestamp = driver.timestamp;
+                        existingDriver.returns = returns;
+                        existingDriver.hasReturns = driver.hasReturns;
+                        log(`Updated existing driver: ${driverName} - Status: ${status}`);
+                    } else {
+                        // Add new driver
+                        allDrivers.push(driver);
+                        driverMap.set(driverId, driver);
+                        log(`Added new driver: ${driverName} - Status: ${status} - Returns: ${returns}`);
+                    }
+                });
+                
+                // Get final driver list from map
+                allDrivers = Array.from(driverMap.values());
+                
+                log(`✅ Processed ${allDrivers.length} unique drivers`);
+                
+                // Update UI
+                updateKPIs();
+                updateActivityFeed();
+                
+            } catch (error) {
+                log('❌ Error processing notifications: ' + error.message);
+                showEmptyState();
+            }
+        }
+        
         // Start auto-refresh
         function startAutoRefresh() {
             if (refreshInterval) {
                 clearInterval(refreshInterval);
             }
             
+            // Refresh every 10 seconds for more real-time updates
             refreshInterval = setInterval(() => {
                 loadDataFromMongoDB();
-            }, 30000); // Refresh every 30 seconds
+            }, 10000);
         }
         
         // Update connection status
@@ -1017,61 +1066,6 @@
                     pulse.classList.add('error');
                     statusText.textContent = message || 'MongoDB Connection Error';
                     break;
-            }
-        }
-        
-        // Process MongoDB data with better error handling
-        function processMongoData(results) {
-            try {
-                let notifications = [];
-                
-                // Try to get notifications from the API response
-                if (results['/api/notifications'] && !results['/api/notifications'].error) {
-                    const notifData = results['/api/notifications'];
-                    
-                    // Handle different response formats
-                    if (Array.isArray(notifData)) {
-                        notifications = notifData;
-                    } else if (notifData.data && Array.isArray(notifData.data)) {
-                        notifications = notifData.data;
-                    } else if (notifData.notifications && Array.isArray(notifData.notifications)) {
-                        notifications = notifData.notifications;
-                    } else {
-                        log('⚠️ Unexpected notifications format: ' + JSON.stringify(notifData).substring(0, 100));
-                    }
-                }
-                
-                log(`📊 Processing ${notifications.length} notifications`);
-                
-                // Map notifications to driver objects with safe property access
-                allDrivers = notifications.map((n, index) => {
-                    const driver = {
-                        id: n?.driver_id || n?._id || n?.id || `driver-${index}`,
-                        name: n?.driver_name || n?.driver || n?.name || `Driver ${index + 1}`,
-                        status: n?.status || 'working',
-                        returns: parseInt(n?.returns || n?.returnsCount || 0),
-                        timestamp: n?.timestamp || new Date().toISOString(),
-                        equipmentIssues: n?.equipmentIssues || {},
-                        tractorNumber: n?.tractorNumber || '',
-                        trailerNumber: n?.trailerNumber || '',
-                        moffettNumber: n?.moffettNumber || '',
-                        completedAt: n?.completedAt || n?.timestamp,
-                        vehicleId: n?.vehicleId || n?.vehicle || ''
-                    };
-                    
-                    // Store in map for quick lookup
-                    driverMap.set(driver.id, driver);
-                    
-                    return driver;
-                });
-                
-                updateKPIs();
-                updateActivityFeed();
-                
-            } catch (error) {
-                log('❌ Error processing data: ' + error.message);
-                log('Stack trace: ' + error.stack);
-                showEmptyState();
             }
         }
         
@@ -1107,27 +1101,13 @@
                 Math.round((stats.totalReturns / stats.driversWithReturns) * 10) / 10 : 0
             );
             
-            // Calculate equipment issues
-            let tractorIssueCount = 0;
-            let trailerIssueCount = 0;
-            let moffettIssueCount = 0;
-            
-            allDrivers.forEach(driver => {
-                if (driver?.equipmentIssues && typeof driver.equipmentIssues === 'object') {
-                    Object.keys(driver.equipmentIssues).forEach(key => {
-                        if (key.startsWith('tractor_')) tractorIssueCount++;
-                        else if (key.startsWith('trailer_')) trailerIssueCount++;
-                        else if (key.startsWith('moffett_')) moffettIssueCount++;
-                    });
-                }
-            });
-            
-            updateElement('tractorIssues', tractorIssueCount);
-            updateElement('trailerIssues', trailerIssueCount);
-            updateElement('moffettIssues', moffettIssueCount);
+            // Equipment issues would be tracked separately (not shown in current data)
+            updateElement('tractorIssues', 0);
+            updateElement('trailerIssues', 0);
+            updateElement('moffettIssues', 0);
         }
         
-        // Update activity feed
+        // Update activity feed WITH CHECK-IN BUTTON
         function updateActivityFeed() {
             const activityList = document.getElementById('activityList');
             const activityCount = document.getElementById('activityCount');
@@ -1156,12 +1136,22 @@
                 return;
             }
             
-            // Generate activity items
+            // Generate activity items WITH CHECK-IN BUTTON for arrived drivers
             activityList.innerHTML = filteredDrivers.map(driver => {
                 const timestamp = driver?.timestamp ? new Date(driver.timestamp) : new Date();
                 const timeString = timestamp instanceof Date && !isNaN(timestamp) 
                     ? timestamp.toLocaleTimeString() 
                     : 'Unknown time';
+                
+                // Create check-in button ONLY for arrived status
+                let checkInButton = '';
+                if (driver?.status === 'arrived') {
+                    checkInButton = `
+                        <button class="btn btn-success" onclick="performCheckIn('${driver.id}', '${driver.name}', ${driver.returns || 0})">
+                            📋 Check-In
+                        </button>
+                    `;
+                }
                 
                 return `
                     <div class="activity-item ${(driver?.status || 'working').replace('-', '')}">
@@ -1171,17 +1161,74 @@
                                 <div class="activity-details">
                                     <span>🕐 ${timeString}</span>
                                     <span>📦 ${parseInt(driver?.returns) || 0} returns</span>
+                                    ${driver?.vehicleId ? `<span>🚚 ${driver.vehicleId}</span>` : ''}
                                 </div>
                             </div>
                             <div class="activity-actions">
                                 <span class="status-badge status-${(driver?.status || 'working').replace('-', '')}">
                                     ${driver?.status || 'working'}
                                 </span>
+                                ${checkInButton}
                             </div>
                         </div>
                     </div>
                 `;
             }).join('');
+            
+            log(`✅ Activity feed updated with ${filteredDrivers.length} drivers`);
+        }
+        
+        // Perform check-in for a driver
+        async function performCheckIn(driverId, driverName, returns) {
+            log(`📋 Starting check-in for: ${driverName}`);
+            
+            if (!confirm(`Complete check-in for ${driverName}?`)) {
+                return;
+            }
+            
+            try {
+                // Send check-in to server
+                const checkInData = {
+                    driver_id: driverId,
+                    driver_name: driverName,
+                    status: 'completed',
+                    returns: returns,
+                    timestamp: new Date().toISOString(),
+                    completedAt: new Date().toISOString()
+                };
+                
+                const response = await fetch(`${API_BASE}/api/checkin`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(checkInData)
+                });
+                
+                if (response.ok) {
+                    showToast(`✅ ${driverName} checked in successfully!`, 'success');
+                    
+                    // Update local state
+                    const driver = driverMap.get(driverId);
+                    if (driver) {
+                        driver.status = 'completed';
+                        driver.completedAt = new Date().toISOString();
+                    }
+                    
+                    // Refresh data
+                    setTimeout(() => {
+                        loadDataFromMongoDB();
+                    }, 1000);
+                    
+                } else {
+                    throw new Error(`Server returned ${response.status}`);
+                }
+                
+            } catch (error) {
+                log('❌ Check-in failed: ' + error.message);
+                showToast('Check-in failed: ' + error.message, 'error');
+            }
         }
         
         // Show empty state
@@ -1196,7 +1243,7 @@
                     <div class="empty-state">
                         <div class="empty-icon">📭</div>
                         <p>No driver activity today</p>
-                        <p style="font-size: 0.875rem; margin-top: 1rem;">Ready for new check-ins</p>
+                        <p style="font-size: 0.875rem; margin-top: 1rem;">Waiting for driver updates...</p>
                     </div>
                 `;
             }
