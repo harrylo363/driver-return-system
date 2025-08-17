@@ -415,11 +415,14 @@ app.post('/api/notifications', async (req, res) => {
     }
 });
 
-// Driver check-in endpoint - FIXED to handle equipment issues
+// Driver check-in endpoint - FIXED to handle equipment issues and return proper JSON
 app.post('/api/checkin', async (req, res) => {
     try {
         if (!db) {
-            return res.status(503).json({ error: 'Database not connected' });
+            return res.status(503).json({ 
+                success: false,
+                error: 'Database not connected' 
+            });
         }
         
         const today = getTodayDate();
@@ -434,7 +437,15 @@ app.post('/api/checkin', async (req, res) => {
         } = req.body;
         
         console.log(`📋 Check-in request for ${driver_name}`);
-        console.log('Equipment Issues:', equipmentIssues);
+        console.log('Check-in data received:', {
+            driver_id,
+            driver_name,
+            tractorNumber,
+            trailerNumber,
+            moffettNumber,
+            returns,
+            hasIssues: Object.keys(equipmentIssues || {}).length > 0
+        });
         
         // Update the driver's status to completed in daily_operations
         const updateResult = await db.collection('daily_operations').updateOne(
@@ -451,7 +462,7 @@ app.post('/api/checkin', async (req, res) => {
                     trailerNumber: trailerNumber || '',
                     moffettNumber: moffettNumber || '',
                     equipmentIssues: equipmentIssues || {},
-                    returns: returns || 0
+                    returns: parseInt(returns) || 0
                 }
             }
         );
@@ -468,15 +479,21 @@ app.post('/api/checkin', async (req, res) => {
                 trailerNumber: trailerNumber,
                 moffettNumber: moffettNumber,
                 equipmentIssues: equipmentIssues || {},
-                returns: returns || 0,
+                returns: parseInt(returns) || 0,
                 date: today,
                 completedAt: new Date(),
                 timestamp: new Date()
+            }).catch(err => {
+                console.log('Warning: Could not save to checkins collection:', err.message);
             });
             
             res.json({ 
                 success: true,
-                message: 'Check-in completed successfully'
+                message: 'Check-in completed successfully',
+                data: {
+                    driver: driver_name,
+                    status: 'completed'
+                }
             });
         } else {
             // If no existing record, create one
@@ -486,7 +503,7 @@ app.post('/api/checkin', async (req, res) => {
                 driver_id: driver_id,
                 name: driver_name,
                 status: 'completed',
-                returns: returns || 0,
+                returns: parseInt(returns) || 0,
                 tractorNumber: tractorNumber || '',
                 trailerNumber: trailerNumber || '',
                 moffettNumber: moffettNumber || '',
@@ -503,20 +520,26 @@ app.post('/api/checkin', async (req, res) => {
             await db.collection('checkins').insertOne({
                 ...checkInData,
                 _id: new ObjectId()
+            }).catch(err => {
+                console.log('Warning: Could not save to checkins collection:', err.message);
             });
             
             console.log(`✅ ${driver_name} checked in (new record created with equipment data)`);
             res.json({ 
                 success: true,
-                message: 'Check-in completed successfully'
+                message: 'Check-in completed successfully (new record)',
+                data: {
+                    driver: driver_name,
+                    status: 'completed'
+                }
             });
         }
         
     } catch (error) {
-        console.error('Error recording check-in:', error);
+        console.error('❌ Error recording check-in:', error);
         res.status(500).json({ 
             success: false,
-            error: error.message 
+            error: error.message || 'Failed to process check-in'
         });
     }
 });
