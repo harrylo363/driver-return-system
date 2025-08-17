@@ -1008,6 +1008,11 @@
             </div>
             
             <div class="form-group">
+                <label class="form-label">Driver Name</label>
+                <input type="text" class="form-input" id="driverNameField" readonly style="background: var(--bg-card); cursor: not-allowed;">
+            </div>
+            
+            <div class="form-group">
                 <label class="form-label">Equipment Numbers <span style="color: var(--danger);">*</span></label>
                 <input type="text" class="form-input" id="tractorNumber" placeholder="Tractor # (Required)" required>
                 <input type="text" class="form-input" id="trailerNumber" placeholder="Trailer # (Required)" style="margin-top: 0.5rem;" required>
@@ -1511,10 +1516,15 @@
         // Open check-in modal for a driver
         function openCheckInModal(driverData) {
             currentCheckInDriver = driverData;
+            
+            // Populate driver name only
             document.getElementById('modalDriverName').textContent = driverData.name;
+            document.getElementById('driverNameField').value = driverData.name;
+            
+            // Show the modal
             document.getElementById('checkInModal').classList.add('show');
             
-            // Reset form
+            // Reset form fields
             document.getElementById('tractorNumber').value = '';
             document.getElementById('trailerNumber').value = '';
             document.getElementById('moffettNumber').value = '';
@@ -1530,6 +1540,11 @@
             });
             
             log('📋 Opened check-in form for: ' + driverData.name);
+            
+            // Focus on first input field
+            setTimeout(() => {
+                document.getElementById('tractorNumber').focus();
+            }, 100);
         }
         
         // Close check-in modal
