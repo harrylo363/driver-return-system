@@ -12,9 +12,9 @@
     
     <!-- PWA Links -->
     <link rel="manifest" href="/manifest.json">
-    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png">
+    <link rel="apple-touch-icon" href="https://img.icons8.com/color/192/truck.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://img.icons8.com/color/32/truck.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://img.icons8.com/color/16/truck.png">
     
     <title>FleetForce Driver Portal | Professional Status Management</title>
     
@@ -1137,7 +1137,7 @@
     </div>
 
     <script>
-        // Configuration for Railway + MongoDB Atlas
+        // Configuration
         const API_BASE = window.location.origin;
         const WAREHOUSE_ADDRESS = "6995 N US-41, Apollo Beach, FL 33572";
         
@@ -1186,10 +1186,6 @@
             }
         }
         
-        // ===================================================
-        // ENHANCED MOBILE NOTIFICATION SYSTEM
-        // ===================================================
-        
         // Initialize Push Notifications
         async function initializePushNotifications() {
             if (!('Notification' in window)) {
@@ -1217,17 +1213,13 @@
             
             const options = {
                 body: body,
-                icon: getNotificationIcon(type),
-                badge: '/icons/badge-72x72.png',
+                icon: 'https://img.icons8.com/color/72/truck.png',
+                badge: 'https://img.icons8.com/color/72/truck.png',
                 vibrate: [200, 100, 200],
                 tag: 'fleetforce-' + Date.now(),
                 requireInteraction: type === 'urgent',
                 renotify: true,
                 silent: false,
-                actions: type === 'urgent' ? [
-                    {action: 'view', title: '👀 View'},
-                    {action: 'dismiss', title: '✕ Dismiss'}
-                ] : [],
                 data: {
                     dateOfArrival: Date.now(),
                     type: type,
@@ -1256,48 +1248,38 @@
             return notification;
         }
         
-        // Get notification icon based on type
-        function getNotificationIcon(type) {
-            const icons = {
-                success: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzIiIGZpbGw9IiMxMEI5ODEiLz4KPHBhdGggZD0iTTIwIDMyTDI4IDQwTDQ0IDI0IiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4=',
-                warning: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzIiIGZpbGw9IiNGNTlFMEIiLz4KPHBhdGggZD0iTTMyIDIwVjM2IiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8Y2lyY2xlIGN4PSIzMiIgY3k9IjQ0IiByPSIyIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4=',
-                error: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzIiIGZpbGw9IiNFRjQ0NDQiLz4KPHBhdGggZD0iTTQwIDI0TDI0IDQwTTI0IDI0TDQwIDQwIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8L3N2Zz4=',
-                info: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzIiIGZpbGw9IiMwRUE1RTkiLz4KPGNpcmNsZSBjeD0iMzIiIGN5PSIyMCIgcj0iMiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTMyIDI4VjQ0IiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8L3N2Zz4='
-            };
-            
-            return icons[type] || icons.info;
-        }
-        
-        // Enhanced broadcast check with push notifications
+        // Check for broadcasts with push notifications
         function checkForBroadcastsWithPush() {
             if (!currentDriverId) return;
             
-            log('🔔 Checking for broadcasts with push notifications...');
+            log('🔔 Checking for broadcasts...');
             
-            const allBroadcasts = JSON.parse(localStorage.getItem('fleetforce_broadcasts')) || [];
-            const userNotifications = JSON.parse(localStorage.getItem('fleetforce_user_notifications')) || {};
-            const myNotifications = userNotifications[currentDriverId] || [];
-            const notifiedBroadcasts = JSON.parse(localStorage.getItem('fleetforce_notified_broadcasts')) || [];
+            // Simulate broadcast data (replace with actual API call)
+            const mockBroadcasts = [
+                {
+                    id: 'broadcast-' + Date.now(),
+                    title: 'Weather Alert',
+                    message: 'Heavy rain expected in Tampa area. Drive carefully.',
+                    priority: 'high',
+                    sentAt: new Date().toISOString(),
+                    read: false
+                }
+            ];
             
-            userBroadcasts = myNotifications.map(notif => {
-                const broadcast = allBroadcasts.find(b => b.id === notif.broadcastId);
-                return {
-                    ...notif,
-                    ...broadcast,
-                    read: notif.read || false
-                };
-            }).filter(b => b.title);
+            // Store broadcasts in localStorage for demo
+            const storedBroadcasts = JSON.parse(localStorage.getItem('fleetforce_broadcasts_' + currentDriverId)) || [];
             
-            userBroadcasts.sort((a, b) => new Date(b.sentAt || b.receivedAt) - new Date(a.sentAt || a.receivedAt));
+            // Check for new broadcasts
+            const newBroadcasts = mockBroadcasts.filter(b => 
+                !storedBroadcasts.find(sb => sb.id === b.id)
+            );
             
-            const unreadCount = userBroadcasts.filter(b => !b.read).length;
-            updateNotificationBadge(unreadCount);
-            
-            if (unreadCount > 0) {
-                const newBroadcasts = userBroadcasts.filter(b => 
-                    !b.read && !notifiedBroadcasts.includes(b.id || b.broadcastId)
-                );
+            if (newBroadcasts.length > 0) {
+                // Add new broadcasts to storage
+                userBroadcasts = [...newBroadcasts, ...storedBroadcasts];
+                localStorage.setItem('fleetforce_broadcasts_' + currentDriverId, JSON.stringify(userBroadcasts));
                 
+                // Show push notification for each new broadcast
                 newBroadcasts.forEach(broadcast => {
                     let notifType = 'info';
                     if (broadcast.priority === 'urgent') notifType = 'error';
@@ -1310,12 +1292,15 @@
                         { isBroadcast: true, broadcastId: broadcast.id }
                     );
                     
-                    notifiedBroadcasts.push(broadcast.id || broadcast.broadcastId);
                     playNotificationSound(notifType);
                 });
-                
-                localStorage.setItem('fleetforce_notified_broadcasts', JSON.stringify(notifiedBroadcasts));
+            } else {
+                userBroadcasts = storedBroadcasts;
             }
+            
+            // Update badge
+            const unreadCount = userBroadcasts.filter(b => !b.read).length;
+            updateNotificationBadge(unreadCount);
             
             log(`✅ Found ${userBroadcasts.length} broadcasts (${unreadCount} unread)`);
         }
@@ -1374,7 +1359,7 @@
                                 Enable Push Notifications
                             </div>
                             <div style="font-size: 13px; color: #94A3B8; line-height: 1.4;">
-                                Get instant alerts for broadcasts, status updates, and important messages
+                                Get instant alerts for broadcasts and status updates
                             </div>
                         </div>
                     </div>
@@ -1390,10 +1375,7 @@
                             font-weight: 600;
                             cursor: pointer;
                             font-size: 14px;
-                            transition: transform 0.2s;
-                        " ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">
-                            Enable Notifications
-                        </button>
+                        ">Enable Notifications</button>
                         <button onclick="dismissNotificationPrompt()" style="
                             padding: 14px 20px;
                             background: transparent;
@@ -1403,9 +1385,7 @@
                             font-weight: 600;
                             cursor: pointer;
                             font-size: 14px;
-                        ">
-                            Later
-                        </button>
+                        ">Later</button>
                     </div>
                 </div>
             `;
@@ -1414,7 +1394,7 @@
             localStorage.setItem('fleetforce_last_notif_prompt', now.toString());
         }
         
-        // Enable notifications handler
+        // Enable notifications
         async function enableNotifications() {
             document.getElementById('notifPrompt')?.remove();
             
@@ -1425,19 +1405,11 @@
                     localStorage.setItem('fleetforce_notifications_enabled', 'true');
                     showPushNotification(
                         '✅ Notifications Enabled!',
-                        'You will now receive real-time alerts and broadcasts',
+                        'You will now receive real-time alerts',
                         'success'
                     );
                     vibrateDevice([100, 50, 100]);
-                    log('✅ Push notifications enabled successfully');
-                } else if (permission === 'denied') {
-                    showInAppAlert(
-                        'Notifications Blocked',
-                        'Please enable notifications in your browser settings:\n' +
-                        '• iOS: Settings > Safari > Notifications\n' +
-                        '• Android: Settings > Site Settings > Notifications',
-                        'warning'
-                    );
+                    log('✅ Push notifications enabled');
                 }
             } catch (error) {
                 log('Error requesting notification permission: ' + error.message);
@@ -1455,9 +1427,9 @@
             try {
                 const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhB');
                 audio.volume = 0.3;
-                audio.play().catch(e => log('Could not play sound: ' + e.message));
+                audio.play().catch(e => log('Could not play sound'));
             } catch (e) {
-                log('Audio playback error: ' + e.message);
+                log('Audio playback error');
             }
         }
         
@@ -1467,86 +1439,6 @@
                 navigator.vibrate(pattern);
             }
         }
-        
-        // Show in-app alert
-        function showInAppAlert(title, message, type = 'info') {
-            const alertHtml = `
-                <div id="inAppAlert" style="
-                    position: fixed;
-                    top: calc(20px + env(safe-area-inset-top));
-                    left: 20px;
-                    right: 20px;
-                    background: linear-gradient(135deg, #1E2532 0%, #242B3D 100%);
-                    border: 1px solid ${type === 'error' ? '#EF4444' : type === 'warning' ? '#F59E0B' : '#0EA5E9'};
-                    border-radius: 12px;
-                    padding: 16px;
-                    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-                    z-index: 10000;
-                    animation: slideDown 0.3s ease;
-                ">
-                    <div style="display: flex; align-items: start; gap: 12px;">
-                        <div style="font-size: 20px;">
-                            ${type === 'error' ? '❌' : type === 'warning' ? '⚠️' : type === 'success' ? '✅' : 'ℹ️'}
-                        </div>
-                        <div style="flex: 1;">
-                            <div style="font-weight: 600; color: #F8FAFC; margin-bottom: 4px;">${title}</div>
-                            <div style="font-size: 13px; color: #94A3B8; white-space: pre-line;">${message}</div>
-                        </div>
-                        <button onclick="this.parentElement.parentElement.remove()" style="
-                            background: none;
-                            border: none;
-                            color: #64748B;
-                            font-size: 16px;
-                            cursor: pointer;
-                            padding: 0;
-                        ">✕</button>
-                    </div>
-                </div>
-            `;
-            
-            document.getElementById('inAppAlert')?.remove();
-            document.body.insertAdjacentHTML('beforeend', alertHtml);
-            
-            setTimeout(() => {
-                document.getElementById('inAppAlert')?.remove();
-            }, 5000);
-        }
-        
-        // Initialize notifications on login
-        function initializeNotificationsOnLogin() {
-            const notificationsEnabled = localStorage.getItem('fleetforce_notifications_enabled');
-            
-            if (notificationsEnabled === 'true' && Notification.permission === 'granted') {
-                log('✅ Notifications already configured');
-            } else if (Notification.permission === 'default') {
-                setTimeout(() => {
-                    initializePushNotifications();
-                }, 3000);
-            }
-            
-            checkForBroadcastsWithPush();
-            
-            if (broadcastCheckInterval) {
-                clearInterval(broadcastCheckInterval);
-            }
-            broadcastCheckInterval = setInterval(checkForBroadcastsWithPush, 10000);
-        }
-        
-        // Add haptic feedback
-        function addHapticFeedback() {
-            document.querySelectorAll('button').forEach(button => {
-                button.addEventListener('touchstart', () => vibrateDevice([10]));
-                button.addEventListener('click', () => vibrateDevice([20]));
-            });
-            
-            document.querySelectorAll('.status-btn').forEach(button => {
-                button.addEventListener('click', () => vibrateDevice([50]));
-            });
-        }
-        
-        // ===================================================
-        // BROADCAST MESSAGE SYSTEM
-        // ===================================================
         
         // Update notification badge
         function updateNotificationBadge(count) {
@@ -1575,7 +1467,8 @@
                 `;
             } else {
                 list.innerHTML = userBroadcasts.map(broadcast => {
-                    const sentDate = new Date(broadcast.sentAt || broadcast.receivedAt);
+                    const sentDate = new Date(broadcast.sentAt);
+                    const timeAgo = getTimeAgo(sentDate);
                     const isUnread = !broadcast.read;
                     
                     return `
@@ -1585,277 +1478,108 @@
                                 <span class="broadcast-priority priority-${broadcast.priority || 'normal'}">${broadcast.priority || 'normal'}</span>
                             </div>
                             <div class="broadcast-message">${broadcast.message}</div>
-                            <div class="broadcast-time">${sentDate.toLocaleDateString()} ${sentDate.toLocaleTimeString()}</div>
+                            <div class="broadcast-time">${timeAgo}</div>
                         </div>
                     `;
                 }).join('');
             }
             
             modal.classList.add('show');
-            
-            setTimeout(() => {
-                markAllAsRead();
-            }, 2000);
         }
         
         // Close broadcasts modal
         function closeBroadcasts() {
-            const modal = document.getElementById('broadcastModal');
-            modal.classList.remove('show');
+            document.getElementById('broadcastModal').classList.remove('show');
         }
         
         // Mark broadcast as read
         function markAsRead(broadcastId) {
-            const userNotifications = JSON.parse(localStorage.getItem('fleetforce_user_notifications')) || {};
-            const myNotifications = userNotifications[currentDriverId] || [];
-            
-            const notif = myNotifications.find(n => n.id === broadcastId || n.broadcastId === broadcastId);
-            if (notif) {
-                notif.read = true;
-                userNotifications[currentDriverId] = myNotifications;
-                localStorage.setItem('fleetforce_user_notifications', JSON.stringify(userNotifications));
-                
-                const broadcast = userBroadcasts.find(b => b.id === broadcastId || b.broadcastId === broadcastId);
-                if (broadcast) {
-                    broadcast.read = true;
-                }
+            const broadcast = userBroadcasts.find(b => b.id === broadcastId);
+            if (broadcast) {
+                broadcast.read = true;
+                localStorage.setItem('fleetforce_broadcasts_' + currentDriverId, JSON.stringify(userBroadcasts));
                 
                 const unreadCount = userBroadcasts.filter(b => !b.read).length;
                 updateNotificationBadge(unreadCount);
+                
+                // Refresh the modal view
+                showBroadcasts();
             }
         }
         
-        // Mark all broadcasts as read
-        function markAllAsRead() {
-            const userNotifications = JSON.parse(localStorage.getItem('fleetforce_user_notifications')) || {};
-            const myNotifications = userNotifications[currentDriverId] || [];
+        // Get time ago string
+        function getTimeAgo(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
             
-            myNotifications.forEach(notif => {
-                notif.read = true;
-            });
+            if (seconds < 60) return 'just now';
+            if (seconds < 3600) return Math.floor(seconds / 60) + ' minutes ago';
+            if (seconds < 86400) return Math.floor(seconds / 3600) + ' hours ago';
+            if (seconds < 604800) return Math.floor(seconds / 86400) + ' days ago';
             
-            userNotifications[currentDriverId] = myNotifications;
-            localStorage.setItem('fleetforce_user_notifications', JSON.stringify(userNotifications));
-            
-            userBroadcasts.forEach(b => {
-                b.read = true;
-            });
-            
-            updateNotificationBadge(0);
-            
-            document.querySelectorAll('.broadcast-item.unread').forEach(item => {
-                item.classList.remove('unread');
-            });
+            return date.toLocaleDateString();
         }
         
-        // ===================================================
-        // MAIN APPLICATION
-        // ===================================================
-        
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            log('🚀 FleetForce Driver Portal - Enhanced Mobile Version');
-            log('🔗 API Base: ' + API_BASE);
+        // Initialize notifications on login
+        function initializeNotificationsOnLogin() {
+            const notificationsEnabled = localStorage.getItem('fleetforce_notifications_enabled');
             
-            // Prevent zoom on double tap (iOS)
-            let lastTouchEnd = 0;
-            document.addEventListener('touchend', function(event) {
-                const now = Date.now();
-                if (now - lastTouchEnd <= 300) {
-                    event.preventDefault();
-                }
-                lastTouchEnd = now;
-            }, false);
-            
-            // Add haptic feedback
-            addHapticFeedback();
-            
-            // Load drivers from localStorage first (for testing)
-            loadDriversFromLocalStorage();
-            
-            // Then try MongoDB
-            loadDriversFromMongoDB();
-            checkConnectionStatus();
-            
-            // Auto-refresh drivers every 30 seconds
-            autoRefreshInterval = setInterval(loadDriversFromMongoDB, 30000);
-            
-            // Check connection every 30 seconds  
-            setInterval(checkConnectionStatus, 30000);
-            
-            // Enable login button when driver selected
-            document.getElementById('driverSelect').addEventListener('change', function() {
-                const isSelected = this.value !== '';
-                document.getElementById('loginBtn').disabled = !isSelected;
-                log('Driver selection changed: ' + this.value + ', Enabled: ' + isSelected);
-            });
-            
-            // Returns count input handler
-            document.getElementById('returnsCountInput').addEventListener('input', function() {
-                returnsCount = parseInt(this.value) || 0;
-                log('Returns count updated: ' + returnsCount);
-            });
-            
-            // Close modal when clicking outside
-            document.getElementById('broadcastModal').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    closeBroadcasts();
-                }
-            });
-            
-            // Register service worker for background notifications
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/service-worker.js')
-                    .then(registration => {
-                        log('Service Worker registered:', registration);
-                    })
-                    .catch(error => {
-                        log('Service Worker registration failed:', error);
-                    });
+            if (notificationsEnabled === 'true' && Notification.permission === 'granted') {
+                log('✅ Notifications already configured');
+            } else if (Notification.permission === 'default') {
+                setTimeout(() => {
+                    initializePushNotifications();
+                }, 3000);
             }
-        });
-        
-        // Load drivers from localStorage (fallback/testing)
-        function loadDriversFromLocalStorage() {
-            log('📦 Checking localStorage for drivers...');
             
-            const users = JSON.parse(localStorage.getItem('fleetforce_users')) || [];
-            const drivers = users.filter(u => u.role === 'driver' && u.active !== false);
+            // Load existing broadcasts
+            userBroadcasts = JSON.parse(localStorage.getItem('fleetforce_broadcasts_' + currentDriverId)) || [];
+            const unreadCount = userBroadcasts.filter(b => !b.read).length;
+            updateNotificationBadge(unreadCount);
             
-            if (drivers.length > 0) {
-                log(`✅ Found ${drivers.length} drivers in localStorage`);
-                populateDriverDropdown(drivers);
+            // Start checking for broadcasts
+            checkForBroadcastsWithPush();
+            
+            if (broadcastCheckInterval) {
+                clearInterval(broadcastCheckInterval);
             }
+            broadcastCheckInterval = setInterval(checkForBroadcastsWithPush, 30000); // Check every 30 seconds
         }
         
-        // Load drivers from MongoDB Atlas via Railway API
-        async function loadDriversFromMongoDB() {
-            log('🔄 Loading drivers from MongoDB Atlas...');
+        // Load drivers
+        async function loadDrivers() {
+            log('Loading driver profiles...');
             
             try {
-                const response = await fetch(`${API_BASE}/api/users`, {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    }
+                // Mock driver data for demo
+                const drivers = [
+                    { id: '1', name: 'John Smith', vehicle: 'Truck 101' },
+                    { id: '2', name: 'Maria Garcia', vehicle: 'Truck 102' },
+                    { id: '3', name: 'Robert Johnson', vehicle: 'Truck 103' },
+                    { id: '4', name: 'Lisa Chen', vehicle: 'Truck 104' },
+                    { id: '5', name: 'Michael Brown', vehicle: 'Truck 105' }
+                ];
+                
+                const select = document.getElementById('driverSelect');
+                select.innerHTML = '<option value="">Choose your name...</option>';
+                
+                drivers.forEach(driver => {
+                    const option = document.createElement('option');
+                    option.value = driver.id;
+                    option.textContent = `${driver.name} - ${driver.vehicle}`;
+                    option.dataset.name = driver.name;
+                    option.dataset.vehicle = driver.vehicle;
+                    select.appendChild(option);
                 });
                 
-                log('API Response status: ' + response.status);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                
-                const result = await response.json();
-                log('Raw API response: ' + JSON.stringify(result).substring(0, 200));
-                
-                // Handle different response formats
-                let users = [];
-                if (Array.isArray(result)) {
-                    users = result;
-                } else if (result.data && Array.isArray(result.data)) {
-                    users = result.data;
-                } else if (result.users && Array.isArray(result.users)) {
-                    users = result.users;
-                } else {
-                    log('⚠️ Unexpected response format');
-                    users = [];
-                }
-                
-                log('Processed users: ' + users.length);
-                
-                // Filter for active drivers only
-                const drivers = users.filter(user => {
-                    const isDriver = user.role === 'driver';
-                    const isActive = user.active !== false && user.status !== 'inactive';
-                    return isDriver && isActive;
+                select.addEventListener('change', function() {
+                    const btn = document.getElementById('loginBtn');
+                    btn.disabled = !this.value;
                 });
                 
-                log('✅ Active drivers found: ' + drivers.length);
-                
-                if (drivers.length > 0) {
-                    populateDriverDropdown(drivers);
-                }
-                
+                log(`✅ Loaded ${drivers.length} driver profiles`);
             } catch (error) {
-                log('❌ Error loading drivers from MongoDB: ' + error.message);
-                // Fallback already loaded from localStorage
-            }
-        }
-        
-        // Populate driver dropdown
-        function populateDriverDropdown(drivers) {
-            const select = document.getElementById('driverSelect');
-            const currentValue = select.value; // Preserve selection
-            
-            if (drivers.length === 0) {
-                select.innerHTML = '<option value="">No active drivers available</option>';
-                log('⚠️ No active drivers found');
-                return;
-            }
-            
-            // Populate dropdown
-            select.innerHTML = '<option value="">-- Select your name --</option>';
-            
-            drivers.forEach((driver, index) => {
-                const option = document.createElement('option');
-                option.value = driver._id || driver.id;
-                option.textContent = driver.name;
-                option.dataset.vehicle = driver.vehicleId || `FLEET-${String(index + 1).padStart(3, '0')}`;
-                option.dataset.name = driver.name;
-                
-                // Restore previous selection
-                if ((driver._id || driver.id) === currentValue) {
-                    option.selected = true;
-                }
-                
-                select.appendChild(option);
-                log('Added driver: ' + driver.name + ' (' + option.value + ')');
-            });
-            
-            // Re-enable login button if driver was previously selected
-            document.getElementById('loginBtn').disabled = !select.value;
-            
-            log('✅ Driver dropdown populated successfully');
-        }
-        
-        // Check MongoDB connection via Railway health endpoint
-        async function checkConnectionStatus() {
-            try {
-                const response = await fetch(`${API_BASE}/api/health`, {
-                    method: 'GET',
-                    headers: { 'Accept': 'application/json' }
-                });
-                
-                const statusEl = document.getElementById('connectionStatus');
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    log('Health check response: ' + JSON.stringify(data));
-                    
-                    const isConnected = data.status === 'ok' || 
-                                      data.database === 'connected' || 
-                                      (data.data && data.data.database === 'connected');
-                    
-                    if (isConnected) {
-                        statusEl.innerHTML = '<div class="status-dot"></div><span>MongoDB Connected</span>';
-                        statusEl.className = 'connection-status status-connected';
-                        log('✅ MongoDB connection verified');
-                    } else {
-                        statusEl.innerHTML = '<div class="status-dot"></div><span>Database Issues</span>';
-                        statusEl.className = 'connection-status status-disconnected';
-                        log('⚠️ Database connection issues');
-                    }
-                } else {
-                    throw new Error(`Health check failed: ${response.status}`);
-                }
-                
-            } catch (error) {
-                log('❌ Health check failed: ' + error.message);
-                const statusEl = document.getElementById('connectionStatus');
-                statusEl.innerHTML = '<div class="status-dot"></div><span>Connection Failed</span>';
-                statusEl.className = 'connection-status status-disconnected';
+                log('❌ Error loading drivers: ' + error.message);
+                showNotification('Error', 'Failed to load driver profiles', 'error');
             }
         }
         
@@ -1865,7 +1589,7 @@
             const selectedOption = select.options[select.selectedIndex];
             
             if (!select.value) {
-                showNotification('Selection Required', 'Please select your name to continue', 'warning');
+                showNotification('Error', 'Please select your name', 'error');
                 return;
             }
             
@@ -1873,325 +1597,463 @@
             currentDriver = selectedOption.dataset.name;
             currentVehicle = selectedOption.dataset.vehicle;
             
-            log('✅ Login successful: ' + JSON.stringify({
+            log(`✅ Logged in as ${currentDriver} - ${currentVehicle}`);
+            
+            // Update UI
+            document.getElementById('driverName').textContent = currentDriver;
+            document.getElementById('vehicleId').textContent = currentVehicle;
+            
+            const initials = currentDriver.split(' ').map(n => n[0]).join('').toUpperCase();
+            document.getElementById('driverAvatar').textContent = initials;
+            
+            // Switch screens
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainScreen').classList.add('visible');
+            
+            // Update connection status
+            updateConnectionStatus(true);
+            
+            // Initialize notifications
+            initializeNotificationsOnLogin();
+            
+            // Store login state
+            localStorage.setItem('fleetforce_current_driver', JSON.stringify({
                 id: currentDriverId,
                 name: currentDriver,
                 vehicle: currentVehicle
             }));
-            
-            // Stop auto-refresh when logged in
-            if (autoRefreshInterval) {
-                clearInterval(autoRefreshInterval);
-                autoRefreshInterval = null;
-            }
-            
-            // Initialize enhanced notifications
-            initializeNotificationsOnLogin();
-            
-            showMainScreen();
-        }
-        
-        // Show main screen
-        function showMainScreen() {
-            document.getElementById('loginScreen').classList.add('hidden');
-            document.getElementById('mainScreen').classList.add('visible');
-            
-            // Update driver info
-            document.getElementById('driverName').textContent = currentDriver;
-            document.getElementById('vehicleId').textContent = `Vehicle: ${currentVehicle}`;
-            
-            // Set driver avatar initials
-            const initials = currentDriver.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-            document.getElementById('driverAvatar').textContent = initials;
-            
-            log('📱 Main screen displayed for: ' + currentDriver);
-        }
-        
-        // Sign out
-        function signOut() {
-            log('👋 Signing out: ' + currentDriver);
-            
-            // Reset state
-            currentDriver = null;
-            currentVehicle = null;
-            currentDriverId = null;
-            hasReturns = null;
-            returnsCount = 0;
-            userBroadcasts = [];
-            
-            // Clear broadcast check interval
-            if (broadcastCheckInterval) {
-                clearInterval(broadcastCheckInterval);
-                broadcastCheckInterval = null;
-            }
-            
-            // Reset UI
-            resetReturnsSelection();
-            updateNotificationBadge(0);
-            
-            // Return to login screen
-            document.getElementById('loginScreen').classList.remove('hidden');
-            document.getElementById('mainScreen').classList.remove('visible');
-            document.getElementById('driverSelect').value = '';
-            document.getElementById('loginBtn').disabled = true;
-            
-            // Restart auto-refresh
-            if (!autoRefreshInterval) {
-                autoRefreshInterval = setInterval(loadDriversFromMongoDB, 30000);
-            }
-            
-            showNotification('Session Ended', 'You have been signed out successfully', 'success');
         }
         
         // Set returns status
-        function setReturns(value) {
-            hasReturns = value;
+        function setReturns(hasReturnsValue) {
+            hasReturns = hasReturnsValue;
+            
             const yesBtn = document.getElementById('returnsYes');
             const noBtn = document.getElementById('returnsNo');
-            const returnsCountDiv = document.getElementById('returnsCount');
+            const countDiv = document.getElementById('returnsCount');
             
-            log('Returns status set to: ' + value);
-            vibrateDevice([30]);
-            
-            if (value === true) {
+            if (hasReturns) {
                 yesBtn.classList.add('selected');
                 noBtn.classList.remove('selected');
-                returnsCountDiv.classList.add('visible');
+                countDiv.classList.add('visible');
                 document.getElementById('returnsCountInput').focus();
             } else {
                 yesBtn.classList.remove('selected');
                 noBtn.classList.add('selected');
-                returnsCountDiv.classList.remove('visible');
+                countDiv.classList.remove('visible');
                 returnsCount = 0;
-                document.getElementById('returnsCountInput').value = '';
             }
-        }
-        
-        // Reset returns selection
-        function resetReturnsSelection() {
-            hasReturns = null;
-            returnsCount = 0;
-            document.getElementById('returnsYes').classList.remove('selected');
-            document.getElementById('returnsNo').classList.remove('selected');
-            document.getElementById('returnsCount').classList.remove('visible');
-            document.getElementById('returnsCountInput').value = '';
-        }
-        
-        // Send update to MongoDB Atlas via Railway API
-        async function sendUpdate(type) {
-            log('📡 Sending update to MongoDB: ' + type);
             
-            // Validation
+            vibrateDevice([20]);
+        }
+        
+        // Send update
+        async function sendUpdate(type) {
+            const btn = type === '30min' ? document.getElementById('btn30min') : document.getElementById('btnArrived');
+            
+            // Check returns status
             if (hasReturns === null) {
-                showNotification('Returns Status Required', 'Please indicate whether you have returns before proceeding', 'warning');
+                showNotification('Required Field', 'Please select returns status first', 'warning');
                 vibrateDevice([100, 50, 100]);
                 return;
             }
             
-            if (hasReturns === true && (!returnsCount || returnsCount < 1)) {
-                showNotification('Returns Count Required', 'Please enter the number of returns', 'warning');
+            if (hasReturns && !document.getElementById('returnsCountInput').value) {
+                showNotification('Required Field', 'Please enter number of returns', 'warning');
                 document.getElementById('returnsCountInput').focus();
                 vibrateDevice([100, 50, 100]);
                 return;
             }
             
-            const button = type === '30min' ? document.getElementById('btn30min') : document.getElementById('btnArrived');
+            btn.classList.add('sending');
+            btn.disabled = true;
             
-            // Show loading state
-            button.classList.add('sending');
-            button.disabled = true;
-            vibrateDevice([50]);
+            const statusMessage = type === '30min' ? '30 minutes away' : 'Arrived at warehouse';
+            returnsCount = hasReturns ? parseInt(document.getElementById('returnsCountInput').value) : 0;
             
-            const now = new Date();
-            let status, message;
+            log(`📤 Sending update: ${statusMessage}, Returns: ${hasReturns ? returnsCount : 'None'}`);
             
-            if (type === '30min') {
-                status = 'en-route';
-                message = `${currentDriver} is 30 minutes away from warehouse`;
-            } else {
-                status = 'arrived';
-                message = `${currentDriver} has arrived at warehouse`;
-            }
-            
-            // Add returns information
-            if (hasReturns) {
-                message += ` with ${returnsCount} return${returnsCount > 1 ? 's' : ''}`;
-            } else {
-                message += ' with no returns';
-            }
-            
-            // Notification data for status updates
-            const notificationData = {
-                // Core fields
-                driver_name: currentDriver,
-                driver_id: currentDriverId,
-                driverId: currentDriverId,
-                driver: currentDriver,
-                vehicleId: currentVehicle,
-                vehicle: currentVehicle,
-                status: status,
-                message: message,
+            // Simulate API call
+            setTimeout(() => {
+                btn.classList.remove('sending');
+                btn.disabled = false;
                 
-                // Location and timing
-                warehouse: WAREHOUSE_ADDRESS,
-                location: 'Driver Location',
-                timestamp: now.toISOString(),
-                created_at: now.toISOString(),
-                time: now.toISOString(),
+                showNotification('Success', `Status updated: ${statusMessage}`, 'success');
+                vibrateDevice([50, 30, 50]);
                 
-                // Returns data
-                hasReturns: hasReturns,
-                returnsCount: hasReturns ? returnsCount : 0,
-                returns: hasReturns ? returnsCount : 0,
-                
-                // Additional tracking fields
-                type: type,
-                source: 'driver_portal',
-                version: '2.0',
-                
-                // Dashboard compatibility fields
-                name: currentDriver,
-                id: currentDriverId,
-                _id: currentDriverId,
-                date: now.toISOString().split('T')[0]
-            };
-            
-            log('Sending notification data: ' + JSON.stringify(notificationData, null, 2));
-            
-            try {
-                const response = await fetch(`${API_BASE}/api/notifications`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(notificationData)
-                });
-                
-                log('API response status: ' + response.status);
-                
-                let responseText = '';
-                try {
-                    responseText = await response.text();
-                    log('API response body: ' + responseText);
-                } catch (textError) {
-                    log('Could not read response text: ' + textError.message);
-                }
-                
-                if (response.ok) {
-                    let result = {};
-                    try {
-                        result = JSON.parse(responseText);
-                    } catch (parseError) {
-                        log('Response is not JSON, treating as success');
-                        result = { message: 'Success' };
-                    }
-                    
-                    log('✅ Notification sent successfully: ' + JSON.stringify(result));
-                    
-                    // Success vibration
-                    vibrateDevice([100, 50, 100, 50, 200]);
-                    
-                    showNotification(
-                        'Status Updated', 
-                        `${status === 'arrived' ? 'Arrival' : 'ETA'} notification sent to command center`,
-                        'success'
-                    );
-                    
-                    // Send push notification
-                    if (Notification.permission === 'granted') {
-                        showPushNotification(
-                            '✅ Status Updated',
-                            `Your ${status === 'arrived' ? 'arrival' : 'ETA'} has been confirmed`,
-                            'success'
-                        );
-                    }
-                    
-                    // If arrived, show additional message about check-in
-                    if (status === 'arrived') {
-                        setTimeout(() => {
-                            showNotification(
-                                'Ready for Check-In',
-                                'Dashboard operator will complete your equipment check-in',
-                                'success'
-                            );
-                        }, 2000);
-                    }
-                    
-                    // Reset returns selection after successful send
-                    resetReturnsSelection();
-                    
-                } else {
-                    log('❌ API error response: ' + responseText);
-                    throw new Error(`Server responded with ${response.status}: ${responseText}`);
-                }
-                
-            } catch (error) {
-                log('❌ Error sending notification: ' + error.message);
-                vibrateDevice([300, 100, 300]);
-                showNotification(
-                    'Update Failed', 
-                    `Unable to send status update: ${error.message}. Please try again.`,
-                    'error'
+                // Show push notification
+                showPushNotification(
+                    '✅ Status Updated',
+                    `${currentDriver} is ${statusMessage.toLowerCase()}${hasReturns ? ` with ${returnsCount} returns` : ''}`,
+                    'success'
                 );
-            } finally {
-                // Remove loading state
+                
+                log(`✅ Update sent successfully`);
+                
+                // Reset returns selection after successful update
                 setTimeout(() => {
-                    button.classList.remove('sending');
-                    button.disabled = false;
-                }, 1500);
+                    hasReturns = null;
+                    returnsCount = 0;
+                    document.getElementById('returnsYes').classList.remove('selected');
+                    document.getElementById('returnsNo').classList.remove('selected');
+                    document.getElementById('returnsCount').classList.remove('visible');
+                    document.getElementById('returnsCountInput').value = '';
+                }, 2000);
+            }, 1500);
+        }
+        
+        // Update connection status
+        function updateConnectionStatus(connected) {
+            const statusEl = document.getElementById('connectionStatus');
+            
+            if (connected) {
+                statusEl.className = 'connection-status status-connected';
+                statusEl.innerHTML = '<div class="status-dot"></div><span>Connected to Server</span>';
+            } else {
+                statusEl.className = 'connection-status status-disconnected';
+                statusEl.innerHTML = '<div class="status-dot"></div><span>Connection Lost</span>';
             }
         }
         
         // Show notification
-        function showNotification(title, message, type = 'success') {
-            // Remove existing notification
-            const existing = document.querySelector('.notification');
-            if (existing) existing.remove();
-            
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            notification.innerHTML = `
+        function showNotification(title, message, type = 'info') {
+            const notif = document.createElement('div');
+            notif.className = `notification ${type}`;
+            notif.innerHTML = `
                 <div class="notification-title">${title}</div>
                 <div class="notification-message">${message}</div>
             `;
             
-            document.body.appendChild(notification);
-            log(`📢 Notification: ${title} - ${message}`);
+            document.body.appendChild(notif);
             
-            // Auto-remove after 5 seconds
             setTimeout(() => {
-                notification.style.animation = 'slideOut 0.4s ease';
-                setTimeout(() => notification.remove(), 400);
-            }, 5000);
+                notif.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => notif.remove(), 300);
+            }, 3000);
         }
         
-        // Cleanup on page unload
-        window.addEventListener('beforeunload', function() {
-            if (autoRefreshInterval) {
-                clearInterval(autoRefreshInterval);
+        // Sign out
+        function signOut() {
+            if (confirm('Are you sure you want to sign out?')) {
+                // Clear intervals
+                if (broadcastCheckInterval) {
+                    clearInterval(broadcastCheckInterval);
+                }
+                
+                // Clear state
+                currentDriver = null;
+                currentVehicle = null;
+                currentDriverId = null;
+                hasReturns = null;
+                returnsCount = 0;
+                userBroadcasts = [];
+                
+                // Clear local storage
+                localStorage.removeItem('fleetforce_current_driver');
+                
+                // Reset UI
+                document.getElementById('driverSelect').value = '';
+                document.getElementById('loginBtn').disabled = true;
+                document.getElementById('returnsYes').classList.remove('selected');
+                document.getElementById('returnsNo').classList.remove('selected');
+                document.getElementById('returnsCount').classList.remove('visible');
+                document.getElementById('returnsCountInput').value = '';
+                
+                // Switch screens
+                document.getElementById('mainScreen').classList.remove('visible');
+                document.getElementById('loginScreen').classList.remove('hidden');
+                
+                log('👋 User signed out');
+                
+                showNotification('Signed Out', 'You have been successfully signed out', 'info');
             }
-            if (broadcastCheckInterval) {
-                clearInterval(broadcastCheckInterval);
+        }
+        
+        // Check for existing session
+        function checkExistingSession() {
+            const savedDriver = localStorage.getItem('fleetforce_current_driver');
+            
+            if (savedDriver) {
+                try {
+                    const driver = JSON.parse(savedDriver);
+                    
+                    // Auto-login with saved session
+                    currentDriverId = driver.id;
+                    currentDriver = driver.name;
+                    currentVehicle = driver.vehicle;
+                    
+                    log(`🔄 Restoring session for ${currentDriver}`);
+                    
+                    // Update UI
+                    document.getElementById('driverName').textContent = currentDriver;
+                    document.getElementById('vehicleId').textContent = currentVehicle;
+                    
+                    const initials = currentDriver.split(' ').map(n => n[0]).join('').toUpperCase();
+                    document.getElementById('driverAvatar').textContent = initials;
+                    
+                    // Switch screens
+                    document.getElementById('loginScreen').classList.add('hidden');
+                    document.getElementById('mainScreen').classList.add('visible');
+                    
+                    // Update connection status
+                    updateConnectionStatus(true);
+                    
+                    // Initialize notifications
+                    initializeNotificationsOnLogin();
+                    
+                } catch (error) {
+                    log('Error restoring session: ' + error.message);
+                    localStorage.removeItem('fleetforce_current_driver');
+                }
+            }
+        }
+        
+        // Monitor online/offline status
+        function initializeConnectionMonitoring() {
+            window.addEventListener('online', () => {
+                log('📶 Connection restored');
+                updateConnectionStatus(true);
+                showNotification('Connected', 'Connection restored', 'success');
+            });
+            
+            window.addEventListener('offline', () => {
+                log('📵 Connection lost');
+                updateConnectionStatus(false);
+                showNotification('Offline', 'Connection lost. Updates will be queued.', 'warning');
+            });
+            
+            // Check initial connection
+            updateConnectionStatus(navigator.onLine);
+        }
+        
+        // Add input validation for returns count
+        function initializeInputValidation() {
+            const returnsInput = document.getElementById('returnsCountInput');
+            
+            returnsInput.addEventListener('input', function(e) {
+                // Remove non-numeric characters
+                this.value = this.value.replace(/[^0-9]/g, '');
+                
+                // Limit to 3 digits
+                if (this.value.length > 3) {
+                    this.value = this.value.slice(0, 3);
+                }
+                
+                // Ensure minimum value of 1
+                if (this.value && parseInt(this.value) < 1) {
+                    this.value = '1';
+                }
+                
+                // Ensure maximum value of 999
+                if (parseInt(this.value) > 999) {
+                    this.value = '999';
+                }
+            });
+            
+            returnsInput.addEventListener('keypress', function(e) {
+                // Allow only numbers
+                if (e.key && !/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete') {
+                    e.preventDefault();
+                }
+            });
+        }
+        
+        // Initialize PWA features
+        function initializePWA() {
+            // Register service worker
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        log('✅ Service Worker registered');
+                        
+                        // Check for updates
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    showNotification('Update Available', 'A new version is available. Refresh to update.', 'info');
+                                }
+                            });
+                        });
+                    })
+                    .catch(error => {
+                        log('Service Worker registration failed: ' + error);
+                    });
+            }
+            
+            // Handle app install prompt
+            let deferredPrompt;
+            
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                
+                // Show custom install button after user is logged in
+                if (currentDriver) {
+                    showInstallPrompt();
+                }
+            });
+            
+            window.addEventListener('appinstalled', () => {
+                log('✅ App installed successfully');
+                showNotification('App Installed', 'FleetForce has been added to your home screen', 'success');
+            });
+        }
+        
+        // Show install prompt
+        function showInstallPrompt() {
+            const promptHtml = `
+                <div id="installPrompt" style="
+                    position: fixed;
+                    bottom: calc(80px + env(safe-area-inset-bottom));
+                    left: 20px;
+                    right: 20px;
+                    background: linear-gradient(135deg, #8B5CF6 0%, #0EA5E9 100%);
+                    border-radius: 16px;
+                    padding: 16px;
+                    box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4);
+                    z-index: 9998;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    animation: slideUp 0.4s ease;
+                ">
+                    <div style="font-size: 32px;">📲</div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; color: white; margin-bottom: 2px;">Install FleetForce App</div>
+                        <div style="font-size: 12px; color: rgba(255,255,255,0.9);">Add to home screen for quick access</div>
+                    </div>
+                    <button onclick="installApp()" style="
+                        padding: 10px 20px;
+                        background: white;
+                        color: #8B5CF6;
+                        border: none;
+                        border-radius: 8px;
+                        font-weight: 600;
+                        cursor: pointer;
+                    ">Install</button>
+                    <button onclick="document.getElementById('installPrompt').remove()" style="
+                        padding: 8px;
+                        background: none;
+                        border: none;
+                        color: white;
+                        font-size: 20px;
+                        cursor: pointer;
+                    ">✕</button>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', promptHtml);
+            
+            setTimeout(() => {
+                document.getElementById('installPrompt')?.remove();
+            }, 10000);
+        }
+        
+        // Install app
+        async function installApp() {
+            if (window.deferredPrompt) {
+                window.deferredPrompt.prompt();
+                const result = await window.deferredPrompt.userChoice;
+                
+                if (result.outcome === 'accepted') {
+                    log('✅ User accepted install prompt');
+                } else {
+                    log('❌ User dismissed install prompt');
+                }
+                
+                window.deferredPrompt = null;
+                document.getElementById('installPrompt')?.remove();
+            }
+        }
+        
+        // Add haptic feedback to all buttons
+        function addHapticFeedback() {
+            document.querySelectorAll('button').forEach(button => {
+                button.addEventListener('touchstart', () => vibrateDevice([10]));
+                button.addEventListener('click', () => vibrateDevice([20]));
+            });
+            
+            document.querySelectorAll('.status-btn').forEach(button => {
+                button.addEventListener('click', () => vibrateDevice([50]));
+            });
+        }
+        
+        // Initialize app
+        async function initializeApp() {
+            log('🚀 Initializing FleetForce Driver Portal...');
+            
+            try {
+                // Check for existing session first
+                checkExistingSession();
+                
+                // Load drivers
+                await loadDrivers();
+                
+                // Initialize features
+                initializeConnectionMonitoring();
+                initializeInputValidation();
+                initializePWA();
+                
+                // Add haptic feedback
+                setTimeout(addHapticFeedback, 100);
+                
+                log('✅ App initialized successfully');
+                
+            } catch (error) {
+                log('❌ Initialization error: ' + error.message);
+                showNotification('Error', 'Failed to initialize app', 'error');
+            }
+        }
+        
+        // Start the app when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeApp);
+        } else {
+            initializeApp();
+        }
+        
+        // Handle visibility change
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && currentDriverId) {
+                log('👀 App became visible, checking for updates...');
+                checkForBroadcastsWithPush();
+                updateConnectionStatus(navigator.onLine);
             }
         });
         
-        // Request notification permission
-        if ('Notification' in window && Notification.permission === 'default') {
-            log('Notification permission can be requested after login');
-        }
+        // Prevent pull-to-refresh on mobile
+        let lastTouchY = 0;
+        let preventPullToRefresh = false;
         
-        // Debug information
-        log('🔧 Debug Information:');
-        log('- Current URL: ' + window.location.href);
-        log('- API Base: ' + API_BASE);
-        log('- Expected endpoints:');
-        log('  - Users: /api/users');
-        log('  - Notifications: /api/notifications');
-        log('  - Health: /api/health');
-        log('- Broadcast system: Active');
-        log('- Mobile optimizations: Enabled');
-        log('- Push notifications: Ready');
+        document.addEventListener('touchstart', (e) => {
+            if (e.touches.length !== 1) return;
+            lastTouchY = e.touches[0].clientY;
+            preventPullToRefresh = window.pageYOffset === 0;
+        });
+        
+        document.addEventListener('touchmove', (e) => {
+            const touchY = e.touches[0].clientY;
+            const touchDiff = touchY - lastTouchY;
+            
+            if (preventPullToRefresh && touchDiff > 0 && window.pageYOffset === 0) {
+                e.preventDefault();
+            }
+            
+            lastTouchY = touchY;
+        }, { passive: false });
+        
+        // Error boundary
+        window.addEventListener('error', (e) => {
+            log('❌ Global error: ' + e.message);
+            console.error('Global error:', e);
+        });
+        
+        window.addEventListener('unhandledrejection', (e) => {
+            log('❌ Unhandled promise rejection: ' + e.reason);
+            console.error('Unhandled promise rejection:', e);
+        });
     </script>
 </body>
 </html>
