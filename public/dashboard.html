@@ -1434,7 +1434,7 @@
             updateElement('moffettIssues', 0);
         }
         
-        // Update activity feed WITH CHECK-IN BUTTON
+        // Update activity feed WITH proper filtering - FIXED VERSION
         function updateActivityFeed() {
             const activityList = document.getElementById('activityList');
             const activityCount = document.getElementById('activityCount');
@@ -1447,17 +1447,47 @@
             }
             
             let filteredDrivers = allDrivers;
-            if (currentFilter !== 'overview') {
+            let filterLabel = 'drivers';
+            
+            // FIXED: Apply proper filtering to hide completed drivers from overview
+            if (currentFilter === 'overview') {
+                // Overview should show all ACTIVE drivers (exclude completed)
+                filteredDrivers = allDrivers.filter(d => d?.status !== 'completed');
+                filterLabel = 'active drivers';
+            } else if (currentFilter === 'completed') {
+                // Only show completed drivers
+                filteredDrivers = allDrivers.filter(d => d?.status === 'completed');
+                filterLabel = 'completed today';
+            } else if (currentFilter === 'en-route') {
+                filteredDrivers = allDrivers.filter(d => d?.status === 'en-route');
+                filterLabel = 'en route';
+            } else if (currentFilter === 'arrived') {
+                filteredDrivers = allDrivers.filter(d => d?.status === 'arrived');
+                filterLabel = 'arrived';
+            } else if (currentFilter === 'working') {
+                filteredDrivers = allDrivers.filter(d => d?.status === 'working');
+                filterLabel = 'still working';
+            } else {
                 filteredDrivers = allDrivers.filter(d => d?.status === currentFilter);
+                filterLabel = currentFilter;
             }
             
-            activityCount.textContent = `${filteredDrivers.length} drivers`;
+            activityCount.textContent = `${filteredDrivers.length} ${filterLabel}`;
             
             if (filteredDrivers.length === 0) {
+                let emptyMessage;
+                if (currentFilter === 'overview') {
+                    emptyMessage = 'No active drivers - all drivers have completed check-in';
+                } else if (currentFilter === 'completed') {
+                    emptyMessage = 'No completed check-ins today';
+                } else {
+                    emptyMessage = `No drivers ${filterLabel}`;
+                }
+                
                 activityList.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-icon">📭</div>
-                        <p>No drivers in this category</p>
+                        <p>${emptyMessage}</p>
                     </div>
                 `;
                 return;
@@ -1488,8 +1518,19 @@
                     `;
                 }
                 
+                // Status badge styling
+                let statusClass = (driver?.status || 'working').replace('-', '');
+                let statusText = driver?.status || 'working';
+                
+                if (driver?.status === 'completed') {
+                    statusClass = 'completed';
+                    statusText = 'COMPLETED ✓';
+                    // No check-in button for completed drivers
+                    checkInButton = '';
+                }
+                
                 return `
-                    <div class="activity-item ${(driver?.status || 'working').replace('-', '')}">
+                    <div class="activity-item ${statusClass}">
                         <div class="activity-content">
                             <div>
                                 <div class="activity-driver">${driver?.name || 'Unknown Driver'}</div>
@@ -1500,8 +1541,8 @@
                                 </div>
                             </div>
                             <div class="activity-actions">
-                                <span class="status-badge status-${(driver?.status || 'working').replace('-', '')}">
-                                    ${driver?.status || 'working'}
+                                <span class="status-badge status-${statusClass}">
+                                    ${statusText}
                                 </span>
                                 ${checkInButton}
                             </div>
