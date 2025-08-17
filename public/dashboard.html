@@ -1270,7 +1270,7 @@
             log('✅ COMPLETE DAILY RESET FINISHED');
             log('================================================');
             
-            showToast('📊 Daily Reset Complete', 'info');
+            showToast('📊 Daily Reset Complete', 'All data has been reset for the new day', 'info');
         }
 
         // Reset ALL KPI displays to 0
@@ -1332,18 +1332,18 @@
         function checkDailyReset() {
             const now = new Date();
             const today = now.toDateString();
-            const lastResetDate = localStorage.getItem('lastResetDate');
+            const storedResetDate = localStorage.getItem('lastResetDate');
             
             // Get current time
             const currentHour = now.getHours();
             const currentMinute = now.getMinutes();
             
             // Check multiple reset conditions
-            const isNewDay = lastResetDate !== today;
+            const isNewDay = storedResetDate !== today;
             const isPastArchiveTime = (currentHour === 23 && currentMinute >= 55);
             const isJustAfterMidnight = (currentHour === 0 && currentMinute < 5);
             
-            log(`🕐 Reset Check: Day=${today}, LastReset=${lastResetDate}, Time=${currentHour}:${currentMinute}`);
+            log(`🕐 Reset Check: Day=${today}, LastReset=${storedResetDate}, Time=${currentHour}:${currentMinute}`);
             
             if (isNewDay) {
                 log('📅 New day detected - triggering reset');
@@ -1351,7 +1351,7 @@
             } else if (isPastArchiveTime) {
                 log('🕐 Past archive time (11:55 PM) - triggering reset');
                 performCompleteDailyReset();
-            } else if (isJustAfterMidnight && lastResetDate !== today) {
+            } else if (isJustAfterMidnight && storedResetDate !== today) {
                 log('🌙 Just after midnight - ensuring reset');
                 performCompleteDailyReset();
             }
@@ -1490,11 +1490,11 @@
         function initializeDashboard() {
             log('🚀 Initializing Dashboard with Complete Reset System');
             
-            // First, check if we need to reset
-            checkDailyReset();
-            
-            // Load any valid stored state
+            // Load any valid stored state first
             loadStoredState();
+            
+            // Then check if we need to reset
+            checkDailyReset();
             
             // Load fresh data from MongoDB
             loadDataFromMongoDB();
@@ -1518,8 +1518,176 @@
             refreshInterval = setInterval(() => {
                 loadDataFromMongoDB();
             }, 10000);
-            
-            log('🔄 Auto-refresh started (10-second intervals)');
+        }
+        
+        // Load data from MongoDB with better error handling
+        async function loadDataFromMongoDB() {
+            try {
+                log('📡 Loading data from MongoDB Atlas...');
+                updateConnectionStatus('loading');
+                
+                // Fetch notifications from MongoDB
+                const response = await fetch(`${API_BASE}/api/notifications`, {
+                    method: 'GET',
+                    headers: { 
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    signal: AbortSignal.timeout(10000)
+                });
+                
+                log(`API Response status: ${response.status}`);
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    log(`Raw response: ${JSON.stringify(result).substring(0, 200)}`);
+                    
+                    // Handle different response formats
+                    let notifications = [];
+                    if (Array.isArray(result)) {
+                        notifications = result;
+                    } else if (result.data && Array.isArray(result.data)) {
+                        notifications = result.data;
+                    } else if (result.notifications && Array.isArray(result.notifications)) {
+                        notifications = result.notifications;
+                    }
+                    
+                    log(`📊 Found ${notifications.length} notifications`);
+                    
+                    // Validate that data is from today
+                    const today = new Date().toDateString();
+                    const todayISO = new Date().toISOString().split('T')[0];
+                    
+                    // Filter only today's data
+                    const todaysNotifications = notifications.filter(n => {
+                        if (n.date) {
+                            return n.date === todayISO;
+                        }
+                        // Check timestamp if no date field
+                        if (n.timestamp || n.lastUpdate) {
+                            const notificationDate = new Date(n.timestamp || n.lastUpdate).toISOString().split('T')[0];
+                            return notificationDate === todayISO;
+                        }
+                        return false;
+                    });
+                    
+                    if (todaysNotifications.length !== notifications.length) {
+                        log(`⚠️ Filtered to ${todaysNotifications.length} notifications from today`);
+                    }
+                    
+                    // Process notifications into driver data
+                    processNotifications(todaysNotifications);
+                    updateConnectionStatus('connected');
+                    
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                document.getElementById('lastUpdate').textContent = 
+                    'Last updated: ' + new Date().toLocaleTimeString();
+                
+            } catch (error) {
+                log('❌ MongoDB connection failed: ' + error.message);
+                updateConnectionStatus('error');
+                showEmptyState();
+            }
+        }
+        
+        // Process notifications from MongoDB - FIXED to use most recent status
+        function processNotifications(notifications) {
+            try {
+                // Clear existing drivers and rebuild from notifications
+                allDrivers = [];
+                driverMap.clear();
+                
+                log(`🔍 Processing ${notifications.length} notifications from MongoDB`);
+                
+                // Sort notifications by timestamp to ensure we process them in order
+                const sortedNotifications = notifications.sort((a, b) => {
+                    const timeA = new Date(a.timestamp || a.lastUpdate || 0);
+                    const timeB = new Date(b.timestamp || b.lastUpdate || 0);
+                    return timeA - timeB; // Oldest first, so newest overwrites
+                });
+                
+                sortedNotifications.forEach((notification, index) => {
+                    // Extract driver information from various possible field names
+                    const driverName = notification.driver_name || 
+                                      notification.driver || 
+                                      notification.name || 
+                                      `Driver ${index + 1}`;
+                    
+                    const driverId = notification.driver_id || 
+                                    notification.driverId || 
+                                    notification._id || 
+                                    notification.id || 
+                                    `driver-${index}`;
+                    
+                    const status = notification.status || 'working';
+                    const returns = parseInt(notification.returns || 
+                                           notification.returnsCount || 
+                                           notification.hasReturns ? notification.returnsCount : 0);
+                    
+                    const timestamp = notification.timestamp || notification.lastUpdate || new Date().toISOString();
+                    
+                    const driver = {
+                        id: driverId,
+                        name: driverName,
+                        status: status,
+                        returns: returns,
+                        timestamp: timestamp,
+                        vehicleId: notification.vehicleId || notification.vehicle || '',
+                        message: notification.message || '',
+                        hasReturns: notification.hasReturns || returns > 0,
+                        equipmentIssues: notification.equipmentIssues || {}
+                    };
+                    
+                    log(`📋 Processing: ${driverName} - Status: ${status} - Returns: ${returns} - Time: ${timestamp}`);
+                    
+                    // Check if driver already exists in map
+                    if (driverMap.has(driverId)) {
+                        // Compare timestamps to keep the most recent update
+                        const existingDriver = driverMap.get(driverId);
+                        const existingTime = new Date(existingDriver.timestamp);
+                        const newTime = new Date(timestamp);
+                        
+                        if (newTime >= existingTime) {
+                            // Update with newer status
+                            existingDriver.status = status;
+                            existingDriver.timestamp = timestamp;
+                            existingDriver.returns = returns;
+                            existingDriver.hasReturns = driver.hasReturns;
+                            existingDriver.message = driver.message;
+                            existingDriver.equipmentIssues = driver.equipmentIssues;
+                            log(`🔄 Updated ${driverName}: ${status} (newer timestamp)`);
+                        } else {
+                            log(`⏭️ Skipped older update for ${driverName}: ${status}`);
+                        }
+                    } else {
+                        // Add new driver
+                        allDrivers.push(driver);
+                        driverMap.set(driverId, driver);
+                        log(`➕ Added new driver: ${driverName} - Status: ${status} - Returns: ${returns}`);
+                    }
+                });
+                
+                // Get final driver list from map and log final status
+                allDrivers = Array.from(driverMap.values());
+                
+                log(`✅ Final processed drivers:`);
+                allDrivers.forEach(driver => {
+                    log(`   ${driver.name}: ${driver.status} (${driver.returns} returns)`);
+                });
+                
+                log(`📊 Total unique drivers: ${allDrivers.length}`);
+                
+                // Update UI
+                updateKPIs();
+                updateActivityFeed();
+                
+            } catch (error) {
+                log('❌ Error processing notifications: ' + error.message);
+                showEmptyState();
+            }
         }
         
         // Update connection status
@@ -2103,176 +2271,6 @@
             }
         }
         
-        // Load data from MongoDB with better error handling
-        async function loadDataFromMongoDB() {
-            try {
-                log('📡 Loading data from MongoDB Atlas...');
-                updateConnectionStatus('loading');
-                
-                // Fetch notifications from MongoDB
-                const response = await fetch(`${API_BASE}/api/notifications`, {
-                    method: 'GET',
-                    headers: { 
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    signal: AbortSignal.timeout(10000)
-                });
-                
-                log(`API Response status: ${response.status}`);
-                
-                if (response.ok) {
-                    const result = await response.json();
-                    log(`Raw response: ${JSON.stringify(result).substring(0, 200)}`);
-                    
-                    // Handle different response formats
-                    let notifications = [];
-                    if (Array.isArray(result)) {
-                        notifications = result;
-                    } else if (result.data && Array.isArray(result.data)) {
-                        notifications = result.data;
-                    } else if (result.notifications && Array.isArray(result.notifications)) {
-                        notifications = result.notifications;
-                    }
-                    
-                    log(`📊 Found ${notifications.length} notifications`);
-                    
-                    // Validate that data is from today
-                    const today = new Date().toDateString();
-                    const todayISO = new Date().toISOString().split('T')[0];
-                    
-                    // Filter only today's data
-                    const todaysNotifications = notifications.filter(n => {
-                        if (n.date) {
-                            return n.date === todayISO;
-                        }
-                        // Check timestamp if no date field
-                        if (n.timestamp || n.lastUpdate) {
-                            const notificationDate = new Date(n.timestamp || n.lastUpdate).toISOString().split('T')[0];
-                            return notificationDate === todayISO;
-                        }
-                        return false;
-                    });
-                    
-                    if (todaysNotifications.length !== notifications.length) {
-                        log(`⚠️ Filtered to ${todaysNotifications.length} notifications from today`);
-                    }
-                    
-                    // Process notifications into driver data
-                    processNotifications(todaysNotifications);
-                    updateConnectionStatus('connected');
-                    
-                } else {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-                
-                document.getElementById('lastUpdate').textContent = 
-                    'Last updated: ' + new Date().toLocaleTimeString();
-                
-            } catch (error) {
-                log('❌ MongoDB connection failed: ' + error.message);
-                updateConnectionStatus('error');
-                showEmptyState();
-            }
-        }
-        
-        // Process notifications from MongoDB - FIXED to use most recent status
-        function processNotifications(notifications) {
-            try {
-                // Clear existing drivers and rebuild from notifications
-                allDrivers = [];
-                driverMap.clear();
-                
-                log(`🔍 Processing ${notifications.length} notifications from MongoDB`);
-                
-                // Sort notifications by timestamp to ensure we process them in order
-                const sortedNotifications = notifications.sort((a, b) => {
-                    const timeA = new Date(a.timestamp || a.lastUpdate || 0);
-                    const timeB = new Date(b.timestamp || b.lastUpdate || 0);
-                    return timeA - timeB; // Oldest first, so newest overwrites
-                });
-                
-                sortedNotifications.forEach((notification, index) => {
-                    // Extract driver information from various possible field names
-                    const driverName = notification.driver_name || 
-                                      notification.driver || 
-                                      notification.name || 
-                                      `Driver ${index + 1}`;
-                    
-                    const driverId = notification.driver_id || 
-                                    notification.driverId || 
-                                    notification._id || 
-                                    notification.id || 
-                                    `driver-${index}`;
-                    
-                    const status = notification.status || 'working';
-                    const returns = parseInt(notification.returns || 
-                                           notification.returnsCount || 
-                                           notification.hasReturns ? notification.returnsCount : 0);
-                    
-                    const timestamp = notification.timestamp || notification.lastUpdate || new Date().toISOString();
-                    
-                    const driver = {
-                        id: driverId,
-                        name: driverName,
-                        status: status,
-                        returns: returns,
-                        timestamp: timestamp,
-                        vehicleId: notification.vehicleId || notification.vehicle || '',
-                        message: notification.message || '',
-                        hasReturns: notification.hasReturns || returns > 0,
-                        equipmentIssues: notification.equipmentIssues || {}
-                    };
-                    
-                    log(`📋 Processing: ${driverName} - Status: ${status} - Returns: ${returns} - Time: ${timestamp}`);
-                    
-                    // Check if driver already exists in map
-                    if (driverMap.has(driverId)) {
-                        // Compare timestamps to keep the most recent update
-                        const existingDriver = driverMap.get(driverId);
-                        const existingTime = new Date(existingDriver.timestamp);
-                        const newTime = new Date(timestamp);
-                        
-                        if (newTime >= existingTime) {
-                            // Update with newer status
-                            existingDriver.status = status;
-                            existingDriver.timestamp = timestamp;
-                            existingDriver.returns = returns;
-                            existingDriver.hasReturns = driver.hasReturns;
-                            existingDriver.message = driver.message;
-                            existingDriver.equipmentIssues = driver.equipmentIssues;
-                            log(`🔄 Updated ${driverName}: ${status} (newer timestamp)`);
-                        } else {
-                            log(`⏭️ Skipped older update for ${driverName}: ${status}`);
-                        }
-                    } else {
-                        // Add new driver
-                        allDrivers.push(driver);
-                        driverMap.set(driverId, driver);
-                        log(`➕ Added new driver: ${driverName} - Status: ${status} - Returns: ${returns}`);
-                    }
-                });
-                
-                // Get final driver list from map and log final status
-                allDrivers = Array.from(driverMap.values());
-                
-                log(`✅ Final processed drivers:`);
-                allDrivers.forEach(driver => {
-                    log(`   ${driver.name}: ${driver.status} (${driver.returns} returns)`);
-                });
-                
-                log(`📊 Total unique drivers: ${allDrivers.length}`);
-                
-                // Update UI
-                updateKPIs();
-                updateActivityFeed();
-                
-            } catch (error) {
-                log('❌ Error processing notifications: ' + error.message);
-                showEmptyState();
-            }
-        }
-        
         // Logout
         function logout() {
             if (confirm('Are you sure you want to logout?')) {
@@ -2299,44 +2297,6 @@
                 toast.remove();
             }, 5000);
         }
-        
-        // Handle page visibility changes
-        document.addEventListener('visibilitychange', function() {
-            if (document.hidden) {
-                // Page is hidden, stop refresh
-                if (refreshInterval) {
-                    clearInterval(refreshInterval);
-                    log('⏸️ Auto-refresh paused (page hidden)');
-                }
-            } else {
-                // Page is visible again, restart refresh
-                startAutoRefresh();
-                loadDataFromMongoDB();
-                log('▶️ Auto-refresh resumed (page visible)');
-            }
-        });
-        
-        // Cleanup on page unload
-        window.addEventListener('beforeunload', function() {
-            if (refreshInterval) {
-                clearInterval(refreshInterval);
-            }
-        });
-        
-        // Error boundary for uncaught errors
-        window.addEventListener('error', function(event) {
-            // Ignore errors from browser extensions
-            if (event.filename && (
-                event.filename.includes('extension://') ||
-                event.filename.includes('chrome-extension://') ||
-                event.filename.includes('moz-extension://')
-            )) {
-                event.preventDefault();
-                return;
-            }
-            
-            log(`❌ Uncaught error: ${event.message} at ${event.filename}:${event.lineno}:${event.colno}`);
-        });
     </script>
 </body>
 </html>
