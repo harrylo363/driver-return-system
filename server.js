@@ -23,7 +23,9 @@ let client;
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public'));
+
+// IMPORTANT: Serve static files from public directory
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Connect to MongoDB Atlas
 async function connectToMongoDB() {
@@ -390,13 +392,24 @@ app.post('/api/status', async (req, res) => {
         const {
             driverId,
             driverName,
+            driver_name,
+            driver_id,
+            name,
             vehicle,
+            vehicleId,
             status, // '30min' or 'arrived'
             hasReturns,
             returnsCount,
+            returns,
             timestamp,
             warehouse
         } = req.body;
+        
+        // Use whichever values are provided
+        const finalDriverName = driverName || driver_name || name;
+        const finalDriverId = driverId || driver_id;
+        const finalVehicle = vehicle || vehicleId;
+        const finalReturns = parseInt(returnsCount || returns) || 0;
         
         // Map status values
         const mappedStatus = status === '30min' ? 'en-route' : 
@@ -408,28 +421,28 @@ app.post('/api/status', async (req, res) => {
         
         // Prepare the data for daily_operations
         const operationData = {
-            driver_id: driverId,
-            driver_name: driverName,
-            name: driverName,
-            driver: driverName,
-            vehicleId: vehicle || '',
-            vehicle: vehicle || '',
+            driver_id: finalDriverId,
+            driver_name: finalDriverName,
+            name: finalDriverName,
+            driver: finalDriverName,
+            vehicleId: finalVehicle || '',
+            vehicle: finalVehicle || '',
             status: mappedStatus,
-            returns: parseInt(returnsCount) || 0,
-            returnsCount: parseInt(returnsCount) || 0,
+            returns: finalReturns,
+            returnsCount: finalReturns,
             hasReturns: hasReturns || false,
             warehouse: warehouse || '6995 N US-41, Apollo Beach, FL 33572',
             timestamp: currentTime,
             lastUpdate: currentTime,
             date: today,
-            message: `${driverName} - ${mappedStatus === 'en-route' ? '30 minutes away' : 'Arrived at warehouse'}`
+            message: `${finalDriverName} - ${mappedStatus === 'en-route' ? '30 minutes away' : 'Arrived at warehouse'}`
         };
         
         console.log('Mapped operation data:', operationData);
         
         // Check if driver already has an entry today
         const existingEntry = await db.collection('daily_operations').findOne({
-            driver_id: driverId,
+            driver_id: finalDriverId,
             date: today
         });
         
@@ -440,13 +453,13 @@ app.post('/api/status', async (req, res) => {
                 { $set: operationData }
             );
             
-            console.log(`✅ Updated status for ${driverName}: ${mappedStatus}`);
+            console.log(`✅ Updated status for ${finalDriverName}: ${mappedStatus}`);
         } else {
             // Create new entry
             operationData._id = new ObjectId();
             const insertResult = await db.collection('daily_operations').insertOne(operationData);
             
-            console.log(`✅ Created new status entry for ${driverName}: ${mappedStatus}`);
+            console.log(`✅ Created new status entry for ${finalDriverName}: ${mappedStatus}`);
         }
         
         // Also save to notifications for history
@@ -462,9 +475,9 @@ app.post('/api/status', async (req, res) => {
             success: true,
             message: `Status updated: ${mappedStatus}`,
             data: {
-                driver: driverName,
+                driver: finalDriverName,
                 status: mappedStatus,
-                returns: returnsCount || 0
+                returns: finalReturns
             }
         });
         
@@ -543,7 +556,8 @@ app.get('/api/notifications', async (req, res) => {
 // POST notification (legacy support - redirects to status)
 app.post('/api/notifications', async (req, res) => {
     console.log('📨 Legacy notification endpoint called, redirecting to status handler');
-    return app._router.handle(Object.assign(req, { url: '/api/status', method: 'POST' }), res);
+    req.url = '/api/status';
+    return app._router.handle(req, res);
 });
 
 // Driver check-in endpoint
@@ -988,7 +1002,8 @@ app.post('/api/auth/login', async (req, res) => {
 
 // Legacy login endpoint (for compatibility)
 app.post('/api/login', async (req, res) => {
-    return app._router.handle(Object.assign(req, { url: '/api/auth/login' }), res);
+    req.url = '/api/auth/login';
+    return app._router.handle(req, res);
 });
 
 // ============= ARCHIVE ENDPOINTS =============
@@ -1040,9 +1055,9 @@ app.get('/api/archive-dates', async (req, res) => {
     }
 });
 
-// ============= STATIC FILE SERVING =============
+// ============= STATIC FILE SERVING - FIXED =============
 
-// Serve HTML files
+// Serve HTML files with proper routing
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
@@ -1059,6 +1074,7 @@ app.get('/login.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Driver portal routes - Handle all variations
 app.get('/driver', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'driver.html'));
 });
@@ -1067,6 +1083,11 @@ app.get('/driver.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'driver.html'));
 });
 
+app.get('/public/driver.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'driver.html'));
+});
+
+// Dashboard routes - Handle all variations
 app.get('/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
@@ -1075,6 +1096,11 @@ app.get('/dashboard.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
+app.get('/public/dashboard.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+});
+
+// Admin panel routes - Handle all variations
 app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
@@ -1083,33 +1109,70 @@ app.get('/admin.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
-// Serve manifest.json
-app.get('/manifest.json', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'manifest.json'));
+app.get('/public/admin.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
-// Serve service worker
+// Serve manifest.json for PWA support
+app.get('/manifest.json', (req, res) => {
+    const manifest = {
+        "name": "FleetForce Management System",
+        "short_name": "FleetForce",
+        "description": "Professional Fleet Management Platform",
+        "start_url": "/",
+        "display": "standalone",
+        "background_color": "#0B0F1A",
+        "theme_color": "#0EA5E9",
+        "orientation": "portrait-primary",
+        "icons": [
+            {
+                "src": "https://img.icons8.com/color/192/truck.png",
+                "sizes": "192x192",
+                "type": "image/png"
+            },
+            {
+                "src": "https://img.icons8.com/color/512/truck.png",
+                "sizes": "512x512",
+                "type": "image/png"
+            }
+        ]
+    };
+    res.json(manifest);
+});
+
+// Serve service worker (if you have one)
 app.get('/sw.js', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'sw.js'));
+    const swPath = path.join(__dirname, 'public', 'sw.js');
+    if (require('fs').existsSync(swPath)) {
+        res.sendFile(swPath);
+    } else {
+        res.status(404).send('// Service worker not configured');
+    }
 });
 
 // ============= ERROR HANDLING =============
 
-// 404 handler
+// 404 handler - Must be after all other routes
 app.use((req, res) => {
-    res.status(404).json({ 
-        error: 'Not found',
-        message: `Cannot ${req.method} ${req.url}`,
-        availableEndpoints: [
-            'GET /api/health',
-            'GET /api/drivers',
-            'POST /api/status',
-            'GET /api/notifications',
-            'POST /api/checkin',
-            'GET /api/users',
-            'POST /api/auth/login'
-        ]
-    });
+    // Check if it's an API request
+    if (req.url.startsWith('/api/')) {
+        res.status(404).json({ 
+            error: 'Not found',
+            message: `Cannot ${req.method} ${req.url}`,
+            availableEndpoints: [
+                'GET /api/health',
+                'GET /api/drivers',
+                'POST /api/status',
+                'GET /api/notifications',
+                'POST /api/checkin',
+                'GET /api/users',
+                'POST /api/auth/login'
+            ]
+        });
+    } else {
+        // For non-API requests, try to serve index.html as fallback
+        res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    }
 });
 
 // Error handling middleware
