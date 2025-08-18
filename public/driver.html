@@ -10,7 +10,7 @@
     <meta name="theme-color" content="#0B0F1A">
     <meta name="mobile-web-app-capable" content="yes">
     
-    <!-- PWA Links - Using public directory -->
+    <!-- PWA Links -->
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="https://img.icons8.com/color/192/truck.png">
     <link rel="icon" type="image/png" sizes="32x32" href="https://img.icons8.com/color/32/truck.png">
@@ -884,7 +884,7 @@
             <div class="status-section">
                 <div class="section-title">Warehouse Status Update</div>
                 <div class="status-buttons">
-                    <button class="status-btn btn-30min" onclick="sendUpdate('30min')" id="btn30min">
+                    <button class="status-btn btn-30min" onclick="sendUpdate('en-route')" id="btn30min">
                         <span class="btn-text">
                             <span>🕐</span>
                             <span>30 Minutes Away</span>
@@ -1065,9 +1065,9 @@
             }
         }
         
-        // Send update - FIXED to properly communicate with MongoDB
-        async function sendUpdate(type) {
-            const btn = type === '30min' ? document.getElementById('btn30min') : document.getElementById('btnArrived');
+        // Send update - FIXED to properly communicate with MongoDB and dashboard
+        async function sendUpdate(statusType) {
+            const btn = statusType === 'en-route' ? document.getElementById('btn30min') : document.getElementById('btnArrived');
             
             // Check returns status
             if (hasReturns === null) {
@@ -1084,12 +1084,13 @@
             btn.classList.add('sending');
             btn.disabled = true;
             
-            const statusMessage = type === '30min' ? '30 minutes away' : 'Arrived at warehouse';
+            const statusMessage = statusType === 'en-route' ? '30 minutes away' : 'Arrived at warehouse';
             returnsCount = hasReturns ? parseInt(document.getElementById('returnsCountInput').value) : 0;
             
             log(`📤 Sending update: ${statusMessage}, Returns: ${hasReturns ? returnsCount : 'None'}`);
             
             try {
+                // Send the update with the correct status format
                 const response = await fetch(`${API_BASE}/api/status`, {
                     method: 'POST',
                     headers: {
@@ -1098,23 +1099,53 @@
                     body: JSON.stringify({
                         driverId: currentDriverId,
                         driverName: currentDriver,
+                        driver_name: currentDriver, // Add both formats for compatibility
+                        driver_id: currentDriverId,   // Add both formats for compatibility
+                        name: currentDriver,          // Add for dashboard compatibility
                         vehicle: currentVehicle,
-                        status: type, // '30min' or 'arrived'
+                        vehicleId: currentVehicle,   // Add both formats
+                        status: statusType === 'en-route' ? '30min' : 'arrived', // Use the format expected by backend
                         hasReturns: hasReturns,
                         returnsCount: returnsCount,
+                        returns: returnsCount,       // Add for dashboard compatibility
                         timestamp: new Date().toISOString(),
-                        warehouse: WAREHOUSE_ADDRESS
+                        lastUpdate: new Date().toISOString(), // Add for dashboard
+                        date: new Date().toISOString().split('T')[0], // Add today's date
+                        warehouse: WAREHOUSE_ADDRESS,
+                        message: `${currentDriver} - ${statusMessage}` // Add message for dashboard
                     })
                 });
                 
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    const errorText = await response.text();
+                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
                 }
                 
                 const result = await response.json();
                 log(`✅ Update sent successfully: ${result.message || 'OK'}`);
                 
                 showNotification('Success', `Status updated: ${statusMessage}`, 'success');
+                
+                // Also try to update notifications collection directly for immediate dashboard update
+                try {
+                    await fetch(`${API_BASE}/api/notifications`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            driver_name: currentDriver,
+                            driver_id: currentDriverId,
+                            status: statusType,
+                            returns: returnsCount,
+                            hasReturns: hasReturns,
+                            vehicleId: currentVehicle,
+                            timestamp: new Date().toISOString(),
+                            date: new Date().toISOString().split('T')[0]
+                        })
+                    });
+                } catch (e) {
+                    // Ignore notification update errors
+                    log('Note: Could not update notifications directly');
+                }
                 
             } catch (error) {
                 log(`❌ Error sending update: ${error.message}`);
