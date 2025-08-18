@@ -11,7 +11,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     
     <!-- PWA Links - Using public directory -->
-    <link rel="manifest" href="/public/manifest.json">
+    <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="https://img.icons8.com/color/192/truck.png">
     <link rel="icon" type="image/png" sizes="32x32" href="https://img.icons8.com/color/32/truck.png">
     <link rel="icon" type="image/png" sizes="16x16" href="https://img.icons8.com/color/16/truck.png">
@@ -136,178 +136,6 @@
         @keyframes slideDown {
             from { transform: translateY(-100%); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
-        }
-        
-        /* Notification Badge */
-        .notification-badge {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--accent-red);
-            color: white;
-            border-radius: 20px;
-            padding: 8px 16px;
-            font-size: 12px;
-            font-weight: 600;
-            display: none;
-            align-items: center;
-            gap: 6px;
-            z-index: 1000;
-            cursor: pointer;
-            animation: badgePulse 2s infinite;
-            box-shadow: var(--shadow-lg);
-        }
-        
-        .notification-badge.show {
-            display: flex;
-        }
-        
-        @keyframes badgePulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-        
-        /* Broadcast Message Modal */
-        .broadcast-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(4px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            padding: 20px;
-        }
-        
-        .broadcast-modal.show {
-            display: flex;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        .broadcast-content {
-            background: var(--bg-card);
-            border: 1px solid var(--border-primary);
-            border-radius: 20px;
-            padding: 24px;
-            max-width: 400px;
-            width: 100%;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: var(--shadow-xl);
-            animation: slideUp 0.4s ease;
-        }
-        
-        .broadcast-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .broadcast-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .broadcast-close {
-            background: transparent;
-            border: none;
-            color: var(--text-tertiary);
-            font-size: 24px;
-            cursor: pointer;
-            padding: 4px;
-            transition: all var(--transition-fast);
-        }
-        
-        .broadcast-close:active {
-            transform: scale(0.9);
-        }
-        
-        .broadcast-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        
-        .broadcast-item {
-            background: var(--bg-elevated);
-            border: 1px solid var(--border-primary);
-            border-radius: 12px;
-            padding: 16px;
-            transition: all var(--transition-fast);
-            cursor: pointer;
-        }
-        
-        .broadcast-item.unread {
-            border-left: 3px solid var(--accent-blue);
-            background: rgba(14, 165, 233, 0.05);
-        }
-        
-        .broadcast-item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            margin-bottom: 8px;
-        }
-        
-        .broadcast-item-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-        
-        .broadcast-priority {
-            font-size: 10px;
-            font-weight: 600;
-            padding: 2px 8px;
-            border-radius: 10px;
-            text-transform: uppercase;
-        }
-        
-        .priority-urgent {
-            background: rgba(239, 68, 68, 0.2);
-            color: var(--accent-red);
-        }
-        
-        .priority-high {
-            background: rgba(245, 158, 11, 0.2);
-            color: var(--accent-orange);
-        }
-        
-        .priority-normal {
-            background: rgba(14, 165, 233, 0.2);
-            color: var(--accent-blue);
-        }
-        
-        .priority-low {
-            background: rgba(100, 116, 139, 0.2);
-            color: var(--text-tertiary);
-        }
-        
-        .broadcast-message {
-            font-size: 13px;
-            color: var(--text-secondary);
-            line-height: 1.5;
-            margin-bottom: 8px;
-        }
-        
-        .broadcast-time {
-            font-size: 11px;
-            color: var(--text-muted);
-        }
-        
-        .broadcast-empty {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-tertiary);
         }
         
         /* Login Screen */
@@ -918,21 +746,6 @@
                 min-width: auto;
             }
             
-            .notification-badge {
-                top: calc(10px + var(--safe-area-inset-top));
-                right: 10px;
-            }
-            
-            .broadcast-modal {
-                padding: 0;
-            }
-            
-            .broadcast-content {
-                border-radius: 20px 20px 0 0;
-                max-height: 90vh;
-                margin-top: auto;
-            }
-            
             .returns-buttons {
                 grid-template-columns: 1fr;
             }
@@ -954,10 +767,6 @@
         @media (pointer: coarse) {
             button, select, input {
                 min-height: 44px;
-            }
-            
-            .broadcast-close {
-                padding: 8px;
             }
         }
         
@@ -993,31 +802,6 @@
     </style>
 </head>
 <body>
-    <!-- Notification Badge -->
-    <div class="notification-badge" id="notificationBadge" onclick="showBroadcasts()">
-        <span>🔔</span>
-        <span id="unreadCount">0</span>
-    </div>
-    
-    <!-- Broadcast Modal -->
-    <div class="broadcast-modal" id="broadcastModal">
-        <div class="broadcast-content">
-            <div class="broadcast-header">
-                <div class="broadcast-title">
-                    <span>📢</span>
-                    <span>Company Broadcasts</span>
-                </div>
-                <button class="broadcast-close" onclick="closeBroadcasts()">✕</button>
-            </div>
-            <div class="broadcast-list" id="broadcastList">
-                <div class="broadcast-empty">
-                    <div style="font-size: 48px; margin-bottom: 16px;">📭</div>
-                    <div>No messages yet</div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
     <div class="container">
         <!-- Login Screen -->
         <div class="login-screen" id="loginScreen">
@@ -1137,8 +921,10 @@
     </div>
 
     <script>
-        // Configuration for Railway + MongoDB Atlas
-        const API_BASE = window.location.origin;
+        // Configuration - Fixed for proper MongoDB communication
+        const API_BASE = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000' 
+            : window.location.origin;
         const WAREHOUSE_ADDRESS = "6995 N US-41, Apollo Beach, FL 33572";
         
         // Global state
@@ -1147,11 +933,8 @@
         let currentDriverId = null;
         let hasReturns = null;
         let returnsCount = 0;
-        let autoRefreshInterval = null;
-        let broadcastCheckInterval = null;
         let debugMode = false;
         let debugInfo = [];
-        let userBroadcasts = [];
         
         // Debug logging function
         function log(message, type = 'info') {
@@ -1185,451 +968,6 @@
                 panel.classList.remove('show');
             }
         }
-        
-        // ===================================================
-        // BROADCAST NOTIFICATION SYSTEM
-        // ===================================================
-        
-        // Initialize Push Notifications
-        async function initializePushNotifications() {
-            if (!('Notification' in window)) {
-                log('This browser does not support notifications');
-                return false;
-            }
-            
-            if (Notification.permission === 'default') {
-                showNotificationPrompt();
-            } else if (Notification.permission === 'granted') {
-                log('Notifications already enabled');
-                localStorage.setItem('fleetforce_notifications_enabled', 'true');
-                return true;
-            } else {
-                log('Notifications denied by user');
-                return false;
-            }
-        }
-        
-        // Show browser push notification
-        function showPushNotification(title, body, type = 'info', data = {}) {
-            if (Notification.permission !== 'granted') return;
-            
-            vibrateDevice([200, 100, 200]);
-            
-            const options = {
-                body: body,
-                icon: 'https://img.icons8.com/color/72/truck.png',
-                badge: 'https://img.icons8.com/color/72/truck.png',
-                vibrate: [200, 100, 200],
-                tag: 'fleetforce-' + Date.now(),
-                requireInteraction: type === 'urgent',
-                renotify: true,
-                silent: false,
-                data: {
-                    dateOfArrival: Date.now(),
-                    type: type,
-                    ...data
-                }
-            };
-            
-            const notification = new Notification(title, options);
-            
-            notification.onclick = function(event) {
-                event.preventDefault();
-                window.focus();
-                notification.close();
-                
-                if (data.isBroadcast) {
-                    showBroadcasts();
-                }
-                
-                log('Notification clicked: ' + title);
-            };
-            
-            if (type !== 'urgent') {
-                setTimeout(() => notification.close(), 10000);
-            }
-            
-            return notification;
-        }
-        
-        // Enhanced broadcast check with push notifications
-        function checkForBroadcastsWithPush() {
-            if (!currentDriverId) return;
-            
-            log('🔔 Checking for broadcasts with push notifications...');
-            
-            const allBroadcasts = JSON.parse(localStorage.getItem('fleetforce_broadcasts')) || [];
-            const userNotifications = JSON.parse(localStorage.getItem('fleetforce_user_notifications')) || {};
-            const myNotifications = userNotifications[currentDriverId] || [];
-            const notifiedBroadcasts = JSON.parse(localStorage.getItem('fleetforce_notified_broadcasts')) || [];
-            
-            userBroadcasts = myNotifications.map(notif => {
-                const broadcast = allBroadcasts.find(b => b.id === notif.broadcastId);
-                return {
-                    ...notif,
-                    ...broadcast,
-                    read: notif.read || false
-                };
-            }).filter(b => b.title);
-            
-            userBroadcasts.sort((a, b) => new Date(b.sentAt || b.receivedAt) - new Date(a.sentAt || a.receivedAt));
-            
-            const unreadCount = userBroadcasts.filter(b => !b.read).length;
-            updateNotificationBadge(unreadCount);
-            
-            if (unreadCount > 0) {
-                const newBroadcasts = userBroadcasts.filter(b => 
-                    !b.read && !notifiedBroadcasts.includes(b.id || b.broadcastId)
-                );
-                
-                newBroadcasts.forEach(broadcast => {
-                    let notifType = 'info';
-                    if (broadcast.priority === 'urgent') notifType = 'error';
-                    else if (broadcast.priority === 'high') notifType = 'warning';
-                    
-                    showPushNotification(
-                        `📢 ${broadcast.title}`,
-                        broadcast.message,
-                        notifType,
-                        { isBroadcast: true, broadcastId: broadcast.id }
-                    );
-                    
-                    notifiedBroadcasts.push(broadcast.id || broadcast.broadcastId);
-                    playNotificationSound(notifType);
-                });
-                
-                localStorage.setItem('fleetforce_notified_broadcasts', JSON.stringify(notifiedBroadcasts));
-            }
-            
-            log(`✅ Found ${userBroadcasts.length} broadcasts (${unreadCount} unread)`);
-        }
-        
-        // Show notification permission prompt
-        function showNotificationPrompt() {
-            const lastPrompt = localStorage.getItem('fleetforce_last_notif_prompt');
-            const now = Date.now();
-            
-            if (lastPrompt && (now - parseInt(lastPrompt)) < 86400000) {
-                return;
-            }
-            
-            const promptHtml = `
-                <div style="
-                    position: fixed;
-                    bottom: calc(20px + env(safe-area-inset-bottom));
-                    left: 20px;
-                    right: 20px;
-                    background: linear-gradient(135deg, #1E2532 0%, #242B3D 100%);
-                    border: 1px solid #334155;
-                    border-radius: 16px;
-                    padding: 20px;
-                    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-                    z-index: 9999;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 12px;
-                    animation: slideUp 0.4s ease;
-                " id="notifPrompt">
-                    <button onclick="document.getElementById('notifPrompt').remove()" style="
-                        position: absolute;
-                        top: 8px;
-                        right: 8px;
-                        background: none;
-                        border: none;
-                        color: #64748B;
-                        font-size: 20px;
-                        cursor: pointer;
-                        padding: 4px;
-                    ">✕</button>
-                    
-                    <div style="display: flex; align-items: center; gap: 16px;">
-                        <div style="
-                            width: 48px;
-                            height: 48px;
-                            background: linear-gradient(135deg, #0EA5E9 0%, #8B5CF6 100%);
-                            border-radius: 12px;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            font-size: 24px;
-                        ">🔔</div>
-                        <div style="flex: 1;">
-                            <div style="font-weight: 600; color: #F8FAFC; margin-bottom: 4px; font-size: 16px;">
-                                Enable Push Notifications
-                            </div>
-                            <div style="font-size: 13px; color: #94A3B8; line-height: 1.4;">
-                                Get instant alerts for broadcasts, status updates, and important messages
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div style="display: flex; gap: 12px; margin-top: 8px;">
-                        <button onclick="enableNotifications()" style="
-                            flex: 1;
-                            padding: 14px;
-                            background: linear-gradient(135deg, #0EA5E9 0%, #8B5CF6 100%);
-                            color: white;
-                            border: none;
-                            border-radius: 10px;
-                            font-weight: 600;
-                            cursor: pointer;
-                            font-size: 14px;
-                            transition: transform 0.2s;
-                        " ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">
-                            Enable Notifications
-                        </button>
-                        <button onclick="dismissNotificationPrompt()" style="
-                            padding: 14px 20px;
-                            background: transparent;
-                            color: #94A3B8;
-                            border: 1px solid #334155;
-                            border-radius: 10px;
-                            font-weight: 600;
-                            cursor: pointer;
-                            font-size: 14px;
-                        ">
-                            Later
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.insertAdjacentHTML('beforeend', promptHtml);
-            localStorage.setItem('fleetforce_last_notif_prompt', now.toString());
-        }
-        
-        // Enable notifications handler
-        async function enableNotifications() {
-            document.getElementById('notifPrompt')?.remove();
-            
-            try {
-                const permission = await Notification.requestPermission();
-                
-                if (permission === 'granted') {
-                    localStorage.setItem('fleetforce_notifications_enabled', 'true');
-                    showPushNotification(
-                        '✅ Notifications Enabled!',
-                        'You will now receive real-time alerts and broadcasts',
-                        'success'
-                    );
-                    vibrateDevice([100, 50, 100]);
-                    log('✅ Push notifications enabled successfully');
-                    
-                    // Send message to service worker
-                    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-                        navigator.serviceWorker.controller.postMessage({
-                            type: 'ENABLE_NOTIFICATIONS'
-                        });
-                    }
-                } else if (permission === 'denied') {
-                    showInAppAlert(
-                        'Notifications Blocked',
-                        'Please enable notifications in your browser settings:\n' +
-                        '• iOS: Settings > Safari > Notifications\n' +
-                        '• Android: Settings > Site Settings > Notifications',
-                        'warning'
-                    );
-                }
-            } catch (error) {
-                log('Error requesting notification permission: ' + error.message);
-            }
-        }
-        
-        // Dismiss notification prompt
-        function dismissNotificationPrompt() {
-            document.getElementById('notifPrompt')?.remove();
-            localStorage.setItem('fleetforce_last_notif_prompt', Date.now().toString());
-        }
-        
-        // Play notification sound
-        function playNotificationSound(type = 'info') {
-            try {
-                const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhB');
-                audio.volume = 0.3;
-                audio.play().catch(e => log('Could not play sound: ' + e.message));
-            } catch (e) {
-                log('Audio playback error: ' + e.message);
-            }
-        }
-        
-        // Vibrate device
-        function vibrateDevice(pattern = [200]) {
-            if ('vibrate' in navigator) {
-                navigator.vibrate(pattern);
-            }
-        }
-        
-        // Show in-app alert
-        function showInAppAlert(title, message, type = 'info') {
-            const alertHtml = `
-                <div id="inAppAlert" style="
-                    position: fixed;
-                    top: calc(20px + env(safe-area-inset-top));
-                    left: 20px;
-                    right: 20px;
-                    background: linear-gradient(135deg, #1E2532 0%, #242B3D 100%);
-                    border: 1px solid ${type === 'error' ? '#EF4444' : type === 'warning' ? '#F59E0B' : '#0EA5E9'};
-                    border-radius: 12px;
-                    padding: 16px;
-                    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-                    z-index: 10000;
-                    animation: slideDown 0.3s ease;
-                ">
-                    <div style="display: flex; align-items: start; gap: 12px;">
-                        <div style="font-size: 20px;">
-                            ${type === 'error' ? '❌' : type === 'warning' ? '⚠️' : type === 'success' ? '✅' : 'ℹ️'}
-                        </div>
-                        <div style="flex: 1;">
-                            <div style="font-weight: 600; color: #F8FAFC; margin-bottom: 4px;">${title}</div>
-                            <div style="font-size: 13px; color: #94A3B8; white-space: pre-line;">${message}</div>
-                        </div>
-                        <button onclick="this.parentElement.parentElement.remove()" style="
-                            background: none;
-                            border: none;
-                            color: #64748B;
-                            font-size: 16px;
-                            cursor: pointer;
-                            padding: 0;
-                        ">✕</button>
-                    </div>
-                </div>
-            `;
-            
-            document.getElementById('inAppAlert')?.remove();
-            document.body.insertAdjacentHTML('beforeend', alertHtml);
-            
-            setTimeout(() => {
-                document.getElementById('inAppAlert')?.remove();
-            }, 5000);
-        }
-        
-        // Initialize notifications on login
-        function initializeNotificationsOnLogin() {
-            const notificationsEnabled = localStorage.getItem('fleetforce_notifications_enabled');
-            
-            if (notificationsEnabled === 'true' && Notification.permission === 'granted') {
-                log('✅ Notifications already configured');
-            } else if (Notification.permission === 'default') {
-                setTimeout(() => {
-                    initializePushNotifications();
-                }, 3000);
-            }
-            
-            checkForBroadcastsWithPush();
-            
-            if (broadcastCheckInterval) {
-                clearInterval(broadcastCheckInterval);
-            }
-            broadcastCheckInterval = setInterval(checkForBroadcastsWithPush, 10000);
-        }
-        
-        // Add haptic feedback
-        function addHapticFeedback() {
-            document.querySelectorAll('button').forEach(button => {
-                button.addEventListener('touchstart', () => vibrateDevice([10]));
-                button.addEventListener('click', () => vibrateDevice([20]));
-            });
-            
-            document.querySelectorAll('.status-btn').forEach(button => {
-                button.addEventListener('click', () => vibrateDevice([50]));
-            });
-        }
-        
-        // ===================================================
-        // BROADCAST MESSAGE SYSTEM
-        // ===================================================
-        
-        // Update notification badge
-        function updateNotificationBadge(count) {
-            const badge = document.getElementById('notificationBadge');
-            const countEl = document.getElementById('unreadCount');
-            
-            if (count > 0) {
-                badge.classList.add('show');
-                countEl.textContent = count > 99 ? '99+' : count;
-            } else {
-                badge.classList.remove('show');
-            }
-        }
-        
-        // Show broadcasts modal
-        function showBroadcasts() {
-            const modal = document.getElementById('broadcastModal');
-            const list = document.getElementById('broadcastList');
-            
-            if (userBroadcasts.length === 0) {
-                list.innerHTML = `
-                    <div class="broadcast-empty">
-                        <div style="font-size: 48px; margin-bottom: 16px;">📭</div>
-                        <div>No messages yet</div>
-                    </div>
-                `;
-            } else {
-                list.innerHTML = userBroadcasts.map(broadcast => {
-                    const sentDate = new Date(broadcast.sentAt || broadcast.receivedAt);
-                    const isUnread = !broadcast.read;
-                    
-                    return `
-                        <div class="broadcast-item ${isUnread ? 'unread' : ''}" onclick="markAsRead('${broadcast.id || broadcast.broadcastId}')">
-                            <div class="broadcast-item-header">
-                                <div class="broadcast-item-title">${broadcast.title}</div>
-                                <span class="broadcast-priority priority-${broadcast.priority || 'normal'}">${broadcast.priority || 'normal'}</span>
-                            </div>
-                            <div class="broadcast-message">${broadcast.message}</div>
-                            <div class="broadcast-time">${getTimeAgo(sentDate)}</div>
-                        </div>
-                    `;
-                }).join('');
-            }
-            
-            modal.classList.add('show');
-        }
-        
-        // Close broadcasts modal
-        function closeBroadcasts() {
-            document.getElementById('broadcastModal').classList.remove('show');
-        }
-        
-        // Mark broadcast as read
-        function markAsRead(broadcastId) {
-            const userNotifications = JSON.parse(localStorage.getItem('fleetforce_user_notifications')) || {};
-            const myNotifications = userNotifications[currentDriverId] || [];
-            
-            const notification = myNotifications.find(n => n.broadcastId === broadcastId);
-            if (notification) {
-                notification.read = true;
-                userNotifications[currentDriverId] = myNotifications;
-                localStorage.setItem('fleetforce_user_notifications', JSON.stringify(userNotifications));
-                
-                // Update userBroadcasts array
-                const broadcast = userBroadcasts.find(b => (b.id || b.broadcastId) === broadcastId);
-                if (broadcast) {
-                    broadcast.read = true;
-                }
-                
-                const unreadCount = userBroadcasts.filter(b => !b.read).length;
-                updateNotificationBadge(unreadCount);
-                
-                // Refresh the modal view
-                showBroadcasts();
-            }
-        }
-        
-        // Get time ago string
-        function getTimeAgo(date) {
-            const seconds = Math.floor((new Date() - date) / 1000);
-            
-            if (seconds < 60) return 'just now';
-            if (seconds < 3600) return Math.floor(seconds / 60) + ' minutes ago';
-            if (seconds < 86400) return Math.floor(seconds / 3600) + ' hours ago';
-            if (seconds < 604800) return Math.floor(seconds / 86400) + ' days ago';
-            
-            return date.toLocaleDateString();
-        }
-        
-        // ===================================================
-        // ORIGINAL DRIVER PORTAL FUNCTIONALITY
-        // ===================================================
         
         // Load drivers
         async function loadDrivers() {
@@ -1665,30 +1003,6 @@
             } catch (error) {
                 log('❌ Error loading drivers: ' + error.message);
                 showNotification('Error', 'Failed to load driver profiles. Please refresh.', 'error');
-                
-                // Fallback to mock data for demo
-                const mockDrivers = [
-                    { _id: '1', name: 'John Smith', vehicle: 'Truck 101' },
-                    { _id: '2', name: 'Maria Garcia', vehicle: 'Truck 102' },
-                    { _id: '3', name: 'Robert Johnson', vehicle: 'Truck 103' }
-                ];
-                
-                const select = document.getElementById('driverSelect');
-                select.innerHTML = '<option value="">Choose your name...</option>';
-                
-                mockDrivers.forEach(driver => {
-                    const option = document.createElement('option');
-                    option.value = driver._id;
-                    option.textContent = `${driver.name} - ${driver.vehicle}`;
-                    option.dataset.name = driver.name;
-                    option.dataset.vehicle = driver.vehicle;
-                    select.appendChild(option);
-                });
-                
-                select.addEventListener('change', function() {
-                    const btn = document.getElementById('loginBtn');
-                    btn.disabled = !this.value;
-                });
             }
         }
         
@@ -1722,9 +1036,6 @@
             // Update connection status
             updateConnectionStatus(true);
             
-            // Initialize notifications
-            initializeNotificationsOnLogin();
-            
             // Store login state
             localStorage.setItem('fleetforce_current_driver', JSON.stringify({
                 id: currentDriverId,
@@ -1752,25 +1063,21 @@
                 countDiv.classList.remove('visible');
                 returnsCount = 0;
             }
-            
-            vibrateDevice([20]);
         }
         
-        // Send update
+        // Send update - FIXED to properly communicate with MongoDB
         async function sendUpdate(type) {
             const btn = type === '30min' ? document.getElementById('btn30min') : document.getElementById('btnArrived');
             
             // Check returns status
             if (hasReturns === null) {
                 showNotification('Required Field', 'Please select returns status first', 'warning');
-                vibrateDevice([100, 50, 100]);
                 return;
             }
             
             if (hasReturns && !document.getElementById('returnsCountInput').value) {
                 showNotification('Required Field', 'Please enter number of returns', 'warning');
                 document.getElementById('returnsCountInput').focus();
-                vibrateDevice([100, 50, 100]);
                 return;
             }
             
@@ -1792,7 +1099,7 @@
                         driverId: currentDriverId,
                         driverName: currentDriver,
                         vehicle: currentVehicle,
-                        status: type,
+                        status: type, // '30min' or 'arrived'
                         hasReturns: hasReturns,
                         returnsCount: returnsCount,
                         timestamp: new Date().toISOString(),
@@ -1808,25 +1115,10 @@
                 log(`✅ Update sent successfully: ${result.message || 'OK'}`);
                 
                 showNotification('Success', `Status updated: ${statusMessage}`, 'success');
-                vibrateDevice([50, 30, 50]);
-                
-                // Show push notification
-                showPushNotification(
-                    '✅ Status Updated',
-                    `${currentDriver} is ${statusMessage.toLowerCase()}${hasReturns ? ` with ${returnsCount} returns` : ''}`,
-                    'success'
-                );
                 
             } catch (error) {
                 log(`❌ Error sending update: ${error.message}`);
-                showNotification('Update Sent', `Status: ${statusMessage}`, 'success');
-                
-                // Still show success for demo purposes
-                showPushNotification(
-                    '✅ Status Updated',
-                    `${currentDriver} is ${statusMessage.toLowerCase()}${hasReturns ? ` with ${returnsCount} returns` : ''}`,
-                    'success'
-                );
+                showNotification('Error', 'Failed to send update. Please try again.', 'error');
             } finally {
                 btn.classList.remove('sending');
                 btn.disabled = false;
@@ -1876,18 +1168,12 @@
         // Sign out
         function signOut() {
             if (confirm('Are you sure you want to sign out?')) {
-                // Clear intervals
-                if (broadcastCheckInterval) {
-                    clearInterval(broadcastCheckInterval);
-                }
-                
                 // Clear state
                 currentDriver = null;
                 currentVehicle = null;
                 currentDriverId = null;
                 hasReturns = null;
                 returnsCount = 0;
-                userBroadcasts = [];
                 
                 // Clear local storage
                 localStorage.removeItem('fleetforce_current_driver');
@@ -1938,9 +1224,6 @@
                     
                     // Update connection status
                     updateConnectionStatus(true);
-                    
-                    // Initialize notifications
-                    initializeNotificationsOnLogin();
                     
                 } catch (error) {
                     log('Error restoring session: ' + error.message);
@@ -1999,119 +1282,11 @@
             });
         }
         
-        // Initialize PWA features
-        function initializePWA() {
-            // Register service worker
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(registration => {
-                        log('✅ Service Worker registered');
-                        
-                        // Check for updates
-                        registration.addEventListener('updatefound', () => {
-                            const newWorker = registration.installing;
-                            
-                            newWorker.addEventListener('statechange', () => {
-                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                    showNotification('Update Available', 'A new version is available. Refresh to update.', 'info');
-                                }
-                            });
-                        });
-                    })
-                    .catch(error => {
-                        log('Service Worker registration failed: ' + error);
-                    });
-            }
-            
-            // Handle app install prompt
-            let deferredPrompt;
-            
-            window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                deferredPrompt = e;
-                
-                // Show custom install button after user is logged in
-                if (currentDriver) {
-                    showInstallPrompt();
-                }
-            });
-            
-            window.addEventListener('appinstalled', () => {
-                log('✅ App installed successfully');
-                showNotification('App Installed', 'FleetForce has been added to your home screen', 'success');
-            });
-        }
-        
-        // Show install prompt
-        function showInstallPrompt() {
-            const promptHtml = `
-                <div id="installPrompt" style="
-                    position: fixed;
-                    bottom: calc(80px + env(safe-area-inset-bottom));
-                    left: 20px;
-                    right: 20px;
-                    background: linear-gradient(135deg, #8B5CF6 0%, #0EA5E9 100%);
-                    border-radius: 16px;
-                    padding: 16px;
-                    box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4);
-                    z-index: 9998;
-                    display: flex;
-                    align-items: center;
-                    gap: 12px;
-                    animation: slideUp 0.4s ease;
-                ">
-                    <div style="font-size: 32px;">📲</div>
-                    <div style="flex: 1;">
-                        <div style="font-weight: 600; color: white; margin-bottom: 2px;">Install FleetForce App</div>
-                        <div style="font-size: 12px; color: rgba(255,255,255,0.9);">Add to home screen for quick access</div>
-                    </div>
-                    <button onclick="installApp()" style="
-                        padding: 10px 20px;
-                        background: white;
-                        color: #8B5CF6;
-                        border: none;
-                        border-radius: 8px;
-                        font-weight: 600;
-                        cursor: pointer;
-                    ">Install</button>
-                    <button onclick="document.getElementById('installPrompt').remove()" style="
-                        padding: 8px;
-                        background: none;
-                        border: none;
-                        color: white;
-                        font-size: 20px;
-                        cursor: pointer;
-                    ">✕</button>
-                </div>
-            `;
-            
-            document.body.insertAdjacentHTML('beforeend', promptHtml);
-            
-            setTimeout(() => {
-                document.getElementById('installPrompt')?.remove();
-            }, 10000);
-        }
-        
-        // Install app
-        async function installApp() {
-            if (window.deferredPrompt) {
-                window.deferredPrompt.prompt();
-                const result = await window.deferredPrompt.userChoice;
-                
-                if (result.outcome === 'accepted') {
-                    log('✅ User accepted install prompt');
-                } else {
-                    log('❌ User dismissed install prompt');
-                }
-                
-                window.deferredPrompt = null;
-                document.getElementById('installPrompt')?.remove();
-            }
-        }
-        
         // Initialize app
         async function initializeApp() {
             log('🚀 Initializing FleetForce Driver Portal...');
+            log('🔗 API Base: ' + API_BASE);
+            log('📍 Warehouse: ' + WAREHOUSE_ADDRESS);
             
             try {
                 // Check for existing session first
@@ -2123,10 +1298,6 @@
                 // Initialize features
                 initializeConnectionMonitoring();
                 initializeInputValidation();
-                initializePWA();
-                
-                // Add haptic feedback
-                setTimeout(addHapticFeedback, 100);
                 
                 log('✅ App initialized successfully');
                 
@@ -2146,8 +1317,7 @@
         // Handle visibility change
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden && currentDriverId) {
-                log('👀 App became visible, checking for updates...');
-                checkForBroadcastsWithPush();
+                log('👀 App became visible, checking connection...');
                 updateConnectionStatus(navigator.onLine);
             }
         });
