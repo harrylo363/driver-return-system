@@ -81,6 +81,21 @@ self.addEventListener('fetch', event => {
         return;
     }
     
+    // IMPORTANT: Skip caching for API calls and non-GET requests
+    const url = new URL(event.request.url);
+    
+    // Skip caching for:
+    // 1. API endpoints
+    // 2. POST, PUT, DELETE requests
+    // 3. WebSocket connections
+    if (url.pathname.startsWith('/api/') || 
+        event.request.method !== 'GET' ||
+        url.protocol === 'ws:' || 
+        url.protocol === 'wss:') {
+        // Just pass through without caching
+        return;
+    }
+    
     event.respondWith(
         caches.match(event.request)
             .then(response => {
@@ -97,13 +112,19 @@ self.addEventListener('fetch', event => {
                         return fetchResponse;
                     }
 
+                    // Only cache GET requests (double-check)
+                    if (event.request.method !== 'GET') {
+                        return fetchResponse;
+                    }
+
                     // Clone the response
                     const responseToCache = fetchResponse.clone();
 
                     caches.open(CACHE_NAME)
                         .then(cache => {
                             // Additional safety check before caching
-                            if (!event.request.url.startsWith('chrome-extension://')) {
+                            if (!event.request.url.startsWith('chrome-extension://') && 
+                                event.request.method === 'GET') {
                                 cache.put(event.request, responseToCache);
                             }
                         })
@@ -115,8 +136,8 @@ self.addEventListener('fetch', event => {
                 });
             })
             .catch(() => {
-                // Offline fallback
-                if (event.request.destination === 'document') {
+                // Offline fallback for GET requests only
+                if (event.request.method === 'GET' && event.request.destination === 'document') {
                     return caches.match('/offline.html');
                 }
             })
