@@ -11,15 +11,33 @@ const urlsToCache = [
   'https://img.icons8.com/color/512/truck.png'
 ];
 
+// Check if we're in a supported environment
+const isValidEnvironment = () => {
+    return !self.location.href.startsWith('chrome-extension://') && 
+           !self.location.href.startsWith('moz-extension://');
+};
+
 // Install event with caching
 self.addEventListener('install', function(event) {
     console.log('[Service Worker] Installing...');
+    
+    // Skip caching in extension environments
+    if (!isValidEnvironment()) {
+        console.log('[Service Worker] Skipping cache - extension environment detected');
+        self.skipWaiting();
+        return;
+    }
     
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => {
                 console.log('[Service Worker] Caching app shell');
-                return cache.addAll(urlsToCache);
+                // Filter out any chrome-extension URLs
+                const validUrls = urlsToCache.filter(url => 
+                    !url.startsWith('chrome-extension://') && 
+                    !url.startsWith('moz-extension://')
+                );
+                return cache.addAll(validUrls);
             })
             .catch(error => {
                 console.error('[Service Worker] Cache installation failed:', error);
@@ -32,6 +50,11 @@ self.addEventListener('install', function(event) {
 // Activate event with cache cleanup
 self.addEventListener('activate', function(event) {
     console.log('[Service Worker] Activating...');
+    
+    // Skip cleanup in extension environments
+    if (!isValidEnvironment()) {
+        return clients.claim();
+    }
     
     event.waitUntil(
         caches.keys().then(cacheNames => {
@@ -51,6 +74,13 @@ self.addEventListener('activate', function(event) {
 
 // Fetch event with offline support
 self.addEventListener('fetch', event => {
+    // Skip caching for extension URLs
+    if (event.request.url.startsWith('chrome-extension://') || 
+        event.request.url.startsWith('moz-extension://') ||
+        !isValidEnvironment()) {
+        return;
+    }
+    
     event.respondWith(
         caches.match(event.request)
             .then(response => {
@@ -61,12 +91,24 @@ self.addEventListener('fetch', event => {
                         return fetchResponse;
                     }
 
+                    // Skip caching if request URL is from extension
+                    if (event.request.url.startsWith('chrome-extension://') || 
+                        event.request.url.startsWith('moz-extension://')) {
+                        return fetchResponse;
+                    }
+
                     // Clone the response
                     const responseToCache = fetchResponse.clone();
 
                     caches.open(CACHE_NAME)
                         .then(cache => {
-                            cache.put(event.request, responseToCache);
+                            // Additional safety check before caching
+                            if (!event.request.url.startsWith('chrome-extension://')) {
+                                cache.put(event.request, responseToCache);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('[Service Worker] Cache put failed:', error);
                         });
 
                     return fetchResponse;
