@@ -4,6 +4,7 @@ const cors = require('cors');
 const path = require('path');
 const cron = require('node-cron');
 const https = require('https');
+const moment = require('moment-timezone');
 require('dotenv').config();
 
 const app = express();
@@ -12,6 +13,9 @@ const PORT = process.env.PORT || 3000;
 // MongoDB Atlas connection
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://your-connection-string';
 const DB_NAME = 'fleet_management';
+
+// Set timezone (adjust this to your local timezone)
+const TIMEZONE = process.env.TZ || 'America/New_York';
 
 // Google Sheets webhook (using your URL)
 const GOOGLE_WEBHOOK_URL = process.env.GOOGLE_WEBHOOK_URL || 
@@ -41,9 +45,11 @@ async function connectToMongoDB() {
         await db.createCollection('users').catch(() => {});
         await db.createCollection('notifications').catch(() => {});
         await db.createCollection('checkins').catch(() => {});
+        await db.createCollection('system_events').catch(() => {});
         
         console.log('✅ Connected to MongoDB Atlas');
         console.log(`📊 Database: ${DB_NAME}`);
+        console.log(`🌍 Timezone: ${TIMEZONE}`);
         
         // Create sample drivers if users collection is empty
         await createSampleDrivers();
@@ -66,7 +72,12 @@ connectToMongoDB();
 
 // Helper function to get today's date in YYYY-MM-DD format
 function getTodayDate() {
-    return new Date().toISOString().split('T')[0];
+    return moment().tz(TIMEZONE).format('YYYY-MM-DD');
+}
+
+// Helper function to get current time in timezone
+function getCurrentTime() {
+    return moment().tz(TIMEZONE);
 }
 
 // Create sample drivers if none exist
@@ -138,64 +149,90 @@ async function createDefaultAdmin() {
     }
 }
 
-// ============= AUTOMATIC DAILY ARCHIVE =============
+// ============= AUTOMATIC DAILY ARCHIVE WITH TIMEZONE SUPPORT =============
 function startDailyArchiveSchedule() {
-    // Schedule for 11:55 PM every day
+    // Schedule for 11:55 PM in the specified timezone
     cron.schedule('55 23 * * *', async () => {
-        console.log('⏰ Starting scheduled daily archive at 11:55 PM...');
+        const now = getCurrentTime();
+        console.log(`⏰ Starting scheduled daily archive at ${now.format('YYYY-MM-DD HH:mm:ss')} ${TIMEZONE}`);
         await performAutomaticDailyArchive();
+    }, {
+        timezone: TIMEZONE
     });
     
-    console.log('⏰ Daily archive scheduled for 11:55 PM every day');
+    // Also schedule a midnight backup check (12:01 AM)
+    cron.schedule('1 0 * * *', async () => {
+        const now = getCurrentTime();
+        console.log(`🌙 Midnight backup archive check at ${now.format('YYYY-MM-DD HH:mm:ss')} ${TIMEZONE}`);
+        
+        // Check if yesterday's data hasn't been archived yet
+        const yesterday = moment().tz(TIMEZONE).subtract(1, 'day').format('YYYY-MM-DD');
+        const yesterdayData = await db.collection('daily_operations')
+            .find({ date: yesterday })
+            .toArray();
+            
+        if (yesterdayData.length > 0) {
+            console.log(`📦 Found unarchived data from ${yesterday}, archiving now...`);
+            await performAutomaticDailyArchive(yesterday);
+        }
+    }, {
+        timezone: TIMEZONE
+    });
+    
+    console.log(`⏰ Daily archive scheduled for 11:55 PM ${TIMEZONE}`);
+    console.log(`🌙 Backup archive check scheduled for 12:01 AM ${TIMEZONE}`);
 }
 
-async function performAutomaticDailyArchive() {
+async function performAutomaticDailyArchive(dateToArchive = null) {
     try {
-        const today = getTodayDate();
+        const now = getCurrentTime();
+        const archiveDate = dateToArchive || getTodayDate();
         
-        // Get all of today's data
-        const todayData = await db.collection('daily_operations')
-            .find({ date: today })
+        console.log(`📦 Starting archive for date: ${archiveDate}`);
+        
+        // Get all data for the specified date
+        const dataToArchive = await db.collection('daily_operations')
+            .find({ date: archiveDate })
             .toArray();
         
-        if (todayData.length === 0) {
-            console.log('📭 No data to archive for today');
+        if (dataToArchive.length === 0) {
+            console.log(`📭 No data to archive for ${archiveDate}`);
             return;
         }
         
         // Prepare the archive report
         const archiveReport = {
-            date: today,
-            time: new Date().toLocaleTimeString(),
-            archivedAt: new Date(),
-            archiveDate: today,
+            date: archiveDate,
+            time: now.format('HH:mm:ss'),
+            archivedAt: now.toDate(),
+            archiveDate: archiveDate,
             
             // Driver Statistics
             driverStats: {
-                totalDrivers: todayData.length,
-                completed: todayData.filter(d => d.status === 'completed').length,
-                arrived: todayData.filter(d => d.status === 'arrived').length,
-                enRoute: todayData.filter(d => d.status === 'en-route').length,
-                stillWorking: todayData.filter(d => d.status === 'working').length
+                totalDrivers: dataToArchive.length,
+                completed: dataToArchive.filter(d => d.status === 'completed').length,
+                arrived: dataToArchive.filter(d => d.status === 'arrived').length,
+                enRoute: dataToArchive.filter(d => d.status === 'en-route').length,
+                stillWorking: dataToArchive.filter(d => d.status === 'working').length
             },
             
             // Returns Information
             returns: {
-                totalReturns: todayData.reduce((sum, d) => sum + (d.returns || 0), 0),
-                driversWithReturns: todayData.filter(d => d.returns > 0).length
+                totalReturns: dataToArchive.reduce((sum, d) => sum + (d.returns || 0), 0),
+                driversWithReturns: dataToArchive.filter(d => d.returns > 0).length
             },
             
             // Equipment Issues
-            equipmentIssues: collectEquipmentIssues(todayData),
+            equipmentIssues: collectEquipmentIssues(dataToArchive),
             
             // Raw data
-            totalRecords: todayData.length,
-            rawData: todayData
+            totalRecords: dataToArchive.length,
+            rawData: dataToArchive
         };
         
         // Step 1: Archive to archived_operations
         const archiveResult = await db.collection('archived_operations').insertOne(archiveReport);
-        console.log(`📦 Archived ${todayData.length} records with ID: ${archiveResult.insertedId}`);
+        console.log(`📦 Archived ${dataToArchive.length} records with ID: ${archiveResult.insertedId}`);
         
         // Step 2: Send to Google Sheets
         try {
@@ -205,11 +242,22 @@ async function performAutomaticDailyArchive() {
             console.error('⚠️ Failed to send to Google Sheets:', error.message);
         }
         
-        // Step 3: Clear daily_operations
-        const deleteResult = await db.collection('daily_operations').deleteMany({ date: today });
+        // Step 3: Clear ALL daily_operations (complete reset)
+        const deleteResult = await db.collection('daily_operations').deleteMany({});
         console.log(`🧹 Cleared ${deleteResult.deletedCount} records from daily operations`);
         
+        // Step 4: Add a system reset marker
+        await db.collection('system_events').insertOne({
+            type: 'daily_reset',
+            date: archiveDate,
+            timestamp: now.toDate(),
+            recordsArchived: dataToArchive.length,
+            recordsCleared: deleteResult.deletedCount,
+            timezone: TIMEZONE
+        });
+        
         console.log('✅ Scheduled daily archive completed successfully!');
+        console.log(`📅 Next archive scheduled for 11:55 PM ${TIMEZONE}`);
         
     } catch (error) {
         console.error('❌ Scheduled archive failed:', error);
@@ -316,18 +364,95 @@ app.get('/api/health', async (req, res) => {
         
         await db.admin().ping();
         
+        const now = getCurrentTime();
+        
         res.json({ 
             status: 'healthy',
             database: 'connected',
-            timestamp: new Date(),
+            timestamp: now.toDate(),
+            timezone: TIMEZONE,
+            localTime: now.format('YYYY-MM-DD HH:mm:ss'),
             date: getTodayDate(),
-            nextArchive: '11:55 PM'
+            nextArchive: '11:55 PM ' + TIMEZONE
         });
     } catch (error) {
         res.status(503).json({ 
             status: 'error', 
             message: error.message 
         });
+    }
+});
+
+// NEW: Reset status endpoint
+app.get('/api/reset-status', async (req, res) => {
+    try {
+        if (!db) {
+            return res.status(503).json({ error: 'Database not connected' });
+        }
+        
+        const today = getTodayDate();
+        const now = getCurrentTime();
+        
+        // Check if there's a reset event for today
+        const resetEvent = await db.collection('system_events')
+            .findOne({ 
+                type: 'daily_reset',
+                date: today
+            });
+        
+        // Check if there's any data in daily_operations
+        const currentDataCount = await db.collection('daily_operations')
+            .countDocuments({ date: today });
+        
+        // Check yesterday's reset
+        const yesterday = moment().tz(TIMEZONE).subtract(1, 'day').format('YYYY-MM-DD');
+        const yesterdayReset = await db.collection('system_events')
+            .findOne({ 
+                type: 'daily_reset',
+                date: yesterday
+            });
+        
+        res.json({
+            date: today,
+            serverTime: now.format('YYYY-MM-DD HH:mm:ss'),
+            timezone: TIMEZONE,
+            resetCompleted: !!resetEvent,
+            resetTime: resetEvent?.timestamp,
+            hasCurrentData: currentDataCount > 0,
+            currentDataCount: currentDataCount,
+            lastResetDate: yesterdayReset?.date,
+            lastResetTime: yesterdayReset?.timestamp
+        });
+        
+    } catch (error) {
+        console.error('Error checking reset status:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// NEW: Force archive endpoint for testing
+app.post('/api/force-archive', async (req, res) => {
+    try {
+        if (!db) {
+            return res.status(503).json({ error: 'Database not connected' });
+        }
+        
+        const { date } = req.body;
+        const archiveDate = date || getTodayDate();
+        
+        console.log(`⚠️ Force archive requested for ${archiveDate}`);
+        await performAutomaticDailyArchive(archiveDate);
+        
+        res.json({ 
+            success: true,
+            message: 'Force archive completed',
+            date: archiveDate,
+            timestamp: getCurrentTime().format('YYYY-MM-DD HH:mm:ss')
+        });
+        
+    } catch (error) {
+        console.error('Error in force archive:', error);
+        res.status(500).json({ error: error.message });
     }
 });
 
@@ -1161,6 +1286,8 @@ app.use((req, res) => {
             message: `Cannot ${req.method} ${req.url}`,
             availableEndpoints: [
                 'GET /api/health',
+                'GET /api/reset-status',
+                'POST /api/force-archive',
                 'GET /api/drivers',
                 'POST /api/status',
                 'GET /api/notifications',
@@ -1188,6 +1315,8 @@ app.use((err, req, res, next) => {
 
 // Start server
 app.listen(PORT, async () => {
+    const now = getCurrentTime();
+    
     console.log('═'.repeat(80));
     console.log(`🚀 FleetForce Management Server`);
     console.log('═'.repeat(80));
@@ -1199,8 +1328,10 @@ app.listen(PORT, async () => {
     console.log(`   Admin Panel: http://localhost:${PORT}/admin`);
     console.log('─'.repeat(80));
     console.log(`🔗 MongoDB: ${MONGODB_URI ? 'Configured' : '⚠️  Not configured (set MONGODB_URI in .env)'}`);
-    console.log(`📅 Today's Date: ${getTodayDate()}`);
-    console.log(`⏰ Automatic archive: 11:55 PM daily`);
+    console.log(`🌍 Timezone: ${TIMEZONE}`);
+    console.log(`📅 Server Date: ${now.format('YYYY-MM-DD')}`);
+    console.log(`🕐 Server Time: ${now.format('HH:mm:ss')}`);
+    console.log(`⏰ Automatic archive: 11:55 PM ${TIMEZONE} daily`);
     console.log('─'.repeat(80));
     console.log(`🔐 Default Credentials:`);
     console.log(`   Admin: admin / admin123`);
